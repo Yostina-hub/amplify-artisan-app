@@ -49,8 +49,11 @@ const adminItems = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
-  const { hasRole } = useAuth();
+  const { hasRole, roles } = useAuth();
   const isCollapsed = state === "collapsed";
+
+  console.log('AppSidebar - User roles:', roles);
+  console.log('AppSidebar - Has admin role:', hasRole('admin'));
 
   return (
     <Sidebar collapsible="icon">

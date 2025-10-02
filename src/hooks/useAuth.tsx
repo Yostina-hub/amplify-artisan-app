@@ -74,7 +74,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     
-    setRoles(data?.map(r => r.role as UserRole) || []);
+    const userRoles = data?.map(r => r.role as UserRole) || [];
+    console.log('User roles loaded:', userRoles);
+    setRoles(userRoles);
     setLoading(false);
   };
 
