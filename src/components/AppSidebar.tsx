@@ -25,12 +25,15 @@ const items = [
   { title: "Social Listening", url: "/social-listening", icon: Radio },
   { title: "Social Accounts", url: "/social-accounts", icon: Link2 },
   { title: "Settings", url: "/settings", icon: Settings },
-  { title: "Company Email", url: "/company/email-settings", icon: Mail },
-  { title: "Platform API Settings", url: "/company/platform-settings", icon: Key },
 ];
 
 const agentItems = [
   { title: "Agents Dashboard", url: "/agents", icon: Briefcase },
+];
+
+const companyAdminItems = [
+  { title: "Company Email Settings", url: "/company/email-settings", icon: Mail },
+  { title: "Company Platform API", url: "/company/platform-settings", icon: Key },
 ];
 
 const adminItems = [
@@ -117,6 +120,32 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         )}
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Company Settings</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {companyAdminItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to={item.url}
+                      end
+                      className={({ isActive }) =>
+                        isActive
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                          : "hover:bg-sidebar-accent/50"
+                      }
+                    >
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
         {hasRole('admin') && (
           <SidebarGroup>
