@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { TrendingUp, Eye, MousePointerClick, Ban } from "lucide-react";
+import { TrendingUp, Eye, MousePointerClick, Ban, Sparkles, AlertTriangle, TrendingDown, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 
 interface AnalyticsData {
   totalUsers: number;
@@ -20,13 +22,25 @@ interface AnalyticsData {
   }>;
 }
 
+interface AIInsights {
+  overview: string;
+  top_performers: Array<{ name: string; metric: string; value: string }>;
+  recommendations: string[];
+  sentiment_summary: string;
+  growth_opportunities: string[];
+  risk_alerts: string[];
+}
+
 export default function ReachAnalytics() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [aiInsights, setAiInsights] = useState<AIInsights | null>(null);
   const [loading, setLoading] = useState(true);
+  const [analyzingAI, setAnalyzingAI] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchAnalytics();
+    fetchAIInsights();
   }, []);
 
   const fetchAnalytics = async () => {
@@ -95,6 +109,27 @@ export default function ReachAnalytics() {
     }
   };
 
+  const fetchAIInsights = async () => {
+    try {
+      setAnalyzingAI(true);
+      const { data, error } = await supabase.functions.invoke('analyze-social-insights', {
+        body: { analysisType: 'comprehensive' }
+      });
+
+      if (error) throw error;
+      setAiInsights(data.insights);
+    } catch (error: any) {
+      console.error('AI Analysis error:', error);
+      toast({
+        title: "AI Analysis unavailable",
+        description: "Could not load AI insights",
+        variant: "destructive",
+      });
+    } finally {
+      setAnalyzingAI(false);
+    }
+  };
+
   const recalculateAllScores = async () => {
     try {
       const { data: users, error } = await supabase
@@ -108,7 +143,6 @@ export default function ReachAnalytics() {
         description: `Processing ${users?.length || 0} users...`,
       });
 
-      // Trigger calculation for all users (in batches to avoid rate limits)
       for (const user of users || []) {
         await supabase.functions.invoke('calculate-reach-score', {
           body: { userId: user.id }
@@ -138,18 +172,32 @@ export default function ReachAnalytics() {
     <div className="container mx-auto p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Reach & Ad Performance Analytics</h1>
+          <h1 className="text-3xl font-bold">Social Media & Reach Analytics</h1>
           <p className="text-muted-foreground mt-2">
-            AI-powered recommendation engine performance metrics
+            AI-powered insights across social metrics, influencers, and brand monitoring
           </p>
         </div>
-        <Button onClick={recalculateAllScores}>
-          Recalculate All Scores
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={fetchAIInsights} disabled={analyzingAI}>
+            <Sparkles className="h-4 w-4 mr-2" />
+            {analyzingAI ? 'Analyzing...' : 'Refresh AI Analysis'}
+          </Button>
+          <Button onClick={recalculateAllScores}>
+            Recalculate All Scores
+          </Button>
+        </div>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="ai-insights">AI Insights</TabsTrigger>
+          <TabsTrigger value="performance">Performance</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6">
+          {/* Key Metrics */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Users Tracked</CardTitle>
@@ -199,8 +247,8 @@ export default function ReachAnalytics() {
         </Card>
       </div>
 
-      {/* Top Performing Campaigns */}
-      <Card>
+          {/* Top Performing Campaigns */}
+          <Card>
         <CardHeader>
           <CardTitle>Top Performing Campaigns</CardTitle>
           <CardDescription>Based on click-through rate and engagement</CardDescription>
@@ -229,6 +277,154 @@ export default function ReachAnalytics() {
           </div>
         </CardContent>
       </Card>
+        </TabsContent>
+
+        <TabsContent value="ai-insights" className="space-y-6">
+          {analyzingAI ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <Sparkles className="h-12 w-12 mx-auto mb-4 animate-pulse text-primary" />
+                <p className="text-muted-foreground">Analyzing social media data with AI...</p>
+              </CardContent>
+            </Card>
+          ) : aiInsights ? (
+            <>
+              {/* AI Overview */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    AI-Powered Overview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-foreground leading-relaxed">{aiInsights.overview}</p>
+                </CardContent>
+              </Card>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                {/* Top Performers */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5" />
+                      Top Performers
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {aiInsights.top_performers.map((performer, i) => (
+                        <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <p className="font-medium">{performer.name}</p>
+                            <p className="text-sm text-muted-foreground">{performer.metric}</p>
+                          </div>
+                          <Badge variant="secondary">{performer.value}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Sentiment Summary */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      Sentiment Analysis
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-foreground leading-relaxed">{aiInsights.sentiment_summary}</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Recommendations */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-success" />
+                    Recommendations
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {aiInsights.recommendations.map((rec, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span className="text-success mt-1">✓</span>
+                        <span>{rec}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                {/* Growth Opportunities */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-primary" />
+                      Growth Opportunities
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {aiInsights.growth_opportunities.map((opp, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <span className="text-primary mt-1">→</span>
+                          <span>{opp}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                {/* Risk Alerts */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-destructive" />
+                      Risk Alerts
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {aiInsights.risk_alerts.map((alert, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <span className="text-destructive mt-1">⚠</span>
+                          <span>{alert}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+            </>
+          ) : (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <TrendingDown className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-muted-foreground mb-4">No AI insights available yet</p>
+                <Button onClick={fetchAIInsights}>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Generate AI Analysis
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="performance" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Detailed Performance Metrics</CardTitle>
+              <CardDescription>Coming soon: Deep dive into campaign performance</CardDescription>
+            </CardHeader>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

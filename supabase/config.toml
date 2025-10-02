@@ -1,1 +1,10 @@
 project_id = "kdqibmhpebndlmzjhuvf"
+
+[functions.calculate-reach-score]
+verify_jwt = false
+
+[functions.recommend-ads]
+verify_jwt = false
+
+[functions.analyze-social-insights]
+verify_jwt = false
