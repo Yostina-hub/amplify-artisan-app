@@ -6,13 +6,17 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, TrendingUp, MessageCircle, Hash, Search, X } from "lucide-react";
+import { Plus, TrendingUp, MessageCircle, Hash, Search, X, BarChart3, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface Keyword {
   id: string;
   keyword: string;
   is_active: boolean;
+  is_competitor?: boolean;
   created_at: string;
 }
 
@@ -37,11 +41,18 @@ interface TrendingTopic {
   category: string | null;
 }
 
-export default function MentionsTracking() {
+const SENTIMENT_COLORS = {
+  positive: "#22c55e",
+  negative: "#ef4444",
+  neutral: "#94a3b8",
+};
+
+export default function SocialListening() {
   const [keywords, setKeywords] = useState<Keyword[]>([]);
   const [mentions, setMentions] = useState<Mention[]>([]);
   const [trends, setTrends] = useState<TrendingTopic[]>([]);
   const [newKeyword, setNewKeyword] = useState("");
+  const [isCompetitor, setIsCompetitor] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -85,13 +96,15 @@ export default function MentionsTracking() {
       const { error } = await supabase.from("tracked_keywords").insert({
         user_id: user.id,
         keyword: newKeyword.trim(),
-        is_active: true
+        is_active: true,
+        is_competitor: isCompetitor
       });
 
       if (error) throw error;
 
-      toast.success("Keyword added successfully");
+      toast.success(`${isCompetitor ? 'Competitor' : 'Keyword'} added successfully`);
       setNewKeyword("");
+      setIsCompetitor(false);
       setIsAddDialogOpen(false);
       fetchData();
     } catch (error: any) {
@@ -135,6 +148,43 @@ export default function MentionsTracking() {
     }
   };
 
+  // Calculate sentiment distribution
+  const sentimentData = [
+    { name: "Positive", value: mentions.filter(m => m.sentiment === "positive").length, color: SENTIMENT_COLORS.positive },
+    { name: "Negative", value: mentions.filter(m => m.sentiment === "negative").length, color: SENTIMENT_COLORS.negative },
+    { name: "Neutral", value: mentions.filter(m => !m.sentiment || m.sentiment === "neutral").length, color: SENTIMENT_COLORS.neutral },
+  ].filter(d => d.value > 0);
+
+  // Calculate mention volume over time (last 7 days)
+  const volumeData = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (6 - i));
+    const dateStr = date.toISOString().split('T')[0];
+    return {
+      date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      mentions: mentions.filter(m => m.mentioned_at.startsWith(dateStr)).length
+    };
+  });
+
+  // Top platforms by mention count
+  const platformData = mentions.reduce((acc, m) => {
+    acc[m.platform] = (acc[m.platform] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const platformChartData = Object.entries(platformData)
+    .map(([platform, count]) => ({ platform, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
+  const totalMentions = mentions.length;
+  const avgEngagement = mentions.length > 0 
+    ? Math.round(mentions.reduce((sum, m) => sum + m.engagement_count, 0) / mentions.length)
+    : 0;
+  const sentimentScore = mentions.length > 0
+    ? Math.round((mentions.filter(m => m.sentiment === "positive").length / mentions.length) * 100)
+    : 0;
+
   if (loading) {
     return <div className="flex items-center justify-center h-64">Loading...</div>;
   }
@@ -143,16 +193,16 @@ export default function MentionsTracking() {
     <div className="space-y-6 animate-in fade-in-50 duration-500">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Mentions & Trends</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Social Listening</h1>
           <p className="text-muted-foreground mt-1">
-            Track mentions, keywords, and trending topics
+            Uncover trends and actionable insights from social conversations
           </p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-gradient-to-r from-primary to-accent">
               <Plus className="h-4 w-4 mr-2" />
-              Add Keyword
+              Track Keyword
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -161,11 +211,21 @@ export default function MentionsTracking() {
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <Input
-                placeholder="Enter keyword or hashtag..."
+                placeholder="Enter keyword, brand name, or hashtag..."
                 value={newKeyword}
                 onChange={(e) => setNewKeyword(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleAddKeyword()}
               />
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="competitor" 
+                  checked={isCompetitor}
+                  onCheckedChange={(checked) => setIsCompetitor(checked as boolean)}
+                />
+                <Label htmlFor="competitor" className="text-sm">
+                  Track as competitor
+                </Label>
+              </div>
               <Button onClick={handleAddKeyword} className="w-full">
                 Add Keyword
               </Button>
@@ -174,8 +234,46 @@ export default function MentionsTracking() {
         </Dialog>
       </div>
 
-      <Tabs defaultValue="mentions" className="space-y-4">
+      {/* Insights Overview */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Total Mentions</CardTitle>
+            <MessageCircle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalMentions}</div>
+            <p className="text-xs text-muted-foreground mt-1">Across all platforms</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Avg. Engagement</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{avgEngagement}</div>
+            <p className="text-xs text-muted-foreground mt-1">Per mention</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Sentiment Score</CardTitle>
+            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{sentimentScore}%</div>
+            <p className="text-xs text-muted-foreground mt-1">Positive sentiment</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Tabs defaultValue="insights" className="space-y-4">
         <TabsList>
+          <TabsTrigger value="insights">
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Insights
+          </TabsTrigger>
           <TabsTrigger value="mentions">
             <MessageCircle className="h-4 w-4 mr-2" />
             Mentions
@@ -190,6 +288,79 @@ export default function MentionsTracking() {
           </TabsTrigger>
         </TabsList>
 
+        <TabsContent value="insights" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Sentiment Distribution</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {sentimentData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={250}>
+                    <PieChart>
+                      <Pie
+                        data={sentimentData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {sentimentData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">No sentiment data available</p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Mention Volume (Last 7 Days)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={volumeData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="mentions" stroke="hsl(var(--primary))" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card className="md:col-span-2">
+              <CardHeader>
+                <CardTitle>Top Platforms by Mentions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {platformChartData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={250}>
+                    <BarChart data={platformChartData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="platform" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="count" fill="hsl(var(--primary))" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">No platform data available</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
         <TabsContent value="mentions" className="space-y-4">
           <Card>
             <CardHeader>
@@ -197,9 +368,12 @@ export default function MentionsTracking() {
             </CardHeader>
             <CardContent>
               {mentions.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">
-                  No mentions found. Add keywords to start tracking.
-                </p>
+                <div className="text-center py-12">
+                  <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">
+                    No mentions found. Add keywords to start tracking conversations.
+                  </p>
+                </div>
               ) : (
                 <div className="space-y-4">
                   {mentions.map((mention) => (
@@ -208,7 +382,7 @@ export default function MentionsTracking() {
                       className="flex items-start gap-4 p-4 border rounded-lg hover:bg-muted/30 transition-colors"
                     >
                       <div className="flex-1 space-y-2">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-medium">{mention.author_name}</span>
                           <Badge variant="outline" className="text-xs">
                             {mention.platform}
@@ -240,9 +414,16 @@ export default function MentionsTracking() {
             </CardHeader>
             <CardContent>
               {keywords.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">
-                  No keywords yet. Click "Add Keyword" to start tracking.
-                </p>
+                <div className="text-center py-12">
+                  <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground mb-4">
+                    No keywords yet. Start tracking brands, hashtags, or competitors.
+                  </p>
+                  <Button onClick={() => setIsAddDialogOpen(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Your First Keyword
+                  </Button>
+                </div>
               ) : (
                 <div className="space-y-2">
                   {keywords.map((keyword) => (
@@ -256,6 +437,11 @@ export default function MentionsTracking() {
                         <Badge variant={keyword.is_active ? "default" : "secondary"}>
                           {keyword.is_active ? "Active" : "Inactive"}
                         </Badge>
+                        {keyword.is_competitor && (
+                          <Badge variant="outline" className="bg-accent/10">
+                            Competitor
+                          </Badge>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         <Button
