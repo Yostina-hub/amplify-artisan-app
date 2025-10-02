@@ -191,6 +191,54 @@ export type Database = {
           },
         ]
       }
+      social_media_mentions: {
+        Row: {
+          account_id: string
+          author_id: string
+          author_name: string
+          content: string
+          created_at: string | null
+          engagement_count: number | null
+          id: string
+          keyword_id: string | null
+          mention_type: string | null
+          mentioned_at: string
+          platform: string
+          post_url: string | null
+          sentiment: string | null
+        }
+        Insert: {
+          account_id: string
+          author_id: string
+          author_name: string
+          content: string
+          created_at?: string | null
+          engagement_count?: number | null
+          id?: string
+          keyword_id?: string | null
+          mention_type?: string | null
+          mentioned_at: string
+          platform: string
+          post_url?: string | null
+          sentiment?: string | null
+        }
+        Update: {
+          account_id?: string
+          author_id?: string
+          author_name?: string
+          content?: string
+          created_at?: string | null
+          engagement_count?: number | null
+          id?: string
+          keyword_id?: string | null
+          mention_type?: string | null
+          mentioned_at?: string
+          platform?: string
+          post_url?: string | null
+          sentiment?: string | null
+        }
+        Relationships: []
+      }
       social_media_metrics: {
         Row: {
           account_id: string
@@ -262,6 +310,69 @@ export type Database = {
           status?: string | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      tracked_keywords: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          keyword: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          keyword: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          keyword?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      trending_topics: {
+        Row: {
+          category: string | null
+          detected_at: string | null
+          growth_rate: number | null
+          hashtag: string | null
+          id: string
+          last_updated: string | null
+          platform: string
+          topic: string
+          volume: number | null
+        }
+        Insert: {
+          category?: string | null
+          detected_at?: string | null
+          growth_rate?: number | null
+          hashtag?: string | null
+          id?: string
+          last_updated?: string | null
+          platform: string
+          topic: string
+          volume?: number | null
+        }
+        Update: {
+          category?: string | null
+          detected_at?: string | null
+          growth_rate?: number | null
+          hashtag?: string | null
+          id?: string
+          last_updated?: string | null
+          platform?: string
+          topic?: string
+          volume?: number | null
         }
         Relationships: []
       }

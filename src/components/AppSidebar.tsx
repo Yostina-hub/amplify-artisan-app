@@ -1,4 +1,4 @@
-import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone } from "lucide-react";
+import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -20,6 +20,7 @@ const items = [
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Social Metrics", url: "/social-metrics", icon: TrendingUp },
   { title: "Ad Campaigns", url: "/ad-campaigns", icon: Megaphone },
+  { title: "Brand Monitoring", url: "/brand-monitoring", icon: MessageCircle },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
