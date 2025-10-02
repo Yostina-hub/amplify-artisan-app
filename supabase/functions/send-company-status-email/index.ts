@@ -55,6 +55,84 @@ serve(async (req: Request): Promise<Response> => {
       throw new Error("SMTP configuration is incomplete. Please configure SMTP settings in Email Settings.");
     }
 
+    let passwordResetLink = "";
+    
+    // If approved, create user account and generate password reset link
+    if (status === "approved") {
+      // Check if user already exists
+      const { data: existingUsers } = await supabase.auth.admin.listUsers();
+      const existingUser = existingUsers?.users?.find(u => u.email === company.email);
+      
+      if (!existingUser) {
+        // Create user account
+        const { data: newUser, error: createUserError } = await supabase.auth.admin.createUser({
+          email: company.email,
+          email_confirm: true,
+          user_metadata: {
+            full_name: company.name,
+            company_name: company.name,
+          }
+        });
+
+        if (createUserError) {
+          console.error("Error creating user:", createUserError);
+          throw new Error(`Failed to create user account: ${createUserError.message}`);
+        }
+
+        console.log("User account created:", newUser.user?.id);
+
+        // Update profile with company_id
+        if (newUser.user) {
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .update({ company_id: company.id })
+            .eq("id", newUser.user.id);
+
+          if (profileError) {
+            console.error("Error updating profile:", profileError);
+          }
+
+          // Assign 'user' role to the new account
+          const { error: roleError } = await supabase
+            .from("user_roles")
+            .insert({
+              user_id: newUser.user.id,
+              role: "user",
+              company_id: company.id,
+            });
+
+          if (roleError) {
+            console.error("Error assigning role:", roleError);
+          }
+        }
+
+        // Generate password reset link
+        const { data: resetData, error: resetError } = await supabase.auth.admin.generateLink({
+          type: 'recovery',
+          email: company.email,
+        });
+
+        if (resetError) {
+          console.error("Error generating reset link:", resetError);
+        } else {
+          passwordResetLink = resetData.properties?.action_link || "";
+        }
+      } else {
+        console.log("User already exists, generating new password reset link");
+        // User exists, just generate a new password reset link
+        const { data: resetData, error: resetError } = await supabase.auth.admin.generateLink({
+          type: 'recovery',
+          email: company.email,
+        });
+
+        if (resetError) {
+          console.error("Error generating reset link:", resetError);
+        } else {
+          passwordResetLink = resetData.properties?.action_link || "";
+        }
+      }
+    }
+
     // Prepare email content
     const subject = status === "approved" 
       ? "Your Company Application Has Been Approved!" 
@@ -64,7 +142,16 @@ serve(async (req: Request): Promise<Response> => {
       ? `
         <h1>Congratulations, ${company.name}!</h1>
         <p>We're pleased to inform you that your company application has been approved.</p>
-        <p>You can now access all features of our platform.</p>
+        <h2>Next Steps: Set Up Your Account</h2>
+        <p>We've created an account for you using the email address: <strong>${company.email}</strong></p>
+        ${passwordResetLink ? `
+          <p>To set up your password and access the platform, please click the link below:</p>
+          <p><a href="${passwordResetLink}" style="display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">Set Up Your Password</a></p>
+          <p style="color: #666; font-size: 14px;">This link will expire in 24 hours. If you need a new link, please contact us.</p>
+        ` : `
+          <p style="color: #666;">Please contact us to receive your login credentials.</p>
+        `}
+        <p>Once you've set your password, you can log in and access all features of our platform.</p>
         <p>If you have any questions, feel free to contact us.</p>
         <br>
         <p>Best regards,<br>${emailConfig.sender_name || 'The Team'}</p>
