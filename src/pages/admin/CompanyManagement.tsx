@@ -27,6 +27,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { Search, MoreHorizontal, CheckCircle, XCircle, Pause, Mail, Eye, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -349,6 +352,7 @@ export default function CompanyManagement() {
                               Resend Email
                             </DropdownMenuItem>
                           )}
+                          <DropdownMenuSeparator />
                           <DropdownMenuItem
                             className="text-destructive"
                             onClick={() => {
