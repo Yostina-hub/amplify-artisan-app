@@ -86,12 +86,26 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Create the user without password - they'll set it via email link
+    // Generate a random temporary password
+    const generateTempPassword = () => {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789@#$';
+      let password = '';
+      for (let i = 0; i < 12; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return password;
+    };
+
+    const temporaryPassword = generateTempPassword();
+
+    // Create the user with temporary password
     const { data: newUser, error: createError } = await supabaseClient.auth.admin.createUser({
       email,
+      password: temporaryPassword,
       email_confirm: true,
       user_metadata: {
-        full_name: fullName || ''
+        full_name: fullName || '',
+        requires_password_change: true
       }
     });
 
@@ -142,23 +156,13 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Generate password setup link
-    const { data: resetData, error: resetError } = await supabaseClient.auth.admin.generateLink({
-      type: 'recovery',
-      email: email,
-    });
-
-    if (resetError) {
-      console.error('Error generating password setup link:', resetError);
-    }
-
-    // Send welcome email with password setup link
+    // Send welcome email with temporary password
     try {
       const { error: emailError } = await supabaseClient.functions.invoke('send-user-welcome-email', {
         body: {
           email: email,
           fullName: fullName,
-          passwordSetupLink: resetData?.properties?.action_link || '',
+          temporaryPassword: temporaryPassword,
           companyId: targetCompanyId
         }
       });

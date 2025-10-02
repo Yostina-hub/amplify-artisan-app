@@ -11,7 +11,7 @@ const corsHeaders = {
 interface WelcomeEmailRequest {
   email: string;
   fullName?: string;
-  passwordSetupLink: string;
+  temporaryPassword: string;
   companyId?: string;
 }
 
@@ -25,7 +25,7 @@ serve(async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { email, fullName, passwordSetupLink, companyId }: WelcomeEmailRequest = await req.json();
+    const { email, fullName, temporaryPassword, companyId }: WelcomeEmailRequest = await req.json();
 
     console.log("Sending welcome email to:", email);
 
@@ -65,7 +65,7 @@ serve(async (req: Request): Promise<Response> => {
     }
 
     // Prepare email content
-    const subject = "Welcome! Set Up Your Account";
+    const subject = "Welcome! Your Account Credentials";
     const htmlContent = `
       <h1>Welcome${fullName ? `, ${fullName}` : ''}!</h1>
       <p>Your account has been created successfully.</p>
@@ -73,16 +73,15 @@ serve(async (req: Request): Promise<Response> => {
       <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
         <h2 style="margin-top: 0;">Your Login Credentials</h2>
         <p style="margin: 10px 0;"><strong>Email/Username:</strong> ${email}</p>
-        <p style="margin: 10px 0; color: #666; font-size: 14px;">Use this email to log in to the platform.</p>
+        <p style="margin: 10px 0;"><strong>Temporary Password:</strong> <code style="background-color: #e5e7eb; padding: 4px 8px; border-radius: 4px; font-family: monospace;">${temporaryPassword}</code></p>
+        <p style="margin: 10px 0; color: #666; font-size: 14px;">Use these credentials to log in to the platform.</p>
       </div>
 
-      <h2>Set Up Your Password</h2>
-      <p>To get started, please click the button below to create your password:</p>
-      <p style="text-align: center; margin: 25px 0;">
-        <a href="${passwordSetupLink}" style="display: inline-block; padding: 14px 32px; background-color: #4F46E5; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">Set Up Your Password</a>
-      </p>
-      <p style="color: #666; font-size: 14px;">⏰ This link will expire in 24 hours. If you need a new link, please contact your administrator.</p>
-      <p style="margin-top: 20px;">After setting your password, you can log in at the login page using your email: <strong>${email}</strong></p>
+      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0; color: #92400e;"><strong>⚠️ Important:</strong> For security reasons, you will be required to change your password upon first login.</p>
+      </div>
+
+      <p style="margin-top: 20px;">To get started, please log in at the login page using the credentials above.</p>
       
       <p style="margin-top: 30px;">If you have any questions, feel free to contact us.</p>
       <br>
