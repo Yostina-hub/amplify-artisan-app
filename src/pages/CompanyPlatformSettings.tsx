@@ -69,16 +69,25 @@ export default function CompanyPlatformSettings() {
 
       setCompanyId(profile.company_id);
 
-      // Fetch platforms and existing configs
-      const [platformsRes, configsRes] = await Promise.all([
-        supabase.from("social_platforms").select("*").eq("is_active", true).order("display_name"),
+      // Fetch subscribed platforms and existing configs
+      const [subscriptionsRes, configsRes] = await Promise.all([
+        supabase
+          .from("company_platform_subscriptions")
+          .select("platform_id, social_platforms(*)")
+          .eq("company_id", profile.company_id)
+          .eq("is_active", true),
         supabase.from("company_platform_configs").select("*").eq("company_id", profile.company_id),
       ]);
 
-      if (platformsRes.error) throw platformsRes.error;
+      if (subscriptionsRes.error) throw subscriptionsRes.error;
       if (configsRes.error) throw configsRes.error;
 
-      setPlatforms(platformsRes.data || []);
+      // Extract platforms from subscriptions
+      const subscribedPlatforms = subscriptionsRes.data
+        ?.map((sub: any) => sub.social_platforms)
+        .filter(Boolean) || [];
+      
+      setPlatforms(subscribedPlatforms);
 
       // Organize configs by platform_id
       const configMap: Record<string, CompanyConfig> = {};
@@ -192,9 +201,19 @@ export default function CompanyPlatformSettings() {
       <Alert>
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          These are your company's OAuth app credentials. Each user will then connect their own accounts using these credentials.
+          These are your company's OAuth app credentials. Each user will then connect their own accounts using these credentials. Only platforms your company is subscribed to are shown here.
         </AlertDescription>
       </Alert>
+
+      {platforms.length === 0 && (
+        <Card>
+          <CardContent className="py-12">
+            <p className="text-center text-muted-foreground">
+              Your company doesn't have any platform subscriptions yet. Contact your system administrator to add platforms.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-6">
         {platforms.map((platform) => {

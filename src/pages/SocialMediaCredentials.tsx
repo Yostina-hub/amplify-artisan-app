@@ -47,16 +47,42 @@ export default function SocialMediaCredentials() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [platformsRes, credentialsRes] = await Promise.all([
-        supabase.from("social_platforms").select("*").eq("is_active", true).order("display_name"),
-        supabase.from("social_media_accounts").select("id, platform, account_name"),
-      ]);
+      
+      // Get user's company
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
 
-      if (platformsRes.error) throw platformsRes.error;
-      if (credentialsRes.error) throw credentialsRes.error;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("company_id")
+        .eq("id", user.id)
+        .single();
 
-      setPlatforms(platformsRes.data || []);
-      setCredentials(credentialsRes.data || []);
+      let platformsData: Platform[] = [];
+
+      if (profile?.company_id) {
+        // Get subscribed platforms only
+        const { data: subscriptions, error: subsError } = await supabase
+          .from("company_platform_subscriptions")
+          .select("platform_id, social_platforms(*)")
+          .eq("company_id", profile.company_id)
+          .eq("is_active", true);
+
+        if (subsError) throw subsError;
+
+        platformsData = subscriptions
+          ?.map((sub: any) => sub.social_platforms)
+          .filter(Boolean) || [];
+      }
+
+      const { data: credentialsData, error: credsError } = await supabase
+        .from("social_media_accounts")
+        .select("id, platform, account_name");
+
+      if (credsError) throw credsError;
+
+      setPlatforms(platformsData);
+      setCredentials(credentialsData || []);
     } catch (error: any) {
       toast({
         title: "Error loading data",
@@ -218,31 +244,41 @@ export default function SocialMediaCredentials() {
         </TabsContent>
 
         <TabsContent value="available" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {platforms.map((platform) => {
-              const Icon = getPlatformIcon(platform.icon_name);
-              return (
-                <Card key={platform.id}>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Icon className="h-5 w-5" />
-                        <CardTitle className="text-lg">{platform.display_name}</CardTitle>
+          {platforms.length === 0 ? (
+            <Card>
+              <CardContent className="py-12">
+                <p className="text-center text-muted-foreground">
+                  No platforms available. Your company needs to be subscribed to platforms first. Contact your administrator.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {platforms.map((platform) => {
+                const Icon = getPlatformIcon(platform.icon_name);
+                return (
+                  <Card key={platform.id}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Icon className="h-5 w-5" />
+                          <CardTitle className="text-lg">{platform.display_name}</CardTitle>
+                        </div>
+                        <Button size="sm" onClick={() => openConnectDialog(platform)}>
+                          <Plus className="mr-2 h-4 w-4" />
+                          Connect
+                        </Button>
                       </div>
-                      <Button size="sm" onClick={() => openConnectDialog(platform)}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Connect
-                      </Button>
-                    </div>
-                    <CardDescription>
-                      {platform.requires_oauth && "OAuth authentication"}
-                      {platform.requires_api_key && "API key required"}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              );
-            })}
-          </div>
+                      <CardDescription>
+                        {platform.requires_oauth && "OAuth authentication"}
+                        {platform.requires_api_key && "API key required"}
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
 
