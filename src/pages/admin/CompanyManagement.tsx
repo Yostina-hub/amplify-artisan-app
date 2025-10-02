@@ -27,7 +27,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, MoreHorizontal, CheckCircle, XCircle, Pause, Mail, Eye } from "lucide-react";
+import { Search, MoreHorizontal, CheckCircle, XCircle, Pause, Mail, Eye, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -55,6 +55,7 @@ export default function CompanyManagement() {
   const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
   const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
 
   useEffect(() => {
@@ -182,6 +183,28 @@ export default function CompanyManagement() {
     } catch (error) {
       console.error("Error resending email:", error);
       toast.error("Failed to resend email");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedCompany) return;
+
+    try {
+      // Delete the company
+      const { error } = await supabase
+        .from("companies")
+        .delete()
+        .eq("id", selectedCompany.id);
+
+      if (error) throw error;
+
+      toast.success(`${selectedCompany.name} has been deleted`);
+      setIsDeleteDialogOpen(false);
+      setSelectedCompany(null);
+      fetchCompanies();
+    } catch (error) {
+      console.error("Error deleting company:", error);
+      toast.error("Failed to delete company");
     }
   };
 
@@ -326,6 +349,16 @@ export default function CompanyManagement() {
                               Resend Email
                             </DropdownMenuItem>
                           )}
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => {
+                              setSelectedCompany(company);
+                              setIsDeleteDialogOpen(true);
+                            }}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Company
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -388,6 +421,33 @@ export default function CompanyManagement() {
             </Button>
             <Button variant="destructive" onClick={handleReject}>
               Reject Company
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Company</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to permanently delete {selectedCompany?.name}? This action cannot be undone and will remove all associated data.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setSelectedCompany(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Company
             </Button>
           </DialogFooter>
         </DialogContent>
