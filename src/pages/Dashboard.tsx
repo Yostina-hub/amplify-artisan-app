@@ -1,11 +1,23 @@
+import { useState } from "react";
 import { StatCard } from "@/components/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, TrendingUp, Calendar, MessageSquare, Twitter, Instagram, Linkedin, Facebook, Youtube, MessageCircle, Pin, Camera, Send, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { ServiceSection } from "@/features/dashboard/ServiceSection";
+import { AIDrawer } from "@/features/dashboard/AIDrawer";
+import { SERVICE_CATEGORIES } from "@/features/dashboard/data";
+import { Service } from "@/features/dashboard/types";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [aiDrawerOpen, setAiDrawerOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
+
+  const handleAIClick = (service: Service) => {
+    setSelectedService(service);
+    setAiDrawerOpen(true);
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in-50 duration-500">
@@ -124,6 +136,25 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Service Grid */}
+      <div className="space-y-8 mt-8">
+        {SERVICE_CATEGORIES.map(category => (
+          <ServiceSection
+            key={category.id}
+            title={category.title}
+            services={category.services}
+            onAIClick={handleAIClick}
+          />
+        ))}
+      </div>
+
+      {/* AI Drawer */}
+      <AIDrawer
+        open={aiDrawerOpen}
+        onClose={() => setAiDrawerOpen(false)}
+        service={selectedService}
+      />
     </div>
   );
 }
