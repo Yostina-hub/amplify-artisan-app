@@ -1,4 +1,4 @@
-import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2 } from "lucide-react";
+import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2, Mail } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -24,6 +24,7 @@ const items = [
   { title: "Brand Monitoring", url: "/brand-monitoring", icon: MessageCircle },
   { title: "Social Listening", url: "/social-listening", icon: Radio },
   { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Company Email", url: "/company/email-settings", icon: Mail },
 ];
 
 const agentItems = [
@@ -36,6 +37,7 @@ const adminItems = [
   { title: "User Management", url: "/admin/users", icon: Users },
   { title: "Content Moderation", url: "/admin/moderation", icon: Flag },
   { title: "System Settings", url: "/admin/settings", icon: Cog },
+  { title: "Email Settings", url: "/admin/email-settings", icon: Mail },
 ];
 
 export function AppSidebar() {

@@ -94,7 +94,12 @@ export default function CompanyManagement() {
 
       if (error) throw error;
 
-      toast.success(`${selectedCompany.name} has been approved`);
+      // Send approval email
+      await supabase.functions.invoke('send-company-status-email', {
+        body: { companyId: selectedCompany.id, status: 'approved' }
+      });
+
+      toast.success(`${selectedCompany.name} has been approved and email sent`);
       setIsApproveDialogOpen(false);
       fetchCompanies();
     } catch (error) {
@@ -120,7 +125,12 @@ export default function CompanyManagement() {
 
       if (error) throw error;
 
-      toast.success(`${selectedCompany.name} has been rejected`);
+      // Send rejection email
+      await supabase.functions.invoke('send-company-status-email', {
+        body: { companyId: selectedCompany.id, status: 'rejected', rejectionReason }
+      });
+
+      toast.success(`${selectedCompany.name} has been rejected and email sent`);
       setIsRejectDialogOpen(false);
       setRejectionReason("");
       fetchCompanies();
