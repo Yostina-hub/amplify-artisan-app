@@ -12,15 +12,27 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { analysisType } = await req.json()
+    const { analysisType, platform } = await req.json()
+
+    // Build queries with optional platform filter
+    let metricsQuery = supabaseClient.from('social_media_metrics').select('*, social_media_accounts(platform, account_name)').limit(100)
+    let influencersQuery = supabaseClient.from('influencers').select('*').limit(50)
+    let mentionsQuery = supabaseClient.from('social_media_mentions').select('*').order('mentioned_at', { ascending: false }).limit(100)
+    let trendsQuery = supabaseClient.from('trending_topics').select('*').order('detected_at', { ascending: false }).limit(50)
+    
+    if (platform && platform !== 'all') {
+      influencersQuery = influencersQuery.eq('platform', platform)
+      mentionsQuery = mentionsQuery.eq('platform', platform)
+      trendsQuery = trendsQuery.eq('platform', platform)
+    }
 
     // Fetch all relevant data
     const [metricsRes, influencersRes, mentionsRes, keywordsRes, trendsRes] = await Promise.all([
-      supabaseClient.from('social_media_metrics').select('*, social_media_accounts(platform, account_name)').limit(100),
-      supabaseClient.from('influencers').select('*').limit(50),
-      supabaseClient.from('social_media_mentions').select('*').order('mentioned_at', { ascending: false }).limit(100),
+      metricsQuery,
+      influencersQuery,
+      mentionsQuery,
       supabaseClient.from('tracked_keywords').select('*'),
-      supabaseClient.from('trending_topics').select('*').order('detected_at', { ascending: false }).limit(50)
+      trendsQuery
     ])
 
     // Prepare analysis data
@@ -46,11 +58,11 @@ Deno.serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are an expert social media analyst. Analyze the provided data and return structured insights as JSON with: overview (string), top_performers (array of {name, metric, value}), recommendations (array of strings), sentiment_summary (string), growth_opportunities (array of strings), risk_alerts (array of strings).'
+            content: `You are an expert social media analyst${platform && platform !== 'all' ? ` specializing in ${platform}` : ''}. Analyze the provided data and return structured insights as JSON with: overview (string), top_performers (array of {name, metric, value}), recommendations (array of strings), sentiment_summary (string), growth_opportunities (array of strings), risk_alerts (array of strings), platform_specific_tips (array of strings).`
           },
           {
             role: 'user',
-            content: `Analyze this social media data comprehensively:\n\nMetrics: ${JSON.stringify(analysisData.metrics.slice(0, 20))}\n\nInfluencers: ${JSON.stringify(analysisData.influencers.slice(0, 15))}\n\nMentions: ${JSON.stringify(analysisData.mentions.slice(0, 30))}\n\nKeywords: ${JSON.stringify(analysisData.keywords)}\n\nTrends: ${JSON.stringify(analysisData.trends.slice(0, 20))}`
+            content: `Analyze this ${platform && platform !== 'all' ? platform : 'cross-platform'} social media data comprehensively:\n\nMetrics: ${JSON.stringify(analysisData.metrics.slice(0, 20))}\n\nInfluencers: ${JSON.stringify(analysisData.influencers.slice(0, 15))}\n\nMentions: ${JSON.stringify(analysisData.mentions.slice(0, 30))}\n\nKeywords: ${JSON.stringify(analysisData.keywords)}\n\nTrends: ${JSON.stringify(analysisData.trends.slice(0, 20))}\n\nProvide ${platform && platform !== 'all' ? platform + '-specific' : 'platform-specific'} insights and actionable recommendations.`
           }
         ],
         tools: [
@@ -77,9 +89,10 @@ Deno.serve(async (req) => {
                   recommendations: { type: 'array', items: { type: 'string' } },
                   sentiment_summary: { type: 'string' },
                   growth_opportunities: { type: 'array', items: { type: 'string' } },
-                  risk_alerts: { type: 'array', items: { type: 'string' } }
+                  risk_alerts: { type: 'array', items: { type: 'string' } },
+                  platform_specific_tips: { type: 'array', items: { type: 'string' } }
                 },
-                required: ['overview', 'top_performers', 'recommendations', 'sentiment_summary', 'growth_opportunities', 'risk_alerts'],
+                required: ['overview', 'top_performers', 'recommendations', 'sentiment_summary', 'growth_opportunities', 'risk_alerts', 'platform_specific_tips'],
                 additionalProperties: false
               }
             }

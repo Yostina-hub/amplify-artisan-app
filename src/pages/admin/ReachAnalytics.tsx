@@ -29,6 +29,7 @@ interface AIInsights {
   sentiment_summary: string;
   growth_opportunities: string[];
   risk_alerts: string[];
+  platform_specific_tips: string[];
 }
 
 export default function ReachAnalytics() {
@@ -36,7 +37,18 @@ export default function ReachAnalytics() {
   const [aiInsights, setAiInsights] = useState<AIInsights | null>(null);
   const [loading, setLoading] = useState(true);
   const [analyzingAI, setAnalyzingAI] = useState(false);
+  const [selectedPlatform, setSelectedPlatform] = useState<string>('all');
   const { toast } = useToast();
+
+  const platforms = [
+    { value: 'all', label: 'All Platforms', icon: '🌐' },
+    { value: 'facebook', label: 'Facebook', icon: '📘' },
+    { value: 'instagram', label: 'Instagram', icon: '📷' },
+    { value: 'twitter', label: 'Twitter/X', icon: '🐦' },
+    { value: 'tiktok', label: 'TikTok', icon: '🎵' },
+    { value: 'linkedin', label: 'LinkedIn', icon: '💼' },
+    { value: 'youtube', label: 'YouTube', icon: '📹' },
+  ];
 
   useEffect(() => {
     fetchAnalytics();
@@ -109,11 +121,11 @@ export default function ReachAnalytics() {
     }
   };
 
-  const fetchAIInsights = async () => {
+  const fetchAIInsights = async (platform: string = selectedPlatform) => {
     try {
       setAnalyzingAI(true);
       const { data, error } = await supabase.functions.invoke('analyze-social-insights', {
-        body: { analysisType: 'comprehensive' }
+        body: { analysisType: 'comprehensive', platform }
       });
 
       if (error) throw error;
@@ -178,7 +190,7 @@ export default function ReachAnalytics() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={fetchAIInsights} disabled={analyzingAI}>
+          <Button variant="outline" onClick={() => fetchAIInsights()} disabled={analyzingAI}>
             <Sparkles className="h-4 w-4 mr-2" />
             {analyzingAI ? 'Analyzing...' : 'Refresh AI Analysis'}
           </Button>
@@ -280,6 +292,33 @@ export default function ReachAnalytics() {
         </TabsContent>
 
         <TabsContent value="ai-insights" className="space-y-6">
+          {/* Platform Selector */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Select Platform</CardTitle>
+              <CardDescription>Choose a specific platform to analyze or view all platforms combined</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
+                {platforms.map((platform) => (
+                  <Button
+                    key={platform.value}
+                    variant={selectedPlatform === platform.value ? "default" : "outline"}
+                    onClick={() => {
+                      setSelectedPlatform(platform.value);
+                      fetchAIInsights(platform.value);
+                    }}
+                    className="flex flex-col h-auto py-3"
+                    disabled={analyzingAI}
+                  >
+                    <span className="text-2xl mb-1">{platform.icon}</span>
+                    <span className="text-xs">{platform.label}</span>
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
           {analyzingAI ? (
             <Card>
               <CardContent className="p-12 text-center">
@@ -291,12 +330,15 @@ export default function ReachAnalytics() {
             <>
               {/* AI Overview */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-primary" />
-                    AI-Powered Overview
-                  </CardTitle>
-                </CardHeader>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-primary" />
+                      AI-Powered Overview
+                      <Badge variant="secondary">
+                        {platforms.find(p => p.value === selectedPlatform)?.label}
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
                 <CardContent>
                   <p className="text-foreground leading-relaxed">{aiInsights.overview}</p>
                 </CardContent>
@@ -401,13 +443,35 @@ export default function ReachAnalytics() {
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Platform-Specific Tips */}
+              {aiInsights.platform_specific_tips && aiInsights.platform_specific_tips.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      {platforms.find(p => p.value === selectedPlatform)?.icon}
+                      {platforms.find(p => p.value === selectedPlatform)?.label} Pro Tips
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {aiInsights.platform_specific_tips.map((tip, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <span className="text-primary mt-1">💡</span>
+                          <span>{tip}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
             </>
           ) : (
             <Card>
               <CardContent className="p-12 text-center">
                 <TrendingDown className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                 <p className="text-muted-foreground mb-4">No AI insights available yet</p>
-                <Button onClick={fetchAIInsights}>
+                <Button onClick={() => fetchAIInsights()}>
                   <Sparkles className="h-4 w-4 mr-2" />
                   Generate AI Analysis
                 </Button>
