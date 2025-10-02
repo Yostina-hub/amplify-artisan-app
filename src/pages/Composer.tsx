@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Image, Smile } from "lucide-react";
+import { CalendarIcon, Image, Smile, Twitter, Instagram, Linkedin, Facebook, Youtube, MessageCircle, Pin, Camera, Send, Phone } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -16,10 +16,16 @@ export default function Composer() {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
 
   const platforms = [
-    { id: "twitter", name: "Twitter", color: "bg-blue-500" },
-    { id: "instagram", name: "Instagram", color: "bg-pink-500" },
-    { id: "linkedin", name: "LinkedIn", color: "bg-blue-700" },
-    { id: "facebook", name: "Facebook", color: "bg-blue-600" },
+    { id: "twitter", name: "Twitter", icon: Twitter, color: "text-[#1DA1F2]" },
+    { id: "instagram", name: "Instagram", icon: Instagram, color: "text-[#E4405F]" },
+    { id: "linkedin", name: "LinkedIn", icon: Linkedin, color: "text-[#0A66C2]" },
+    { id: "facebook", name: "Facebook", icon: Facebook, color: "text-[#1877F2]" },
+    { id: "youtube", name: "YouTube", icon: Youtube, color: "text-[#FF0000]" },
+    { id: "tiktok", name: "TikTok", icon: MessageCircle, color: "text-foreground" },
+    { id: "pinterest", name: "Pinterest", icon: Pin, color: "text-[#E60023]" },
+    { id: "snapchat", name: "Snapchat", icon: Camera, color: "text-[#FFFC00]" },
+    { id: "telegram", name: "Telegram", icon: Send, color: "text-[#0088cc]" },
+    { id: "whatsapp", name: "WhatsApp", icon: Phone, color: "text-[#25D366]" },
   ];
 
   const handlePlatformToggle = (platformId: string) => {
@@ -86,29 +92,37 @@ export default function Composer() {
 
           <div className="space-y-3">
             <Label>Select Platforms</Label>
-            <div className="grid grid-cols-2 gap-3">
-              {platforms.map((platform) => (
-                <div
-                  key={platform.id}
-                  className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                  onClick={() => handlePlatformToggle(platform.id)}
-                >
-                  <Checkbox
-                    id={platform.id}
-                    checked={selectedPlatforms.includes(platform.id)}
-                    onCheckedChange={() => handlePlatformToggle(platform.id)}
-                  />
-                  <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${platform.color}`} />
-                    <label
-                      htmlFor={platform.id}
-                      className="text-sm font-medium cursor-pointer"
-                    >
-                      {platform.name}
-                    </label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {platforms.map((platform) => {
+                const Icon = platform.icon;
+                const isSelected = selectedPlatforms.includes(platform.id);
+                return (
+                  <div
+                    key={platform.id}
+                    className={`flex items-center space-x-3 p-4 border-2 rounded-xl transition-all cursor-pointer ${
+                      isSelected 
+                        ? 'border-primary bg-primary/5 shadow-md' 
+                        : 'border-border hover:border-primary/50 hover:bg-muted/30'
+                    }`}
+                    onClick={() => handlePlatformToggle(platform.id)}
+                  >
+                    <Checkbox
+                      id={platform.id}
+                      checked={isSelected}
+                      onCheckedChange={() => handlePlatformToggle(platform.id)}
+                    />
+                    <div className="flex items-center gap-2">
+                      <Icon className={`w-5 h-5 ${platform.color}`} />
+                      <label
+                        htmlFor={platform.id}
+                        className="text-sm font-medium cursor-pointer"
+                      >
+                        {platform.name}
+                      </label>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

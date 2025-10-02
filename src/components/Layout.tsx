@@ -18,6 +18,11 @@ export function Layout({ children }: LayoutProps) {
           <main className="flex-1 p-6">
             {children}
           </main>
+          <footer className="border-t border-border py-3 px-6 bg-card">
+            <p className="text-xs text-muted-foreground text-center">
+              Powered by <span className="font-semibold text-foreground">Lemat Technology</span>
+            </p>
+          </footer>
         </div>
       </div>
     </SidebarProvider>
