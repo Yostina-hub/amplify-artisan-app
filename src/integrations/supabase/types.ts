@@ -76,6 +76,54 @@ export type Database = {
           },
         ]
       }
+      ad_impressions: {
+        Row: {
+          ad_campaign_id: string | null
+          company_id: string | null
+          created_at: string | null
+          engagement_score: number | null
+          id: string
+          impression_type: string | null
+          session_id: string
+          user_id: string | null
+        }
+        Insert: {
+          ad_campaign_id?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          engagement_score?: number | null
+          id?: string
+          impression_type?: string | null
+          session_id: string
+          user_id?: string | null
+        }
+        Update: {
+          ad_campaign_id?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          engagement_score?: number | null
+          id?: string
+          impression_type?: string | null
+          session_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_impressions_ad_campaign_id_fkey"
+            columns: ["ad_campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ad_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_impressions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_influencers: {
         Row: {
           agreed_price: number | null
@@ -987,6 +1035,72 @@ export type Database = {
           platform?: string
           topic?: string
           volume?: number | null
+        }
+        Relationships: []
+      }
+      user_engagement: {
+        Row: {
+          created_at: string | null
+          device_info: Json | null
+          id: string
+          interactions: Json | null
+          page_visited: string
+          session_id: string
+          time_spent: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          device_info?: Json | null
+          id?: string
+          interactions?: Json | null
+          page_visited: string
+          session_id: string
+          time_spent?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          device_info?: Json | null
+          id?: string
+          interactions?: Json | null
+          page_visited?: string
+          session_id?: string
+          time_spent?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_reach_scores: {
+        Row: {
+          created_at: string | null
+          engagement_level: string | null
+          id: string
+          interests: Json | null
+          last_calculated_at: string | null
+          reach_score: number
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          engagement_level?: string | null
+          id?: string
+          interests?: Json | null
+          last_calculated_at?: string | null
+          reach_score?: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          engagement_level?: string | null
+          id?: string
+          interests?: Json | null
+          last_calculated_at?: string | null
+          reach_score?: number
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }

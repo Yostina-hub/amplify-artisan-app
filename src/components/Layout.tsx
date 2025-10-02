@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useAuth } from "@/hooks/useAuth";
+import { useEngagementTracking } from "@/hooks/useEngagementTracking";
 import { Button } from "@/components/ui/button";
 import { LogOut, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -22,6 +23,7 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const { user, signOut, roles } = useAuth();
   const navigate = useNavigate();
+  useEngagementTracking(); // Track user engagement across all pages
 
   const handleSignOut = async () => {
     await signOut();

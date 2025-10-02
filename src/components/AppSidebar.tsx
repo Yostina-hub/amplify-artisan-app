@@ -1,4 +1,4 @@
-import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2, Mail, Link2, Globe, Key, Package } from "lucide-react";
+import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2, Mail, Link2, Globe, Key, Package, BarChart2 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -43,6 +43,7 @@ const adminItems = [
   { title: "Content Moderation", url: "/admin/moderation", icon: Flag },
   { title: "Social Platforms", url: "/admin/social-platforms", icon: Globe },
   { title: "Platform Subscriptions", url: "/admin/platform-subscriptions", icon: Package },
+  { title: "Reach Analytics", url: "/admin/reach-analytics", icon: BarChart2 },
   { title: "Email Settings", url: "/admin/email-settings", icon: Mail },
   { title: "System Settings", url: "/admin/settings", icon: Cog },
 ];

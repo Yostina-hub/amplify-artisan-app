@@ -8,6 +8,7 @@ import { ServiceSection } from "@/features/dashboard/ServiceSection";
 import { AIDrawer } from "@/features/dashboard/AIDrawer";
 import { SERVICE_CATEGORIES } from "@/features/dashboard/data";
 import { Service } from "@/features/dashboard/types";
+import { PersonalizedAds } from "@/components/PersonalizedAds";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -100,41 +101,46 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle>Connected Platforms</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {[
-                { name: "Twitter", status: "Connected", icon: Twitter, color: "text-[#1DA1F2]" },
-                { name: "Instagram", status: "Connected", icon: Instagram, color: "text-[#E4405F]" },
-                { name: "LinkedIn", status: "Connected", icon: Linkedin, color: "text-[#0A66C2]" },
-                { name: "Facebook", status: "Connected", icon: Facebook, color: "text-[#1877F2]" },
-                { name: "YouTube", status: "Connected", icon: Youtube, color: "text-[#FF0000]" },
-                { name: "Pinterest", status: "Not Connected", icon: Pin, color: "text-[#E60023]" },
-                { name: "Telegram", status: "Connected", icon: Send, color: "text-[#0088cc]" },
-                { name: "WhatsApp", status: "Not Connected", icon: Phone, color: "text-[#25D366]" },
-              ].map((platform, i) => {
-                const Icon = platform.icon;
-                const isConnected = platform.status === "Connected";
-                return (
-                  <div key={i} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/30 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full bg-muted flex items-center justify-center`}>
-                        <Icon className={`w-4 h-4 ${platform.color}`} />
+        <div className="col-span-3 space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Connected Platforms</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {[
+                  { name: "Twitter", status: "Connected", icon: Twitter, color: "text-[#1DA1F2]" },
+                  { name: "Instagram", status: "Connected", icon: Instagram, color: "text-[#E4405F]" },
+                  { name: "LinkedIn", status: "Connected", icon: Linkedin, color: "text-[#0A66C2]" },
+                  { name: "Facebook", status: "Connected", icon: Facebook, color: "text-[#1877F2]" },
+                  { name: "YouTube", status: "Connected", icon: Youtube, color: "text-[#FF0000]" },
+                  { name: "Pinterest", status: "Not Connected", icon: Pin, color: "text-[#E60023]" },
+                  { name: "Telegram", status: "Connected", icon: Send, color: "text-[#0088cc]" },
+                  { name: "WhatsApp", status: "Not Connected", icon: Phone, color: "text-[#25D366]" },
+                ].map((platform, i) => {
+                  const Icon = platform.icon;
+                  const isConnected = platform.status === "Connected";
+                  return (
+                    <div key={i} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/30 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full bg-muted flex items-center justify-center`}>
+                          <Icon className={`w-4 h-4 ${platform.color}`} />
+                        </div>
+                        <span className="text-sm font-medium">{platform.name}</span>
                       </div>
-                      <span className="text-sm font-medium">{platform.name}</span>
+                      <span className={`text-xs px-2 py-1 rounded-full ${isConnected ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
+                        {platform.status}
+                      </span>
                     </div>
-                    <span className={`text-xs px-2 py-1 rounded-full ${isConnected ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
-                      {platform.status}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* AI-Powered Personalized Ads */}
+          <PersonalizedAds maxAds={2} />
+        </div>
       </div>
 
       {/* Service Grid */}
