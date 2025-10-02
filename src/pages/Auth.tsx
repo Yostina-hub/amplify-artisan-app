@@ -40,7 +40,7 @@ const Auth = () => {
         return;
       }
       
-      navigate('/');
+      navigate('/dashboard');
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -95,7 +95,7 @@ const Auth = () => {
         description: "Your password has been changed successfully.",
       });
 
-      navigate('/');
+      navigate('/dashboard');
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -126,7 +126,7 @@ const Auth = () => {
       setSignInForm({ email: signUpForm.email, password: signUpForm.password });
       // Auto sign in after signup
       await signIn(signUpForm.email, signUpForm.password);
-      navigate('/');
+      navigate('/dashboard');
     } catch (error: any) {
       toast({
         variant: "destructive",

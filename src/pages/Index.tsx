@@ -1,18 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Calendar, MessageSquare, TrendingUp, Zap, Shield, ChevronDown, Instagram, Facebook, Linkedin, Twitter, Youtube, PieChart, BarChart3, Sparkles } from "lucide-react";
-import { useEffect } from "react";
+import { Calendar, MessageSquare, TrendingUp, Zap, Shield, Instagram, Facebook, Linkedin, Twitter, Youtube, PieChart, BarChart3, Sparkles } from "lucide-react";
+import { IndustriesDropdown } from "@/components/IndustriesDropdown";
+import { FeaturesDropdown } from "@/components/FeaturesDropdown";
+import { ResourcesDropdown } from "@/components/ResourcesDropdown";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-
-  useEffect(() => {
-    if (user) {
-      navigate("/dashboard");
-    }
-  }, [user, navigate]);
 
   const socialPlatforms = [
     { icon: Instagram, color: "#E4405F" },
@@ -67,16 +61,10 @@ const Index = () => {
             <span className="text-2xl font-bold text-accent">SocialHub</span>
           </div>
           <div className="hidden lg:flex items-center gap-8">
-            <button className="text-sm font-medium text-foreground hover:text-accent transition-colors flex items-center gap-1">
-              Top features <ChevronDown className="h-4 w-4" />
-            </button>
+            <FeaturesDropdown />
             <a href="#integrations" className="text-sm font-medium text-foreground hover:text-accent transition-colors">Integrations</a>
-            <button className="text-sm font-medium text-foreground hover:text-accent transition-colors flex items-center gap-1">
-              Industries <ChevronDown className="h-4 w-4" />
-            </button>
-            <button className="text-sm font-medium text-foreground hover:text-accent transition-colors flex items-center gap-1">
-              Resources <ChevronDown className="h-4 w-4" />
-            </button>
+            <IndustriesDropdown />
+            <ResourcesDropdown />
             <a href="#pricing" className="text-sm font-medium text-foreground hover:text-accent transition-colors">Pricing</a>
             <a href="#enterprise" className="text-sm font-medium text-foreground hover:text-accent transition-colors">Enterprise</a>
           </div>

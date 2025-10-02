@@ -31,7 +31,7 @@ const ForcePasswordChange = () => {
       });
       if (error) throw error;
       toast({ title: "Password updated", description: "Welcome!" });
-      navigate("/");
+      navigate("/dashboard");
     } catch (err: any) {
       toast({ title: "Update failed", description: err.message });
     } finally {

@@ -27,7 +27,7 @@ export const ProtectedRoute = ({ children, requiredRole, allowUnapproved }: Prot
       } else if (forcingPasswordChange && location.pathname !== '/force-password') {
         navigate('/force-password');
       } else if (requiredRole && !isAllowedRole) {
-        navigate('/');
+        navigate('/dashboard');
       } else if (!requiredRole && !allowUnapproved && roles.length === 0) {
         navigate('/pending-approval');
       }
