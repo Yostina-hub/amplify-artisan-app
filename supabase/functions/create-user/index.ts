@@ -36,21 +36,48 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Check if user is admin
+    // Get user's profile to check company
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('company_id')
+      .eq('id', user.id)
+      .single();
+
+    // Check if user is admin with company context
     const { data: roles } = await supabaseClient
       .from('user_roles')
-      .select('role')
+      .select('role, company_id')
       .eq('user_id', user.id);
 
-    const isAdmin = roles?.some(r => r.role === 'admin');
-    if (!isAdmin) {
+    const adminRole = roles?.find(r => r.role === 'admin');
+    if (!adminRole) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized - Admin access required' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const { email, password, fullName, role } = await req.json();
+    // Determine if super admin (no company) or company admin
+    const isSuperAdmin = !adminRole.company_id;
+    
+    const { email, password, fullName, role, companyId } = await req.json();
+    const targetCompanyId = companyId || profile?.company_id;
+
+    // Company admins can only create users for their own company
+    if (!isSuperAdmin && adminRole.company_id !== targetCompanyId) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized: Company admins can only create users for their own company' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Super admins creating users must specify a company
+    if (isSuperAdmin && !targetCompanyId) {
+      return new Response(
+        JSON.stringify({ error: 'Company ID is required when creating users' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     if (!email || !password) {
       return new Response(
@@ -76,17 +103,43 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Assign role if provided
-    if (role && newUser.user) {
+    if (!newUser.user) {
+      return new Response(
+        JSON.stringify({ error: 'Failed to create user' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Update profile with company_id
+    const { error: profileError } = await supabaseClient
+      .from('profiles')
+      .update({ company_id: targetCompanyId })
+      .eq('id', newUser.user.id);
+    
+    if (profileError) {
+      console.error('Error updating profile with company:', profileError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to assign company to user' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Assign role if provided, with company context
+    if (role) {
       const { error: roleError } = await supabaseClient
         .from('user_roles')
         .insert({
           user_id: newUser.user.id,
-          role: role
+          role: role,
+          company_id: targetCompanyId
         });
 
       if (roleError) {
         console.error('Error assigning role:', roleError);
+        return new Response(
+          JSON.stringify({ error: 'Failed to assign role to user' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
     }
 

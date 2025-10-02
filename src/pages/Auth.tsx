@@ -174,8 +174,19 @@ const Auth = () => {
             </TabsContent>
           </Tabs>
         </CardContent>
-        <CardFooter className="text-center text-sm text-muted-foreground">
-          By continuing, you agree to our Terms of Service and Privacy Policy
+        <CardFooter className="flex flex-col gap-4">
+          <div className="text-center">
+            <Button
+              variant="link"
+              className="text-sm text-muted-foreground"
+              onClick={() => navigate('/company-application')}
+            >
+              Apply as a Company →
+            </Button>
+          </div>
+          <p className="text-center text-xs text-muted-foreground">
+            By continuing, you agree to our Terms of Service and Privacy Policy
+          </p>
         </CardFooter>
       </Card>
     </div>

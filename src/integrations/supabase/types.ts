@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           budget: number
           clicks: number | null
+          company_id: string | null
           conversions: number | null
           created_at: string | null
           end_date: string | null
@@ -34,6 +35,7 @@ export type Database = {
         Insert: {
           budget: number
           clicks?: number | null
+          company_id?: string | null
           conversions?: number | null
           created_at?: string | null
           end_date?: string | null
@@ -50,6 +52,7 @@ export type Database = {
         Update: {
           budget?: number
           clicks?: number | null
+          company_id?: string | null
           conversions?: number | null
           created_at?: string | null
           end_date?: string | null
@@ -63,7 +66,15 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ad_campaigns_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       campaign_influencers: {
         Row: {
@@ -128,9 +139,64 @@ export type Database = {
           },
         ]
       }
+      companies: {
+        Row: {
+          address: string | null
+          applied_at: string
+          approved_at: string | null
+          approved_by: string | null
+          company_size: string | null
+          created_at: string
+          email: string
+          id: string
+          industry: string | null
+          name: string
+          phone: string | null
+          rejection_reason: string | null
+          status: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          applied_at?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          company_size?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          industry?: string | null
+          name: string
+          phone?: string | null
+          rejection_reason?: string | null
+          status?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          applied_at?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          company_size?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          industry?: string | null
+          name?: string
+          phone?: string | null
+          rejection_reason?: string | null
+          status?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       influencer_campaigns: {
         Row: {
           budget: number
+          company_id: string | null
           created_at: string | null
           description: string | null
           end_date: string | null
@@ -145,6 +211,7 @@ export type Database = {
         }
         Insert: {
           budget: number
+          company_id?: string | null
           created_at?: string | null
           description?: string | null
           end_date?: string | null
@@ -159,6 +226,7 @@ export type Database = {
         }
         Update: {
           budget?: number
+          company_id?: string | null
           created_at?: string | null
           description?: string | null
           end_date?: string | null
@@ -171,7 +239,15 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "influencer_campaigns_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       influencer_communications: {
         Row: {
@@ -270,6 +346,7 @@ export type Database = {
           avg_post_price: number | null
           bio: string | null
           category: string | null
+          company_id: string | null
           created_at: string | null
           email: string | null
           engagement_rate: number | null
@@ -291,6 +368,7 @@ export type Database = {
           avg_post_price?: number | null
           bio?: string | null
           category?: string | null
+          company_id?: string | null
           created_at?: string | null
           email?: string | null
           engagement_rate?: number | null
@@ -312,6 +390,7 @@ export type Database = {
           avg_post_price?: number | null
           bio?: string | null
           category?: string | null
+          company_id?: string | null
           created_at?: string | null
           email?: string | null
           engagement_rate?: number | null
@@ -328,11 +407,20 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "influencers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
           avatar_url: string | null
+          company_id: string | null
           created_at: string | null
           email: string
           full_name: string | null
@@ -341,6 +429,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          company_id?: string | null
           created_at?: string | null
           email: string
           full_name?: string | null
@@ -349,19 +438,29 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          company_id?: string | null
           created_at?: string | null
           email?: string
           full_name?: string | null
           id?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       social_media_accounts: {
         Row: {
           access_token: string
           account_id: string
           account_name: string
+          company_id: string | null
           created_at: string | null
           id: string
           is_active: boolean | null
@@ -375,6 +474,7 @@ export type Database = {
           access_token: string
           account_id: string
           account_name: string
+          company_id?: string | null
           created_at?: string | null
           id?: string
           is_active?: boolean | null
@@ -388,6 +488,7 @@ export type Database = {
           access_token?: string
           account_id?: string
           account_name?: string
+          company_id?: string | null
           created_at?: string | null
           id?: string
           is_active?: boolean | null
@@ -397,7 +498,15 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "social_media_accounts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       social_media_comments: {
         Row: {
@@ -544,6 +653,7 @@ export type Database = {
       }
       social_media_posts: {
         Row: {
+          company_id: string | null
           content: string
           created_at: string | null
           id: string
@@ -555,6 +665,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          company_id?: string | null
           content: string
           created_at?: string | null
           id?: string
@@ -566,6 +677,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          company_id?: string | null
           content?: string
           created_at?: string | null
           id?: string
@@ -576,10 +688,19 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "social_media_posts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tracked_keywords: {
         Row: {
+          company_id: string | null
           created_at: string | null
           id: string
           is_active: boolean | null
@@ -588,6 +709,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          company_id?: string | null
           created_at?: string | null
           id?: string
           is_active?: boolean | null
@@ -596,6 +718,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          company_id?: string | null
           created_at?: string | null
           id?: string
           is_active?: boolean | null
@@ -603,7 +726,15 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tracked_keywords_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trending_topics: {
         Row: {
@@ -643,30 +774,45 @@ export type Database = {
       }
       user_roles: {
         Row: {
+          company_id: string | null
           created_at: string | null
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
+          company_id?: string | null
           created_at?: string | null
           id?: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
+          company_id?: string | null
           created_at?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      get_user_company_id: {
+        Args: { _user_id: string }
+        Returns: string
+      }
       get_user_roles: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"][]

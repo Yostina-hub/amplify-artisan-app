@@ -1,4 +1,4 @@
-import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio } from "lucide-react";
+import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -32,6 +32,7 @@ const agentItems = [
 
 const adminItems = [
   { title: "Admin Dashboard", url: "/admin", icon: Shield },
+  { title: "Company Management", url: "/admin/companies", icon: Building2 },
   { title: "User Management", url: "/admin/users", icon: Users },
   { title: "Content Moderation", url: "/admin/moderation", icon: Flag },
   { title: "System Settings", url: "/admin/settings", icon: Cog },

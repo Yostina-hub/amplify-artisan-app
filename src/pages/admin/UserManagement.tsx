@@ -48,11 +48,19 @@ const createUserSchema = z.object({
 
 type UserRole = Database['public']['Enums']['app_role'];
 
+interface Company {
+  id: string;
+  name: string;
+  status: string;
+}
+
 interface User {
   id: string;
   email: string;
   full_name: string;
   created_at: string;
+  company_id: string | null;
+  company?: Company;
   roles: UserRole[];
 }
 
@@ -68,20 +76,75 @@ export default function UserManagement() {
     email: '',
     password: '',
     fullName: '',
-    role: 'user' as UserRole
+    role: 'user' as UserRole,
+    companyId: ''
   });
   const [isCreating, setIsCreating] = useState(false);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [userCompanyId, setUserCompanyId] = useState<string | null>(null);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   useEffect(() => {
+    checkUserRole();
     fetchUsers();
+    fetchCompanies();
   }, []);
+
+  const checkUserRole = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Get user's company
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+
+      setUserCompanyId(profile?.company_id || null);
+
+      // Check if super admin (admin with no company)
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role, company_id')
+        .eq('user_id', user.id);
+
+      const adminRole = roles?.find(r => r.role === 'admin');
+      setIsSuperAdmin(!!adminRole && !adminRole.company_id);
+    } catch (error) {
+      console.error('Error checking user role:', error);
+    }
+  };
+
+  const fetchCompanies = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('companies')
+        .select('id, name, status')
+        .eq('status', 'approved')
+        .order('name');
+
+      if (error) throw error;
+      setCompanies(data || []);
+    } catch (error) {
+      console.error('Error fetching companies:', error);
+    }
+  };
 
   const fetchUsers = async () => {
     try {
-      // Fetch all profiles
-      const { data: profiles, error: profilesError } = await supabase
+      // Build query - company admins only see their company's users
+      let query = supabase
         .from('profiles')
-        .select('*')
+        .select('*, companies(id, name, status)');
+
+      // Filter by company for company admins
+      if (!isSuperAdmin && userCompanyId) {
+        query = query.eq('company_id', userCompanyId);
+      }
+
+      const { data: profiles, error: profilesError } = await query
         .order('created_at', { ascending: false });
 
       if (profilesError) throw profilesError;
@@ -94,7 +157,7 @@ export default function UserManagement() {
       if (rolesError) throw rolesError;
 
       // Combine profiles with their roles
-      const usersWithRoles: User[] = (profiles || []).map(profile => {
+      const usersWithRoles: User[] = (profiles || []).map((profile: any) => {
         const roles = (userRoles || [])
           .filter(role => role.user_id === profile.id)
           .map(role => role.role as UserRole);
@@ -104,6 +167,8 @@ export default function UserManagement() {
           email: profile.email,
           full_name: profile.full_name || '',
           created_at: profile.created_at || '',
+          company_id: profile.company_id,
+          company: profile.companies,
           roles
         };
       });
@@ -170,7 +235,8 @@ export default function UserManagement() {
           email: createForm.email,
           password: createForm.password,
           fullName: createForm.fullName,
-          role: createForm.role
+          role: createForm.role,
+          companyId: createForm.companyId || (isSuperAdmin ? null : userCompanyId)
         },
         headers: {
           Authorization: `Bearer ${session.access_token}`,
@@ -181,7 +247,7 @@ export default function UserManagement() {
 
       toast.success('User created successfully');
       setIsCreateDialogOpen(false);
-      setCreateForm({ email: '', password: '', fullName: '', role: 'user' });
+      setCreateForm({ email: '', password: '', fullName: '', role: 'user', companyId: '' });
       fetchUsers();
     } catch (error: any) {
       console.error('Error creating user:', error);
@@ -258,6 +324,7 @@ export default function UserManagement() {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
+                {isSuperAdmin && <TableHead>Company</TableHead>}
                 <TableHead>Roles</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Joined</TableHead>
@@ -273,7 +340,7 @@ export default function UserManagement() {
                 </TableRow>
               ) : filteredUsers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground">
+                  <TableCell colSpan={isSuperAdmin ? 7 : 6} className="text-center text-muted-foreground">
                     No users found
                   </TableCell>
                 </TableRow>
@@ -284,6 +351,15 @@ export default function UserManagement() {
                       {user.full_name || 'No name'}
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
+                    {isSuperAdmin && (
+                      <TableCell>
+                        {user.company ? (
+                          <Badge variant="outline">{user.company.name}</Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">No company</span>
+                        )}
+                      </TableCell>
+                    )}
                     <TableCell>
                       <div className="flex gap-1 flex-wrap">
                         {user.roles.length > 0 ? (
@@ -412,9 +488,30 @@ export default function UserManagement() {
                 disabled={isCreating}
               />
             </div>
+            {isSuperAdmin && (
+              <div className="space-y-2">
+                <Label htmlFor="create-company">Company *</Label>
+                <Select 
+                  value={createForm.companyId} 
+                  onValueChange={(value) => setCreateForm({ ...createForm, companyId: value })}
+                  disabled={isCreating}
+                >
+                  <SelectTrigger id="create-company">
+                    <SelectValue placeholder="Select a company" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companies.map((company) => (
+                      <SelectItem key={company.id} value={company.id}>
+                        {company.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="create-role">Role</Label>
-              <Select 
+              <Select
                 value={createForm.role} 
                 onValueChange={(value) => setCreateForm({ ...createForm, role: value as UserRole })}
                 disabled={isCreating}

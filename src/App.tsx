@@ -24,6 +24,8 @@ import SocialListening from "./pages/SocialListening";
 import InfluencerMarketing from "./pages/InfluencerMarketing";
 import NotFound from "./pages/NotFound";
 import PendingApproval from "./pages/PendingApproval";
+import CompanyApplication from "./pages/CompanyApplication";
+import CompanyManagement from "./pages/admin/CompanyManagement";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +38,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/company-application" element={<CompanyApplication />} />
             <Route path="/pending-approval" element={<ProtectedRoute allowUnapproved><Layout><PendingApproval /></Layout></ProtectedRoute>} />
             <Route path="/" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
             <Route path="/composer" element={<ProtectedRoute><Layout><Composer /></Layout></ProtectedRoute>} />
@@ -49,6 +52,7 @@ const App = () => (
             <Route path="/social-listening" element={<ProtectedRoute><Layout><SocialListening /></Layout></ProtectedRoute>} />
             <Route path="/agents" element={<ProtectedRoute requiredRole="agent"><Layout><Agents /></Layout></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><Layout><AdminDashboard /></Layout></ProtectedRoute>} />
+            <Route path="/admin/companies" element={<ProtectedRoute requiredRole="admin"><Layout><CompanyManagement /></Layout></ProtectedRoute>} />
             <Route path="/admin/users" element={<ProtectedRoute requiredRole="admin"><Layout><UserManagement /></Layout></ProtectedRoute>} />
             <Route path="/admin/moderation" element={<ProtectedRoute requiredRole="admin"><Layout><ContentModeration /></Layout></ProtectedRoute>} />
             <Route path="/admin/settings" element={<ProtectedRoute requiredRole="admin"><Layout><SystemSettings /></Layout></ProtectedRoute>} />
