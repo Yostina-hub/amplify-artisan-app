@@ -21,6 +21,7 @@ import SystemSettings from "./pages/admin/SystemSettings";
 import SocialMediaMetrics from "./pages/SocialMediaMetrics";
 import AdCampaigns from "./pages/AdCampaigns";
 import SocialListening from "./pages/SocialListening";
+import InfluencerMarketing from "./pages/InfluencerMarketing";
 import NotFound from "./pages/NotFound";
 import PendingApproval from "./pages/PendingApproval";
 
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/settings" element={<ProtectedRoute><Layout><Settings /></Layout></ProtectedRoute>} />
             <Route path="/social-metrics" element={<ProtectedRoute><Layout><SocialMediaMetrics /></Layout></ProtectedRoute>} />
             <Route path="/ad-campaigns" element={<ProtectedRoute><Layout><AdCampaigns /></Layout></ProtectedRoute>} />
+            <Route path="/influencer-marketing" element={<ProtectedRoute><Layout><InfluencerMarketing /></Layout></ProtectedRoute>} />
             <Route path="/brand-monitoring" element={<ProtectedRoute><Layout><BrandMonitoring /></Layout></ProtectedRoute>} />
             <Route path="/social-listening" element={<ProtectedRoute><Layout><SocialListening /></Layout></ProtectedRoute>} />
             <Route path="/agents" element={<ProtectedRoute requiredRole="agent"><Layout><Agents /></Layout></ProtectedRoute>} />

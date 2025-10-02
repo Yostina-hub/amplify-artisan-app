@@ -20,6 +20,7 @@ const items = [
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Social Metrics", url: "/social-metrics", icon: TrendingUp },
   { title: "Ad Campaigns", url: "/ad-campaigns", icon: Megaphone },
+  { title: "Influencer Marketing", url: "/influencer-marketing", icon: Users },
   { title: "Brand Monitoring", url: "/brand-monitoring", icon: MessageCircle },
   { title: "Social Listening", url: "/social-listening", icon: Radio },
   { title: "Settings", url: "/settings", icon: Settings },

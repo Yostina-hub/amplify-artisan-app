@@ -65,6 +65,271 @@ export type Database = {
         }
         Relationships: []
       }
+      campaign_influencers: {
+        Row: {
+          agreed_price: number | null
+          campaign_id: string
+          content_approved_at: string | null
+          content_submitted_at: string | null
+          created_at: string | null
+          deliverables: Json | null
+          id: string
+          influencer_id: string
+          notes: string | null
+          performance_metrics: Json | null
+          posted_at: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          agreed_price?: number | null
+          campaign_id: string
+          content_approved_at?: string | null
+          content_submitted_at?: string | null
+          created_at?: string | null
+          deliverables?: Json | null
+          id?: string
+          influencer_id: string
+          notes?: string | null
+          performance_metrics?: Json | null
+          posted_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          agreed_price?: number | null
+          campaign_id?: string
+          content_approved_at?: string | null
+          content_submitted_at?: string | null
+          created_at?: string | null
+          deliverables?: Json | null
+          id?: string
+          influencer_id?: string
+          notes?: string | null
+          performance_metrics?: Json | null
+          posted_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_influencers_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "influencer_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_influencers_influencer_id_fkey"
+            columns: ["influencer_id"]
+            isOneToOne: false
+            referencedRelation: "influencers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      influencer_campaigns: {
+        Row: {
+          budget: number
+          created_at: string | null
+          description: string | null
+          end_date: string | null
+          goals: Json | null
+          id: string
+          name: string
+          start_date: string
+          status: string | null
+          target_audience: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          budget: number
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          goals?: Json | null
+          id?: string
+          name: string
+          start_date: string
+          status?: string | null
+          target_audience?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          budget?: number
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          goals?: Json | null
+          id?: string
+          name?: string
+          start_date?: string
+          status?: string | null
+          target_audience?: Json | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      influencer_communications: {
+        Row: {
+          communication_type: string | null
+          created_at: string | null
+          direction: string
+          id: string
+          influencer_id: string
+          message: string
+          subject: string | null
+          user_id: string
+        }
+        Insert: {
+          communication_type?: string | null
+          created_at?: string | null
+          direction: string
+          id?: string
+          influencer_id: string
+          message: string
+          subject?: string | null
+          user_id: string
+        }
+        Update: {
+          communication_type?: string | null
+          created_at?: string | null
+          direction?: string
+          id?: string
+          influencer_id?: string
+          message?: string
+          subject?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "influencer_communications_influencer_id_fkey"
+            columns: ["influencer_id"]
+            isOneToOne: false
+            referencedRelation: "influencers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      influencer_contracts: {
+        Row: {
+          campaign_influencer_id: string
+          contract_url: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          payment_amount: number
+          payment_date: string | null
+          payment_method: string | null
+          payment_status: string | null
+          signed_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          campaign_influencer_id: string
+          contract_url?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          payment_amount: number
+          payment_date?: string | null
+          payment_method?: string | null
+          payment_status?: string | null
+          signed_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          campaign_influencer_id?: string
+          contract_url?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          payment_amount?: number
+          payment_date?: string | null
+          payment_method?: string | null
+          payment_status?: string | null
+          signed_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "influencer_contracts_campaign_influencer_id_fkey"
+            columns: ["campaign_influencer_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_influencers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      influencers: {
+        Row: {
+          avatar_url: string | null
+          avg_post_price: number | null
+          bio: string | null
+          category: string | null
+          created_at: string | null
+          email: string | null
+          engagement_rate: number | null
+          follower_count: number | null
+          id: string
+          location: string | null
+          name: string
+          phone: string | null
+          platform: string
+          platform_handle: string
+          platform_url: string | null
+          status: string | null
+          tags: string[] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          avg_post_price?: number | null
+          bio?: string | null
+          category?: string | null
+          created_at?: string | null
+          email?: string | null
+          engagement_rate?: number | null
+          follower_count?: number | null
+          id?: string
+          location?: string | null
+          name: string
+          phone?: string | null
+          platform: string
+          platform_handle: string
+          platform_url?: string | null
+          status?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          avg_post_price?: number | null
+          bio?: string | null
+          category?: string | null
+          created_at?: string | null
+          email?: string | null
+          engagement_rate?: number | null
+          follower_count?: number | null
+          id?: string
+          location?: string | null
+          name?: string
+          phone?: string | null
+          platform?: string
+          platform_handle?: string
+          platform_url?: string | null
+          status?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
