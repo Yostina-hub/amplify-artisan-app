@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -32,10 +33,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MoreHorizontal, Search } from "lucide-react";
+import { MoreHorizontal, Search, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import { z } from "zod";
+
+const createUserSchema = z.object({
+  email: z.string().trim().email({ message: "Invalid email address" }).max(255),
+  password: z.string().min(6, { message: "Password must be at least 6 characters" }).max(100),
+  fullName: z.string().trim().max(100, { message: "Name must be less than 100 characters" }).optional(),
+  role: z.enum(['user', 'agent', 'admin']).optional()
+});
 
 type UserRole = Database['public']['Enums']['app_role'];
 
@@ -54,6 +63,14 @@ export default function UserManagement() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<UserRole>("user");
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    email: '',
+    password: '',
+    fullName: '',
+    role: 'user' as UserRole
+  });
+  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -133,6 +150,47 @@ export default function UserManagement() {
     }
   };
 
+  const handleCreateUser = async () => {
+    try {
+      const validation = createUserSchema.safeParse(createForm);
+      if (!validation.success) {
+        toast.error(validation.error.errors[0].message);
+        return;
+      }
+
+      setIsCreating(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
+
+      const { error } = await supabase.functions.invoke('create-user', {
+        body: {
+          email: createForm.email,
+          password: createForm.password,
+          fullName: createForm.fullName,
+          role: createForm.role
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+      
+      if (error) throw error;
+
+      toast.success('User created successfully');
+      setIsCreateDialogOpen(false);
+      setCreateForm({ email: '', password: '', fullName: '', role: 'user' });
+      fetchUsers();
+    } catch (error: any) {
+      console.error('Error creating user:', error);
+      toast.error(error.message || 'Failed to create user');
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   const handleDeleteUser = async (user: User) => {
     if (!confirm(`Are you sure you want to delete ${user.email}?`)) return;
 
@@ -174,6 +232,10 @@ export default function UserManagement() {
             Manage user accounts and permissions
           </p>
         </div>
+        <Button onClick={() => setIsCreateDialogOpen(true)}>
+          <UserPlus className="h-4 w-4 mr-2" />
+          Create User
+        </Button>
       </div>
 
       <Card>
@@ -302,6 +364,82 @@ export default function UserManagement() {
             </Button>
             <Button onClick={handleAssignRole}>
               Assign Role
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New User</DialogTitle>
+            <DialogDescription>
+              Create a new user account with email and password
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="create-email">Email *</Label>
+              <Input
+                id="create-email"
+                type="email"
+                placeholder="user@example.com"
+                value={createForm.email}
+                onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+                disabled={isCreating}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-password">Password *</Label>
+              <Input
+                id="create-password"
+                type="password"
+                placeholder="••••••••"
+                value={createForm.password}
+                onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
+                disabled={isCreating}
+              />
+              <p className="text-xs text-muted-foreground">Minimum 6 characters</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-name">Full Name</Label>
+              <Input
+                id="create-name"
+                type="text"
+                placeholder="John Doe"
+                value={createForm.fullName}
+                onChange={(e) => setCreateForm({ ...createForm, fullName: e.target.value })}
+                disabled={isCreating}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-role">Role</Label>
+              <Select 
+                value={createForm.role} 
+                onValueChange={(value) => setCreateForm({ ...createForm, role: value as UserRole })}
+                disabled={isCreating}
+              >
+                <SelectTrigger id="create-role">
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">User</SelectItem>
+                  <SelectItem value="agent">Agent</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsCreateDialogOpen(false)}
+              disabled={isCreating}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleCreateUser} disabled={isCreating}>
+              {isCreating ? 'Creating...' : 'Create User'}
             </Button>
           </DialogFooter>
         </DialogContent>
