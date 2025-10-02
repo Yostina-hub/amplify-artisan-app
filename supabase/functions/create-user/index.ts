@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
     // Determine if super admin (no company) or company admin
     const isSuperAdmin = !adminRole.company_id;
     
-    const { email, password, fullName, role, companyId } = await req.json();
+    const { email, fullName, role, companyId } = await req.json();
     const targetCompanyId = companyId || profile?.company_id;
 
     // Company admins can only create users for their own company
@@ -79,17 +79,16 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (!email || !password) {
+    if (!email) {
       return new Response(
-        JSON.stringify({ error: 'Email and password are required' }),
+        JSON.stringify({ error: 'Email is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Create the user
+    // Create the user without password - they'll set it via email link
     const { data: newUser, error: createError } = await supabaseClient.auth.admin.createUser({
       email,
-      password,
       email_confirm: true,
       user_metadata: {
         full_name: fullName || ''
@@ -143,8 +142,41 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Generate password setup link
+    const { data: resetData, error: resetError } = await supabaseClient.auth.admin.generateLink({
+      type: 'recovery',
+      email: email,
+    });
+
+    if (resetError) {
+      console.error('Error generating password setup link:', resetError);
+    }
+
+    // Send welcome email with password setup link
+    try {
+      const { error: emailError } = await supabaseClient.functions.invoke('send-user-welcome-email', {
+        body: {
+          email: email,
+          fullName: fullName,
+          passwordSetupLink: resetData?.properties?.action_link || '',
+          companyId: targetCompanyId
+        }
+      });
+
+      if (emailError) {
+        console.error('Error sending welcome email:', emailError);
+        // Don't fail the user creation if email fails
+      }
+    } catch (emailErr) {
+      console.error('Failed to send welcome email:', emailErr);
+    }
+
     return new Response(
-      JSON.stringify({ success: true, user: newUser.user }),
+      JSON.stringify({ 
+        success: true, 
+        user: newUser.user,
+        message: 'User created successfully. Welcome email sent with password setup instructions.'
+      }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 

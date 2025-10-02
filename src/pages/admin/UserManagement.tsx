@@ -41,7 +41,6 @@ import { z } from "zod";
 
 const createUserSchema = z.object({
   email: z.string().trim().email({ message: "Invalid email address" }).max(255),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }).max(100),
   fullName: z.string().trim().max(100, { message: "Name must be less than 100 characters" }).optional(),
   role: z.enum(['user', 'agent', 'admin']).optional()
 });
@@ -74,7 +73,6 @@ export default function UserManagement() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [createForm, setCreateForm] = useState({
     email: '',
-    password: '',
     fullName: '',
     role: 'user' as UserRole,
     companyId: ''
@@ -233,7 +231,6 @@ export default function UserManagement() {
       const { error } = await supabase.functions.invoke('create-user', {
         body: {
           email: createForm.email,
-          password: createForm.password,
           fullName: createForm.fullName,
           role: createForm.role,
           companyId: createForm.companyId || (isSuperAdmin ? null : userCompanyId)
@@ -245,9 +242,9 @@ export default function UserManagement() {
       
       if (error) throw error;
 
-      toast.success('User created successfully');
+      toast.success('User created successfully. Welcome email sent with password setup instructions.');
       setIsCreateDialogOpen(false);
-      setCreateForm({ email: '', password: '', fullName: '', role: 'user', companyId: '' });
+      setCreateForm({ email: '', fullName: '', role: 'user', companyId: '' });
       fetchUsers();
     } catch (error: any) {
       console.error('Error creating user:', error);
@@ -474,7 +471,7 @@ export default function UserManagement() {
           <DialogHeader>
             <DialogTitle>Create New User</DialogTitle>
             <DialogDescription>
-              Create a new user account with email and password
+              User will receive an email with instructions to set up their password
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -488,18 +485,6 @@ export default function UserManagement() {
                 onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
                 disabled={isCreating}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="create-password">Password *</Label>
-              <Input
-                id="create-password"
-                type="password"
-                placeholder="••••••••"
-                value={createForm.password}
-                onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
-                disabled={isCreating}
-              />
-              <p className="text-xs text-muted-foreground">Minimum 6 characters</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="create-name">Full Name</Label>
