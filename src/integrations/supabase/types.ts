@@ -193,6 +193,69 @@ export type Database = {
         }
         Relationships: []
       }
+      company_platform_configs: {
+        Row: {
+          api_key: string | null
+          api_secret: string | null
+          client_id: string | null
+          client_secret: string | null
+          company_id: string
+          config: Json | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          platform_id: string
+          redirect_url: string | null
+          updated_at: string | null
+          webhook_url: string | null
+        }
+        Insert: {
+          api_key?: string | null
+          api_secret?: string | null
+          client_id?: string | null
+          client_secret?: string | null
+          company_id: string
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          platform_id: string
+          redirect_url?: string | null
+          updated_at?: string | null
+          webhook_url?: string | null
+        }
+        Update: {
+          api_key?: string | null
+          api_secret?: string | null
+          client_id?: string | null
+          client_secret?: string | null
+          company_id?: string
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          platform_id?: string
+          redirect_url?: string | null
+          updated_at?: string | null
+          webhook_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_platform_configs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_platform_configs_platform_id_fkey"
+            columns: ["platform_id"]
+            isOneToOne: false
+            referencedRelation: "social_platforms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_configurations: {
         Row: {
           company_id: string | null

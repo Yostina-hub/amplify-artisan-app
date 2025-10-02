@@ -30,6 +30,7 @@ import CompanyApplication from "./pages/CompanyApplication";
 import CompanyManagement from "./pages/admin/CompanyManagement";
 import SocialPlatformManagement from "./pages/admin/SocialPlatformManagement";
 import SocialMediaCredentials from "./pages/SocialMediaCredentials";
+import CompanyPlatformSettings from "./pages/CompanyPlatformSettings";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ const App = () => (
             <Route path="/admin/email-settings" element={<ProtectedRoute requiredRole="admin"><Layout><EmailSettings /></Layout></ProtectedRoute>} />
             <Route path="/admin/social-platforms" element={<ProtectedRoute requiredRole="admin"><Layout><SocialPlatformManagement /></Layout></ProtectedRoute>} />
             <Route path="/company/email-settings" element={<ProtectedRoute><Layout><CompanyEmailSettings /></Layout></ProtectedRoute>} />
+            <Route path="/company/platform-settings" element={<ProtectedRoute><Layout><CompanyPlatformSettings /></Layout></ProtectedRoute>} />
             <Route path="/social-accounts" element={<ProtectedRoute><Layout><SocialMediaCredentials /></Layout></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
           </Routes>

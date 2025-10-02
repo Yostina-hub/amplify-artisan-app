@@ -1,4 +1,4 @@
-import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2, Mail, Link2, Globe } from "lucide-react";
+import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2, Mail, Link2, Globe, Key } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -26,6 +26,7 @@ const items = [
   { title: "Social Accounts", url: "/social-accounts", icon: Link2 },
   { title: "Settings", url: "/settings", icon: Settings },
   { title: "Company Email", url: "/company/email-settings", icon: Mail },
+  { title: "Platform API Settings", url: "/company/platform-settings", icon: Key },
 ];
 
 const agentItems = [
