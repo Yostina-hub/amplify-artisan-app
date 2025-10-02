@@ -29,15 +29,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Fetch roles when user changes
+        // Fetch roles when user changes (defer to avoid deadlocks)
         if (session?.user) {
-          await fetchUserRoles(session.user.id);
+          setTimeout(() => {
+            fetchUserRoles(session.user!.id);
+          }, 0);
         } else {
           setRoles([]);
+          setLoading(false);
         }
       }
     );
@@ -49,14 +52,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       if (session?.user) {
         await fetchUserRoles(session.user.id);
+      } else {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   const fetchUserRoles = async (userId: string) => {
+    setLoading(true);
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
@@ -64,10 +69,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     
     if (error) {
       console.error('Error fetching roles:', error);
+      setRoles([]);
+      setLoading(false);
       return;
     }
     
     setRoles(data?.map(r => r.role as UserRole) || []);
+    setLoading(false);
   };
 
   const hasRole = (role: UserRole) => roles.includes(role);

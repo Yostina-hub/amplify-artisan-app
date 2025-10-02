@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
 const PendingApproval = () => {
-  const { signOut, user } = useAuth();
+  const { signOut, user, roles } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -13,6 +13,12 @@ const PendingApproval = () => {
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute("content", "Account pending approval for access to Amplify Artisan dashboard");
   }, []);
+
+  useEffect(() => {
+    if (roles.length > 0) {
+      navigate('/');
+    }
+  }, [roles, navigate]);
 
   const handleSignOut = async () => {
     await signOut();
