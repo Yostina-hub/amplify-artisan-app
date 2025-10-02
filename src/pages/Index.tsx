@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BarChart3, Calendar, MessageSquare, TrendingUp, Zap, Shield } from "lucide-react";
+import { Calendar, MessageSquare, TrendingUp, Zap, Shield, ChevronDown, Instagram, Facebook, Linkedin, Twitter, Youtube, PieChart, BarChart3, Sparkles } from "lucide-react";
 import { useEffect } from "react";
 
 const Index = () => {
@@ -14,8 +14,12 @@ const Index = () => {
     }
   }, [user, navigate]);
 
-  const trustedCompanies = [
-    "Adobe", "Microsoft", "Salesforce", "Amazon", "Google"
+  const socialPlatforms = [
+    { icon: Instagram, color: "#E4405F" },
+    { icon: Facebook, color: "#1877F2" },
+    { icon: Linkedin, color: "#0A66C2" },
+    { icon: Twitter, color: "#000000" },
+    { icon: Youtube, color: "#FF0000" },
   ];
 
   const features = [
@@ -54,95 +58,142 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="border-b border-border">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+      <nav className="border-b border-border bg-white">
+        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <MessageSquare className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold">SocialHub</span>
+            <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center">
+              <MessageSquare className="h-6 w-6 text-white" />
+            </div>
+            <span className="text-2xl font-bold text-accent">SocialHub</span>
           </div>
-          <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-sm font-medium hover:text-primary transition-colors">Features</a>
-            <a href="#pricing" className="text-sm font-medium hover:text-primary transition-colors">Pricing</a>
-            <a href="#resources" className="text-sm font-medium hover:text-primary transition-colors">Resources</a>
-            <Button variant="ghost" onClick={() => navigate("/auth")}>Log in</Button>
-            <Button onClick={() => navigate("/auth")}>Start your free trial</Button>
+          <div className="hidden lg:flex items-center gap-8">
+            <button className="text-sm font-medium text-foreground hover:text-accent transition-colors flex items-center gap-1">
+              Top features <ChevronDown className="h-4 w-4" />
+            </button>
+            <a href="#integrations" className="text-sm font-medium text-foreground hover:text-accent transition-colors">Integrations</a>
+            <button className="text-sm font-medium text-foreground hover:text-accent transition-colors flex items-center gap-1">
+              Industries <ChevronDown className="h-4 w-4" />
+            </button>
+            <button className="text-sm font-medium text-foreground hover:text-accent transition-colors flex items-center gap-1">
+              Resources <ChevronDown className="h-4 w-4" />
+            </button>
+            <a href="#pricing" className="text-sm font-medium text-foreground hover:text-accent transition-colors">Pricing</a>
+            <a href="#enterprise" className="text-sm font-medium text-foreground hover:text-accent transition-colors">Enterprise</a>
+          </div>
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" onClick={() => navigate("/auth")} className="text-sm font-medium">
+              Log in
+            </Button>
+            <Button onClick={() => navigate("/auth")} className="text-sm font-semibold">
+              Start your free trial
+            </Button>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <div className="container mx-auto px-4 py-20 lg:py-32">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-            Drive real business impact with{" "}
-            <span className="text-primary">real-time social insights.</span>
-            <br />
-            <span className="text-foreground">SocialHub makes it easy.</span>
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Manage all your social media channels, schedule content, analyze performance, 
-            and engage with your audience—all from one powerful platform.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
-            <Button
-              size="lg"
-              onClick={() => navigate("/auth")}
-              className="text-lg px-8 py-6"
-            >
-              Start your free trial
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => navigate("/auth")}
-              className="text-lg px-8 py-6"
-            >
-              Request a demo
-            </Button>
-          </div>
-
-          {/* Trust Badges */}
-          <div className="pt-16 space-y-4">
-            <p className="text-sm text-muted-foreground uppercase tracking-wider">
-              Trusted by leading brands worldwide
-            </p>
-            <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
-              {trustedCompanies.map((company, index) => (
-                <div key={index} className="text-2xl font-semibold">
-                  {company}
-                </div>
-              ))}
+      <div className="bg-white">
+        <div className="container mx-auto px-6 py-16 lg:py-20">
+          <div className="max-w-5xl mx-auto text-center space-y-8">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight">
+              <span className="text-foreground">Drive real business impact</span>
+              <br />
+              <span className="text-foreground">with real-time social insights.</span>
+              <br />
+              <span className="text-accent">SocialHub makes it easy.</span>
+            </h1>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+              <Button
+                size="lg"
+                onClick={() => navigate("/auth")}
+                className="text-base font-semibold px-8 h-12 rounded-md"
+              >
+                Start your free trial
+              </Button>
+              <Button
+                size="lg"
+                variant="link"
+                onClick={() => navigate("/auth")}
+                className="text-base font-semibold underline text-foreground hover:text-accent"
+              >
+                Request a demo
+              </Button>
             </div>
           </div>
         </div>
       </div>
 
       {/* Hero Image Section */}
-      <div className="container mx-auto px-4 pb-20">
-        <div className="relative mx-auto max-w-6xl">
-          <div className="aspect-video rounded-2xl bg-gradient-to-br from-primary/10 via-secondary/20 to-accent/10 border-2 border-border shadow-2xl overflow-hidden">
-            <div className="w-full h-full flex items-center justify-center p-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-                <div className="bg-card/80 backdrop-blur rounded-lg p-6 border border-border">
-                  <div className="flex items-center gap-2 mb-4">
-                    <BarChart3 className="h-6 w-6 text-primary" />
-                    <h3 className="font-semibold">Analytics Dashboard</h3>
+      <div className="bg-gradient-to-b from-pink-50 to-white">
+        <div className="container mx-auto px-6 py-12">
+          <div className="relative mx-auto max-w-7xl">
+            <div className="grid lg:grid-cols-2 gap-8 items-center">
+              {/* Left side - Illustration placeholder */}
+              <div className="relative">
+                <div className="absolute -left-8 top-20 bg-white rounded-xl shadow-lg p-4 w-48">
+                  <div className="flex items-center gap-2 mb-2">
+                    <PieChart className="h-5 w-5 text-accent" />
+                    <span className="text-xs font-semibold">Share of sentiment</span>
                   </div>
-                  <div className="space-y-3">
-                    <div className="h-2 bg-primary/20 rounded w-full"></div>
-                    <div className="h-2 bg-primary/20 rounded w-4/5"></div>
-                    <div className="h-2 bg-primary/20 rounded w-3/5"></div>
+                  <div className="w-32 h-32 mx-auto">
+                    <div className="w-full h-full rounded-full border-8 border-accent"></div>
                   </div>
                 </div>
-                <div className="bg-card/80 backdrop-blur rounded-lg p-6 border border-border">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Calendar className="h-6 w-6 text-primary" />
-                    <h3 className="font-semibold">Content Calendar</h3>
+                
+                <div className="bg-gradient-to-br from-orange-100 to-pink-100 rounded-2xl p-8 aspect-square flex items-center justify-center">
+                  <div className="text-center">
+                    <MessageSquare className="h-24 w-24 mx-auto text-accent mb-4" />
+                    <p className="text-sm text-muted-foreground">Dashboard Preview</p>
                   </div>
-                  <div className="space-y-3">
-                    <div className="h-2 bg-primary/20 rounded w-full"></div>
-                    <div className="h-2 bg-primary/20 rounded w-4/5"></div>
-                    <div className="h-2 bg-primary/20 rounded w-3/5"></div>
+                </div>
+
+                <div className="absolute -right-4 top-8 bg-white rounded-xl shadow-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <BarChart3 className="h-5 w-5 text-primary" />
+                    <span className="text-sm font-semibold">6,783</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Impressions</p>
+                </div>
+              </div>
+
+              {/* Right side - Feature cards */}
+              <div className="space-y-4">
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm font-semibold">Publish to</span>
+                  </div>
+                  <div className="flex gap-3">
+                    {socialPlatforms.map((platform, index) => (
+                      <div key={index} className="w-10 h-10 rounded-full flex items-center justify-center bg-secondary">
+                        <platform.icon className="h-5 w-5" style={{ color: platform.color }} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
+                      <Sparkles className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Start from scratch</h3>
+                      <p className="text-sm text-muted-foreground">Generate new captions to engage, delight, or sell</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <div className="flex items-center gap-4 border-b pb-3 mb-3">
+                    <button className="px-4 py-2 text-sm font-semibold border-b-2 border-foreground">Calendar</button>
+                    <button className="px-4 py-2 text-sm text-muted-foreground">Drafts</button>
+                    <button className="px-4 py-2 text-sm text-muted-foreground">Content</button>
+                    <button className="px-4 py-2 text-sm text-muted-foreground">Approvals</button>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[1, 2, 3].map((day) => (
+                      <div key={day} className="aspect-square bg-gradient-to-br from-pink-100 to-purple-100 rounded-lg"></div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -152,13 +203,13 @@ const Index = () => {
       </div>
 
       {/* Features Section */}
-      <div id="features" className="bg-secondary/30 py-20">
-        <div className="container mx-auto px-4">
+      <div id="features" className="bg-white py-20">
+        <div className="container mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-foreground">
               Everything you need to succeed on social
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Powerful features designed to help you grow your brand and engage your audience
             </p>
           </div>
@@ -166,13 +217,13 @@ const Index = () => {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="p-8 rounded-xl bg-card border border-border hover:shadow-lg transition-all hover:-translate-y-1"
+                className="p-8 rounded-xl bg-white border border-border hover:shadow-xl transition-all hover:-translate-y-1"
               >
-                <div className="h-14 w-14 rounded-lg bg-primary/10 flex items-center justify-center mb-6">
-                  <feature.icon className="h-7 w-7 text-primary" />
+                <div className="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center mb-6">
+                  <feature.icon className="h-6 w-6 text-accent" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+                <h3 className="text-lg font-bold mb-3 text-foreground">{feature.title}</h3>
+                <p className="text-muted-foreground leading-relaxed text-sm">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -180,23 +231,22 @@ const Index = () => {
       </div>
 
       {/* CTA Section */}
-      <div className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center space-y-8 bg-primary/5 rounded-2xl p-12 border border-primary/20">
-            <h2 className="text-4xl md:text-5xl font-bold">
+      <div className="bg-gradient-to-b from-pink-50 to-white py-20">
+        <div className="container mx-auto px-6">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
               Ready to transform your social media?
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-lg text-muted-foreground">
               Join thousands of businesses already growing with SocialHub
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
               <Button
                 size="lg"
                 onClick={() => navigate("/auth")}
-                className="text-lg px-8 py-6"
+                className="text-base font-semibold px-8 h-12"
               >
                 Get started for free
-                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </div>
           </div>
@@ -204,17 +254,19 @@ const Index = () => {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-border py-12">
-        <div className="container mx-auto px-4">
+      <footer className="bg-white border-t border-border py-12">
+        <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2">
-              <MessageSquare className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold">SocialHub</span>
+              <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+                <MessageSquare className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-xl font-bold text-accent">SocialHub</span>
             </div>
             <div className="flex gap-6 text-sm text-muted-foreground">
-              <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
-              <a href="#" className="hover:text-foreground transition-colors">Terms</a>
-              <a href="#" className="hover:text-foreground transition-colors">Contact</a>
+              <a href="#" className="hover:text-accent transition-colors">Privacy</a>
+              <a href="#" className="hover:text-accent transition-colors">Terms</a>
+              <a href="#" className="hover:text-accent transition-colors">Contact</a>
             </div>
           </div>
         </div>
