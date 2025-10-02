@@ -412,31 +412,29 @@ export default function CompanyManagement() {
                             </>
                           )}
                           {company.status === "approved" && (
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() => handleSuspend(company)}
-                            >
-                              <Pause className="mr-2 h-4 w-4" />
-                              Suspend
-                            </DropdownMenuItem>
-                          )}
-                          {(company.status === "approved" || company.status === "rejected") && (
                             <>
                               <DropdownMenuItem
-                                onClick={() => handleResendEmail(company)}
+                                className="text-destructive"
+                                onClick={() => handleSuspend(company)}
                               >
-                                <Mail className="mr-2 h-4 w-4" />
-                                Resend Email
+                                <Pause className="mr-2 h-4 w-4" />
+                                Suspend
                               </DropdownMenuItem>
-                              {company.status === "approved" && (
-                                <DropdownMenuItem
-                                  onClick={() => handleViewAdmin(company)}
-                                >
-                                  <UserCog className="mr-2 h-4 w-4" />
-                                  Manage Admin
-                                </DropdownMenuItem>
-                              )}
+                              <DropdownMenuItem
+                                onClick={() => handleViewAdmin(company)}
+                              >
+                                <UserCog className="mr-2 h-4 w-4" />
+                                Manage Admin
+                              </DropdownMenuItem>
                             </>
+                          )}
+                          {(company.status === "approved" || company.status === "rejected") && (
+                            <DropdownMenuItem
+                              onClick={() => handleResendEmail(company)}
+                            >
+                              <Mail className="mr-2 h-4 w-4" />
+                              Resend Email
+                            </DropdownMenuItem>
                           )}
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
