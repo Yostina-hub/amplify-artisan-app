@@ -137,9 +137,19 @@ export default function UserManagement() {
     if (!confirm(`Are you sure you want to delete ${user.email}?`)) return;
 
     try {
-      // Delete from auth.users (cascade will handle profiles and user_roles)
-      const { error } = await supabase.auth.admin.deleteUser(user.id);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
 
+      const { error } = await supabase.functions.invoke('delete-user', {
+        body: { userId: user.id },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+      
       if (error) throw error;
 
       toast.success('User deleted successfully');
