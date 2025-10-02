@@ -754,6 +754,57 @@ export type Database = {
           },
         ]
       }
+      social_platforms: {
+        Row: {
+          api_base_url: string | null
+          config: Json | null
+          created_at: string | null
+          display_name: string
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          oauth_authorize_url: string | null
+          oauth_scopes: string | null
+          oauth_token_url: string | null
+          requires_api_key: boolean | null
+          requires_oauth: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          api_base_url?: string | null
+          config?: Json | null
+          created_at?: string | null
+          display_name: string
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          oauth_authorize_url?: string | null
+          oauth_scopes?: string | null
+          oauth_token_url?: string | null
+          requires_api_key?: boolean | null
+          requires_oauth?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          api_base_url?: string | null
+          config?: Json | null
+          created_at?: string | null
+          display_name?: string
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          oauth_authorize_url?: string | null
+          oauth_scopes?: string | null
+          oauth_token_url?: string | null
+          requires_api_key?: boolean | null
+          requires_oauth?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       tracked_keywords: {
         Row: {
           company_id: string | null

@@ -28,6 +28,8 @@ import NotFound from "./pages/NotFound";
 import PendingApproval from "./pages/PendingApproval";
 import CompanyApplication from "./pages/CompanyApplication";
 import CompanyManagement from "./pages/admin/CompanyManagement";
+import SocialPlatformManagement from "./pages/admin/SocialPlatformManagement";
+import SocialMediaCredentials from "./pages/SocialMediaCredentials";
 
 const queryClient = new QueryClient();
 
@@ -57,9 +59,11 @@ const App = () => (
             <Route path="/admin/companies" element={<ProtectedRoute requiredRole="admin"><Layout><CompanyManagement /></Layout></ProtectedRoute>} />
             <Route path="/admin/users" element={<ProtectedRoute requiredRole="admin"><Layout><UserManagement /></Layout></ProtectedRoute>} />
             <Route path="/admin/moderation" element={<ProtectedRoute requiredRole="admin"><Layout><ContentModeration /></Layout></ProtectedRoute>} />
-          <Route path="/admin/settings" element={<ProtectedRoute requiredRole="admin"><Layout><SystemSettings /></Layout></ProtectedRoute>} />
-          <Route path="/admin/email-settings" element={<ProtectedRoute requiredRole="admin"><Layout><EmailSettings /></Layout></ProtectedRoute>} />
-          <Route path="/company/email-settings" element={<ProtectedRoute><Layout><CompanyEmailSettings /></Layout></ProtectedRoute>} />
+            <Route path="/admin/settings" element={<ProtectedRoute requiredRole="admin"><Layout><SystemSettings /></Layout></ProtectedRoute>} />
+            <Route path="/admin/email-settings" element={<ProtectedRoute requiredRole="admin"><Layout><EmailSettings /></Layout></ProtectedRoute>} />
+            <Route path="/admin/social-platforms" element={<ProtectedRoute requiredRole="admin"><Layout><SocialPlatformManagement /></Layout></ProtectedRoute>} />
+            <Route path="/company/email-settings" element={<ProtectedRoute><Layout><CompanyEmailSettings /></Layout></ProtectedRoute>} />
+            <Route path="/social-accounts" element={<ProtectedRoute><Layout><SocialMediaCredentials /></Layout></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

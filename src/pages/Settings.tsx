@@ -6,8 +6,9 @@ import { Switch } from "@/components/ui/switch";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Twitter, Facebook, Instagram, Linkedin, Youtube } from "lucide-react";
+import * as Icons from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useNavigate } from "react-router-dom";
 
 type SocialAccount = {
   id: string;
@@ -16,26 +17,39 @@ type SocialAccount = {
   is_active: boolean;
 };
 
+type Platform = {
+  id: string;
+  name: string;
+  display_name: string;
+  icon_name: string | null;
+};
+
 export default function Settings() {
   const [accounts, setAccounts] = useState<SocialAccount[]>([]);
+  const [platforms, setPlatforms] = useState<Platform[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetchAccounts();
+    fetchData();
   }, []);
 
-  const fetchAccounts = async () => {
+  const fetchData = async () => {
     try {
-      const { data, error } = await supabase
-        .from('social_media_accounts')
-        .select('*');
+      const [accountsRes, platformsRes] = await Promise.all([
+        supabase.from('social_media_accounts').select('*'),
+        supabase.from('social_platforms').select('id, name, display_name, icon_name').eq('is_active', true),
+      ]);
       
-      if (error) throw error;
-      setAccounts(data || []);
+      if (accountsRes.error) throw accountsRes.error;
+      if (platformsRes.error) throw platformsRes.error;
+      
+      setAccounts(accountsRes.data || []);
+      setPlatforms(platformsRes.data || []);
     } catch (error: any) {
       toast({
-        title: "Error fetching accounts",
+        title: "Error loading data",
         description: error.message,
         variant: "destructive",
       });
@@ -48,7 +62,7 @@ export default function Settings() {
     try {
       const { error } = await supabase
         .from('social_media_accounts')
-        .update({ is_active: false })
+        .delete()
         .eq('id', accountId);
       
       if (error) throw error;
@@ -57,7 +71,7 @@ export default function Settings() {
         title: "Account disconnected",
         description: "Your account has been disconnected successfully",
       });
-      fetchAccounts();
+      fetchData();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -68,17 +82,12 @@ export default function Settings() {
   };
 
   const getPlatformIcon = (platform: string) => {
-    switch (platform.toLowerCase()) {
-      case 'twitter': return <Twitter className="h-5 w-5" />;
-      case 'facebook': return <Facebook className="h-5 w-5" />;
-      case 'instagram': return <Instagram className="h-5 w-5" />;
-      case 'linkedin': return <Linkedin className="h-5 w-5" />;
-      case 'youtube': return <Youtube className="h-5 w-5" />;
-      default: return null;
-    }
+    const platformData = platforms.find(p => p.name.toLowerCase() === platform.toLowerCase());
+    if (!platformData?.icon_name) return null;
+    
+    const Icon = (Icons as any)[platformData.icon_name];
+    return Icon ? <Icon className="h-5 w-5" /> : null;
   };
-
-  const platforms = ['Twitter', 'Facebook', 'Instagram', 'LinkedIn', 'YouTube', 'TikTok'];
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in-50 duration-500">
@@ -115,18 +124,29 @@ export default function Settings() {
         <CardContent className="space-y-4">
           {loading ? (
             <p>Loading accounts...</p>
+          ) : platforms.length === 0 ? (
+            <div className="text-center py-4">
+              <p className="text-muted-foreground">No platforms available</p>
+              <Button 
+                variant="link" 
+                onClick={() => navigate('/social-accounts')}
+                className="mt-2"
+              >
+                Manage Social Accounts
+              </Button>
+            </div>
           ) : (
             platforms.map((platform) => {
               const connectedAccount = accounts.find(
-                (acc) => acc.platform.toLowerCase() === platform.toLowerCase() && acc.is_active
+                (acc) => acc.platform.toLowerCase() === platform.name.toLowerCase() && acc.is_active
               );
               
               return (
-                <div key={platform} className="flex items-center justify-between p-4 border rounded-lg">
+                <div key={platform.id} className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center gap-3">
-                    {getPlatformIcon(platform)}
+                    {getPlatformIcon(platform.name)}
                     <div>
-                      <span className="font-medium">{platform}</span>
+                      <span className="font-medium">{platform.display_name}</span>
                       {connectedAccount && (
                         <p className="text-sm text-muted-foreground">@{connectedAccount.account_name}</p>
                       )}
@@ -141,30 +161,12 @@ export default function Settings() {
                       Disconnect
                     </Button>
                   ) : (
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button size="sm">Connect</Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Connect {platform}</DialogTitle>
-                          <DialogDescription>
-                            Enter your {platform} account credentials to connect
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4 pt-4">
-                          <div className="space-y-2">
-                            <Label>Account Username</Label>
-                            <Input placeholder={`@username`} />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Access Token</Label>
-                            <Input type="password" placeholder="Paste your API token here" />
-                          </div>
-                          <Button className="w-full">Connect Account</Button>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+                    <Button 
+                      size="sm"
+                      onClick={() => navigate('/social-accounts')}
+                    >
+                      Connect
+                    </Button>
                   )}
                 </div>
               );
