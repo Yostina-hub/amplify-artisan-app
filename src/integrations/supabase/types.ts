@@ -722,6 +722,65 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_transactions: {
+        Row: {
+          amount: number
+          created_at: string | null
+          currency: string | null
+          id: string
+          metadata: Json | null
+          payment_date: string | null
+          payment_method: string
+          phone_number: string | null
+          status: string | null
+          subscription_request_id: string | null
+          transaction_reference: string | null
+          updated_at: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          metadata?: Json | null
+          payment_date?: string | null
+          payment_method: string
+          phone_number?: string | null
+          status?: string | null
+          subscription_request_id?: string | null
+          transaction_reference?: string | null
+          updated_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          metadata?: Json | null
+          payment_date?: string | null
+          payment_method?: string
+          phone_number?: string | null
+          status?: string | null
+          subscription_request_id?: string | null
+          transaction_reference?: string | null
+          updated_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_subscription_request_id_fkey"
+            columns: ["subscription_request_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pricing_plans: {
         Row: {
           billing_period: string | null
@@ -1156,6 +1215,71 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_requests: {
+        Row: {
+          company_name: string | null
+          created_at: string | null
+          email: string
+          full_name: string
+          id: string
+          industry: string | null
+          message: string | null
+          payment_instructions: string | null
+          payment_method: string | null
+          phone: string
+          pricing_plan_id: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string | null
+          email: string
+          full_name: string
+          id?: string
+          industry?: string | null
+          message?: string | null
+          payment_instructions?: string | null
+          payment_method?: string | null
+          phone: string
+          pricing_plan_id?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          industry?: string | null
+          message?: string | null
+          payment_instructions?: string | null
+          payment_method?: string | null
+          phone?: string
+          pricing_plan_id?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_requests_pricing_plan_id_fkey"
+            columns: ["pricing_plan_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tracked_keywords: {
         Row: {
           company_id: string | null
@@ -1324,6 +1448,60 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_subscriptions: {
+        Row: {
+          auto_renew: boolean | null
+          created_at: string | null
+          end_date: string | null
+          id: string
+          pricing_plan_id: string | null
+          start_date: string | null
+          status: string | null
+          subscription_request_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          auto_renew?: boolean | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          pricing_plan_id?: string | null
+          start_date?: string | null
+          status?: string | null
+          subscription_request_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          auto_renew?: boolean | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          pricing_plan_id?: string | null
+          start_date?: string | null
+          status?: string | null
+          subscription_request_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_pricing_plan_id_fkey"
+            columns: ["pricing_plan_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_subscriptions_subscription_request_id_fkey"
+            columns: ["subscription_request_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_requests"
             referencedColumns: ["id"]
           },
         ]

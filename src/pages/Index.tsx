@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Calendar, MessageSquare, TrendingUp, Zap, Shield, Instagram, Facebook, Linkedin, Twitter, Youtube, PieChart, BarChart3, Sparkles, CheckCircle2, Star } from "lucide-react";
@@ -5,11 +6,14 @@ import { IndustriesDropdown } from "@/components/IndustriesDropdown";
 import { FeaturesDropdown } from "@/components/FeaturesDropdown";
 import { ResourcesDropdown } from "@/components/ResourcesDropdown";
 import { MobileMenu } from "@/components/MobileMenu";
+import { SubscriptionForm } from "@/components/SubscriptionForm";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const navigate = useNavigate();
+  const [showSubscriptionForm, setShowSubscriptionForm] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = useState<string>();
 
   const { data: pricingPlans, isLoading: pricingLoading } = useQuery({
     queryKey: ['pricing-plans'],
@@ -24,6 +28,11 @@ const Index = () => {
       return data;
     },
   });
+
+  const handleSubscribeClick = (planId: string) => {
+    setSelectedPlanId(planId);
+    setShowSubscriptionForm(true);
+  };
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -334,7 +343,7 @@ const Index = () => {
                     ))}
                   </ul>
                   <Button
-                    onClick={() => navigate("/auth")}
+                    onClick={() => handleSubscribeClick(plan.id)}
                     variant={plan.is_popular ? "default" : "outline"}
                     className="w-full"
                   >
@@ -432,6 +441,13 @@ const Index = () => {
           </div>
         </div>
       </footer>
+
+      {/* Subscription Form Modal */}
+      <SubscriptionForm 
+        open={showSubscriptionForm} 
+        onOpenChange={setShowSubscriptionForm}
+        selectedPlanId={selectedPlanId}
+      />
     </div>
   );
 };
