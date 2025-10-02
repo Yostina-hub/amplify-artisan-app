@@ -70,6 +70,8 @@ export default function UserManagement() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<UserRole>("user");
+  const [isRemoveRoleDialogOpen, setIsRemoveRoleDialogOpen] = useState(false);
+  const [roleToRemove, setRoleToRemove] = useState<UserRole | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [createForm, setCreateForm] = useState({
     email: '',
@@ -197,10 +199,21 @@ export default function UserManagement() {
         return;
       }
 
+      // Prepare role data with company_id if applicable
+      const roleData: any = { 
+        user_id: selectedUser.id, 
+        role: selectedRole 
+      };
+
+      // For company admins, associate the role with their company
+      if (!isSuperAdmin && userCompanyId) {
+        roleData.company_id = userCompanyId;
+      }
+
       // Insert new role
       const { error } = await supabase
         .from('user_roles')
-        .insert({ user_id: selectedUser.id, role: selectedRole });
+        .insert(roleData);
 
       if (error) throw error;
 
@@ -210,6 +223,28 @@ export default function UserManagement() {
     } catch (error) {
       console.error('Error assigning role:', error);
       toast.error('Failed to assign role');
+    }
+  };
+
+  const handleRemoveRole = async () => {
+    if (!selectedUser || !roleToRemove) return;
+
+    try {
+      const { error } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', selectedUser.id)
+        .eq('role', roleToRemove);
+
+      if (error) throw error;
+
+      toast.success('Role removed successfully');
+      setIsRemoveRoleDialogOpen(false);
+      setRoleToRemove(null);
+      fetchUsers();
+    } catch (error) {
+      console.error('Error removing role:', error);
+      toast.error('Failed to remove role');
     }
   };
 
@@ -379,8 +414,18 @@ export default function UserManagement() {
                       <div className="flex gap-1 flex-wrap">
                         {user.roles.length > 0 ? (
                           user.roles.map((role) => (
-                            <Badge key={role} variant="default">
-                              {role}
+                            <Badge 
+                              key={role} 
+                              variant="default"
+                              className="cursor-pointer hover:bg-destructive"
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setRoleToRemove(role);
+                                setIsRemoveRoleDialogOpen(true);
+                              }}
+                              title="Click to remove this role"
+                            >
+                              {role} ×
                             </Badge>
                           ))
                         ) : (
@@ -440,20 +485,35 @@ export default function UserManagement() {
           <DialogHeader>
             <DialogTitle>Assign Role</DialogTitle>
             <DialogDescription>
-              Assign a role to {selectedUser?.email}
+              Assign a new role to {selectedUser?.email}
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
-            <Select value={selectedRole} onValueChange={(value) => setSelectedRole(value as UserRole)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="user">User</SelectItem>
-                <SelectItem value="agent">Agent</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="space-y-4 py-4">
+            {selectedUser && selectedUser.roles.length > 0 && (
+              <div>
+                <Label className="text-sm text-muted-foreground">Current Roles:</Label>
+                <div className="flex gap-2 mt-2">
+                  {selectedUser.roles.map((role) => (
+                    <Badge key={role} variant="outline">
+                      {role}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div>
+              <Label>New Role</Label>
+              <Select value={selectedRole} onValueChange={(value) => setSelectedRole(value as UserRole)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">User</SelectItem>
+                  <SelectItem value="agent">Agent</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsRoleDialogOpen(false)}>
@@ -461,6 +521,31 @@ export default function UserManagement() {
             </Button>
             <Button onClick={handleAssignRole}>
               Assign Role
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isRemoveRoleDialogOpen} onOpenChange={setIsRemoveRoleDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remove Role</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to remove the "{roleToRemove}" role from {selectedUser?.email}?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setIsRemoveRoleDialogOpen(false);
+                setRoleToRemove(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleRemoveRole}>
+              Remove Role
             </Button>
           </DialogFooter>
         </DialogContent>
