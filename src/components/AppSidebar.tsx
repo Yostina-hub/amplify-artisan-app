@@ -38,8 +38,8 @@ const adminItems = [
   { title: "User Management", url: "/admin/users", icon: Users },
   { title: "Content Moderation", url: "/admin/moderation", icon: Flag },
   { title: "Social Platforms", url: "/admin/social-platforms", icon: Globe },
-  { title: "System Settings", url: "/admin/settings", icon: Cog },
   { title: "Email Settings", url: "/admin/email-settings", icon: Mail },
+  { title: "System Settings", url: "/admin/settings", icon: Cog },
 ];
 
 export function AppSidebar() {
