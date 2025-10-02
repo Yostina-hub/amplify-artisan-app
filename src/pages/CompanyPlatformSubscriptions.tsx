@@ -19,9 +19,13 @@ interface Platform {
 }
 
 interface Subscription {
+  id: string;
   platform_id: string;
   is_active: boolean;
   subscribed_at: string;
+  status: string;
+  reviewed_at: string | null;
+  rejection_reason: string | null;
 }
 
 export default function CompanyPlatformSubscriptions() {
@@ -109,19 +113,20 @@ export default function CompanyPlatformSubscriptions() {
         .insert([{
           company_id: companyId,
           platform_id: platformId,
-          is_active: true,
+          is_active: false,
+          status: 'pending',
         }]);
 
       if (error) throw error;
 
       toast({ 
-        title: "Subscribed successfully",
-        description: "You can now configure this platform in Platform Settings"
+        title: "Request submitted",
+        description: "Your subscription request has been sent to the admin for review"
       });
       fetchData();
     } catch (error: any) {
       toast({
-        title: "Error subscribing",
+        title: "Error submitting request",
         description: error.message,
         variant: "destructive",
       });
@@ -133,6 +138,41 @@ export default function CompanyPlatformSubscriptions() {
   const handleUnsubscribe = async (platformId: string) => {
     if (!companyId) return;
 
+    const subscription = subscriptions[platformId];
+    
+    // If still pending, allow deletion
+    if (subscription?.status === 'pending') {
+      const confirmed = window.confirm(
+        "Are you sure you want to cancel this subscription request?"
+      );
+
+      if (!confirmed) return;
+
+      try {
+        setSubscribing(platformId);
+
+        const { error } = await supabase
+          .from("company_platform_subscriptions")
+          .delete()
+          .eq("id", subscription.id);
+
+        if (error) throw error;
+
+        toast({ title: "Request cancelled" });
+        fetchData();
+      } catch (error: any) {
+        toast({
+          title: "Error cancelling request",
+          description: error.message,
+          variant: "destructive",
+        });
+      } finally {
+        setSubscribing(null);
+      }
+      return;
+    }
+
+    // For approved subscriptions
     const confirmed = window.confirm(
       "Are you sure you want to unsubscribe from this platform? This will deactivate all related configurations."
     );
@@ -170,7 +210,49 @@ export default function CompanyPlatformSubscriptions() {
   };
 
   const isSubscribed = (platformId: string) => {
-    return subscriptions[platformId]?.is_active === true;
+    const sub = subscriptions[platformId];
+    return sub?.status === 'approved' && sub?.is_active === true;
+  };
+
+  const isPending = (platformId: string) => {
+    return subscriptions[platformId]?.status === 'pending';
+  };
+
+  const isRejected = (platformId: string) => {
+    return subscriptions[platformId]?.status === 'rejected';
+  };
+
+  const getStatusBadge = (platformId: string) => {
+    const sub = subscriptions[platformId];
+    if (!sub) return null;
+
+    if (sub.status === 'pending') {
+      return (
+        <Badge variant="secondary" className="gap-1">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          Pending Review
+        </Badge>
+      );
+    }
+
+    if (sub.status === 'rejected') {
+      return (
+        <Badge variant="destructive" className="gap-1">
+          Rejected
+        </Badge>
+      );
+    }
+
+    if (sub.status === 'approved' && sub.is_active) {
+      return (
+        <Badge variant="default" className="gap-1">
+          <Check className="h-3 w-3" />
+          Active
+        </Badge>
+      );
+    }
+
+    return null;
   };
 
   if (loading) {
@@ -224,7 +306,10 @@ export default function CompanyPlatformSubscriptions() {
         {platforms.map((platform) => {
           const Icon = getPlatformIcon(platform.icon_name);
           const subscribed = isSubscribed(platform.id);
+          const pending = isPending(platform.id);
+          const rejected = isRejected(platform.id);
           const processing = subscribing === platform.id;
+          const hasSubscription = subscriptions[platform.id];
 
           return (
             <Card key={platform.id} className={subscribed ? "border-primary" : ""}>
@@ -240,15 +325,18 @@ export default function CompanyPlatformSubscriptions() {
                       </CardDescription>
                     </div>
                   </div>
-                  {subscribed && (
-                    <Badge variant="default" className="gap-1">
-                      <Check className="h-3 w-3" />
-                      Active
-                    </Badge>
-                  )}
+                  {getStatusBadge(platform.id)}
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-2">
+                {rejected && subscriptions[platform.id]?.rejection_reason && (
+                  <Alert variant="destructive" className="mb-2">
+                    <AlertDescription className="text-xs">
+                      {subscriptions[platform.id].rejection_reason}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
                 {subscribed ? (
                   <Button
                     variant="outline"
@@ -265,19 +353,35 @@ export default function CompanyPlatformSubscriptions() {
                       "Unsubscribe"
                     )}
                   </Button>
-                ) : (
+                ) : pending ? (
                   <Button
-                    onClick={() => handleSubscribe(platform.id)}
+                    variant="outline"
+                    onClick={() => handleUnsubscribe(platform.id)}
                     disabled={processing}
                     className="w-full"
                   >
                     {processing ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Subscribing...
+                        Cancelling...
                       </>
                     ) : (
-                      "Subscribe"
+                      "Cancel Request"
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => handleSubscribe(platform.id)}
+                    disabled={processing || !!hasSubscription}
+                    className="w-full"
+                  >
+                    {processing ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Requesting...
+                      </>
+                    ) : (
+                      "Request Subscription"
                     )}
                   </Button>
                 )}

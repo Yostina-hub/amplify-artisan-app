@@ -312,6 +312,10 @@ export type Database = {
           id: string
           is_active: boolean | null
           platform_id: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
           subscribed_at: string | null
           updated_at: string | null
         }
@@ -322,6 +326,10 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           platform_id: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
           subscribed_at?: string | null
           updated_at?: string | null
         }
@@ -332,6 +340,10 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           platform_id?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
           subscribed_at?: string | null
           updated_at?: string | null
         }
