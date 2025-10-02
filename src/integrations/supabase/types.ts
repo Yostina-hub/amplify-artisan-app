@@ -420,6 +420,57 @@ export type Database = {
           },
         ]
       }
+      industries: {
+        Row: {
+          benefits: Json | null
+          case_study: Json | null
+          created_at: string | null
+          description: string | null
+          display_name: string
+          display_order: number | null
+          features: Json | null
+          icon_name: string
+          id: string
+          is_active: boolean | null
+          name: string
+          slug: string
+          updated_at: string | null
+          use_cases: Json | null
+        }
+        Insert: {
+          benefits?: Json | null
+          case_study?: Json | null
+          created_at?: string | null
+          description?: string | null
+          display_name: string
+          display_order?: number | null
+          features?: Json | null
+          icon_name: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          slug: string
+          updated_at?: string | null
+          use_cases?: Json | null
+        }
+        Update: {
+          benefits?: Json | null
+          case_study?: Json | null
+          created_at?: string | null
+          description?: string | null
+          display_name?: string
+          display_order?: number | null
+          features?: Json | null
+          icon_name?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          slug?: string
+          updated_at?: string | null
+          use_cases?: Json | null
+        }
+        Relationships: []
+      }
       influencer_campaigns: {
         Row: {
           budget: number

@@ -37,6 +37,7 @@ import AdminCompanyPlatformSubscriptions from "./pages/admin/CompanyPlatformSubs
 import ReachAnalytics from "./pages/admin/ReachAnalytics";
 import ForcePasswordChange from "./pages/ForcePasswordChange";
 import LandingPageManager from "./pages/admin/LandingPageManager";
+import IndustryManagement from "./pages/admin/IndustryManagement";
 
 const queryClient = new QueryClient();
 
@@ -74,6 +75,7 @@ const App = () => (
             <Route path="/admin/platform-subscriptions" element={<ProtectedRoute requiredRole="admin"><Layout><AdminCompanyPlatformSubscriptions /></Layout></ProtectedRoute>} />
             <Route path="/admin/reach-analytics" element={<ProtectedRoute requiredRole="admin"><Layout><ReachAnalytics /></Layout></ProtectedRoute>} />
             <Route path="/admin/landing-page" element={<ProtectedRoute requiredRole="admin"><Layout><LandingPageManager /></Layout></ProtectedRoute>} />
+            <Route path="/admin/industries" element={<ProtectedRoute requiredRole="admin"><Layout><IndustryManagement /></Layout></ProtectedRoute>} />
             <Route path="/company/email-settings" element={<ProtectedRoute><Layout><CompanyEmailSettings /></Layout></ProtectedRoute>} />
             <Route path="/company/platform-subscriptions" element={<ProtectedRoute><Layout><CompanyPlatformSubscriptions /></Layout></ProtectedRoute>} />
             <Route path="/company/platform-settings" element={<ProtectedRoute><Layout><CompanyPlatformSettings /></Layout></ProtectedRoute>} />
