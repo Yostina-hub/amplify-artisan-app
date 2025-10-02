@@ -121,6 +121,27 @@ serve(async (req: Request): Promise<Response> => {
         }
       } else {
         console.log("User already exists, skipping account creation");
+        // Reset password for existing user and enforce password change on next login
+        const generateTempPassword = () => {
+          const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789@#$';
+          let password = '';
+          for (let i = 0; i < 12; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          return password;
+        };
+        temporaryPassword = generateTempPassword();
+        const { error: updateErr } = await supabase.auth.admin.updateUserById(existingUser.id, {
+          password: temporaryPassword,
+          user_metadata: {
+            ...(existingUser.user_metadata || {}),
+            requires_password_change: true,
+          },
+        } as any);
+        if (updateErr) {
+          console.error("Error updating existing user password:", updateErr);
+          throw new Error(`Failed to set temporary password: ${updateErr.message}`);
+        }
       }
     }
 
@@ -128,6 +149,11 @@ serve(async (req: Request): Promise<Response> => {
     const subject = status === "approved" 
       ? "Your Company Application Has Been Approved!" 
       : "Update on Your Company Application";
+
+    // Derive a login URL from request origin or configured site URL
+    const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || Deno.env.get("LOVABLE_SITE_URL") || "";
+    const baseUrl = origin ? origin.replace(/\/$/, "") : "";
+    const loginUrl = baseUrl ? `${baseUrl}/auth` : "/auth";
 
     const htmlContent = status === "approved"
       ? `
@@ -145,9 +171,10 @@ serve(async (req: Request): Promise<Response> => {
           <p style="margin: 0; color: #92400e;"><strong>⚠️ Important:</strong> For security reasons, you will be required to change your password upon first login.</p>
         </div>
 
-        <p style="margin-top: 20px;">To get started, please log in at the login page using the credentials above.</p>
-        
-        <p style="margin-top: 30px;">If you have any questions, feel free to contact us.</p>
+        <p style="margin-top: 20px;">To get started, please log in using the credentials above:</p>
+        <p style="margin: 16px 0;">
+          <a href="${loginUrl}" style="background:#111827;color:#fff;text-decoration:none;padding:10px 16px;border-radius:6px;display:inline-block">Open Login Page</a>
+        </p>
         <br>
         <p>Best regards,<br>${emailConfig.sender_name || 'The Team'}</p>
       `
@@ -178,7 +205,6 @@ serve(async (req: Request): Promise<Response> => {
       from: emailConfig.sender_email || emailConfig.smtp_username,
       to: company.email,
       subject: subject,
-      content: htmlContent,
       html: htmlContent,
     });
 

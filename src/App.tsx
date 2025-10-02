@@ -34,6 +34,7 @@ import CompanyPlatformSettings from "./pages/CompanyPlatformSettings";
 import CompanyPlatformSubscriptions from "./pages/CompanyPlatformSubscriptions";
 import AdminCompanyPlatformSubscriptions from "./pages/admin/CompanyPlatformSubscriptions";
 import ReachAnalytics from "./pages/admin/ReachAnalytics";
+import ForcePasswordChange from "./pages/ForcePasswordChange";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/company-application" element={<CompanyApplication />} />
             <Route path="/pending-approval" element={<ProtectedRoute allowUnapproved><Layout><PendingApproval /></Layout></ProtectedRoute>} />
+            <Route path="/force-password" element={<ProtectedRoute allowUnapproved><Layout><ForcePasswordChange /></Layout></ProtectedRoute>} />
             <Route path="/" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
             <Route path="/composer" element={<ProtectedRoute><Layout><Composer /></Layout></ProtectedRoute>} />
             <Route path="/calendar" element={<ProtectedRoute><Layout><CalendarView /></Layout></ProtectedRoute>} />
@@ -72,7 +74,7 @@ const App = () => (
             <Route path="/company/platform-subscriptions" element={<ProtectedRoute><Layout><CompanyPlatformSubscriptions /></Layout></ProtectedRoute>} />
             <Route path="/company/platform-settings" element={<ProtectedRoute><Layout><CompanyPlatformSettings /></Layout></ProtectedRoute>} />
             <Route path="/social-accounts" element={<ProtectedRoute><Layout><SocialMediaCredentials /></Layout></ProtectedRoute>} />
-          <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
