@@ -30,7 +30,7 @@ import {
 import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Search, MoreHorizontal, CheckCircle, XCircle, Pause, Mail, Eye, Trash2 } from "lucide-react";
+import { Search, MoreHorizontal, CheckCircle, XCircle, Pause, Mail, Eye, Trash2, UserCog, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -59,7 +59,10 @@ export default function CompanyManagement() {
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
   const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isManageAdminOpen, setIsManageAdminOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
+  const [companyAdmin, setCompanyAdmin] = useState<any>(null);
+  const [loadingAdmin, setLoadingAdmin] = useState(false);
 
   useEffect(() => {
     fetchCompanies();
@@ -211,6 +214,79 @@ export default function CompanyManagement() {
     }
   };
 
+  const fetchCompanyAdmin = async (companyId: string) => {
+    setLoadingAdmin(true);
+    try {
+      // Find profiles with this company_id
+      const { data: profiles, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('company_id', companyId);
+
+      if (profileError) throw profileError;
+
+      if (!profiles || profiles.length === 0) {
+        setCompanyAdmin(null);
+        return;
+      }
+
+      // Get roles for these users
+      const { data: roles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('*')
+        .in('user_id', profiles.map(p => p.id))
+        .eq('role', 'admin');
+
+      if (rolesError) throw rolesError;
+
+      // Find the admin user
+      const adminProfile = profiles.find(p => 
+        roles?.some(r => r.user_id === p.id)
+      );
+
+      if (adminProfile) {
+        const adminRoles = roles?.filter(r => r.user_id === adminProfile.id);
+        setCompanyAdmin({
+          ...adminProfile,
+          roles: adminRoles?.map(r => r.role) || []
+        });
+      } else {
+        setCompanyAdmin(null);
+      }
+    } catch (error) {
+      console.error('Error fetching company admin:', error);
+      toast.error('Failed to load company admin');
+    } finally {
+      setLoadingAdmin(false);
+    }
+  };
+
+  const handleViewAdmin = async (company: Company) => {
+    setSelectedCompany(company);
+    setIsManageAdminOpen(true);
+    await fetchCompanyAdmin(company.id);
+  };
+
+  const handleResetAdminPassword = async () => {
+    if (!companyAdmin) return;
+
+    try {
+      const { error } = await supabase.functions.invoke('send-password-reset-email', {
+        body: { 
+          email: companyAdmin.email,
+          userId: companyAdmin.id
+        }
+      });
+
+      if (error) throw error;
+
+      toast.success(`Password reset email sent to ${companyAdmin.email}`);
+    } catch (error: any) {
+      console.error('Error sending password reset:', error);
+      toast.error(error.message || 'Failed to send password reset email');
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { variant: any; icon?: any }> = {
       pending: { variant: "secondary" },
@@ -345,12 +421,22 @@ export default function CompanyManagement() {
                             </DropdownMenuItem>
                           )}
                           {(company.status === "approved" || company.status === "rejected") && (
-                            <DropdownMenuItem
-                              onClick={() => handleResendEmail(company)}
-                            >
-                              <Mail className="mr-2 h-4 w-4" />
-                              Resend Email
-                            </DropdownMenuItem>
+                            <>
+                              <DropdownMenuItem
+                                onClick={() => handleResendEmail(company)}
+                              >
+                                <Mail className="mr-2 h-4 w-4" />
+                                Resend Email
+                              </DropdownMenuItem>
+                              {company.status === "approved" && (
+                                <DropdownMenuItem
+                                  onClick={() => handleViewAdmin(company)}
+                                >
+                                  <UserCog className="mr-2 h-4 w-4" />
+                                  Manage Admin
+                                </DropdownMenuItem>
+                              )}
+                            </>
                           )}
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
@@ -559,6 +645,71 @@ export default function CompanyManagement() {
                 </Button>
               </>
             )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage Company Admin Dialog */}
+      <Dialog open={isManageAdminOpen} onOpenChange={setIsManageAdminOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Company Admin Account</DialogTitle>
+            <DialogDescription>
+              Manage the admin account for {selectedCompany?.name}
+            </DialogDescription>
+          </DialogHeader>
+          {loadingAdmin ? (
+            <div className="text-center py-8 text-muted-foreground">
+              Loading admin details...
+            </div>
+          ) : companyAdmin ? (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-muted-foreground">Name</Label>
+                <p className="font-medium">{companyAdmin.full_name || 'Not set'}</p>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-muted-foreground">Email</Label>
+                <p className="font-medium">{companyAdmin.email}</p>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-muted-foreground">Roles</Label>
+                <div className="flex gap-2">
+                  {companyAdmin.roles?.map((role: string) => (
+                    <Badge key={role} variant="default">{role}</Badge>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-muted-foreground">Created</Label>
+                <p className="text-sm">{new Date(companyAdmin.created_at).toLocaleString()}</p>
+              </div>
+              <div className="pt-4">
+                <Button 
+                  onClick={handleResetAdminPassword}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <KeyRound className="mr-2 h-4 w-4" />
+                  Send Password Reset
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground mb-4">
+                No admin account found for this company.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                The admin account is created when you approve the company. 
+                Try re-approving or using the "Resend Email" option.
+              </p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsManageAdminOpen(false)}>
+              Close
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
