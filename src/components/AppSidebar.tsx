@@ -48,6 +48,7 @@ const adminItems = [
   { title: "Social Platforms", url: "/admin/social-platforms", icon: Globe },
   { title: "Platform Subscriptions", url: "/admin/platform-subscriptions", icon: Package },
   { title: "Reach Analytics", url: "/admin/reach-analytics", icon: BarChart2 },
+  { title: "Landing Page Manager", url: "/admin/landing-page", icon: FileText },
   { title: "Email Settings", url: "/admin/email-settings", icon: Mail },
   { title: "System Settings", url: "/admin/settings", icon: Cog },
 ];
