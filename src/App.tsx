@@ -22,6 +22,7 @@ import SocialMediaMetrics from "./pages/SocialMediaMetrics";
 import AdCampaigns from "./pages/AdCampaigns";
 import SocialListening from "./pages/SocialListening";
 import NotFound from "./pages/NotFound";
+import PendingApproval from "./pages/PendingApproval";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/pending-approval" element={<ProtectedRoute allowUnapproved><Layout><PendingApproval /></Layout></ProtectedRoute>} />
             <Route path="/" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
             <Route path="/composer" element={<ProtectedRoute><Layout><Composer /></Layout></ProtectedRoute>} />
             <Route path="/calendar" element={<ProtectedRoute><Layout><CalendarView /></Layout></ProtectedRoute>} />

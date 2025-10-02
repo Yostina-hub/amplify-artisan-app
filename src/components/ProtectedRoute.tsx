@@ -6,10 +6,11 @@ import { Loader2 } from 'lucide-react';
 interface ProtectedRouteProps {
   children: ReactNode;
   requiredRole?: 'admin' | 'agent' | 'user';
+  allowUnapproved?: boolean;
 }
 
-export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
-  const { user, loading, hasRole } = useAuth();
+export const ProtectedRoute = ({ children, requiredRole, allowUnapproved }: ProtectedRouteProps) => {
+  const { user, loading, hasRole, roles } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,9 +19,11 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
         navigate('/auth');
       } else if (requiredRole && !hasRole(requiredRole)) {
         navigate('/');
+      } else if (!requiredRole && !allowUnapproved && roles.length === 0) {
+        navigate('/pending-approval');
       }
     }
-  }, [user, loading, requiredRole, hasRole, navigate]);
+  }, [user, loading, requiredRole, hasRole, roles, allowUnapproved, navigate]);
 
   if (loading) {
     return (
@@ -30,7 +33,7 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
     );
   }
 
-  if (!user || (requiredRole && !hasRole(requiredRole))) {
+  if (!user || (requiredRole && !hasRole(requiredRole)) || (!requiredRole && !allowUnapproved && roles.length === 0)) {
     return null;
   }
 
