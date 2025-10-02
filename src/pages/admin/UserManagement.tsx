@@ -33,7 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MoreHorizontal, Search, UserPlus } from "lucide-react";
+import { MoreHorizontal, Search, UserPlus, Mail, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
@@ -284,6 +284,24 @@ export default function UserManagement() {
     }
   };
 
+  const handleSendPasswordReset = async (user: User) => {
+    try {
+      const { error } = await supabase.functions.invoke('send-password-reset-email', {
+        body: { 
+          email: user.email,
+          userId: user.id
+        }
+      });
+
+      if (error) throw error;
+
+      toast.success(`Password reset email sent to ${user.email}`);
+    } catch (error: any) {
+      console.error('Error sending password reset:', error);
+      toast.error(error.message || 'Failed to send password reset email');
+    }
+  };
+
   const filteredUsers = users.filter(user =>
     user.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.email.toLowerCase().includes(searchQuery.toLowerCase())
@@ -396,6 +414,12 @@ export default function UserManagement() {
                             }}
                           >
                             Assign Role
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleSendPasswordReset(user)}
+                          >
+                            <KeyRound className="mr-2 h-4 w-4" />
+                            Send Password Reset
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="text-destructive"
