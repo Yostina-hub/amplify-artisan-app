@@ -1,12 +1,20 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Calendar, MessageSquare, TrendingUp, Zap, Shield, Instagram, Facebook, Linkedin, Twitter, Youtube, PieChart, BarChart3, Sparkles } from "lucide-react";
+import { Calendar, MessageSquare, TrendingUp, Zap, Shield, Instagram, Facebook, Linkedin, Twitter, Youtube, PieChart, BarChart3, Sparkles, CheckCircle2, Star } from "lucide-react";
 import { IndustriesDropdown } from "@/components/IndustriesDropdown";
 import { FeaturesDropdown } from "@/components/FeaturesDropdown";
 import { ResourcesDropdown } from "@/components/ResourcesDropdown";
+import { MobileMenu } from "@/components/MobileMenu";
 
 const Index = () => {
   const navigate = useNavigate();
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   const socialPlatforms = [
     { icon: Instagram, color: "#E4405F" },
@@ -62,19 +70,42 @@ const Index = () => {
           </div>
           <div className="hidden lg:flex items-center gap-8">
             <FeaturesDropdown />
-            <a href="#integrations" className="text-sm font-medium text-foreground hover:text-accent transition-colors">Integrations</a>
+            <button 
+              onClick={() => scrollToSection('integrations')}
+              className="text-sm font-medium text-foreground hover:text-accent transition-colors"
+            >
+              Integrations
+            </button>
             <IndustriesDropdown />
             <ResourcesDropdown />
-            <a href="#pricing" className="text-sm font-medium text-foreground hover:text-accent transition-colors">Pricing</a>
-            <a href="#enterprise" className="text-sm font-medium text-foreground hover:text-accent transition-colors">Enterprise</a>
+            <button 
+              onClick={() => scrollToSection('pricing')}
+              className="text-sm font-medium text-foreground hover:text-accent transition-colors"
+            >
+              Pricing
+            </button>
+            <button 
+              onClick={() => scrollToSection('enterprise')}
+              className="text-sm font-medium text-foreground hover:text-accent transition-colors"
+            >
+              Enterprise
+            </button>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={() => navigate("/auth")} className="text-sm font-medium">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate("/auth")} 
+              className="text-sm font-medium hidden md:flex"
+            >
               Log in
             </Button>
-            <Button onClick={() => navigate("/auth")} className="text-sm font-semibold">
+            <Button 
+              onClick={() => navigate("/auth")} 
+              className="text-sm font-semibold hidden md:flex"
+            >
               Start your free trial
             </Button>
+            <MobileMenu />
           </div>
         </div>
       </nav>
@@ -214,6 +245,198 @@ const Index = () => {
                 <p className="text-muted-foreground leading-relaxed text-sm">{feature.description}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Integrations Section */}
+      <div id="integrations" className="bg-white py-20">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-foreground">
+              Connect all your favorite platforms
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Manage Facebook, Instagram, Twitter, LinkedIn, YouTube and more from one place
+            </p>
+          </div>
+          <div className="flex flex-wrap justify-center items-center gap-12 max-w-4xl mx-auto">
+            {socialPlatforms.map((platform, index) => (
+              <div key={index} className="flex flex-col items-center gap-3">
+                <div className="w-16 h-16 rounded-xl bg-secondary flex items-center justify-center hover:scale-110 transition-transform">
+                  <platform.icon className="h-8 w-8" style={{ color: platform.color }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Pricing Section */}
+      <div id="pricing" className="bg-secondary/30 py-20">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-foreground">
+              Simple, transparent pricing
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Choose the plan that fits your business needs
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Professional Plan */}
+            <div className="bg-white rounded-2xl p-8 border-2 border-border hover:border-accent transition-colors">
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-bold mb-2">Professional</h3>
+                <div className="flex items-baseline justify-center gap-2 mb-4">
+                  <span className="text-4xl font-bold">$99</span>
+                  <span className="text-muted-foreground">/month</span>
+                </div>
+                <p className="text-sm text-muted-foreground">Perfect for small teams</p>
+              </div>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-accent" />
+                  <span className="text-sm">Up to 10 social accounts</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-accent" />
+                  <span className="text-sm">Unlimited scheduling</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-accent" />
+                  <span className="text-sm">Advanced analytics</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-accent" />
+                  <span className="text-sm">5 team members</span>
+                </li>
+              </ul>
+              <Button onClick={() => navigate("/auth")} variant="outline" className="w-full">
+                Start free trial
+              </Button>
+            </div>
+
+            {/* Team Plan - Featured */}
+            <div className="bg-white rounded-2xl p-8 border-2 border-accent relative transform md:scale-105 shadow-xl">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-accent text-white px-4 py-1 rounded-full text-sm font-semibold">
+                Most Popular
+              </div>
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-bold mb-2">Team</h3>
+                <div className="flex items-baseline justify-center gap-2 mb-4">
+                  <span className="text-4xl font-bold">$249</span>
+                  <span className="text-muted-foreground">/month</span>
+                </div>
+                <p className="text-sm text-muted-foreground">For growing businesses</p>
+              </div>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-accent" />
+                  <span className="text-sm">Up to 20 social accounts</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-accent" />
+                  <span className="text-sm">Everything in Professional</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-accent" />
+                  <span className="text-sm">AI content assistant</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-accent" />
+                  <span className="text-sm">10 team members</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-accent" />
+                  <span className="text-sm">Priority support</span>
+                </li>
+              </ul>
+              <Button onClick={() => navigate("/auth")} className="w-full">
+                Start free trial
+              </Button>
+            </div>
+
+            {/* Business Plan */}
+            <div className="bg-white rounded-2xl p-8 border-2 border-border hover:border-accent transition-colors">
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-bold mb-2">Business</h3>
+                <div className="flex items-baseline justify-center gap-2 mb-4">
+                  <span className="text-4xl font-bold">$499</span>
+                  <span className="text-muted-foreground">/month</span>
+                </div>
+                <p className="text-sm text-muted-foreground">For large organizations</p>
+              </div>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-accent" />
+                  <span className="text-sm">Unlimited social accounts</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-accent" />
+                  <span className="text-sm">Everything in Team</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-accent" />
+                  <span className="text-sm">Custom integrations</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-accent" />
+                  <span className="text-sm">Unlimited team members</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-accent" />
+                  <span className="text-sm">Dedicated support</span>
+                </li>
+              </ul>
+              <Button onClick={() => navigate("/auth")} variant="outline" className="w-full">
+                Contact sales
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Enterprise Section */}
+      <div id="enterprise" className="bg-white py-20">
+        <div className="container mx-auto px-6">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
+              Enterprise solutions for large teams
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Custom pricing, dedicated support, and advanced security features for organizations with complex needs
+            </p>
+            <div className="grid md:grid-cols-3 gap-8 pt-8">
+              <div className="text-center">
+                <Shield className="h-12 w-12 text-accent mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-2">Advanced Security</h3>
+                <p className="text-sm text-muted-foreground">
+                  SSO, SAML, and enterprise-grade data protection
+                </p>
+              </div>
+              <div className="text-center">
+                <Star className="h-12 w-12 text-accent mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-2">Premium Support</h3>
+                <p className="text-sm text-muted-foreground">
+                  Dedicated account manager and 24/7 support
+                </p>
+              </div>
+              <div className="text-center">
+                <Zap className="h-12 w-12 text-accent mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-2">Custom Features</h3>
+                <p className="text-sm text-muted-foreground">
+                  Tailored integrations and workflows for your business
+                </p>
+              </div>
+            </div>
+            <Button
+              size="lg"
+              onClick={() => navigate("/auth")}
+              className="text-base font-semibold px-8 h-12"
+            >
+              Contact enterprise sales
+            </Button>
           </div>
         </div>
       </div>
