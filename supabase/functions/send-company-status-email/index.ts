@@ -106,12 +106,12 @@ serve(async (req: Request): Promise<Response> => {
             console.error("Error updating profile:", profileError);
           }
 
-          // Assign 'user' role to the new account
+          // Assign 'admin' role to the company account (company admins can manage their company)
           const { error: roleError } = await supabase
             .from("user_roles")
             .insert({
               user_id: newUser.user.id,
-              role: "user",
+              role: "admin",
               company_id: company.id,
             });
 
