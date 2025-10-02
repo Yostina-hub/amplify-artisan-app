@@ -32,6 +32,9 @@ const agentItems = [
 ];
 
 const companyAdminItems = [
+  { title: "User Management", url: "/admin/users", icon: Users },
+  { title: "Content Moderation", url: "/admin/moderation", icon: Flag },
+  { title: "Reach Analytics", url: "/admin/reach-analytics", icon: BarChart2 },
   { title: "Company Email Settings", url: "/company/email-settings", icon: Mail },
   { title: "Platform Subscriptions", url: "/company/platform-subscriptions", icon: Package },
   { title: "Platform API Settings", url: "/company/platform-settings", icon: Key },
