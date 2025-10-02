@@ -27,7 +27,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, MoreHorizontal, CheckCircle, XCircle, Pause } from "lucide-react";
+import { Search, MoreHorizontal, CheckCircle, XCircle, Pause, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -159,6 +159,31 @@ export default function CompanyManagement() {
     }
   };
 
+  const handleResendEmail = async (company: Company) => {
+    if (company.status === 'pending') {
+      toast.error("Cannot resend email for pending companies. Please approve or reject first.");
+      return;
+    }
+
+    try {
+      const body: any = {
+        companyId: company.id,
+        status: company.status === 'approved' ? 'approved' : 'rejected'
+      };
+
+      if (company.status === 'rejected' && company.rejection_reason) {
+        body.rejectionReason = company.rejection_reason;
+      }
+
+      await supabase.functions.invoke('send-company-status-email', { body });
+
+      toast.success(`Email resent to ${company.name}`);
+    } catch (error) {
+      console.error("Error resending email:", error);
+      toast.error("Failed to resend email");
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { variant: any; icon?: any }> = {
       pending: { variant: "secondary" },
@@ -281,6 +306,14 @@ export default function CompanyManagement() {
                             >
                               <Pause className="mr-2 h-4 w-4" />
                               Suspend
+                            </DropdownMenuItem>
+                          )}
+                          {(company.status === "approved" || company.status === "rejected") && (
+                            <DropdownMenuItem
+                              onClick={() => handleResendEmail(company)}
+                            >
+                              <Mail className="mr-2 h-4 w-4" />
+                              Resend Email
                             </DropdownMenuItem>
                           )}
                         </DropdownMenuContent>
