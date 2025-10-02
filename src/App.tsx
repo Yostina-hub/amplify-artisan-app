@@ -17,6 +17,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
 import ContentModeration from "./pages/admin/ContentModeration";
 import SystemSettings from "./pages/admin/SystemSettings";
+import SocialMediaMetrics from "./pages/SocialMediaMetrics";
+import AdCampaigns from "./pages/AdCampaigns";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +37,8 @@ const App = () => (
             <Route path="/calendar" element={<ProtectedRoute><Layout><CalendarView /></Layout></ProtectedRoute>} />
             <Route path="/analytics" element={<ProtectedRoute><Layout><Analytics /></Layout></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Layout><Settings /></Layout></ProtectedRoute>} />
+            <Route path="/social-metrics" element={<ProtectedRoute><Layout><SocialMediaMetrics /></Layout></ProtectedRoute>} />
+            <Route path="/ad-campaigns" element={<ProtectedRoute><Layout><AdCampaigns /></Layout></ProtectedRoute>} />
             <Route path="/agents" element={<ProtectedRoute requiredRole="agent"><Layout><Agents /></Layout></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><Layout><AdminDashboard /></Layout></ProtectedRoute>} />
             <Route path="/admin/users" element={<ProtectedRoute requiredRole="admin"><Layout><UserManagement /></Layout></ProtectedRoute>} />

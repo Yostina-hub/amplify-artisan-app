@@ -9,11 +9,15 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon, Image, Smile, Twitter, Instagram, Linkedin, Facebook, Youtube, MessageCircle, Pin, Camera, Send, Phone } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Composer() {
   const [content, setContent] = useState("");
   const [date, setDate] = useState<Date>();
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { toast: showToast } = useToast();
 
   const platforms = [
     { id: "twitter", name: "Twitter", icon: Twitter, color: "text-[#1DA1F2]" },
@@ -36,7 +40,7 @@ export default function Composer() {
     );
   };
 
-  const handleSchedule = () => {
+  const handleSchedule = async () => {
     if (!content.trim()) {
       toast.error("Please write some content first");
       return;
@@ -45,10 +49,41 @@ export default function Composer() {
       toast.error("Please select at least one platform");
       return;
     }
-    toast.success("Post scheduled successfully!");
-    setContent("");
-    setDate(undefined);
-    setSelectedPlatforms([]);
+
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      const { error } = await supabase.from('social_media_posts').insert({
+        content: content.trim(),
+        platforms: selectedPlatforms,
+        scheduled_at: date?.toISOString() || null,
+        status: date ? 'scheduled' : 'draft',
+        user_id: user.id,
+      });
+
+      if (error) throw error;
+
+      showToast({
+        title: date ? "Post scheduled" : "Draft saved",
+        description: date 
+          ? `Your post will be published on ${format(date, "PPP")}` 
+          : "Your post has been saved as a draft",
+      });
+
+      setContent("");
+      setDate(undefined);
+      setSelectedPlatforms([]);
+    } catch (error: any) {
+      showToast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -150,10 +185,15 @@ export default function Composer() {
             <Button
               onClick={handleSchedule}
               className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90"
+              disabled={loading}
             >
-              {date ? "Schedule Post" : "Publish Now"}
+              {loading ? "Saving..." : (date ? "Schedule Post" : "Save Draft")}
             </Button>
-            <Button variant="outline">Save Draft</Button>
+            <Button variant="outline" onClick={() => {
+              setContent("");
+              setDate(undefined);
+              setSelectedPlatforms([]);
+            }}>Clear</Button>
           </div>
         </CardContent>
       </Card>

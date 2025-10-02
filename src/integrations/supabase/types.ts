@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_campaigns: {
+        Row: {
+          budget: number
+          clicks: number | null
+          conversions: number | null
+          created_at: string | null
+          end_date: string | null
+          id: string
+          impressions: number | null
+          name: string
+          platform: string
+          start_date: string
+          status: string | null
+          target_audience: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          budget: number
+          clicks?: number | null
+          conversions?: number | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          impressions?: number | null
+          name: string
+          platform: string
+          start_date: string
+          status?: string | null
+          target_audience?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          budget?: number
+          clicks?: number | null
+          conversions?: number | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          impressions?: number | null
+          name?: string
+          platform?: string
+          start_date?: string
+          status?: string | null
+          target_audience?: Json | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -38,6 +89,179 @@ export type Database = {
           full_name?: string | null
           id?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      social_media_accounts: {
+        Row: {
+          access_token: string
+          account_id: string
+          account_name: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          platform: string
+          refresh_token: string | null
+          token_expires_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          account_id: string
+          account_name: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          platform: string
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          account_id?: string
+          account_name?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          platform?: string
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      social_media_comments: {
+        Row: {
+          account_id: string
+          author_id: string
+          author_name: string
+          content: string
+          created_at: string | null
+          id: string
+          platform_comment_id: string
+          post_id: string | null
+          replied: boolean | null
+          replied_at: string | null
+          reply_content: string | null
+        }
+        Insert: {
+          account_id: string
+          author_id: string
+          author_name: string
+          content: string
+          created_at?: string | null
+          id?: string
+          platform_comment_id: string
+          post_id?: string | null
+          replied?: boolean | null
+          replied_at?: string | null
+          reply_content?: string | null
+        }
+        Update: {
+          account_id?: string
+          author_id?: string
+          author_name?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          platform_comment_id?: string
+          post_id?: string | null
+          replied?: boolean | null
+          replied_at?: string | null
+          reply_content?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_media_comments_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "social_media_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_media_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "social_media_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_media_metrics: {
+        Row: {
+          account_id: string
+          created_at: string | null
+          engagement_rate: number | null
+          followers_count: number | null
+          id: string
+          last_synced_at: string | null
+          posts_count: number | null
+        }
+        Insert: {
+          account_id: string
+          created_at?: string | null
+          engagement_rate?: number | null
+          followers_count?: number | null
+          id?: string
+          last_synced_at?: string | null
+          posts_count?: number | null
+        }
+        Update: {
+          account_id?: string
+          created_at?: string | null
+          engagement_rate?: number | null
+          followers_count?: number | null
+          id?: string
+          last_synced_at?: string | null
+          posts_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_media_metrics_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "social_media_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_media_posts: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          platform_post_ids: Json | null
+          platforms: string[]
+          scheduled_at: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          platform_post_ids?: Json | null
+          platforms: string[]
+          scheduled_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          platform_post_ids?: Json | null
+          platforms?: string[]
+          scheduled_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
