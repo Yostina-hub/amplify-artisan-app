@@ -27,7 +27,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, MoreHorizontal, CheckCircle, XCircle, Pause, Mail } from "lucide-react";
+import { Search, MoreHorizontal, CheckCircle, XCircle, Pause, Mail, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -54,6 +54,7 @@ export default function CompanyManagement() {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
+  const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
 
   useEffect(() => {
@@ -277,6 +278,15 @@ export default function CompanyManagement() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedCompany(company);
+                              setIsViewDetailsOpen(true);
+                            }}
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Details
+                          </DropdownMenuItem>
                           {company.status === "pending" && (
                             <>
                               <DropdownMenuItem
@@ -379,6 +389,112 @@ export default function CompanyManagement() {
             <Button variant="destructive" onClick={handleReject}>
               Reject Company
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Details Dialog */}
+      <Dialog open={isViewDetailsOpen} onOpenChange={setIsViewDetailsOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Company Details</DialogTitle>
+            <DialogDescription>
+              Full information about {selectedCompany?.name}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedCompany && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Company Name</Label>
+                  <p className="font-medium">{selectedCompany.name}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Status</Label>
+                  <div className="mt-1">{getStatusBadge(selectedCompany.status)}</div>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Email</Label>
+                  <p className="font-medium">{selectedCompany.email}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Phone</Label>
+                  <p className="font-medium">{selectedCompany.phone || "—"}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Website</Label>
+                  <p className="font-medium">
+                    {selectedCompany.website ? (
+                      <a href={selectedCompany.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                        {selectedCompany.website}
+                      </a>
+                    ) : "—"}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Industry</Label>
+                  <p className="font-medium">{selectedCompany.industry || "—"}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Company Size</Label>
+                  <p className="font-medium">{selectedCompany.company_size || "—"}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Applied Date</Label>
+                  <p className="font-medium">
+                    {new Date(selectedCompany.applied_at).toLocaleDateString()}
+                  </p>
+                </div>
+                {selectedCompany.approved_at && (
+                  <div>
+                    <Label className="text-muted-foreground">Approved Date</Label>
+                    <p className="font-medium">
+                      {new Date(selectedCompany.approved_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                )}
+              </div>
+              {selectedCompany.address && (
+                <div>
+                  <Label className="text-muted-foreground">Address</Label>
+                  <p className="font-medium">{selectedCompany.address}</p>
+                </div>
+              )}
+              {selectedCompany.rejection_reason && (
+                <div>
+                  <Label className="text-muted-foreground">Rejection Reason</Label>
+                  <p className="font-medium text-destructive">{selectedCompany.rejection_reason}</p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsViewDetailsOpen(false)}>
+              Close
+            </Button>
+            {selectedCompany?.status === "pending" && (
+              <>
+                <Button
+                  onClick={() => {
+                    setIsViewDetailsOpen(false);
+                    setIsApproveDialogOpen(true);
+                  }}
+                >
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  Approve
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    setIsViewDetailsOpen(false);
+                    setIsRejectDialogOpen(true);
+                  }}
+                >
+                  <XCircle className="mr-2 h-4 w-4" />
+                  Reject
+                </Button>
+              </>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

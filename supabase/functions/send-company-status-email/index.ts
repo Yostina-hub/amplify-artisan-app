@@ -142,17 +142,26 @@ serve(async (req: Request): Promise<Response> => {
       ? `
         <h1>Congratulations, ${company.name}!</h1>
         <p>We're pleased to inform you that your company application has been approved.</p>
-        <h2>Next Steps: Set Up Your Account</h2>
-        <p>We've created an account for you using the email address: <strong>${company.email}</strong></p>
+        
+        <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h2 style="margin-top: 0;">Your Login Credentials</h2>
+          <p style="margin: 10px 0;"><strong>Email/Username:</strong> ${company.email}</p>
+          <p style="margin: 10px 0; color: #666; font-size: 14px;">Use this email to log in to the platform.</p>
+        </div>
+
+        <h2>Set Up Your Password</h2>
         ${passwordResetLink ? `
-          <p>To set up your password and access the platform, please click the link below:</p>
-          <p><a href="${passwordResetLink}" style="display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">Set Up Your Password</a></p>
-          <p style="color: #666; font-size: 14px;">This link will expire in 24 hours. If you need a new link, please contact us.</p>
+          <p>To complete your account setup, please click the button below to create your password:</p>
+          <p style="text-align: center; margin: 25px 0;">
+            <a href="${passwordResetLink}" style="display: inline-block; padding: 14px 32px; background-color: #4F46E5; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">Set Up Your Password</a>
+          </p>
+          <p style="color: #666; font-size: 14px;">⏰ This link will expire in 24 hours. If you need a new link, please contact us.</p>
+          <p style="margin-top: 20px;">After setting your password, you can log in at the login page using your email: <strong>${company.email}</strong></p>
         ` : `
-          <p style="color: #666;">Please contact us to receive your login credentials.</p>
+          <p style="color: #666;">Please contact us to receive your password setup link.</p>
         `}
-        <p>Once you've set your password, you can log in and access all features of our platform.</p>
-        <p>If you have any questions, feel free to contact us.</p>
+        
+        <p style="margin-top: 30px;">If you have any questions, feel free to contact us.</p>
         <br>
         <p>Best regards,<br>${emailConfig.sender_name || 'The Team'}</p>
       `
