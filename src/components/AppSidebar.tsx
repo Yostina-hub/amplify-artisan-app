@@ -51,11 +51,11 @@ const adminItems = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
-  const { hasRole, roles } = useAuth();
+const { hasRole, roles, isCompanyAdmin, isSuperAdmin } = useAuth();
   const isCollapsed = state === "collapsed";
 
   console.log('AppSidebar - User roles:', roles);
-  console.log('AppSidebar - Has admin role:', hasRole('admin'));
+  console.log('AppSidebar - Is super admin:', isSuperAdmin);
 
   return (
     <Sidebar collapsible="icon">
@@ -127,31 +127,33 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Company Settings</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {companyAdminItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      end
-                      className={({ isActive }) =>
-                        isActive
-                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                          : "hover:bg-sidebar-accent/50"
-                      }
-                    >
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+{isCompanyAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Company Settings</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {companyAdminItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <NavLink
+                        to={item.url}
+                        end
+                        className={({ isActive }) =>
+                          isActive
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                            : "hover:bg-sidebar-accent/50"
+                        }
+                      >
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         {hasRole('admin') && (
           <SidebarGroup>
