@@ -31,7 +31,8 @@ import CompanyManagement from "./pages/admin/CompanyManagement";
 import SocialPlatformManagement from "./pages/admin/SocialPlatformManagement";
 import SocialMediaCredentials from "./pages/SocialMediaCredentials";
 import CompanyPlatformSettings from "./pages/CompanyPlatformSettings";
-import CompanyPlatformSubscriptions from "./pages/admin/CompanyPlatformSubscriptions";
+import CompanyPlatformSubscriptions from "./pages/CompanyPlatformSubscriptions";
+import AdminCompanyPlatformSubscriptions from "./pages/admin/CompanyPlatformSubscriptions";
 import ReachAnalytics from "./pages/admin/ReachAnalytics";
 
 const queryClient = new QueryClient();
@@ -65,9 +66,10 @@ const App = () => (
             <Route path="/admin/settings" element={<ProtectedRoute requiredRole="admin"><Layout><SystemSettings /></Layout></ProtectedRoute>} />
             <Route path="/admin/email-settings" element={<ProtectedRoute requiredRole="admin"><Layout><EmailSettings /></Layout></ProtectedRoute>} />
             <Route path="/admin/social-platforms" element={<ProtectedRoute requiredRole="admin"><Layout><SocialPlatformManagement /></Layout></ProtectedRoute>} />
-            <Route path="/admin/platform-subscriptions" element={<ProtectedRoute requiredRole="admin"><Layout><CompanyPlatformSubscriptions /></Layout></ProtectedRoute>} />
+            <Route path="/admin/platform-subscriptions" element={<ProtectedRoute requiredRole="admin"><Layout><AdminCompanyPlatformSubscriptions /></Layout></ProtectedRoute>} />
             <Route path="/admin/reach-analytics" element={<ProtectedRoute requiredRole="admin"><Layout><ReachAnalytics /></Layout></ProtectedRoute>} />
             <Route path="/company/email-settings" element={<ProtectedRoute><Layout><CompanyEmailSettings /></Layout></ProtectedRoute>} />
+            <Route path="/company/platform-subscriptions" element={<ProtectedRoute><Layout><CompanyPlatformSubscriptions /></Layout></ProtectedRoute>} />
             <Route path="/company/platform-settings" element={<ProtectedRoute><Layout><CompanyPlatformSettings /></Layout></ProtectedRoute>} />
             <Route path="/social-accounts" element={<ProtectedRoute><Layout><SocialMediaCredentials /></Layout></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />

@@ -33,7 +33,8 @@ const agentItems = [
 
 const companyAdminItems = [
   { title: "Company Email Settings", url: "/company/email-settings", icon: Mail },
-  { title: "Company Platform API", url: "/company/platform-settings", icon: Key },
+  { title: "Platform Subscriptions", url: "/company/platform-subscriptions", icon: Package },
+  { title: "Platform API Settings", url: "/company/platform-settings", icon: Key },
 ];
 
 const adminItems = [
