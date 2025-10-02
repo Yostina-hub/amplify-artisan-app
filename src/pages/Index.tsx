@@ -7,6 +7,7 @@ import { FeaturesDropdown } from "@/components/FeaturesDropdown";
 import { ResourcesDropdown } from "@/components/ResourcesDropdown";
 import { MobileMenu } from "@/components/MobileMenu";
 import { SubscriptionForm } from "@/components/SubscriptionForm";
+import { Footer } from "@/components/Footer";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -424,23 +425,7 @@ const Index = () => {
       </div>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-border py-12">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
-                <MessageSquare className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-accent">SocialHub</span>
-            </div>
-            <div className="flex gap-6 text-sm text-muted-foreground">
-              <a href="#" className="hover:text-accent transition-colors">Privacy</a>
-              <a href="#" className="hover:text-accent transition-colors">Terms</a>
-              <a href="#" className="hover:text-accent transition-colors">Contact</a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Subscription Form Modal */}
       <SubscriptionForm 
