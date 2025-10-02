@@ -21,57 +21,79 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in-50 duration-500">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">
-            Welcome back! Here's your social media overview
-          </p>
+    <div className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary-glow to-accent p-8 shadow-elegant">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,hsl(6_78%_57%_/_0.3),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_100%,hsl(184_91%_30%_/_0.2),transparent_50%)]" />
+        
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-bold tracking-tight text-white animate-in fade-in-50 duration-500">
+              Welcome Back! 👋
+            </h1>
+            <p className="text-white/90 text-lg animate-in fade-in-50 duration-500 delay-100">
+              Your social media empire awaits. Let's create something amazing today.
+            </p>
+          </div>
+          <Button 
+            onClick={() => navigate('/composer')}
+            size="lg"
+            className="bg-white text-primary hover:bg-white/90 font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105 animate-in zoom-in-50 duration-500 delay-200"
+          >
+            <MessageSquare className="mr-2 h-5 w-5" />
+            Create Post
+          </Button>
         </div>
-        <Button 
-          onClick={() => navigate('/composer')}
-          className="bg-gradient-to-r from-primary to-accent hover:opacity-90"
-        >
-          Create Post
-        </Button>
       </div>
 
+      {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Total Followers"
-          value="45,231"
-          change="+20.1%"
-          icon={Users}
-          trend="up"
-        />
-        <StatCard
-          title="Engagement Rate"
-          value="12.5%"
-          change="+4.3%"
-          icon={TrendingUp}
-          trend="up"
-        />
-        <StatCard
-          title="Scheduled Posts"
-          value="24"
-          change="-2"
-          icon={Calendar}
-          trend="down"
-        />
-        <StatCard
-          title="Total Posts"
-          value="1,234"
-          change="+12%"
-          icon={MessageSquare}
-          trend="up"
-        />
+        <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-100">
+          <StatCard
+            title="Total Followers"
+            value="45,231"
+            change="+20.1%"
+            icon={Users}
+            trend="up"
+          />
+        </div>
+        <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-200">
+          <StatCard
+            title="Engagement Rate"
+            value="12.5%"
+            change="+4.3%"
+            icon={TrendingUp}
+            trend="up"
+          />
+        </div>
+        <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-300">
+          <StatCard
+            title="Scheduled Posts"
+            value="24"
+            change="-2"
+            icon={Calendar}
+            trend="down"
+          />
+        </div>
+        <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-[400ms]">
+          <StatCard
+            title="Total Posts"
+            value="1,234"
+            change="+12%"
+            icon={MessageSquare}
+            trend="up"
+          />
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 animate-in fade-in-50 duration-700 delay-500">
+        <Card className="col-span-4 border-2 hover:shadow-xl transition-all duration-300 hover:border-primary/20">
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-accent animate-pulse" />
+              Recent Activity
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -85,8 +107,8 @@ export default function Dashboard() {
               ].map((item, i) => {
                 const Icon = item.icon;
                 return (
-                  <div key={i} className="flex items-center gap-4 p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className={`w-10 h-10 rounded-full bg-muted flex items-center justify-center`}>
+                  <div key={i} className="flex items-center gap-4 p-3 rounded-lg hover:bg-gradient-to-r hover:from-primary/5 hover:to-accent/5 transition-all duration-300 hover:shadow-md group cursor-pointer">
+                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                       <Icon className={`w-5 h-5 ${item.color}`} />
                     </div>
                     <div className="flex-1">
@@ -102,9 +124,14 @@ export default function Dashboard() {
         </Card>
 
         <div className="col-span-3 space-y-4">
-          <Card>
+          <Card className="border-2 hover:shadow-xl transition-all duration-300 hover:border-accent/20">
             <CardHeader>
-              <CardTitle>Connected Platforms</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                  <Camera className="h-4 w-4 text-white" />
+                </div>
+                Connected Platforms
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -121,14 +148,14 @@ export default function Dashboard() {
                   const Icon = platform.icon;
                   const isConnected = platform.status === "Connected";
                   return (
-                    <div key={i} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/30 transition-colors">
+                    <div key={i} className="flex items-center justify-between p-3 border rounded-lg hover:border-primary/30 hover:shadow-md transition-all duration-300 group cursor-pointer">
                       <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full bg-muted flex items-center justify-center`}>
+                        <div className={`w-8 h-8 rounded-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                           <Icon className={`w-4 h-4 ${platform.color}`} />
                         </div>
-                        <span className="text-sm font-medium">{platform.name}</span>
+                        <span className="text-sm font-medium group-hover:text-primary transition-colors">{platform.name}</span>
                       </div>
-                      <span className={`text-xs px-2 py-1 rounded-full ${isConnected ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
+                      <span className={`text-xs px-3 py-1 rounded-full font-medium transition-all duration-300 ${isConnected ? 'bg-gradient-to-r from-success/20 to-success/10 text-success border border-success/30' : 'bg-muted text-muted-foreground border border-border'}`}>
                         {platform.status}
                       </span>
                     </div>

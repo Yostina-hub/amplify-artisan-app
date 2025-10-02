@@ -35,13 +35,15 @@ export function Layout({ children }: LayoutProps) {
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col">
-          <header className="h-14 border-b border-border flex items-center justify-between px-4 bg-card">
-            <SidebarTrigger />
+          <header className="h-16 border-b border-border flex items-center justify-between px-6 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+            <SidebarTrigger className="hover:bg-primary/10 transition-colors" />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <User className="h-4 w-4" />
-                  <span className="hidden md:inline">{user?.email}</span>
+                <Button variant="ghost" size="sm" className="gap-2 hover:bg-primary/10 transition-all">
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                    <User className="h-4 w-4 text-white" />
+                  </div>
+                  <span className="hidden md:inline font-medium">{user?.email}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -65,13 +67,18 @@ export function Layout({ children }: LayoutProps) {
               </DropdownMenuContent>
             </DropdownMenu>
           </header>
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-6 bg-gradient-to-br from-background via-background to-muted/20">
             {children}
           </main>
-          <footer className="border-t border-border py-3 px-6 bg-card">
-            <p className="text-xs text-muted-foreground text-center">
-              Powered by <span className="font-semibold text-foreground">Lemat Technology</span>
-            </p>
+          <footer className="border-t border-border py-4 px-6 bg-card/50 backdrop-blur-sm">
+            <div className="flex items-center justify-center gap-2">
+              <p className="text-xs text-muted-foreground">
+                Powered by
+              </p>
+              <span className="text-sm font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Lemat Technology
+              </span>
+            </div>
           </footer>
         </div>
       </div>

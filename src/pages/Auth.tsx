@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, MessageSquare } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const Auth = () => {
@@ -199,11 +199,27 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">SocialHub</CardTitle>
-          <CardDescription>Manage all your social media in one place</CardDescription>
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden p-4">
+      {/* Animated Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(184_91%_17%_/_0.1),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,hsl(6_78%_57%_/_0.08),transparent_50%)]" />
+      
+      {/* Floating elements */}
+      <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse delay-1000" />
+      
+      <Card className="w-full max-w-md relative z-10 shadow-2xl border-2 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
+        <CardHeader className="text-center space-y-2 pb-6">
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center mb-2 shadow-lg animate-in zoom-in-50 duration-500 delay-200">
+            <MessageSquare className="h-8 w-8 text-white" />
+          </div>
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            Welcome to SocialHub
+          </CardTitle>
+          <CardDescription className="text-base">
+            Transform your social media presence with AI-powered insights
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">

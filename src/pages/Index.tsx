@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Calendar, MessageSquare, TrendingUp, Zap, Shield, Instagram, Facebook, Linkedin, Twitter, Youtube, PieChart, BarChart3, Sparkles, CheckCircle2, Star } from "lucide-react";
+import { Calendar, MessageSquare, TrendingUp, Zap, Shield, Instagram, Facebook, Linkedin, Twitter, Youtube, PieChart, BarChart3, Sparkles, CheckCircle2, Star, MessageCircle } from "lucide-react";
 import { IndustriesDropdown } from "@/components/IndustriesDropdown";
 import { FeaturesDropdown } from "@/components/FeaturesDropdown";
 import { ResourcesDropdown } from "@/components/ResourcesDropdown";
@@ -86,19 +86,21 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="border-b border-border bg-white">
+      <nav className="sticky top-0 z-50 border-b border-border bg-white/80 backdrop-blur-md shadow-sm">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center">
+          <div className="flex items-center gap-3 group cursor-pointer" onClick={() => navigate("/")}>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
               <MessageSquare className="h-6 w-6 text-white" />
             </div>
-            <span className="text-2xl font-bold text-accent">SocialHub</span>
+            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              SocialHub
+            </span>
           </div>
           <div className="hidden lg:flex items-center gap-8">
             <FeaturesDropdown />
             <button 
               onClick={() => scrollToSection('integrations')}
-              className="text-sm font-medium text-foreground hover:text-accent transition-colors"
+              className="text-sm font-semibold text-foreground hover:text-primary transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-primary after:transition-all"
             >
               Integrations
             </button>
@@ -106,13 +108,13 @@ const Index = () => {
             <ResourcesDropdown />
             <button 
               onClick={() => scrollToSection('pricing')}
-              className="text-sm font-medium text-foreground hover:text-accent transition-colors"
+              className="text-sm font-semibold text-foreground hover:text-primary transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-primary after:transition-all"
             >
               Pricing
             </button>
             <button 
               onClick={() => scrollToSection('enterprise')}
-              className="text-sm font-medium text-foreground hover:text-accent transition-colors"
+              className="text-sm font-semibold text-foreground hover:text-primary transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-primary after:transition-all"
             >
               Enterprise
             </button>
@@ -121,15 +123,15 @@ const Index = () => {
             <Button 
               variant="ghost" 
               onClick={() => navigate("/auth")} 
-              className="text-sm font-medium hidden md:flex"
+              className="text-sm font-semibold hidden md:flex hover:text-primary hover:bg-primary/5 transition-all"
             >
               Log in
             </Button>
             <Button 
               onClick={() => navigate("/auth")} 
-              className="text-sm font-semibold hidden md:flex"
+              className="text-sm font-semibold hidden md:flex bg-gradient-to-r from-primary to-accent hover:opacity-90 shadow-lg hover:shadow-xl transition-all hover:scale-105"
             >
-              Start your free trial
+              Start Free Trial
             </Button>
             <MobileMenu />
           </div>
@@ -137,32 +139,65 @@ const Index = () => {
       </nav>
 
       {/* Hero Section */}
-      <div className="bg-white">
-        <div className="container mx-auto px-6 py-16 lg:py-20">
-          <div className="max-w-5xl mx-auto text-center space-y-8">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight">
-              <span className="text-foreground">Drive real business impact</span>
+      <div className="bg-white relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(184_91%_17%_/_0.08),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,hsl(6_78%_57%_/_0.06),transparent_50%)]" />
+        
+        <div className="container mx-auto px-6 py-20 lg:py-28 relative z-10">
+          <div className="max-w-5xl mx-auto text-center space-y-10">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 animate-in fade-in-50 slide-in-from-top-4 duration-700">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Trusted by 10,000+ growing businesses
+              </span>
+            </div>
+            
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight animate-in fade-in-50 slide-in-from-bottom-6 duration-700 delay-100">
+              <span className="text-foreground">Transform Your Social Media</span>
               <br />
-              <span className="text-foreground">with real-time social insights.</span>
-              <br />
-              <span className="text-accent">SocialHub makes it easy.</span>
+              <span className="text-foreground">Into a</span>{" "}
+              <span className="bg-gradient-to-r from-primary via-primary-glow to-accent bg-clip-text text-transparent animate-in fade-in-50 duration-1000 delay-300">
+                Growth Engine
+              </span>
             </h1>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+            
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed animate-in fade-in-50 slide-in-from-bottom-4 duration-700 delay-200">
+              Harness the power of AI-driven analytics, seamless scheduling, and unified management. 
+              Grow your audience, boost engagement, and drive real results—all from one intelligent platform.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700 delay-300">
               <Button
                 size="lg"
                 onClick={() => navigate("/auth")}
-                className="text-base font-semibold px-8 h-12 rounded-md"
+                className="text-base font-semibold px-10 h-14 rounded-xl shadow-lg hover:shadow-2xl transition-all hover:scale-105 bg-gradient-to-r from-primary to-accent"
               >
-                Start your free trial
+                Start Free Trial - No Credit Card
               </Button>
               <Button
                 size="lg"
-                variant="link"
+                variant="outline"
                 onClick={() => navigate("/auth")}
-                className="text-base font-semibold underline text-foreground hover:text-accent"
+                className="text-base font-semibold px-10 h-14 rounded-xl border-2 hover:bg-gradient-to-r hover:from-primary/5 hover:to-accent/5 transition-all hover:scale-105"
               >
-                Request a demo
+                Watch Demo
               </Button>
+            </div>
+            
+            <div className="flex items-center justify-center gap-6 pt-6 text-sm text-muted-foreground animate-in fade-in-50 duration-700 delay-500">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-success" />
+                <span>14-day free trial</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-success" />
+                <span>No credit card required</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-success" />
+                <span>Cancel anytime</span>
+              </div>
             </div>
           </div>
         </div>
@@ -248,27 +283,37 @@ const Index = () => {
       </div>
 
       {/* Features Section */}
-      <div id="features" className="bg-white py-20">
+      <div id="features" className="bg-gradient-to-b from-white to-secondary/30 py-24">
         <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-foreground">
-              Everything you need to succeed on social
+          <div className="text-center mb-20 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
+              <Zap className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold text-primary">Powerful Features</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-foreground">
+              Everything You Need to
+              <br />
+              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Dominate Social Media
+              </span>
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Powerful features designed to help you grow your brand and engage your audience
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
+              Built for teams who demand excellence. Experience enterprise-grade tools 
+              with an interface so intuitive, you'll wonder how you ever lived without it.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="p-8 rounded-xl bg-white border border-border hover:shadow-xl transition-all hover:-translate-y-1"
+                className="group p-8 rounded-2xl bg-white border-2 border-border hover:border-primary/30 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 animate-in fade-in-50 slide-in-from-bottom-4"
+                style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center mb-6">
-                  <feature.icon className="h-6 w-6 text-accent" />
+                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                  <feature.icon className="h-7 w-7 text-primary group-hover:text-accent transition-colors duration-500" />
                 </div>
-                <h3 className="text-lg font-bold mb-3 text-foreground">{feature.title}</h3>
-                <p className="text-muted-foreground leading-relaxed text-sm">{feature.description}</p>
+                <h3 className="text-xl font-bold mb-4 text-foreground group-hover:text-primary transition-colors">{feature.title}</h3>
+                <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -276,80 +321,139 @@ const Index = () => {
       </div>
 
       {/* Integrations Section */}
-      <div id="integrations" className="bg-white py-20">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-foreground">
-              Connect all your favorite platforms
+      <div id="integrations" className="relative overflow-hidden bg-white py-24">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,hsl(184_91%_17%_/_0.03),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_50%,hsl(6_78%_57%_/_0.03),transparent_60%)]" />
+        
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="text-center mb-20 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 mb-6">
+              <MessageCircle className="h-4 w-4 text-accent" />
+              <span className="text-sm font-semibold text-accent">Seamless Integrations</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+              <span className="text-foreground">One Platform,</span>
+              <br />
+              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                All Your Channels
+              </span>
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Manage Facebook, Instagram, Twitter, LinkedIn, YouTube and more from one place
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
+              Manage Facebook, Instagram, Twitter, LinkedIn, YouTube, and more—all from one powerful dashboard
             </p>
           </div>
-          <div className="flex flex-wrap justify-center items-center gap-12 max-w-4xl mx-auto">
+          <div className="flex flex-wrap justify-center items-center gap-10 max-w-5xl mx-auto">
             {socialPlatforms.map((platform, index) => (
-              <div key={index} className="flex flex-col items-center gap-3">
-                <div className="w-16 h-16 rounded-xl bg-secondary flex items-center justify-center hover:scale-110 transition-transform">
-                  <platform.icon className="h-8 w-8" style={{ color: platform.color }} />
+              <div 
+                key={index} 
+                className="group animate-in fade-in-50 zoom-in-50 duration-500"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-secondary to-secondary/50 flex items-center justify-center shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-125 hover:-rotate-6 border-2 border-border group-hover:border-primary/30">
+                  <platform.icon className="h-10 w-10 transition-transform duration-500" style={{ color: platform.color }} />
                 </div>
               </div>
             ))}
+          </div>
+          
+          <div className="mt-16 text-center animate-in fade-in-50 duration-700 delay-500">
+            <p className="text-sm font-semibold text-muted-foreground mb-6">
+              Plus 20+ more integrations coming soon
+            </p>
+            <Button 
+              variant="outline" 
+              size="lg"
+              className="border-2 hover:bg-primary/5 hover:border-primary font-semibold"
+            >
+              View All Integrations
+            </Button>
           </div>
         </div>
       </div>
 
       {/* Pricing Section */}
-      <div id="pricing" className="bg-secondary/30 py-20">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-foreground">
-              Simple, transparent pricing
+      <div id="pricing" className="relative overflow-hidden py-24">
+        {/* Background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-secondary/30 via-background to-secondary/20" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,hsl(184_91%_17%_/_0.05),transparent_70%)]" />
+        
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="text-center mb-20 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
+              <Star className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold text-primary">Flexible Plans for Every Team</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+              <span className="text-foreground">Pricing That</span>
+              <br />
+              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Scales With You
+              </span>
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Choose the plan that fits your business needs
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+              Start free, upgrade when you're ready. No hidden fees, cancel anytime.
             </p>
           </div>
           {pricingLoading ? (
-            <div className="text-center py-12">Loading pricing...</div>
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            </div>
           ) : (
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {pricingPlans?.map((plan) => (
+            <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+              {pricingPlans?.map((plan, index) => (
                 <div
                   key={plan.id}
-                  className={`bg-white rounded-2xl p-8 border-2 transition-colors ${
+                  className={`group relative bg-white rounded-3xl p-8 border-2 transition-all duration-500 hover:-translate-y-2 animate-in fade-in-50 slide-in-from-bottom-6 ${
                     plan.is_popular
-                      ? 'border-accent relative md:scale-105 shadow-xl'
-                      : 'border-border hover:border-accent'
+                      ? 'border-primary shadow-2xl md:scale-105 hover:shadow-3xl'
+                      : 'border-border hover:border-primary/30 hover:shadow-xl'
                   }`}
+                  style={{ animationDelay: `${index * 150}ms` }}
                 >
+                  {/* Gradient overlay */}
                   {plan.is_popular && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-accent text-white px-4 py-1 rounded-full text-sm font-semibold">
-                      Most Popular
-                    </div>
+                    <>
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 rounded-3xl" />
+                      <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-accent text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
+                        ⭐ Most Popular
+                      </div>
+                    </>
                   )}
-                  <div className="text-center mb-6">
-                    <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                    <div className="flex items-baseline justify-center gap-2 mb-4">
-                      <span className="text-4xl font-bold">${plan.price}</span>
-                      <span className="text-muted-foreground">/{plan.billing_period}</span>
+                  
+                  <div className="relative z-10">
+                    <div className="text-center mb-8">
+                      <h3 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors">{plan.name}</h3>
+                      <div className="flex items-baseline justify-center gap-2 mb-4">
+                        <span className="text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">${plan.price}</span>
+                        <span className="text-muted-foreground font-medium">/{plan.billing_period}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{plan.description}</p>
                     </div>
-                    <p className="text-sm text-muted-foreground">{plan.description}</p>
+                    
+                    <ul className="space-y-4 mb-8">
+                      {Array.isArray(plan.features) && (plan.features as string[]).map((feature: string, idx: number) => (
+                        <li key={idx} className="flex items-start gap-3 group/item">
+                          <div className="mt-0.5 h-5 w-5 rounded-full bg-gradient-to-br from-success/20 to-success/10 flex items-center justify-center flex-shrink-0 group-hover/item:scale-110 transition-transform">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-success" />
+                          </div>
+                          <span className="text-sm leading-relaxed">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    
+                    <Button
+                      onClick={() => handleSubscribeClick(plan.id)}
+                      variant={plan.is_popular ? "default" : "outline"}
+                      size="lg"
+                      className={`w-full font-semibold transition-all hover:scale-105 ${
+                        plan.is_popular 
+                          ? 'bg-gradient-to-r from-primary to-accent shadow-lg hover:shadow-xl' 
+                          : 'hover:bg-primary/5 hover:border-primary'
+                      }`}
+                    >
+                      {plan.cta_text}
+                    </Button>
                   </div>
-                  <ul className="space-y-3 mb-8">
-                    {Array.isArray(plan.features) && (plan.features as string[]).map((feature: string, idx: number) => (
-                      <li key={idx} className="flex items-center gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-accent flex-shrink-0" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Button
-                    onClick={() => handleSubscribeClick(plan.id)}
-                    variant={plan.is_popular ? "default" : "outline"}
-                    className="w-full"
-                  >
-                    {plan.cta_text}
-                  </Button>
                 </div>
               ))}
             </div>
@@ -358,67 +462,131 @@ const Index = () => {
       </div>
 
       {/* Enterprise Section */}
-      <div id="enterprise" className="bg-white py-20">
-        <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto text-center space-y-8">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-              Enterprise solutions for large teams
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Custom pricing, dedicated support, and advanced security features for organizations with complex needs
-            </p>
-            <div className="grid md:grid-cols-3 gap-8 pt-8">
-              <div className="text-center">
-                <Shield className="h-12 w-12 text-accent mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Advanced Security</h3>
-                <p className="text-sm text-muted-foreground">
-                  SSO, SAML, and enterprise-grade data protection
-                </p>
+      <div id="enterprise" className="relative overflow-hidden bg-gradient-to-br from-secondary/50 to-background py-28">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,hsl(184_91%_17%_/_0.08),transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,hsl(6_78%_57%_/_0.06),transparent_70%)]" />
+        
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-20 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
+                <Star className="h-4 w-4 text-primary animate-pulse" />
+                <span className="text-sm font-semibold text-primary">Enterprise Grade</span>
               </div>
-              <div className="text-center">
-                <Star className="h-12 w-12 text-accent mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Premium Support</h3>
-                <p className="text-sm text-muted-foreground">
-                  Dedicated account manager and 24/7 support
-                </p>
-              </div>
-              <div className="text-center">
-                <Zap className="h-12 w-12 text-accent mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Custom Features</h3>
-                <p className="text-sm text-muted-foreground">
-                  Tailored integrations and workflows for your business
-                </p>
-              </div>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+                <span className="text-foreground">Built for</span>
+                <br />
+                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  Global Enterprises
+                </span>
+              </h2>
+              <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
+                Custom solutions, dedicated support, and enterprise-grade security 
+                for organizations managing complex social media operations at scale
+              </p>
             </div>
-            <Button
-              size="lg"
-              onClick={() => navigate("/auth")}
-              className="text-base font-semibold px-8 h-12"
-            >
-              Contact enterprise sales
-            </Button>
+            
+            <div className="grid md:grid-cols-3 gap-8 mb-16">
+              {[
+                { 
+                  icon: Shield, 
+                  title: "Advanced Security", 
+                  description: "SSO, SAML, custom integrations, and enterprise-grade data protection with SOC 2 compliance",
+                  gradient: "from-primary/10 to-primary/5"
+                },
+                { 
+                  icon: Star, 
+                  title: "Premium Support", 
+                  description: "Dedicated account manager, 24/7 priority support, onboarding assistance, and training programs",
+                  gradient: "from-accent/10 to-accent/5"
+                },
+                { 
+                  icon: Zap, 
+                  title: "Custom Solutions", 
+                  description: "Tailored integrations, custom workflows, API access, and white-label options for your brand",
+                  gradient: "from-primary/10 to-accent/5"
+                }
+              ].map((item, i) => (
+                <div 
+                  key={i}
+                  className="group p-8 rounded-3xl bg-white border-2 border-border hover:border-primary/30 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 animate-in fade-in-50 slide-in-from-bottom-6"
+                  style={{ animationDelay: `${i * 150}ms` }}
+                >
+                  <div className={`h-16 w-16 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}>
+                    <item.icon className="h-8 w-8 text-primary group-hover:text-accent transition-colors duration-500" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">{item.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{item.description}</p>
+                </div>
+              ))}
+            </div>
+            
+            <div className="text-center animate-in fade-in-50 duration-700 delay-500">
+              <Button
+                size="lg"
+                onClick={() => navigate("/auth")}
+                className="text-lg font-semibold px-12 h-16 rounded-2xl bg-gradient-to-r from-primary to-accent shadow-2xl hover:shadow-3xl transition-all hover:scale-105"
+              >
+                Contact Enterprise Sales
+              </Button>
+              <p className="mt-6 text-sm text-muted-foreground">
+                Join Fortune 500 companies already transforming their social media operations
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-b from-pink-50 to-white py-20">
-        <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto text-center space-y-8">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-              Ready to transform your social media?
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              Join thousands of businesses already growing with SocialHub
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+      <div className="relative overflow-hidden py-24">
+        {/* Gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-glow to-accent" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,hsl(0_0%_100%_/_0.1),transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,hsl(0_0%_100%_/_0.08),transparent_70%)]" />
+        
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="max-w-4xl mx-auto text-center space-y-10">
+            <div className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+                Ready to Transform Your
+                <br />
+                Social Media Presence?
+              </h2>
+              <p className="text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
+                Join thousands of successful businesses who are already growing faster 
+                with SocialHub's intelligent automation and analytics.
+              </p>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-in fade-in-50 slide-in-from-bottom-4 duration-700 delay-200">
               <Button
                 size="lg"
                 onClick={() => navigate("/auth")}
-                className="text-base font-semibold px-8 h-12"
+                className="text-base font-semibold px-10 h-14 rounded-xl bg-white text-primary hover:bg-white/90 shadow-2xl hover:shadow-3xl transition-all hover:scale-105"
               >
-                Get started for free
+                Start Your Free 14-Day Trial
               </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => navigate("/auth")}
+                className="text-base font-semibold px-10 h-14 rounded-xl border-2 border-white text-white hover:bg-white/10 transition-all hover:scale-105"
+              >
+                Schedule a Demo
+              </Button>
+            </div>
+            
+            <div className="flex flex-wrap items-center justify-center gap-8 pt-8 animate-in fade-in-50 duration-700 delay-300">
+              {[
+                { icon: Shield, text: "Enterprise Security" },
+                { icon: Zap, text: "Lightning Fast" },
+                { icon: Star, text: "Award Winning" },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-2 text-white/90">
+                  <item.icon className="h-5 w-5" />
+                  <span className="font-medium">{item.text}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
