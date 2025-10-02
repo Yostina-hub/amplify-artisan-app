@@ -5,9 +5,25 @@ import { IndustriesDropdown } from "@/components/IndustriesDropdown";
 import { FeaturesDropdown } from "@/components/FeaturesDropdown";
 import { ResourcesDropdown } from "@/components/ResourcesDropdown";
 import { MobileMenu } from "@/components/MobileMenu";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const navigate = useNavigate();
+
+  const { data: pricingPlans, isLoading: pricingLoading } = useQuery({
+    queryKey: ['pricing-plans'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('pricing_plans')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+      
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -283,117 +299,51 @@ const Index = () => {
               Choose the plan that fits your business needs
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Professional Plan */}
-            <div className="bg-white rounded-2xl p-8 border-2 border-border hover:border-accent transition-colors">
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold mb-2">Professional</h3>
-                <div className="flex items-baseline justify-center gap-2 mb-4">
-                  <span className="text-4xl font-bold">$99</span>
-                  <span className="text-muted-foreground">/month</span>
+          {pricingLoading ? (
+            <div className="text-center py-12">Loading pricing...</div>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {pricingPlans?.map((plan) => (
+                <div
+                  key={plan.id}
+                  className={`bg-white rounded-2xl p-8 border-2 transition-colors ${
+                    plan.is_popular
+                      ? 'border-accent relative md:scale-105 shadow-xl'
+                      : 'border-border hover:border-accent'
+                  }`}
+                >
+                  {plan.is_popular && (
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-accent text-white px-4 py-1 rounded-full text-sm font-semibold">
+                      Most Popular
+                    </div>
+                  )}
+                  <div className="text-center mb-6">
+                    <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+                    <div className="flex items-baseline justify-center gap-2 mb-4">
+                      <span className="text-4xl font-bold">${plan.price}</span>
+                      <span className="text-muted-foreground">/{plan.billing_period}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{plan.description}</p>
+                  </div>
+                  <ul className="space-y-3 mb-8">
+                    {Array.isArray(plan.features) && (plan.features as string[]).map((feature: string, idx: number) => (
+                      <li key={idx} className="flex items-center gap-2">
+                        <CheckCircle2 className="h-5 w-5 text-accent flex-shrink-0" />
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Button
+                    onClick={() => navigate("/auth")}
+                    variant={plan.is_popular ? "default" : "outline"}
+                    className="w-full"
+                  >
+                    {plan.cta_text}
+                  </Button>
                 </div>
-                <p className="text-sm text-muted-foreground">Perfect for small teams</p>
-              </div>
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-accent" />
-                  <span className="text-sm">Up to 10 social accounts</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-accent" />
-                  <span className="text-sm">Unlimited scheduling</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-accent" />
-                  <span className="text-sm">Advanced analytics</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-accent" />
-                  <span className="text-sm">5 team members</span>
-                </li>
-              </ul>
-              <Button onClick={() => navigate("/auth")} variant="outline" className="w-full">
-                Start free trial
-              </Button>
+              ))}
             </div>
-
-            {/* Team Plan - Featured */}
-            <div className="bg-white rounded-2xl p-8 border-2 border-accent relative transform md:scale-105 shadow-xl">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-accent text-white px-4 py-1 rounded-full text-sm font-semibold">
-                Most Popular
-              </div>
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold mb-2">Team</h3>
-                <div className="flex items-baseline justify-center gap-2 mb-4">
-                  <span className="text-4xl font-bold">$249</span>
-                  <span className="text-muted-foreground">/month</span>
-                </div>
-                <p className="text-sm text-muted-foreground">For growing businesses</p>
-              </div>
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-accent" />
-                  <span className="text-sm">Up to 20 social accounts</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-accent" />
-                  <span className="text-sm">Everything in Professional</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-accent" />
-                  <span className="text-sm">AI content assistant</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-accent" />
-                  <span className="text-sm">10 team members</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-accent" />
-                  <span className="text-sm">Priority support</span>
-                </li>
-              </ul>
-              <Button onClick={() => navigate("/auth")} className="w-full">
-                Start free trial
-              </Button>
-            </div>
-
-            {/* Business Plan */}
-            <div className="bg-white rounded-2xl p-8 border-2 border-border hover:border-accent transition-colors">
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold mb-2">Business</h3>
-                <div className="flex items-baseline justify-center gap-2 mb-4">
-                  <span className="text-4xl font-bold">$499</span>
-                  <span className="text-muted-foreground">/month</span>
-                </div>
-                <p className="text-sm text-muted-foreground">For large organizations</p>
-              </div>
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-accent" />
-                  <span className="text-sm">Unlimited social accounts</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-accent" />
-                  <span className="text-sm">Everything in Team</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-accent" />
-                  <span className="text-sm">Custom integrations</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-accent" />
-                  <span className="text-sm">Unlimited team members</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-accent" />
-                  <span className="text-sm">Dedicated support</span>
-                </li>
-              </ul>
-              <Button onClick={() => navigate("/auth")} variant="outline" className="w-full">
-                Contact sales
-              </Button>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 

@@ -722,6 +722,72 @@ export type Database = {
         }
         Relationships: []
       }
+      pricing_plans: {
+        Row: {
+          billing_period: string | null
+          created_at: string | null
+          cta_text: string | null
+          currency: string | null
+          custom_integrations: boolean | null
+          description: string | null
+          display_order: number | null
+          features: Json | null
+          id: string
+          includes_ai: boolean | null
+          is_active: boolean | null
+          is_popular: boolean | null
+          max_social_accounts: number | null
+          max_team_members: number | null
+          name: string
+          price: number
+          slug: string
+          support_level: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          billing_period?: string | null
+          created_at?: string | null
+          cta_text?: string | null
+          currency?: string | null
+          custom_integrations?: boolean | null
+          description?: string | null
+          display_order?: number | null
+          features?: Json | null
+          id?: string
+          includes_ai?: boolean | null
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          max_social_accounts?: number | null
+          max_team_members?: number | null
+          name: string
+          price: number
+          slug: string
+          support_level?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          billing_period?: string | null
+          created_at?: string | null
+          cta_text?: string | null
+          currency?: string | null
+          custom_integrations?: boolean | null
+          description?: string | null
+          display_order?: number | null
+          features?: Json | null
+          id?: string
+          includes_ai?: boolean | null
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          max_social_accounts?: number | null
+          max_team_members?: number | null
+          name?: string
+          price?: number
+          slug?: string
+          support_level?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

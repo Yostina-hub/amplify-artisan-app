@@ -39,6 +39,7 @@ import ForcePasswordChange from "./pages/ForcePasswordChange";
 import LandingPageManager from "./pages/admin/LandingPageManager";
 import IndustryManagement from "./pages/admin/IndustryManagement";
 import Industry from "./pages/Industry";
+import PricingManagement from "./pages/admin/PricingManagement";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +79,7 @@ const App = () => (
             <Route path="/admin/reach-analytics" element={<ProtectedRoute requiredRole="admin"><Layout><ReachAnalytics /></Layout></ProtectedRoute>} />
             <Route path="/admin/landing-page" element={<ProtectedRoute requiredRole="admin"><Layout><LandingPageManager /></Layout></ProtectedRoute>} />
             <Route path="/admin/industries" element={<ProtectedRoute requiredRole="admin"><Layout><IndustryManagement /></Layout></ProtectedRoute>} />
+            <Route path="/admin/pricing" element={<ProtectedRoute requiredRole="admin"><Layout><PricingManagement /></Layout></ProtectedRoute>} />
             <Route path="/company/email-settings" element={<ProtectedRoute><Layout><CompanyEmailSettings /></Layout></ProtectedRoute>} />
             <Route path="/company/platform-subscriptions" element={<ProtectedRoute><Layout><CompanyPlatformSubscriptions /></Layout></ProtectedRoute>} />
             <Route path="/company/platform-settings" element={<ProtectedRoute><Layout><CompanyPlatformSettings /></Layout></ProtectedRoute>} />
