@@ -18,6 +18,11 @@ export default function EmailSettings() {
     id: "",
     sender_email: "",
     sender_name: "",
+    smtp_host: "",
+    smtp_port: 465,
+    smtp_username: "",
+    smtp_password: "",
+    smtp_secure: true,
     is_verified: false,
     is_active: true,
   });
@@ -51,6 +56,11 @@ export default function EmailSettings() {
         .update({
           sender_email: config.sender_email,
           sender_name: config.sender_name,
+          smtp_host: config.smtp_host,
+          smtp_port: config.smtp_port,
+          smtp_username: config.smtp_username,
+          smtp_password: config.smtp_password,
+          smtp_secure: config.smtp_secure,
           is_active: config.is_active,
         })
         .eq("id", config.id);
@@ -86,15 +96,7 @@ export default function EmailSettings() {
       <Alert>
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Make sure your sender email is verified in Resend dashboard at{" "}
-          <a
-            href="https://resend.com/domains"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline"
-          >
-            https://resend.com/domains
-          </a>
+          Configure your organization's SMTP server settings to send emails from your own email account.
         </AlertDescription>
       </Alert>
 
@@ -130,11 +132,75 @@ export default function EmailSettings() {
               onChange={(e) =>
                 setConfig({ ...config, sender_email: e.target.value })
               }
-              placeholder="no-reply@yourdomain.com"
+              placeholder="info@yourdomain.com"
             />
-            <p className="text-sm text-muted-foreground">
-              Must be a verified domain in your Resend account
-            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="smtp_host">SMTP Host</Label>
+              <Input
+                id="smtp_host"
+                value={config.smtp_host}
+                onChange={(e) =>
+                  setConfig({ ...config, smtp_host: e.target.value })
+                }
+                placeholder="mail.yourdomain.com"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="smtp_port">SMTP Port</Label>
+              <Input
+                id="smtp_port"
+                type="number"
+                value={config.smtp_port}
+                onChange={(e) =>
+                  setConfig({ ...config, smtp_port: parseInt(e.target.value) || 465 })
+                }
+                placeholder="465"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="smtp_username">SMTP Username</Label>
+            <Input
+              id="smtp_username"
+              value={config.smtp_username}
+              onChange={(e) =>
+                setConfig({ ...config, smtp_username: e.target.value })
+              }
+              placeholder="info@yourdomain.com"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="smtp_password">SMTP Password</Label>
+            <Input
+              id="smtp_password"
+              type="password"
+              value={config.smtp_password}
+              onChange={(e) =>
+                setConfig({ ...config, smtp_password: e.target.value })
+              }
+              placeholder="Your email password"
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Use SSL/TLS (Secure Connection)</Label>
+              <p className="text-sm text-muted-foreground">
+                Enable secure connection (recommended for port 465)
+              </p>
+            </div>
+            <Switch
+              checked={config.smtp_secure}
+              onCheckedChange={(checked) =>
+                setConfig({ ...config, smtp_secure: checked })
+              }
+            />
           </div>
 
           <div className="flex items-center justify-between">

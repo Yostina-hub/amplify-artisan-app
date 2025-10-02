@@ -17,6 +17,11 @@ export default function CompanyEmailSettings() {
     id: "",
     sender_email: "",
     sender_name: "",
+    smtp_host: "",
+    smtp_port: 465,
+    smtp_username: "",
+    smtp_password: "",
+    smtp_secure: true,
     is_active: true,
   });
 
@@ -74,6 +79,11 @@ export default function CompanyEmailSettings() {
           .update({
             sender_email: config.sender_email,
             sender_name: config.sender_name,
+            smtp_host: config.smtp_host,
+            smtp_port: config.smtp_port,
+            smtp_username: config.smtp_username,
+            smtp_password: config.smtp_password,
+            smtp_secure: config.smtp_secure,
             is_active: config.is_active,
           })
           .eq("id", config.id);
@@ -87,6 +97,11 @@ export default function CompanyEmailSettings() {
             company_id: companyId,
             sender_email: config.sender_email,
             sender_name: config.sender_name,
+            smtp_host: config.smtp_host,
+            smtp_port: config.smtp_port,
+            smtp_username: config.smtp_username,
+            smtp_password: config.smtp_password,
+            smtp_secure: config.smtp_secure,
             is_active: config.is_active,
           });
 
@@ -123,7 +138,7 @@ export default function CompanyEmailSettings() {
       <Alert>
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Your email domain must be verified in Resend. Contact your system administrator if you need help.
+          Configure your company's SMTP server settings to send emails from your own email account.
         </AlertDescription>
       </Alert>
 
@@ -159,11 +174,75 @@ export default function CompanyEmailSettings() {
               onChange={(e) =>
                 setConfig({ ...config, sender_email: e.target.value })
               }
-              placeholder="notifications@yourcompany.com"
+              placeholder="info@yourcompany.com"
             />
-            <p className="text-sm text-muted-foreground">
-              Must be a verified domain
-            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="smtp_host">SMTP Host</Label>
+              <Input
+                id="smtp_host"
+                value={config.smtp_host}
+                onChange={(e) =>
+                  setConfig({ ...config, smtp_host: e.target.value })
+                }
+                placeholder="mail.yourcompany.com"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="smtp_port">SMTP Port</Label>
+              <Input
+                id="smtp_port"
+                type="number"
+                value={config.smtp_port}
+                onChange={(e) =>
+                  setConfig({ ...config, smtp_port: parseInt(e.target.value) || 465 })
+                }
+                placeholder="465"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="smtp_username">SMTP Username</Label>
+            <Input
+              id="smtp_username"
+              value={config.smtp_username}
+              onChange={(e) =>
+                setConfig({ ...config, smtp_username: e.target.value })
+              }
+              placeholder="info@yourcompany.com"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="smtp_password">SMTP Password</Label>
+            <Input
+              id="smtp_password"
+              type="password"
+              value={config.smtp_password}
+              onChange={(e) =>
+                setConfig({ ...config, smtp_password: e.target.value })
+              }
+              placeholder="Your email password"
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Use SSL/TLS (Secure Connection)</Label>
+              <p className="text-sm text-muted-foreground">
+                Enable secure connection (recommended for port 465)
+              </p>
+            </div>
+            <Switch
+              checked={config.smtp_secure}
+              onCheckedChange={(checked) =>
+                setConfig({ ...config, smtp_secure: checked })
+              }
+            />
           </div>
 
           <div className="flex items-center justify-between">

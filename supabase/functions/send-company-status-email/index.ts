@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
-import { Resend } from "https://esm.sh/resend@2.0.0";
+import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,12 +20,6 @@ serve(async (req: Request): Promise<Response> => {
   }
 
   try {
-    const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    if (!resendApiKey) {
-      throw new Error("RESEND_API_KEY is not configured");
-    }
-
-    const resend = new Resend(resendApiKey);
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -57,6 +51,10 @@ serve(async (req: Request): Promise<Response> => {
       throw new Error("Email configuration not found or inactive");
     }
 
+    if (!emailConfig.smtp_host || !emailConfig.smtp_username || !emailConfig.smtp_password) {
+      throw new Error("SMTP configuration is incomplete. Please configure SMTP settings in Email Settings.");
+    }
+
     // Prepare email content
     const subject = status === "approved" 
       ? "Your Company Application Has Been Approved!" 
@@ -69,7 +67,7 @@ serve(async (req: Request): Promise<Response> => {
         <p>You can now access all features of our platform.</p>
         <p>If you have any questions, feel free to contact us.</p>
         <br>
-        <p>Best regards,<br>${emailConfig.sender_name}</p>
+        <p>Best regards,<br>${emailConfig.sender_name || 'The Team'}</p>
       `
       : `
         <h1>Update on Your Application</h1>
@@ -78,21 +76,36 @@ serve(async (req: Request): Promise<Response> => {
         ${rejectionReason ? `<p><strong>Reason:</strong> ${rejectionReason}</p>` : ""}
         <p>If you have any questions or would like to discuss this further, please don't hesitate to contact us.</p>
         <br>
-        <p>Best regards,<br>${emailConfig.sender_name}</p>
+        <p>Best regards,<br>${emailConfig.sender_name || 'The Team'}</p>
       `;
 
-    // Send email
-    const emailResponse = await resend.emails.send({
-      from: `${emailConfig.sender_name} <${emailConfig.sender_email}>`,
-      to: [company.email],
+    // Send email using SMTP
+    const client = new SMTPClient({
+      connection: {
+        hostname: emailConfig.smtp_host,
+        port: emailConfig.smtp_port || 465,
+        tls: emailConfig.smtp_secure !== false,
+        auth: {
+          username: emailConfig.smtp_username,
+          password: emailConfig.smtp_password,
+        },
+      },
+    });
+
+    await client.send({
+      from: emailConfig.sender_email || emailConfig.smtp_username,
+      to: company.email,
       subject: subject,
+      content: htmlContent,
       html: htmlContent,
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    await client.close();
+
+    console.log("Email sent successfully to:", company.email);
 
     return new Response(
-      JSON.stringify({ success: true, emailResponse }),
+      JSON.stringify({ success: true, message: "Email sent successfully" }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
