@@ -20,6 +20,7 @@ import ContentModeration from "./pages/admin/ContentModeration";
 import SystemSettings from "./pages/admin/SystemSettings";
 import SocialMediaMetrics from "./pages/SocialMediaMetrics";
 import AdCampaigns from "./pages/AdCampaigns";
+import MentionsTracking from "./pages/MentionsTracking";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/social-metrics" element={<ProtectedRoute><Layout><SocialMediaMetrics /></Layout></ProtectedRoute>} />
             <Route path="/ad-campaigns" element={<ProtectedRoute><Layout><AdCampaigns /></Layout></ProtectedRoute>} />
             <Route path="/brand-monitoring" element={<ProtectedRoute><Layout><BrandMonitoring /></Layout></ProtectedRoute>} />
+            <Route path="/mentions" element={<ProtectedRoute><Layout><MentionsTracking /></Layout></ProtectedRoute>} />
             <Route path="/agents" element={<ProtectedRoute requiredRole="agent"><Layout><Agents /></Layout></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><Layout><AdminDashboard /></Layout></ProtectedRoute>} />
             <Route path="/admin/users" element={<ProtectedRoute requiredRole="admin"><Layout><UserManagement /></Layout></ProtectedRoute>} />
