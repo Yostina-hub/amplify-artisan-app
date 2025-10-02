@@ -38,6 +38,7 @@ import ReachAnalytics from "./pages/admin/ReachAnalytics";
 import ForcePasswordChange from "./pages/ForcePasswordChange";
 import LandingPageManager from "./pages/admin/LandingPageManager";
 import IndustryManagement from "./pages/admin/IndustryManagement";
+import Industry from "./pages/Industry";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/industry/:slug" element={<Industry />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/company-application" element={<CompanyApplication />} />
             <Route path="/pending-approval" element={<ProtectedRoute allowUnapproved><Layout><PendingApproval /></Layout></ProtectedRoute>} />

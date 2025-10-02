@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const iconMap: Record<string, any> = {
   Building2,
@@ -22,6 +23,8 @@ const iconMap: Record<string, any> = {
 };
 
 export const IndustriesDropdown = () => {
+  const navigate = useNavigate();
+  
   const { data: industries, isLoading } = useQuery({
     queryKey: ['industries'],
     queryFn: async () => {
@@ -55,6 +58,7 @@ export const IndustriesDropdown = () => {
                   <DropdownMenuItem
                     key={industry.id}
                     className="flex flex-col items-start gap-2 p-4 cursor-pointer hover:bg-secondary rounded-md"
+                    onClick={() => navigate(`/industry/${industry.slug}`)}
                   >
                     <div className="flex items-center gap-3 w-full">
                       <Icon className="h-5 w-5 text-accent flex-shrink-0" />
