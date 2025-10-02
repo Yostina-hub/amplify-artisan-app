@@ -230,12 +230,13 @@ export default function CompanyManagement() {
         return;
       }
 
-      // Get roles for these users
+      // Get roles for these users scoped to this company
       const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
         .select('*')
         .in('user_id', profiles.map(p => p.id))
-        .eq('role', 'admin');
+        .eq('role', 'admin')
+        .eq('company_id', companyId);
 
       if (rolesError) throw rolesError;
 

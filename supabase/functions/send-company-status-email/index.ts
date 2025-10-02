@@ -142,6 +142,37 @@ serve(async (req: Request): Promise<Response> => {
           console.error("Error updating existing user password:", updateErr);
           throw new Error(`Failed to set temporary password: ${updateErr.message}`);
         }
+
+        // Ensure profile exists and is linked to the company
+        const { error: upsertProfileError } = await supabase
+          .from("profiles")
+          .upsert(
+            {
+              id: existingUser.id,
+              email: existingUser.email ?? company.email,
+              full_name: (existingUser.user_metadata as any)?.full_name || company.name,
+              company_id: company.id,
+            },
+            { onConflict: "id" }
+          );
+        if (upsertProfileError) {
+          console.error("Error upserting profile:", upsertProfileError);
+        }
+
+        // Ensure the user has the company admin role
+        const { error: upsertRoleError } = await supabase
+          .from("user_roles")
+          .upsert(
+            {
+              user_id: existingUser.id,
+              role: "admin",
+              company_id: company.id,
+            },
+            { onConflict: "user_id,role" }
+          );
+        if (upsertRoleError) {
+          console.error("Error upserting user role:", upsertRoleError);
+        }
       }
     }
 
