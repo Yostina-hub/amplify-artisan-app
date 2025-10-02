@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Save, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import * as Icons from "lucide-react";
+import { platformConfigSchema } from "@/lib/validations";
 
 interface Platform {
   id: string;
@@ -113,17 +114,24 @@ export default function CompanyPlatformSettings() {
       setSaving(platformId);
       const config = configs[platformId];
 
+      // Validate input
+      const validationResult = platformConfigSchema.safeParse(config);
+      if (!validationResult.success) {
+        const firstError = validationResult.error.errors[0];
+        throw new Error(firstError.message);
+      }
+
       if (config?.id) {
         // Update existing
         const { error } = await supabase
           .from("company_platform_configs")
           .update({
-            client_id: config.client_id,
-            client_secret: config.client_secret,
-            api_key: config.api_key,
-            api_secret: config.api_secret,
-            redirect_url: config.redirect_url,
-            webhook_url: config.webhook_url,
+            client_id: validationResult.data.client_id,
+            client_secret: validationResult.data.client_secret,
+            api_key: validationResult.data.api_key,
+            api_secret: validationResult.data.api_secret,
+            redirect_url: validationResult.data.redirect_url,
+            webhook_url: validationResult.data.webhook_url,
             is_active: config.is_active,
           })
           .eq("id", config.id);
@@ -136,7 +144,8 @@ export default function CompanyPlatformSettings() {
           .insert([{
             company_id: companyId,
             platform_id: platformId,
-            ...config,
+            ...validationResult.data,
+            is_active: config.is_active,
           }]);
 
         if (error) throw error;

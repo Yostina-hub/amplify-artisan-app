@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import * as Icons from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
+import { querySocialMediaAccountsSafe } from "@/lib/safeQuery";
 
 type SocialAccount = {
   id: string;
@@ -38,7 +39,7 @@ export default function Settings() {
   const fetchData = async () => {
     try {
       const [accountsRes, platformsRes] = await Promise.all([
-        supabase.from('social_media_accounts').select('*'),
+        querySocialMediaAccountsSafe().select('*'),
         supabase.from('social_platforms').select('id, name, display_name, icon_name').eq('is_active', true),
       ]);
       

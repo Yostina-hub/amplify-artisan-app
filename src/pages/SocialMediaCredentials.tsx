@@ -9,6 +9,8 @@ import { Loader2, Plus, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import * as Icons from "lucide-react";
+import { socialMediaAccountSchema } from "@/lib/validations";
+import { querySocialMediaAccountsSafe } from "@/lib/safeQuery";
 
 interface Platform {
   id: string;
@@ -75,8 +77,7 @@ export default function SocialMediaCredentials() {
           .filter(Boolean) || [];
       }
 
-      const { data: credentialsData, error: credsError } = await supabase
-        .from("social_media_accounts")
+      const { data: credentialsData, error: credsError } = await querySocialMediaAccountsSafe()
         .select("id, platform, account_name");
 
       if (credsError) throw credsError;
@@ -98,25 +99,32 @@ export default function SocialMediaCredentials() {
     if (!selectedPlatform) return;
 
     try {
+      // Validate input
+      const validationResult = socialMediaAccountSchema.safeParse(formData);
+      if (!validationResult.success) {
+        const firstError = validationResult.error.errors[0];
+        throw new Error(firstError.message);
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
       const insertData: any = {
         user_id: user.id,
         platform: selectedPlatform.name,
-        account_name: formData.account_name,
-        account_id: formData.account_name,
+        account_name: validationResult.data.account_name,
+        account_id: validationResult.data.account_name,
         is_active: true,
       };
 
       if (selectedPlatform.requires_oauth) {
-        insertData.access_token = formData.access_token;
-        insertData.refresh_token = formData.refresh_token;
+        insertData.access_token = validationResult.data.access_token;
+        insertData.refresh_token = validationResult.data.refresh_token;
       }
 
       if (selectedPlatform.requires_api_key) {
-        insertData.access_token = formData.api_key;
-        insertData.refresh_token = formData.api_secret;
+        insertData.access_token = validationResult.data.api_key;
+        insertData.refresh_token = validationResult.data.api_secret;
       }
 
       const { error } = await supabase.from("social_media_accounts").insert([insertData]);

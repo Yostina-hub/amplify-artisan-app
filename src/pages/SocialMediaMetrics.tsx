@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { querySocialMediaAccountsSafe } from "@/lib/safeQuery";
 
 type Comment = {
   id: string;
@@ -49,7 +50,7 @@ export default function SocialMediaMetrics() {
   const fetchData = async () => {
     try {
       const [accountsRes, metricsRes, commentsRes] = await Promise.all([
-        supabase.from('social_media_accounts').select('*').eq('is_active', true),
+        querySocialMediaAccountsSafe().select('*').eq('is_active', true),
         supabase.from('social_media_metrics').select('*'),
         supabase.from('social_media_comments').select('*').order('created_at', { ascending: false }),
       ]);
