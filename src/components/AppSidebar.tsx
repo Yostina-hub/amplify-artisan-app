@@ -54,8 +54,9 @@ export function AppSidebar() {
 const { hasRole, roles, isCompanyAdmin, isSuperAdmin } = useAuth();
   const isCollapsed = state === "collapsed";
 
-  console.log('AppSidebar - User roles:', roles);
+console.log('AppSidebar - User roles:', roles);
   console.log('AppSidebar - Is super admin:', isSuperAdmin);
+  console.log('AppSidebar - Is company admin:', isCompanyAdmin);
 
   return (
     <Sidebar collapsible="icon">
@@ -155,7 +156,7 @@ const { hasRole, roles, isCompanyAdmin, isSuperAdmin } = useAuth();
           </SidebarGroup>
         )}
 
-        {hasRole('admin') && (
+{isSuperAdmin && (
           <SidebarGroup>
             <SidebarGroupLabel>Admin</SidebarGroupLabel>
             <SidebarGroupContent>

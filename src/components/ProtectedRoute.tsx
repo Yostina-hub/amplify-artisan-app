@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute = ({ children, requiredRole, allowUnapproved }: ProtectedRouteProps) => {
-  const { user, loading, hasRole, roles } = useAuth();
+  const { user, loading, hasRole, roles, isSuperAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -18,17 +18,21 @@ export const ProtectedRoute = ({ children, requiredRole, allowUnapproved }: Prot
 
   useEffect(() => {
     if (!loading) {
+      const isAllowedRole = requiredRole
+        ? (requiredRole === 'admin' ? isSuperAdmin : hasRole(requiredRole))
+        : true;
+
       if (!user) {
         navigate('/auth');
       } else if (forcingPasswordChange && location.pathname !== '/force-password') {
         navigate('/force-password');
-      } else if (requiredRole && !hasRole(requiredRole)) {
+      } else if (requiredRole && !isAllowedRole) {
         navigate('/');
       } else if (!requiredRole && !allowUnapproved && roles.length === 0) {
         navigate('/pending-approval');
       }
     }
-  }, [user, loading, requiredRole, hasRole, roles, allowUnapproved, navigate, forcingPasswordChange, location.pathname]);
+  }, [user, loading, requiredRole, hasRole, roles, allowUnapproved, navigate, forcingPasswordChange, location.pathname, isSuperAdmin]);
 
   if (loading) {
     return (
@@ -38,7 +42,7 @@ export const ProtectedRoute = ({ children, requiredRole, allowUnapproved }: Prot
     );
   }
 
-  if (!user || (forcingPasswordChange && location.pathname !== '/force-password') || (requiredRole && !hasRole(requiredRole)) || (!requiredRole && !allowUnapproved && roles.length === 0)) {
+  if (!user || (forcingPasswordChange && location.pathname !== '/force-password') || (requiredRole && !(requiredRole === 'admin' ? isSuperAdmin : hasRole(requiredRole))) || (!requiredRole && !allowUnapproved && roles.length === 0)) {
     return null;
   }
 
