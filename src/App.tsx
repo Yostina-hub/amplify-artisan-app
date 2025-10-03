@@ -42,6 +42,8 @@ import Industry from "./pages/Industry";
 import PricingManagement from "./pages/admin/PricingManagement";
 import SubscriptionManagement from "./pages/admin/SubscriptionManagement";
 import TrialSettings from "./pages/admin/TrialSettings";
+import AuditLog from "./pages/admin/AuditLog";
+import CompanyAuditLog from "./pages/CompanyAuditLog";
 
 const queryClient = new QueryClient();
 
@@ -84,7 +86,9 @@ const App = () => (
             <Route path="/admin/pricing" element={<ProtectedRoute requiredRole="admin"><Layout><PricingManagement /></Layout></ProtectedRoute>} />
             <Route path="/admin/subscriptions" element={<ProtectedRoute requiredRole="admin"><Layout><SubscriptionManagement /></Layout></ProtectedRoute>} />
             <Route path="/admin/trial-settings" element={<ProtectedRoute requiredRole="admin"><Layout><TrialSettings /></Layout></ProtectedRoute>} />
+            <Route path="/admin/audit-log" element={<ProtectedRoute requiredRole="admin"><Layout><AuditLog /></Layout></ProtectedRoute>} />
             <Route path="/company/email-settings" element={<ProtectedRoute><Layout><CompanyEmailSettings /></Layout></ProtectedRoute>} />
+            <Route path="/company/audit-log" element={<ProtectedRoute><Layout><CompanyAuditLog /></Layout></ProtectedRoute>} />
             <Route path="/company/platform-subscriptions" element={<ProtectedRoute><Layout><CompanyPlatformSubscriptions /></Layout></ProtectedRoute>} />
             <Route path="/company/platform-settings" element={<ProtectedRoute><Layout><CompanyPlatformSettings /></Layout></ProtectedRoute>} />
             <Route path="/social-accounts" element={<ProtectedRoute><Layout><SocialMediaCredentials /></Layout></ProtectedRoute>} />

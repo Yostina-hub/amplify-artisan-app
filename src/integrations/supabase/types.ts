@@ -1561,6 +1561,31 @@ export type Database = {
       }
     }
     Views: {
+      audit_log_view: {
+        Row: {
+          action: string | null
+          company_id: string | null
+          created_at: string | null
+          details: Json | null
+          id: string | null
+          ip_address: string | null
+          record_id: string | null
+          table_name: string | null
+          user_agent: string | null
+          user_email: string | null
+          user_id: string | null
+          user_name: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_configurations_safe: {
         Row: {
           company_id: string | null

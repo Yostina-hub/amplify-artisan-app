@@ -1,4 +1,4 @@
-import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2, Mail, Link2, Globe, Key, Package, BarChart2, Layers, DollarSign, CreditCard } from "lucide-react";
+import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2, Mail, Link2, Globe, Key, Package, BarChart2, Layers, DollarSign, CreditCard, FileSearch } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -38,6 +38,7 @@ const companyAdminItems = [
   { title: "Company Email Settings", url: "/company/email-settings", icon: Mail },
   { title: "Platform Subscriptions", url: "/company/platform-subscriptions", icon: Package },
   { title: "Platform API Settings", url: "/company/platform-settings", icon: Key },
+  { title: "Audit Log", url: "/company/audit-log", icon: FileSearch },
 ];
 
 const adminItems = [
@@ -55,6 +56,7 @@ const adminItems = [
   { title: "Landing Page Manager", url: "/admin/landing-page", icon: FileText },
   { title: "Email Settings", url: "/admin/email-settings", icon: Mail },
   { title: "System Settings", url: "/admin/settings", icon: Cog },
+  { title: "Audit Log", url: "/admin/audit-log", icon: FileSearch },
 ];
 
 export function AppSidebar() {
