@@ -152,12 +152,12 @@ export function Footer() {
               <span className="font-semibold text-foreground">Lemat Technology</span>
             </p>
             <div className="flex gap-6">
-              <a href="#" className="text-sm text-muted-foreground hover:text-accent transition-colors">
+              <Link to="/privacy-policy" className="text-sm text-muted-foreground hover:text-accent transition-colors">
                 Privacy Policy
-              </a>
-              <a href="#" className="text-sm text-muted-foreground hover:text-accent transition-colors">
+              </Link>
+              <Link to="/terms-of-service" className="text-sm text-muted-foreground hover:text-accent transition-colors">
                 Terms of Service
-              </a>
+              </Link>
               <a href="#" className="text-sm text-muted-foreground hover:text-accent transition-colors">
                 Cookie Policy
               </a>
