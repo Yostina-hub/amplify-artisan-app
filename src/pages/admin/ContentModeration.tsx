@@ -368,7 +368,6 @@ export default function ContentModeration() {
                       </Button>
                       <Button
                         size="sm"
-                        className="bg-success hover:bg-success/90"
                         onClick={() => handleApprove(post.id)}
                       >
                         <CheckCircle className="h-4 w-4 mr-2" />
@@ -456,7 +455,6 @@ export default function ContentModeration() {
                       </Button>
                       <Button
                         size="sm"
-                        className="bg-success hover:bg-success/90"
                         onClick={() => handleApprove(post.id)}
                       >
                         <CheckCircle className="h-4 w-4 mr-2" />
@@ -615,7 +613,7 @@ export default function ContentModeration() {
                   Close
                 </Button>
                 <Button
-                  className="bg-success hover:bg-success/90"
+                  variant="default"
                   onClick={() => {
                     handleApprove(selectedPost.id);
                     setIsDetailsOpen(false);
