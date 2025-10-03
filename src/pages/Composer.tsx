@@ -125,9 +125,11 @@ export default function Composer() {
         }
       }
 
-      // Add external media links
-      if (mediaLinks.length > 0) {
-        for (const link of mediaLinks) {
+      // Add external media links (including current input if not added yet)
+      const pendingLink = linkInput?.trim() ? [linkInput.trim()] : [];
+      const allLinks = [...mediaLinks, ...pendingLink];
+      if (allLinks.length > 0) {
+        for (const link of allLinks) {
           // Detect media type based on URL
           let type = 'link';
           if (link.includes('youtube.com') || link.includes('youtu.be')) {
@@ -142,7 +144,7 @@ export default function Composer() {
 
           mediaUrls.push({
             url: link,
-            type: type
+            type
           });
         }
       }
