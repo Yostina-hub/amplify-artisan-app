@@ -1175,6 +1175,7 @@ export type Database = {
           flagged: boolean | null
           id: string
           likes: number | null
+          media_urls: Json | null
           metrics_last_synced_at: string | null
           moderated_at: string | null
           moderated_by: string | null
@@ -1200,6 +1201,7 @@ export type Database = {
           flagged?: boolean | null
           id?: string
           likes?: number | null
+          media_urls?: Json | null
           metrics_last_synced_at?: string | null
           moderated_at?: string | null
           moderated_by?: string | null
@@ -1225,6 +1227,7 @@ export type Database = {
           flagged?: boolean | null
           id?: string
           likes?: number | null
+          media_urls?: Json | null
           metrics_last_synced_at?: string | null
           moderated_at?: string | null
           moderated_by?: string | null

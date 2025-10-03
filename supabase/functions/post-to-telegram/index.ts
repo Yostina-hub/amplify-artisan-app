@@ -25,10 +25,10 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get post content
+    // Get post content and media
     const { data: post, error: postError } = await supabase
       .from('social_media_posts')
-      .select('content, platforms')
+      .select('content, platforms, media_urls')
       .eq('id', postId)
       .single();
 
@@ -72,32 +72,97 @@ serve(async (req) => {
       throw new Error("Telegram bot token or channel ID not configured");
     }
 
-    // Send message to Telegram
-    const telegramUrl = `https://api.telegram.org/bot${config.api_key}/sendMessage`;
-    const telegramResponse = await fetch(telegramUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        chat_id: config.channel_id,
-        text: post.content,
-        parse_mode: 'HTML',
-      }),
-    });
+    // Send message to Telegram (with or without media)
+    const mediaUrls = post.media_urls || [];
+    let telegramData;
+    let telegramUrl;
 
-    const telegramData = await telegramResponse.json();
+    if (mediaUrls.length === 0) {
+      // Send text-only message
+      telegramUrl = `https://api.telegram.org/bot${config.api_key}/sendMessage`;
+      const telegramResponse = await fetch(telegramUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chat_id: config.channel_id,
+          text: post.content,
+          parse_mode: 'HTML',
+        }),
+      });
 
-    if (!telegramResponse.ok) {
-      console.error("Telegram API error:", telegramData);
-      throw new Error(`Telegram API error: ${telegramData.description || 'Unknown error'}`);
+      telegramData = await telegramResponse.json();
+
+      if (!telegramResponse.ok) {
+        console.error("Telegram API error:", telegramData);
+        throw new Error(`Telegram API error: ${telegramData.description || 'Unknown error'}`);
+      }
+    } else if (mediaUrls.length === 1) {
+      // Send single media with caption
+      const media = mediaUrls[0];
+      const mediaType = media.type || 'photo'; // photo or video
+      
+      telegramUrl = mediaType === 'video' 
+        ? `https://api.telegram.org/bot${config.api_key}/sendVideo`
+        : `https://api.telegram.org/bot${config.api_key}/sendPhoto`;
+      
+      const telegramResponse = await fetch(telegramUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chat_id: config.channel_id,
+          [mediaType === 'video' ? 'video' : 'photo']: media.url,
+          caption: post.content,
+          parse_mode: 'HTML',
+        }),
+      });
+
+      telegramData = await telegramResponse.json();
+
+      if (!telegramResponse.ok) {
+        console.error("Telegram API error:", telegramData);
+        throw new Error(`Telegram API error: ${telegramData.description || 'Unknown error'}`);
+      }
+    } else {
+      // Send multiple media (album)
+      const mediaGroup = mediaUrls.map((media: any, index: number) => ({
+        type: media.type || 'photo',
+        media: media.url,
+        ...(index === 0 && post.content ? { caption: post.content, parse_mode: 'HTML' } : {}),
+      }));
+
+      telegramUrl = `https://api.telegram.org/bot${config.api_key}/sendMediaGroup`;
+      const telegramResponse = await fetch(telegramUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chat_id: config.channel_id,
+          media: mediaGroup,
+        }),
+      });
+
+      telegramData = await telegramResponse.json();
+
+      if (!telegramResponse.ok) {
+        console.error("Telegram API error:", telegramData);
+        throw new Error(`Telegram API error: ${telegramData.description || 'Unknown error'}`);
+      }
     }
 
     console.log("Successfully posted to Telegram:", telegramData);
 
     // Update post with Telegram message ID
+    const messageId = Array.isArray(telegramData.result) 
+      ? telegramData.result[0].message_id 
+      : telegramData.result.message_id;
+    
     const platformPostIds = {
-      telegram: telegramData.result.message_id.toString(),
+      telegram: messageId.toString(),
     };
 
     const { error: updateError } = await supabase
@@ -114,8 +179,11 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        messageId: telegramData.result.message_id,
-        chatId: telegramData.result.chat.id 
+        messageId: messageId,
+        chatId: Array.isArray(telegramData.result) 
+          ? telegramData.result[0].chat.id 
+          : telegramData.result.chat.id,
+        mediaCount: mediaUrls.length
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

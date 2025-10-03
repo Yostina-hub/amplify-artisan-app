@@ -19,6 +19,7 @@ interface Post {
   user_name?: string;
   platforms: string[];
   content: string;
+  media_urls?: Array<{ url: string; type?: string }>;
   status: string;
   flagged: boolean;
   flag_reason: string | null;
@@ -52,7 +53,7 @@ export default function ContentModeration() {
     try {
       let query = supabase
         .from('social_media_posts')
-        .select('*')
+        .select('*, media_urls')
         .order('created_at', { ascending: false });
 
       // Filter based on role
@@ -90,6 +91,7 @@ export default function ContentModeration() {
       // Transform and categorize posts
       const transformedPosts = (data || []).map(post => ({
         ...post,
+        media_urls: (post.media_urls as any) || [],
         user_email: profileMap.get(post.user_id)?.email || 'Unknown',
         user_name: profileMap.get(post.user_id)?.full_name || 'Unknown User',
       }));
@@ -364,6 +366,19 @@ export default function ContentModeration() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <p className="text-sm line-clamp-3">{post.content}</p>
+                    {post.media_urls && post.media_urls.length > 0 && (
+                      <div className="flex gap-2 flex-wrap">
+                        {post.media_urls.map((media, idx) => (
+                          <div key={idx} className="relative w-24 h-24 rounded-lg overflow-hidden border">
+                            {media.type === 'video' ? (
+                              <video src={media.url} className="w-full h-full object-cover" />
+                            ) : (
+                              <img src={media.url} alt={`Media ${idx + 1}`} className="w-full h-full object-cover" />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     <div className="flex gap-2 flex-wrap">
                       <Button
                         size="sm"
@@ -442,6 +457,19 @@ export default function ContentModeration() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <p className="text-sm line-clamp-3">{post.content}</p>
+                    {post.media_urls && post.media_urls.length > 0 && (
+                      <div className="flex gap-2 flex-wrap">
+                        {post.media_urls.map((media, idx) => (
+                          <div key={idx} className="relative w-24 h-24 rounded-lg overflow-hidden border">
+                            {media.type === 'video' ? (
+                              <video src={media.url} className="w-full h-full object-cover" />
+                            ) : (
+                              <img src={media.url} alt={`Media ${idx + 1}`} className="w-full h-full object-cover" />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     {post.flag_reason && (
                       <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
                         <p className="text-xs text-destructive font-medium mb-1">
@@ -575,6 +603,31 @@ export default function ContentModeration() {
                   {selectedPost.content}
                 </p>
               </div>
+
+              {selectedPost.media_urls && selectedPost.media_urls.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Media</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    {selectedPost.media_urls.map((media, idx) => (
+                      <div key={idx} className="relative rounded-lg overflow-hidden border aspect-video">
+                        {media.type === 'video' ? (
+                          <video 
+                            src={media.url} 
+                            controls 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <img 
+                            src={media.url} 
+                            alt={`Media ${idx + 1}`} 
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {(selectedPost.likes || selectedPost.shares || selectedPost.views) && (
                 <div>
