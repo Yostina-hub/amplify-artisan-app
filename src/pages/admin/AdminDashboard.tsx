@@ -9,6 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AnimatedSocialShowcase } from "@/components/AnimatedSocialShowcase";
+import { AdminGrowthShowcase } from "@/components/AdminGrowthShowcase";
 
 interface DashboardStats {
   totalUsers: number;
@@ -595,6 +596,9 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Admin Growth Showcase */}
+      <AdminGrowthShowcase />
 
       {/* Animated Social Media Showcase */}
       <AnimatedSocialShowcase />
