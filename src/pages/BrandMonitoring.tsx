@@ -6,8 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Trash2, Plus, TrendingUp, MessageCircle, Hash, Eye } from "lucide-react";
+import { Trash2, Plus, TrendingUp, MessageCircle, Hash, Eye, ExternalLink, Calendar, ThumbsUp } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Label } from "@/components/ui/label";
+import { format } from "date-fns";
 
 type Keyword = {
   id: string;
@@ -45,6 +50,7 @@ export default function BrandMonitoring() {
   const [trends, setTrends] = useState<TrendingTopic[]>([]);
   const [newKeyword, setNewKeyword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [selectedMention, setSelectedMention] = useState<Mention | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -261,21 +267,119 @@ export default function BrandMonitoring() {
                         </span>
                       </div>
                       <p className="text-sm mb-2">{mention.content}</p>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Eye className="w-3 h-3" />
-                          {mention.engagement_count} engagements
-                        </span>
-                        {mention.post_url && (
-                          <a
-                            href={mention.post_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline"
-                          >
-                            View Post
-                          </a>
-                        )}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Eye className="w-3 h-3" />
+                            {mention.engagement_count} engagements
+                          </span>
+                          {mention.post_url && (
+                            <a
+                              href={mention.post_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline flex items-center gap-1"
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                              View Post
+                            </a>
+                          )}
+                        </div>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => setSelectedMention(mention)}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              Details
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                              <DialogTitle>Mention Details</DialogTitle>
+                              <DialogDescription>
+                                Complete information about this brand mention
+                              </DialogDescription>
+                            </DialogHeader>
+                            <ScrollArea className="max-h-[70vh]">
+                              <div className="space-y-6 pr-4">
+                                <div className="flex items-center gap-4">
+                                  <MessageCircle className={`h-8 w-8 ${getPlatformColor(mention.platform)}`} />
+                                  <div className="flex-1">
+                                    <h3 className="font-semibold">{mention.author_name}</h3>
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <Badge variant="outline" className="text-xs capitalize">
+                                        {mention.platform}
+                                      </Badge>
+                                      <Badge variant="outline" className="text-xs capitalize">
+                                        {mention.mention_type}
+                                      </Badge>
+                                      {mention.sentiment && (
+                                        <Badge className={`text-xs ${getSentimentColor(mention.sentiment)}`}>
+                                          {mention.sentiment}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <Separator />
+
+                                <div>
+                                  <Label className="text-muted-foreground flex items-center gap-2 mb-2">
+                                    <MessageCircle className="h-4 w-4" />
+                                    Content
+                                  </Label>
+                                  <p className="text-sm bg-muted p-4 rounded-lg">
+                                    {mention.content}
+                                  </p>
+                                </div>
+
+                                <Separator />
+
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <Label className="text-muted-foreground flex items-center gap-2 mb-2">
+                                      <Calendar className="h-3 w-3" />
+                                      Mentioned At
+                                    </Label>
+                                    <p className="font-medium">
+                                      {format(new Date(mention.mentioned_at), "PPpp")}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-muted-foreground flex items-center gap-2 mb-2">
+                                      <ThumbsUp className="h-3 w-3" />
+                                      Engagement
+                                    </Label>
+                                    <p className="font-medium">
+                                      {mention.engagement_count.toLocaleString()} interactions
+                                    </p>
+                                  </div>
+                                </div>
+
+                                {mention.post_url && (
+                                  <>
+                                    <Separator />
+                                    <div>
+                                      <Label className="text-muted-foreground mb-2 block">Original Post</Label>
+                                      <Button 
+                                        variant="outline" 
+                                        className="w-full"
+                                        onClick={() => window.open(mention.post_url!, '_blank')}
+                                      >
+                                        <ExternalLink className="h-4 w-4 mr-2" />
+                                        View Original Post on {mention.platform}
+                                      </Button>
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                            </ScrollArea>
+                          </DialogContent>
+                        </Dialog>
                       </div>
                     </div>
                   ))}

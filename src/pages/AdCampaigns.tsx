@@ -4,11 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { PlusCircle, Play, Pause, TrendingUp } from "lucide-react";
+import { PlusCircle, Play, Pause, TrendingUp, Eye, Calendar, DollarSign, MousePointer, Target } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { format } from "date-fns";
 
 type Campaign = {
   id: string;
@@ -26,6 +29,7 @@ type Campaign = {
 export default function AdCampaigns() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [newCampaign, setNewCampaign] = useState({
     name: "",
     platform: "",
@@ -129,7 +133,7 @@ export default function AdCampaigns() {
   };
 
   const calculateROI = (campaign: Campaign) => {
-    if (campaign.budget === 0) return 0;
+    if (campaign.budget === 0) return "0.0";
     const revenue = campaign.conversions * 50; // Assume $50 per conversion
     return (((revenue - campaign.budget) / campaign.budget) * 100).toFixed(1);
   };
@@ -244,26 +248,189 @@ export default function AdCampaigns() {
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
-                    {getStatusBadge(campaign.status)}
-                    {(campaign.status === 'draft' || campaign.status === 'active' || campaign.status === 'paused') && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleToggleCampaign(campaign.id, campaign.status)}
-                      >
-                        {campaign.status === 'active' ? (
-                          <>
-                            <Pause className="h-4 w-4 mr-1" />
-                            Pause
-                          </>
-                        ) : (
-                          <>
-                            <Play className="h-4 w-4 mr-1" />
-                            Start
-                          </>
-                        )}
-                      </Button>
-                    )}
+                     {getStatusBadge(campaign.status)}
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setSelectedCampaign(campaign)}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          Details
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-4xl max-h-[90vh]">
+                        <DialogHeader>
+                          <DialogTitle>{campaign.name}</DialogTitle>
+                          <DialogDescription className="capitalize">
+                            {campaign.platform} Campaign
+                          </DialogDescription>
+                        </DialogHeader>
+                        <ScrollArea className="max-h-[70vh]">
+                          <div className="space-y-6 pr-4">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                              <div className="space-y-1">
+                                <Label className="text-muted-foreground flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  Status
+                                </Label>
+                                <div>{getStatusBadge(campaign.status)}</div>
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-muted-foreground flex items-center gap-1">
+                                  <DollarSign className="h-3 w-3" />
+                                  Budget
+                                </Label>
+                                <p className="font-semibold">${campaign.budget.toLocaleString()}</p>
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-muted-foreground">Start Date</Label>
+                                <p className="font-semibold">
+                                  {format(new Date(campaign.start_date), "MMM d, yyyy")}
+                                </p>
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-muted-foreground">End Date</Label>
+                                <p className="font-semibold">
+                                  {campaign.end_date 
+                                    ? format(new Date(campaign.end_date), "MMM d, yyyy")
+                                    : "Ongoing"}
+                                </p>
+                              </div>
+                            </div>
+
+                            <Separator />
+
+                            <div>
+                              <h3 className="font-semibold mb-4 flex items-center gap-2">
+                                <Target className="h-4 w-4" />
+                                Performance Metrics
+                              </h3>
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                                <Card>
+                                  <CardHeader className="pb-2">
+                                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                                      Impressions
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <p className="text-3xl font-bold">
+                                      {campaign.impressions.toLocaleString()}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      Total views
+                                    </p>
+                                  </CardContent>
+                                </Card>
+                                <Card>
+                                  <CardHeader className="pb-2">
+                                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                                      Clicks
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <p className="text-3xl font-bold">
+                                      {campaign.clicks.toLocaleString()}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      Click-through rate: {campaign.impressions > 0 
+                                        ? ((campaign.clicks / campaign.impressions) * 100).toFixed(2)
+                                        : 0}%
+                                    </p>
+                                  </CardContent>
+                                </Card>
+                                <Card>
+                                  <CardHeader className="pb-2">
+                                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                                      Conversions
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <p className="text-3xl font-bold">{campaign.conversions}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      Conversion rate: {campaign.clicks > 0
+                                        ? ((campaign.conversions / campaign.clicks) * 100).toFixed(2)
+                                        : 0}%
+                                    </p>
+                                  </CardContent>
+                                </Card>
+                                <Card>
+                                  <CardHeader className="pb-2">
+                                    <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                                      <TrendingUp className="h-4 w-4" />
+                                      ROI
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <p className={`text-3xl font-bold ${
+                                      parseFloat(calculateROI(campaign)) > 0 
+                                        ? "text-green-600" 
+                                        : "text-red-600"
+                                    }`}>
+                                      {calculateROI(campaign)}%
+                                    </p>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      Return on investment
+                                    </p>
+                                  </CardContent>
+                                </Card>
+                              </div>
+                            </div>
+
+                            <Separator />
+
+                            <div>
+                              <h3 className="font-semibold mb-4">Cost Analysis</h3>
+                              <div className="grid grid-cols-3 gap-4">
+                                <div className="p-4 bg-muted rounded-lg">
+                                  <p className="text-sm text-muted-foreground">Cost per Click</p>
+                                  <p className="text-2xl font-bold">
+                                    ${campaign.clicks > 0 
+                                      ? (campaign.budget / campaign.clicks).toFixed(2)
+                                      : "0.00"}
+                                  </p>
+                                </div>
+                                <div className="p-4 bg-muted rounded-lg">
+                                  <p className="text-sm text-muted-foreground">Cost per Conversion</p>
+                                  <p className="text-2xl font-bold">
+                                    ${campaign.conversions > 0
+                                      ? (campaign.budget / campaign.conversions).toFixed(2)
+                                      : "0.00"}
+                                  </p>
+                                </div>
+                                <div className="p-4 bg-muted rounded-lg">
+                                  <p className="text-sm text-muted-foreground">Spent</p>
+                                  <p className="text-2xl font-bold">
+                                    ${campaign.budget.toFixed(2)}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </ScrollArea>
+                        <div className="flex justify-end gap-2 mt-4">
+                          {(campaign.status === 'draft' || campaign.status === 'active' || campaign.status === 'paused') && (
+                            <Button
+                              variant="outline"
+                              onClick={() => handleToggleCampaign(campaign.id, campaign.status)}
+                            >
+                              {campaign.status === 'active' ? (
+                                <>
+                                  <Pause className="h-4 w-4 mr-1" />
+                                  Pause Campaign
+                                </>
+                              ) : (
+                                <>
+                                  <Play className="h-4 w-4 mr-1" />
+                                  Start Campaign
+                                </>
+                              )}
+                            </Button>
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </div>
               </CardHeader>

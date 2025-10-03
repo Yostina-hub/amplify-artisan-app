@@ -11,7 +11,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Users, TrendingUp, DollarSign, Instagram, Youtube, Facebook, Twitter } from "lucide-react";
+import { Plus, Search, Users, TrendingUp, DollarSign, Instagram, Youtube, Facebook, Twitter, Eye, Mail, Globe, Hash } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { format } from "date-fns";
 
 const InfluencerMarketing = () => {
   const { user } = useAuth();
@@ -23,6 +26,8 @@ const InfluencerMarketing = () => {
   const [filterCategory, setFilterCategory] = useState("all");
   const [isAddInfluencerOpen, setIsAddInfluencerOpen] = useState(false);
   const [isAddCampaignOpen, setIsAddCampaignOpen] = useState(false);
+  const [selectedInfluencer, setSelectedInfluencer] = useState<any>(null);
+  const [selectedCampaign, setSelectedCampaign] = useState<any>(null);
 
   useEffect(() => {
     document.title = "Influencer Marketing | Amplify Artisan";
@@ -338,6 +343,137 @@ const InfluencerMarketing = () => {
                       <p className="font-semibold">${influencer.avg_post_price}</p>
                     </div>
                   )}
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full mt-2"
+                        onClick={() => setSelectedInfluencer(influencer)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Details
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-3xl">
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center gap-3">
+                          {getPlatformIcon(influencer.platform)}
+                          {influencer.name}
+                        </DialogTitle>
+                        <p className="text-sm text-muted-foreground">{influencer.platform_handle}</p>
+                      </DialogHeader>
+                      <ScrollArea className="max-h-[70vh]">
+                        <div className="space-y-6 pr-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <Card>
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm text-muted-foreground">Followers</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <p className="text-3xl font-bold">
+                                  {influencer.follower_count.toLocaleString()}
+                                </p>
+                              </CardContent>
+                            </Card>
+                            <Card>
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm text-muted-foreground">Engagement Rate</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <p className="text-3xl font-bold">{influencer.engagement_rate}%</p>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          <Separator />
+
+                          <div className="space-y-4">
+                            <h3 className="font-semibold">Profile Information</h3>
+                            <div className="grid gap-3">
+                              {influencer.category && (
+                                <div className="flex items-center gap-2">
+                                  <Hash className="h-4 w-4 text-muted-foreground" />
+                                  <div>
+                                    <Label className="text-muted-foreground">Category</Label>
+                                    <p className="font-medium capitalize">{influencer.category}</p>
+                                  </div>
+                                </div>
+                              )}
+                              {influencer.email && (
+                                <div className="flex items-center gap-2">
+                                  <Mail className="h-4 w-4 text-muted-foreground" />
+                                  <div>
+                                    <Label className="text-muted-foreground">Email</Label>
+                                    <p className="font-medium">{influencer.email}</p>
+                                  </div>
+                                </div>
+                              )}
+                              {influencer.platform_url && (
+                                <div className="flex items-center gap-2">
+                                  <Globe className="h-4 w-4 text-muted-foreground" />
+                                  <div>
+                                    <Label className="text-muted-foreground">Profile URL</Label>
+                                    <a 
+                                      href={influencer.platform_url} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="font-medium text-primary hover:underline"
+                                    >
+                                      View Profile
+                                    </a>
+                                  </div>
+                                </div>
+                              )}
+                              {influencer.avg_post_price && (
+                                <div className="flex items-center gap-2">
+                                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                                  <div>
+                                    <Label className="text-muted-foreground">Average Post Price</Label>
+                                    <p className="font-medium">${influencer.avg_post_price}</p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {influencer.bio && (
+                            <>
+                              <Separator />
+                              <div>
+                                <h3 className="font-semibold mb-2">Bio</h3>
+                                <p className="text-sm text-muted-foreground">{influencer.bio}</p>
+                              </div>
+                            </>
+                          )}
+
+                          <Separator />
+
+                          <div>
+                            <h3 className="font-semibold mb-3">Statistics</h3>
+                            <div className="grid grid-cols-3 gap-4">
+                              <div className="p-4 bg-muted rounded-lg">
+                                <p className="text-sm text-muted-foreground">Est. Reach</p>
+                                <p className="text-2xl font-bold">
+                                  {(influencer.follower_count * (influencer.engagement_rate / 100)).toLocaleString()}
+                                </p>
+                              </div>
+                              <div className="p-4 bg-muted rounded-lg">
+                                <p className="text-sm text-muted-foreground">Status</p>
+                                <Badge className="mt-2">{influencer.status}</Badge>
+                              </div>
+                              <div className="p-4 bg-muted rounded-lg">
+                                <p className="text-sm text-muted-foreground">Added On</p>
+                                <p className="text-sm font-medium mt-1">
+                                  {format(new Date(influencer.created_at), "MMM d, yyyy")}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </ScrollArea>
+                    </DialogContent>
+                  </Dialog>
                 </CardContent>
               </Card>
             ))}
