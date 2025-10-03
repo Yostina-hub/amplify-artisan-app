@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AnimatedSocialShowcase } from "@/components/AnimatedSocialShowcase";
 
 interface DashboardStats {
   totalUsers: number;
@@ -648,7 +649,10 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      <Card className="border-2 hover:shadow-xl transition-all duration-300 hover:border-primary/20 animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-900">
+      {/* Animated Social Media Showcase */}
+      <AnimatedSocialShowcase />
+
+      <Card className="border-2 hover:shadow-xl transition-all duration-300 hover:border-primary/20 animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-[1000ms]">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
