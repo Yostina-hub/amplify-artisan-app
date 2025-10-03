@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Clock, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { SubscriptionForm } from "./SubscriptionForm";
 
 interface TrialInfo {
   is_trial: boolean;
@@ -16,7 +16,7 @@ interface TrialInfo {
 export const FreeTrialBanner = () => {
   const [trialInfo, setTrialInfo] = useState<TrialInfo | null>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [showUpgradeForm, setShowUpgradeForm] = useState(false);
 
   useEffect(() => {
     const fetchTrialInfo = async () => {
@@ -66,15 +66,22 @@ export const FreeTrialBanner = () => {
               <>You're experiencing our premium features. Upgrade anytime to continue after your trial ends.</>
             )}
           </AlertDescription>
-          <Button 
-            onClick={() => navigate('/')} 
-            className="mt-3"
-            variant={isExpiringSoon ? "default" : "outline"}
-          >
-            View Pricing Plans
-          </Button>
+          <div className="flex gap-2 mt-3">
+            <Button 
+              onClick={() => setShowUpgradeForm(true)} 
+              variant={isExpiringSoon ? "default" : "default"}
+              className="flex-1 sm:flex-none"
+            >
+              {isExpiringSoon ? '⚡ Upgrade Now' : 'Upgrade to Premium'}
+            </Button>
+          </div>
         </div>
       </div>
+      <SubscriptionForm 
+        open={showUpgradeForm}
+        onOpenChange={setShowUpgradeForm}
+        isUpgradeMode={true}
+      />
     </Alert>
   );
 };

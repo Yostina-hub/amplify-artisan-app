@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -15,11 +15,23 @@ interface SubscriptionFormProps {
   onOpenChange: (open: boolean) => void;
   selectedPlanId?: string;
   isTrialMode?: boolean;
+  isUpgradeMode?: boolean;
 }
 
-export const SubscriptionForm = ({ open, onOpenChange, selectedPlanId, isTrialMode = false }: SubscriptionFormProps) => {
+export const SubscriptionForm = ({ open, onOpenChange, selectedPlanId, isTrialMode = false, isUpgradeMode = false }: SubscriptionFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [userEmail, setUserEmail] = useState<string>('');
+
+  useEffect(() => {
+    if (isUpgradeMode) {
+      supabase.auth.getUser().then(({ data }) => {
+        if (data.user) {
+          setUserEmail(data.user.email || '');
+        }
+      });
+    }
+  }, [isUpgradeMode]);
 
   const { data: trialSettings } = useQuery({
     queryKey: ['trial-settings'],
@@ -65,6 +77,41 @@ export const SubscriptionForm = ({ open, onOpenChange, selectedPlanId, isTrialMo
           trial_ends_at: trialEndsAt.toISOString(),
           status: 'approved',
         };
+      }
+
+      if (isUpgradeMode) {
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+
+        // Update existing trial subscription to converted
+        const { error: updateError } = await supabase
+          .from('subscription_requests')
+          .update({ 
+            trial_converted: true,
+            status: 'payment_pending',
+            pricing_plan_id: formData.pricing_plan_id,
+            message: formData.message,
+          })
+          .eq('email', user.email)
+          .eq('is_trial', true);
+
+        if (updateError) throw updateError;
+
+        // Send upgrade confirmation email
+        const { error: emailError } = await supabase.functions.invoke('send-upgrade-confirmation', {
+          body: {
+            email: user.email,
+            fullName: formData.full_name,
+            planId: formData.pricing_plan_id,
+          },
+        });
+
+        if (emailError) {
+          console.error('Error sending upgrade confirmation:', emailError);
+        }
+
+        return; // Exit early for upgrade mode
       }
       
       const { data: requestData, error: insertError } = await supabase
@@ -136,12 +183,14 @@ export const SubscriptionForm = ({ open, onOpenChange, selectedPlanId, isTrialMo
               <CheckCircle2 className="h-8 w-8 text-green-600" />
             </div>
             <DialogTitle className="text-2xl">
-              {isTrialMode ? 'Trial Activated! 🎉' : 'Request Submitted!'}
+              {isUpgradeMode ? 'Upgrade Request Submitted! 🎉' : isTrialMode ? 'Trial Activated! 🎉' : 'Request Submitted!'}
             </DialogTitle>
             <DialogDescription className="text-base">
-              {isTrialMode 
-                ? 'Your trial account has been created! Check your email for login credentials. You can start exploring all features immediately.'
-                : 'Thank you for your interest! Our team will review your subscription request and contact you within 24-48 hours via email with approval status and payment instructions.'
+              {isUpgradeMode
+                ? 'Thank you for upgrading! Our team will review your request and send you payment instructions via email within 24 hours.'
+                : isTrialMode 
+                  ? 'Your trial account has been created! Check your email for login credentials. You can start exploring all features immediately.'
+                  : 'Thank you for your interest! Our team will review your subscription request and contact you within 24-48 hours via email with approval status and payment instructions.'
               }
             </DialogDescription>
             <Button onClick={() => {
@@ -161,13 +210,15 @@ export const SubscriptionForm = ({ open, onOpenChange, selectedPlanId, isTrialMo
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center gap-2">
-            {isTrialMode && <Sparkles className="h-6 w-6 text-primary" />}
-            {isTrialMode ? 'Start Your Free Trial' : 'Start Your Subscription'}
+            {(isTrialMode || isUpgradeMode) && <Sparkles className="h-6 w-6 text-primary" />}
+            {isUpgradeMode ? 'Upgrade to Premium' : isTrialMode ? 'Start Your Free Trial' : 'Start Your Subscription'}
           </DialogTitle>
           <DialogDescription>
-            {isTrialMode 
-              ? `Start your ${trialSettings?.trial_duration_days || 3}-day free trial instantly - no credit card required!`
-              : 'Fill out this form and our team will review your request. You\'ll receive payment instructions after approval.'
+            {isUpgradeMode
+              ? 'Choose a plan and complete the upgrade to continue enjoying premium features after your trial.'
+              : isTrialMode 
+                ? `Start your ${trialSettings?.trial_duration_days || 3}-day free trial instantly - no credit card required!`
+                : 'Fill out this form and our team will review your request. You\'ll receive payment instructions after approval.'
             }
           </DialogDescription>
         </DialogHeader>
@@ -202,59 +253,65 @@ export const SubscriptionForm = ({ open, onOpenChange, selectedPlanId, isTrialMo
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="john@example.com"
-                required
-              />
-            </div>
+            {!isUpgradeMode && (
+              <div className="space-y-2">
+                <Label htmlFor="email">Email *</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="john@example.com"
+                  required
+                />
+              </div>
+            )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number *</Label>
-              <Input
-                id="phone"
-                name="phone"
-                type="tel"
-                placeholder="+251912345678"
-                required
-              />
-            </div>
+{!isUpgradeMode && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number *</Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  placeholder="+251912345678"
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="company_name">Company Name</Label>
-              <Input
-                id="company_name"
-                name="company_name"
-                placeholder="Your Company"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="company_name">Company Name</Label>
+                <Input
+                  id="company_name"
+                  name="company_name"
+                  placeholder="Your Company"
+                />
+              </div>
             </div>
-          </div>
+          )}
 
-          <div className="space-y-2">
-            <Label htmlFor="industry">Industry</Label>
-            <Select name="industry">
-              <SelectTrigger>
-                <SelectValue placeholder="Select your industry" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="technology">Technology</SelectItem>
-                <SelectItem value="healthcare">Healthcare</SelectItem>
-                <SelectItem value="finance">Finance</SelectItem>
-                <SelectItem value="education">Education</SelectItem>
-                <SelectItem value="retail">Retail</SelectItem>
-                <SelectItem value="manufacturing">Manufacturing</SelectItem>
-                <SelectItem value="government">Government</SelectItem>
-                <SelectItem value="nonprofit">Non-Profit</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {!isUpgradeMode && (
+            <div className="space-y-2">
+              <Label htmlFor="industry">Industry</Label>
+              <Select name="industry">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select your industry" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="technology">Technology</SelectItem>
+                  <SelectItem value="healthcare">Healthcare</SelectItem>
+                  <SelectItem value="finance">Finance</SelectItem>
+                  <SelectItem value="education">Education</SelectItem>
+                  <SelectItem value="retail">Retail</SelectItem>
+                  <SelectItem value="manufacturing">Manufacturing</SelectItem>
+                  <SelectItem value="government">Government</SelectItem>
+                  <SelectItem value="nonprofit">Non-Profit</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="message">Additional Information</Label>
@@ -300,10 +357,10 @@ export const SubscriptionForm = ({ open, onOpenChange, selectedPlanId, isTrialMo
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {isTrialMode ? 'Starting Trial...' : 'Submitting...'}
+                  {isUpgradeMode ? 'Processing Upgrade...' : isTrialMode ? 'Starting Trial...' : 'Submitting...'}
                 </>
               ) : (
-                isTrialMode ? 'Start Free Trial Now' : 'Submit Request'
+                isUpgradeMode ? 'Upgrade Now' : isTrialMode ? 'Start Free Trial Now' : 'Submit Request'
               )}
             </Button>
           </div>
