@@ -30,6 +30,7 @@ interface CompanyConfig {
   api_secret: string;
   redirect_url: string;
   webhook_url: string;
+  channel_id: string;
   is_active: boolean;
 }
 
@@ -136,6 +137,7 @@ export default function CompanyPlatformSettings() {
             api_secret: validationResult.data.api_secret,
             redirect_url: validationResult.data.redirect_url,
             webhook_url: validationResult.data.webhook_url,
+            channel_id: config.channel_id,
             is_active: config.is_active,
           })
           .eq("id", config.id);
@@ -149,6 +151,7 @@ export default function CompanyPlatformSettings() {
             company_id: companyId,
             platform_id: platformId,
             ...validationResult.data,
+            channel_id: config.channel_id,
             is_active: config.is_active,
           }]);
 
@@ -251,6 +254,7 @@ export default function CompanyPlatformSettings() {
             api_secret: "",
             redirect_url: "",
             webhook_url: "",
+            channel_id: "",
             is_active: true,
           };
           const Icon = getPlatformIcon(platform.icon_name);
@@ -356,6 +360,23 @@ export default function CompanyPlatformSettings() {
                     placeholder="https://yourapp.com/webhooks"
                   />
                 </div>
+
+                {platform.name === "telegram" && (
+                  <div className="space-y-2">
+                    <Label>Channel/Group ID</Label>
+                    <Input
+                      type="text"
+                      value={config.channel_id}
+                      onChange={(e) =>
+                        updateConfig(platform.id, "channel_id", e.target.value)
+                      }
+                      placeholder="@yourchannel or -1001234567890"
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Enter your Telegram channel username (e.g., @yourchannel) or group ID
+                    </p>
+                  </div>
+                )}
 
                 <Button
                   onClick={() => handleSave(platform.id)}

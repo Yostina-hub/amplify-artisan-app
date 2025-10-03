@@ -145,6 +145,22 @@ export default function ContentModeration() {
         }).catch(err => console.error('Notification error:', err));
       }
 
+      // Post to Telegram if platform is included
+      if (post?.platforms?.includes('telegram') && post.company_id) {
+        supabase.functions.invoke('post-to-telegram', {
+          body: { postId, companyId: post.company_id }
+        }).then(({ error: telegramError }) => {
+          if (telegramError) {
+            console.error('Telegram posting error:', telegramError);
+            toast({
+              title: "Post approved",
+              description: "But Telegram posting failed. Check configuration.",
+              variant: "destructive",
+            });
+          }
+        }).catch(err => console.error('Telegram error:', err));
+      }
+
       toast({
         title: "Success",
         description: "Post approved and scheduled for publishing",

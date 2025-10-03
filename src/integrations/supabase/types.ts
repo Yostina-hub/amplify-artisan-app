@@ -254,6 +254,7 @@ export type Database = {
         Row: {
           api_key: string | null
           api_secret: string | null
+          channel_id: string | null
           client_id: string | null
           client_secret: string | null
           company_id: string
@@ -269,6 +270,7 @@ export type Database = {
         Insert: {
           api_key?: string | null
           api_secret?: string | null
+          channel_id?: string | null
           client_id?: string | null
           client_secret?: string | null
           company_id: string
@@ -284,6 +286,7 @@ export type Database = {
         Update: {
           api_key?: string | null
           api_secret?: string | null
+          channel_id?: string | null
           client_id?: string | null
           client_secret?: string | null
           company_id?: string
