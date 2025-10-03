@@ -42,28 +42,39 @@ const agentItems = [
 ];
 
 const companyAdminItems = [
-  { title: "User Management", url: "/admin/users", icon: Users },
-  { title: "Content Moderation", url: "/admin/moderation", icon: Flag },
-  { title: "Company Email Settings", url: "/company/email-settings", icon: Mail },
+  { title: "Email Settings", url: "/company/email-settings", icon: Mail },
   { title: "Platform Subscriptions", url: "/company/platform-subscriptions", icon: Package },
   { title: "Platform API Settings", url: "/company/platform-settings", icon: Key },
   { title: "Audit Log", url: "/company/audit-log", icon: FileSearch },
 ];
 
-const adminItems = [
+const adminManagementItems = [
   { title: "Admin Dashboard", url: "/admin", icon: Shield },
   { title: "Company Management", url: "/admin/companies", icon: Building2 },
   { title: "User Management", url: "/admin/users", icon: Users },
   { title: "Content Moderation", url: "/admin/moderation", icon: Flag },
+];
+
+const adminPlatformItems = [
   { title: "Social Platforms", url: "/admin/social-platforms", icon: Globe },
   { title: "Platform Subscriptions", url: "/admin/platform-subscriptions", icon: Package },
+];
+
+const adminBusinessItems = [
   { title: "Subscription Management", url: "/admin/subscriptions", icon: CreditCard },
-  { title: "Trial Settings", url: "/admin/trial-settings", icon: Settings },
-  { title: "Industry Management", url: "/admin/industries", icon: Layers },
   { title: "Pricing Management", url: "/admin/pricing", icon: DollarSign },
+  { title: "Industry Management", url: "/admin/industries", icon: Layers },
   { title: "Landing Page Manager", url: "/admin/landing-page", icon: FileText },
+];
+
+const adminConfigItems = [
   { title: "Email Settings", url: "/admin/email-settings", icon: Mail },
+  { title: "Trial Settings", url: "/admin/trial-settings", icon: Settings },
   { title: "System Settings", url: "/admin/settings", icon: Cog },
+];
+
+const adminMonitoringItems = [
+  { title: "Analytics Hub", url: "/admin/reach-analytics", icon: BarChart3 },
   { title: "Audit Log", url: "/admin/audit-log", icon: FileSearch },
 ];
 
@@ -74,6 +85,11 @@ export function AppSidebar() {
   const [analyticsOpen, setAnalyticsOpen] = useState(true);
   const [marketingOpen, setMarketingOpen] = useState(false);
   const [monitoringOpen, setMonitoringOpen] = useState(false);
+  const [adminManagementOpen, setAdminManagementOpen] = useState(true);
+  const [adminPlatformOpen, setAdminPlatformOpen] = useState(false);
+  const [adminBusinessOpen, setAdminBusinessOpen] = useState(false);
+  const [adminConfigOpen, setAdminConfigOpen] = useState(false);
+  const [adminMonitoringOpen, setAdminMonitoringOpen] = useState(false);
 
   console.log('AppSidebar - User roles:', roles);
   console.log('AppSidebar - Is super admin:', isSuperAdmin);
@@ -291,33 +307,194 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {/* Super Admin Section */}
-        {isSuperAdmin && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Admin</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {adminItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to={item.url}
-                        end
-                        className={({ isActive }) =>
-                          isActive
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                            : "hover:bg-sidebar-accent/50"
-                        }
-                      >
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+        {/* Super Admin Section - Management */}
+        {isSuperAdmin && !isCollapsed && (
+          <Collapsible open={adminManagementOpen} onOpenChange={setAdminManagementOpen}>
+            <SidebarGroup>
+              <CollapsibleTrigger className="w-full">
+                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-2 py-1 transition-colors">
+                  <span>Management</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminManagementOpen ? 'rotate-180' : ''}`} />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {adminManagementItems.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild>
+                          <NavLink
+                            to={item.url}
+                            end
+                            className={({ isActive }) =>
+                              isActive
+                                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                : "hover:bg-sidebar-accent/50"
+                            }
+                          >
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
+        )}
+
+        {/* Super Admin Section - Platforms */}
+        {isSuperAdmin && !isCollapsed && (
+          <Collapsible open={adminPlatformOpen} onOpenChange={setAdminPlatformOpen}>
+            <SidebarGroup>
+              <CollapsibleTrigger className="w-full">
+                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-2 py-1 transition-colors">
+                  <span>Platforms</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminPlatformOpen ? 'rotate-180' : ''}`} />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {adminPlatformItems.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild>
+                          <NavLink
+                            to={item.url}
+                            end
+                            className={({ isActive }) =>
+                              isActive
+                                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                : "hover:bg-sidebar-accent/50"
+                            }
+                          >
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
+        )}
+
+        {/* Super Admin Section - Business */}
+        {isSuperAdmin && !isCollapsed && (
+          <Collapsible open={adminBusinessOpen} onOpenChange={setAdminBusinessOpen}>
+            <SidebarGroup>
+              <CollapsibleTrigger className="w-full">
+                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-2 py-1 transition-colors">
+                  <span>Business</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminBusinessOpen ? 'rotate-180' : ''}`} />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {adminBusinessItems.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild>
+                          <NavLink
+                            to={item.url}
+                            end
+                            className={({ isActive }) =>
+                              isActive
+                                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                : "hover:bg-sidebar-accent/50"
+                            }
+                          >
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
+        )}
+
+        {/* Super Admin Section - Configuration */}
+        {isSuperAdmin && !isCollapsed && (
+          <Collapsible open={adminConfigOpen} onOpenChange={setAdminConfigOpen}>
+            <SidebarGroup>
+              <CollapsibleTrigger className="w-full">
+                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-2 py-1 transition-colors">
+                  <span>Configuration</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminConfigOpen ? 'rotate-180' : ''}`} />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {adminConfigItems.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild>
+                          <NavLink
+                            to={item.url}
+                            end
+                            className={({ isActive }) =>
+                              isActive
+                                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                : "hover:bg-sidebar-accent/50"
+                            }
+                          >
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
+        )}
+
+        {/* Super Admin Section - Monitoring */}
+        {isSuperAdmin && !isCollapsed && (
+          <Collapsible open={adminMonitoringOpen} onOpenChange={setAdminMonitoringOpen}>
+            <SidebarGroup>
+              <CollapsibleTrigger className="w-full">
+                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-2 py-1 transition-colors">
+                  <span>Monitoring</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminMonitoringOpen ? 'rotate-180' : ''}`} />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {adminMonitoringItems.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild>
+                          <NavLink
+                            to={item.url}
+                            end
+                            className={({ isActive }) =>
+                              isActive
+                                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                : "hover:bg-sidebar-accent/50"
+                            }
+                          >
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
         )}
       </SidebarContent>
     </Sidebar>
