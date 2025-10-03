@@ -1163,40 +1163,67 @@ export type Database = {
       }
       social_media_posts: {
         Row: {
+          clicks: number | null
           company_id: string | null
           content: string
           created_at: string | null
+          engagement_rate: number | null
           id: string
+          likes: number | null
+          metrics_last_synced_at: string | null
           platform_post_ids: Json | null
           platforms: string[]
+          reach: number | null
+          saves: number | null
           scheduled_at: string | null
+          shares: number | null
           status: string | null
           updated_at: string | null
           user_id: string
+          video_watch_time_seconds: number | null
+          views: number | null
         }
         Insert: {
+          clicks?: number | null
           company_id?: string | null
           content: string
           created_at?: string | null
+          engagement_rate?: number | null
           id?: string
+          likes?: number | null
+          metrics_last_synced_at?: string | null
           platform_post_ids?: Json | null
           platforms: string[]
+          reach?: number | null
+          saves?: number | null
           scheduled_at?: string | null
+          shares?: number | null
           status?: string | null
           updated_at?: string | null
           user_id: string
+          video_watch_time_seconds?: number | null
+          views?: number | null
         }
         Update: {
+          clicks?: number | null
           company_id?: string | null
           content?: string
           created_at?: string | null
+          engagement_rate?: number | null
           id?: string
+          likes?: number | null
+          metrics_last_synced_at?: string | null
           platform_post_ids?: Json | null
           platforms?: string[]
+          reach?: number | null
+          saves?: number | null
           scheduled_at?: string | null
+          shares?: number | null
           status?: string | null
           updated_at?: string | null
           user_id?: string
+          video_watch_time_seconds?: number | null
+          views?: number | null
         }
         Relationships: [
           {

@@ -305,6 +305,26 @@ export default function CompanyDashboard() {
         />
       </div>
 
+      {/* Quick Action - View Detailed Analytics */}
+      <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5">
+        <CardContent className="py-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <h3 className="text-lg font-semibold">Track Your Performance</h3>
+              <p className="text-sm text-muted-foreground">
+                View detailed analytics for views, shares, likes, saves, and more across all your posts
+              </p>
+            </div>
+            <Button 
+              onClick={() => navigate('/social-analytics')}
+              className="bg-gradient-to-r from-primary to-accent hover:opacity-90"
+            >
+              View Analytics
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Company Growth Showcase */}
       <CompanyGrowthShowcase />
 

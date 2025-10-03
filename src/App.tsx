@@ -46,6 +46,7 @@ import SubscriptionManagement from "./pages/admin/SubscriptionManagement";
 import TrialSettings from "./pages/admin/TrialSettings";
 import AuditLog from "./pages/admin/AuditLog";
 import CompanyAuditLog from "./pages/CompanyAuditLog";
+import SocialMediaAnalytics from "./pages/SocialMediaAnalytics";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,7 @@ const App = () => (
             <Route path="/analytics" element={<ProtectedRoute><Layout><Analytics /></Layout></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Layout><Settings /></Layout></ProtectedRoute>} />
             <Route path="/social-metrics" element={<ProtectedRoute><Layout><SocialMediaMetrics /></Layout></ProtectedRoute>} />
+            <Route path="/social-analytics" element={<ProtectedRoute><Layout><SocialMediaAnalytics /></Layout></ProtectedRoute>} />
             <Route path="/ad-campaigns" element={<ProtectedRoute><Layout><AdCampaigns /></Layout></ProtectedRoute>} />
             <Route path="/influencer-marketing" element={<ProtectedRoute><Layout><InfluencerMarketing /></Layout></ProtectedRoute>} />
             <Route path="/brand-monitoring" element={<ProtectedRoute><Layout><BrandMonitoring /></Layout></ProtectedRoute>} />
