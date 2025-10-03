@@ -326,14 +326,14 @@ export default function CompanyPlatformSettings() {
                 {platform.requires_api_key && (
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>API Key</Label>
+                      <Label>Bot Token / API Key</Label>
                       <Input
                         type="password"
                         value={config.api_key}
                         onChange={(e) =>
                           updateConfig(platform.id, "api_key", e.target.value)
                         }
-                        placeholder="Enter your API key"
+                        placeholder="Enter your bot token or API key"
                       />
                     </div>
                     <div className="space-y-2">
@@ -362,7 +362,7 @@ export default function CompanyPlatformSettings() {
                   />
                 </div>
 
-                {platform.name === "telegram" && (
+                {platform.name.toLowerCase() === "telegram" && (
                   <div className="space-y-2">
                     <Label>Channel/Group ID</Label>
                     <Input
