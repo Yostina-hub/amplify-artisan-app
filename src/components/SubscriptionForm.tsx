@@ -159,10 +159,10 @@ export const SubscriptionForm = ({ open, onOpenChange, selectedPlanId, isTrialMo
     const data = {
       pricing_plan_id: formData.get('plan_id'),
       full_name: formData.get('full_name'),
-      email: formData.get('email'),
-      phone: formData.get('phone'),
-      company_name: formData.get('company_name'),
-      industry: formData.get('industry'),
+      email: isUpgradeMode ? userEmail : formData.get('email'),
+      phone: isUpgradeMode ? null : formData.get('phone'),
+      company_name: isUpgradeMode ? null : formData.get('company_name'),
+      industry: isUpgradeMode ? null : formData.get('industry'),
       message: formData.get('message'),
     };
 
