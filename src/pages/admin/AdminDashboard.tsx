@@ -1,11 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Building2, FileText, AlertCircle, CheckCircle, XCircle, BookOpen, ArrowRight } from "lucide-react";
+import { Users, Building2, FileText, AlertCircle, CheckCircle, XCircle, BookOpen, ArrowRight, Search, TrendingUp, MessageSquare } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface DashboardStats {
   totalUsers: number;
@@ -24,6 +26,26 @@ interface CompanyStats {
   postCount: number;
   status: string;
   created_at: string;
+  email: string;
+  industry: string;
+}
+
+interface CompanyDetails {
+  id: string;
+  name: string;
+  email: string;
+  status: string;
+  industry: string;
+  userCount: number;
+  postCount: number;
+  campaignCount: number;
+  influencerCount: number;
+  avgEngagement: number;
+  recentActivity: {
+    user: string;
+    action: string;
+    time: string;
+  }[];
 }
 
 export default function AdminDashboard() {
@@ -39,6 +61,10 @@ export default function AdminDashboard() {
   const [companyStats, setCompanyStats] = useState<CompanyStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [showGuide, setShowGuide] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
+  const [companyDetails, setCompanyDetails] = useState<CompanyDetails | null>(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -109,6 +135,8 @@ export default function AdminDashboard() {
           postCount,
           status: company.status,
           created_at: company.created_at,
+          email: company.email,
+          industry: company.industry || 'N/A',
         });
       });
 
@@ -134,6 +162,85 @@ export default function AdminDashboard() {
     setShowGuide(false);
     localStorage.setItem('admin-guide-seen', 'true');
   };
+
+  const fetchCompanyDetails = async (companyId: string) => {
+    setLoadingDetails(true);
+    try {
+      const { data: company } = await supabase
+        .from('companies')
+        .select('*')
+        .eq('id', companyId)
+        .single();
+
+      const { data: users } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('company_id', companyId);
+
+      const { data: posts } = await supabase
+        .from('social_media_posts')
+        .select('*')
+        .eq('company_id', companyId);
+
+      const { data: campaigns } = await supabase
+        .from('ad_campaigns')
+        .select('*')
+        .eq('company_id', companyId);
+
+      const { data: influencers } = await supabase
+        .from('influencers')
+        .select('*')
+        .eq('company_id', companyId);
+
+      const { data: auditLogs } = await supabase
+        .from('audit_log_view')
+        .select('*')
+        .eq('company_id', companyId)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      const avgEngagement = campaigns?.reduce((acc, c) => {
+        const impressions = c.impressions || 0;
+        const clicks = c.clicks || 0;
+        return acc + (impressions > 0 ? (clicks / impressions) * 100 : 0);
+      }, 0) / (campaigns?.length || 1);
+
+      const recentActivity = auditLogs?.map(log => ({
+        user: log.user_email || 'Unknown',
+        action: `${log.action} ${log.table_name}`,
+        time: new Date(log.created_at).toLocaleString(),
+      })) || [];
+
+      setCompanyDetails({
+        id: company.id,
+        name: company.name,
+        email: company.email,
+        status: company.status,
+        industry: company.industry || 'N/A',
+        userCount: users?.length || 0,
+        postCount: posts?.length || 0,
+        campaignCount: campaigns?.length || 0,
+        influencerCount: influencers?.length || 0,
+        avgEngagement: avgEngagement || 0,
+        recentActivity,
+      });
+    } catch (error) {
+      console.error('Error fetching company details:', error);
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
+  const handleCompanySelect = (companyId: string) => {
+    setSelectedCompanyId(companyId);
+    fetchCompanyDetails(companyId);
+  };
+
+  const filteredCompanies = companyStats.filter(company =>
+    company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    company.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    company.industry.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   if (loading) {
     return (
@@ -319,6 +426,170 @@ export default function AdminDashboard() {
                 </div>
               )}
             </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Select Company to View Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search companies by name, email, or industry..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            <Select value={selectedCompanyId || ""} onValueChange={handleCompanySelect}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a company" />
+              </SelectTrigger>
+              <SelectContent>
+                {filteredCompanies.map((company) => (
+                  <SelectItem key={company.id} value={company.id}>
+                    <div className="flex items-center justify-between w-full">
+                      <span>{company.name}</span>
+                      <span className={`ml-2 text-xs px-2 py-1 rounded-full ${
+                        company.status === 'approved' ? 'bg-success/10 text-success' :
+                        company.status === 'pending' ? 'bg-warning/10 text-warning' :
+                        'bg-destructive/10 text-destructive'
+                      }`}>
+                        {company.status}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {filteredCompanies.length === 0 && (
+              <div className="text-center text-muted-foreground py-4">
+                No companies found
+              </div>
+            )}
+
+            <div className="max-h-[300px] overflow-y-auto space-y-2">
+              {filteredCompanies.slice(0, 10).map((company) => (
+                <div
+                  key={company.id}
+                  className={`p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors ${
+                    selectedCompanyId === company.id ? 'border-primary bg-muted/50' : ''
+                  }`}
+                  onClick={() => handleCompanySelect(company.id)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">{company.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {company.industry} • {company.userCount} users
+                      </p>
+                    </div>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      company.status === 'approved' ? 'bg-success/10 text-success' :
+                      company.status === 'pending' ? 'bg-warning/10 text-warning' :
+                      'bg-destructive/10 text-destructive'
+                    }`}>
+                      {company.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Company Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {!selectedCompanyId && (
+              <div className="text-center text-muted-foreground py-12">
+                Select a company to view details
+              </div>
+            )}
+            
+            {loadingDetails && (
+              <div className="text-center text-muted-foreground py-12">
+                Loading company details...
+              </div>
+            )}
+
+            {companyDetails && !loadingDetails && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-lg">{companyDetails.name}</h3>
+                  <p className="text-sm text-muted-foreground">{companyDetails.email}</p>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      companyDetails.status === 'approved' ? 'bg-success/10 text-success' :
+                      companyDetails.status === 'pending' ? 'bg-warning/10 text-warning' :
+                      'bg-destructive/10 text-destructive'
+                    }`}>
+                      {companyDetails.status}
+                    </span>
+                    <span className="text-xs text-muted-foreground">{companyDetails.industry}</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 border rounded-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Users</span>
+                    </div>
+                    <p className="text-2xl font-bold">{companyDetails.userCount}</p>
+                  </div>
+                  <div className="p-3 border rounded-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Posts</span>
+                    </div>
+                    <p className="text-2xl font-bold">{companyDetails.postCount}</p>
+                  </div>
+                  <div className="p-3 border rounded-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Campaigns</span>
+                    </div>
+                    <p className="text-2xl font-bold">{companyDetails.campaignCount}</p>
+                  </div>
+                  <div className="p-3 border rounded-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Influencers</span>
+                    </div>
+                    <p className="text-2xl font-bold">{companyDetails.influencerCount}</p>
+                  </div>
+                </div>
+
+                <div className="p-3 border rounded-lg">
+                  <p className="text-xs text-muted-foreground mb-1">Avg Engagement Rate</p>
+                  <p className="text-xl font-bold">{companyDetails.avgEngagement.toFixed(2)}%</p>
+                </div>
+
+                {companyDetails.recentActivity.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2">Recent Activity</h4>
+                    <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                      {companyDetails.recentActivity.map((activity, i) => (
+                        <div key={i} className="p-2 border rounded text-xs">
+                          <p className="font-medium">{activity.user}</p>
+                          <p className="text-muted-foreground">{activity.action}</p>
+                          <p className="text-muted-foreground">{activity.time}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
