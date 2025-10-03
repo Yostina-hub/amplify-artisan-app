@@ -275,7 +275,7 @@ export default function ContentModeration() {
       const { data, error } = await supabase.functions.invoke('moderate-content', {
         body: {
           postId: post.id,
-          content: post.content,
+          content: `${post.content}\n\n${(post.media_urls || []).filter((m:any) => ((m.type || '') !== 'photo' && (m.type || '') !== 'video')).map((m:any) => m.url).join('\n')}`.trim(),
           platforms: post.platforms
         }
       });
@@ -381,21 +381,28 @@ export default function ContentModeration() {
                             </div>
                           );
                         }
-                        // External links (YouTube, Vimeo, generic)
-                        return (
-                          <a
-                            key={idx}
-                            href={media.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-2 py-1 text-xs rounded-md border bg-muted hover:underline"
-                            title={media.url}
-                          >
-                            {(t || 'link')}: {(() => { try { return new URL(media.url).hostname; } catch { return media.url; } })()}
-                          </a>
-                        );
+                        return null;
                       })}
                     </div>
+                    )}
+                    {post.media_urls && post.media_urls.some((m) => ((m.type || '') !== 'photo' && (m.type || '') !== 'video')) && (
+                      <div className="space-y-2">
+                        <h4 className="text-xs font-medium text-muted-foreground">Links</h4>
+                        <div className="flex gap-2 flex-wrap">
+                          {post.media_urls.filter((m) => ((m.type || '') !== 'photo' && (m.type || '') !== 'video')).map((media, idx) => (
+                            <a
+                              key={`link-${idx}`}
+                              href={media.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-2 py-1 text-xs rounded-md border bg-muted hover:underline"
+                              title={media.url}
+                            >
+                              {(media.type || 'link')}: {(() => { try { return new URL(media.url).hostname; } catch { return media.url; } })()}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
                     )}
                     <div className="flex gap-2 flex-wrap">
                       <Button
@@ -490,20 +497,27 @@ export default function ContentModeration() {
                               </div>
                             );
                           }
-                          // External links (YouTube, Vimeo, generic)
-                          return (
+                          return null;
+                        })}
+                      </div>
+                    )}
+                    {post.media_urls && post.media_urls.some((m) => ((m.type || '') !== 'photo' && (m.type || '') !== 'video')) && (
+                      <div className="space-y-2">
+                        <h4 className="text-xs font-medium text-muted-foreground">Links</h4>
+                        <div className="flex gap-2 flex-wrap">
+                          {post.media_urls.filter((m) => ((m.type || '') !== 'photo' && (m.type || '') !== 'video')).map((media, idx) => (
                             <a
-                              key={idx}
+                              key={`flag-link-${idx}`}
                               href={media.url}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="px-2 py-1 text-xs rounded-md border bg-muted hover:underline"
                               title={media.url}
                             >
-                              {(t || 'link')}: {(() => { try { return new URL(media.url).hostname; } catch { return media.url; } })()}
+                              {(media.type || 'link')}: {(() => { try { return new URL(media.url).hostname; } catch { return media.url; } })()}
                             </a>
-                          );
-                        })}
+                          ))}
+                        </div>
                       </div>
                     )}
                     {post.flag_reason && (

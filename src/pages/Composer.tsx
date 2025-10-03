@@ -260,7 +260,7 @@ export default function Composer() {
                   placeholder="Or paste YouTube, Vimeo, or image link..."
                   value={linkInput}
                   onChange={(e) => setLinkInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleAddLink()}
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddLink())}
                   className="flex-1 px-3 py-2 text-sm border rounded-md"
                 />
                 <Button 
