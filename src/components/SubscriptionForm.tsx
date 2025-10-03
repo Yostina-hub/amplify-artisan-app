@@ -67,11 +67,29 @@ export const SubscriptionForm = ({ open, onOpenChange, selectedPlanId, isTrialMo
         };
       }
       
-      const { error } = await supabase
+      const { data: requestData, error: insertError } = await supabase
         .from('subscription_requests')
-        .insert(dataToInsert);
+        .insert(dataToInsert)
+        .select()
+        .single();
       
-      if (error) throw error;
+      if (insertError) throw insertError;
+
+      // If trial mode, create user account and send welcome email
+      if (isTrialMode && requestData) {
+        const { error: emailError } = await supabase.functions.invoke('send-trial-welcome-email', {
+          body: {
+            email: formData.email,
+            fullName: formData.full_name,
+            subscriptionRequestId: requestData.id,
+          },
+        });
+
+        if (emailError) {
+          console.error('Error sending trial welcome email:', emailError);
+          // Don't throw - subscription was created successfully
+        }
+      }
     },
     onSuccess: () => {
       setShowSuccess(true);
@@ -117,9 +135,14 @@ export const SubscriptionForm = ({ open, onOpenChange, selectedPlanId, isTrialMo
             <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
               <CheckCircle2 className="h-8 w-8 text-green-600" />
             </div>
-            <DialogTitle className="text-2xl">Request Submitted!</DialogTitle>
+            <DialogTitle className="text-2xl">
+              {isTrialMode ? 'Trial Activated! 🎉' : 'Request Submitted!'}
+            </DialogTitle>
             <DialogDescription className="text-base">
-              Thank you for your interest! Our team will review your subscription request and contact you within 24-48 hours via email with approval status and payment instructions.
+              {isTrialMode 
+                ? 'Your trial account has been created! Check your email for login credentials. You can start exploring all features immediately.'
+                : 'Thank you for your interest! Our team will review your subscription request and contact you within 24-48 hours via email with approval status and payment instructions.'
+              }
             </DialogDescription>
             <Button onClick={() => {
               setShowSuccess(false);
@@ -243,15 +266,26 @@ export const SubscriptionForm = ({ open, onOpenChange, selectedPlanId, isTrialMo
             />
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-800">
-              <strong>What happens next?</strong><br />
-              1. Our team reviews your request (24-48 hours)<br />
-              2. You'll receive approval email with payment instructions<br />
-              3. Complete payment via Telebirr, CBE, or Bank Transfer<br />
-              4. Get instant access to your account
-            </p>
-          </div>
+          {!isTrialMode && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-blue-800">
+                <strong>What happens next?</strong><br />
+                1. Our team reviews your request (24-48 hours)<br />
+                2. You'll receive approval email with payment instructions<br />
+                3. Complete payment via Telebirr, CBE, or Bank Transfer<br />
+                4. Get instant access to your account
+              </p>
+            </div>
+          )}
+
+          {isTrialMode && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <p className="text-sm text-green-800">
+                <strong>🚀 Instant Access!</strong><br />
+                Your account will be created immediately and you'll receive login credentials via email within seconds. No approval needed - start exploring right away!
+              </p>
+            </div>
+          )}
 
           <div className="flex justify-end gap-2 pt-4">
             <Button
