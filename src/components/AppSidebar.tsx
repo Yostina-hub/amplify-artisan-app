@@ -141,115 +141,115 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {/* Analytics Section - Collapsible */}
-        {!isCollapsed && (
-          <Collapsible open={analyticsOpen} onOpenChange={setAnalyticsOpen}>
-            <SidebarGroup>
+        <Collapsible open={analyticsOpen} onOpenChange={setAnalyticsOpen}>
+          <SidebarGroup>
+            {!isCollapsed && (
               <CollapsibleTrigger className="w-full">
                 <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-2 py-1 transition-colors">
                   <span>Analytics</span>
                   <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${analyticsOpen ? 'rotate-180' : ''}`} />
                 </SidebarGroupLabel>
               </CollapsibleTrigger>
-              <CollapsibleContent>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {analyticsItems.map((item) => (
-                      <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton asChild>
-                          <NavLink
-                            to={item.url}
-                            className={({ isActive }) =>
-                              isActive
-                                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                                : "hover:bg-sidebar-accent/50"
-                            }
-                          >
-                            <item.icon className="h-4 w-4" />
-                            <span>{item.title}</span>
-                          </NavLink>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </CollapsibleContent>
-            </SidebarGroup>
-          </Collapsible>
-        )}
+            )}
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {analyticsItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink
+                          to={item.url}
+                          className={({ isActive }) =>
+                            isActive
+                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                              : "hover:bg-sidebar-accent/50"
+                          }
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
 
         {/* Marketing Section - Collapsible */}
-        {!isCollapsed && (
-          <Collapsible open={marketingOpen} onOpenChange={setMarketingOpen}>
-            <SidebarGroup>
+        <Collapsible open={marketingOpen} onOpenChange={setMarketingOpen}>
+          <SidebarGroup>
+            {!isCollapsed && (
               <CollapsibleTrigger className="w-full">
                 <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-2 py-1 transition-colors">
                   <span>Marketing</span>
                   <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${marketingOpen ? 'rotate-180' : ''}`} />
                 </SidebarGroupLabel>
               </CollapsibleTrigger>
-              <CollapsibleContent>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {marketingItems.map((item) => (
-                      <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton asChild>
-                          <NavLink
-                            to={item.url}
-                            className={({ isActive }) =>
-                              isActive
-                                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                                : "hover:bg-sidebar-accent/50"
-                            }
-                          >
-                            <item.icon className="h-4 w-4" />
-                            <span>{item.title}</span>
-                          </NavLink>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </CollapsibleContent>
-            </SidebarGroup>
-          </Collapsible>
-        )}
+            )}
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {marketingItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink
+                          to={item.url}
+                          className={({ isActive }) =>
+                            isActive
+                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                              : "hover:bg-sidebar-accent/50"
+                          }
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
 
         {/* Monitoring Section - Collapsible */}
-        {!isCollapsed && (
-          <Collapsible open={monitoringOpen} onOpenChange={setMonitoringOpen}>
-            <SidebarGroup>
+        <Collapsible open={monitoringOpen} onOpenChange={setMonitoringOpen}>
+          <SidebarGroup>
+            {!isCollapsed && (
               <CollapsibleTrigger className="w-full">
                 <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-2 py-1 transition-colors">
                   <span>Monitoring</span>
                   <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${monitoringOpen ? 'rotate-180' : ''}`} />
                 </SidebarGroupLabel>
               </CollapsibleTrigger>
-              <CollapsibleContent>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {monitoringItems.map((item) => (
-                      <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton asChild>
-                          <NavLink
-                            to={item.url}
-                            className={({ isActive }) =>
-                              isActive
-                                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                                : "hover:bg-sidebar-accent/50"
-                            }
-                          >
-                            <item.icon className="h-4 w-4" />
-                            <span>{item.title}</span>
-                          </NavLink>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </CollapsibleContent>
-            </SidebarGroup>
-          </Collapsible>
-        )}
+            )}
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {monitoringItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink
+                          to={item.url}
+                          className={({ isActive }) =>
+                            isActive
+                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                              : "hover:bg-sidebar-accent/50"
+                          }
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
 
         {/* Agents Section */}
         {hasRole('agent') && (
@@ -310,15 +310,17 @@ export function AppSidebar() {
         )}
 
         {/* Super Admin Section - Management */}
-        {isSuperAdmin && !isCollapsed && (
+        {isSuperAdmin && (
           <Collapsible open={adminManagementOpen} onOpenChange={setAdminManagementOpen}>
             <SidebarGroup>
-              <CollapsibleTrigger className="w-full">
-                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-2 py-1 transition-colors">
-                  <span>Management</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminManagementOpen ? 'rotate-180' : ''}`} />
-                </SidebarGroupLabel>
-              </CollapsibleTrigger>
+              {!isCollapsed && (
+                <CollapsibleTrigger className="w-full">
+                  <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-2 py-1 transition-colors">
+                    <span>Management</span>
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminManagementOpen ? 'rotate-180' : ''}`} />
+                  </SidebarGroupLabel>
+                </CollapsibleTrigger>
+              )}
               <CollapsibleContent>
                 <SidebarGroupContent>
                   <SidebarMenu>
@@ -348,15 +350,17 @@ export function AppSidebar() {
         )}
 
         {/* Super Admin Section - Platforms */}
-        {isSuperAdmin && !isCollapsed && (
+        {isSuperAdmin && (
           <Collapsible open={adminPlatformOpen} onOpenChange={setAdminPlatformOpen}>
             <SidebarGroup>
-              <CollapsibleTrigger className="w-full">
-                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-2 py-1 transition-colors">
-                  <span>Platforms</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminPlatformOpen ? 'rotate-180' : ''}`} />
-                </SidebarGroupLabel>
-              </CollapsibleTrigger>
+              {!isCollapsed && (
+                <CollapsibleTrigger className="w-full">
+                  <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-2 py-1 transition-colors">
+                    <span>Platforms</span>
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminPlatformOpen ? 'rotate-180' : ''}`} />
+                  </SidebarGroupLabel>
+                </CollapsibleTrigger>
+              )}
               <CollapsibleContent>
                 <SidebarGroupContent>
                   <SidebarMenu>
@@ -386,15 +390,17 @@ export function AppSidebar() {
         )}
 
         {/* Super Admin Section - Business */}
-        {isSuperAdmin && !isCollapsed && (
+        {isSuperAdmin && (
           <Collapsible open={adminBusinessOpen} onOpenChange={setAdminBusinessOpen}>
             <SidebarGroup>
-              <CollapsibleTrigger className="w-full">
-                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-2 py-1 transition-colors">
-                  <span>Business</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminBusinessOpen ? 'rotate-180' : ''}`} />
-                </SidebarGroupLabel>
-              </CollapsibleTrigger>
+              {!isCollapsed && (
+                <CollapsibleTrigger className="w-full">
+                  <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-2 py-1 transition-colors">
+                    <span>Business</span>
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminBusinessOpen ? 'rotate-180' : ''}`} />
+                  </SidebarGroupLabel>
+                </CollapsibleTrigger>
+              )}
               <CollapsibleContent>
                 <SidebarGroupContent>
                   <SidebarMenu>
@@ -424,15 +430,17 @@ export function AppSidebar() {
         )}
 
         {/* Super Admin Section - Configuration */}
-        {isSuperAdmin && !isCollapsed && (
+        {isSuperAdmin && (
           <Collapsible open={adminConfigOpen} onOpenChange={setAdminConfigOpen}>
             <SidebarGroup>
-              <CollapsibleTrigger className="w-full">
-                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-2 py-1 transition-colors">
-                  <span>Configuration</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminConfigOpen ? 'rotate-180' : ''}`} />
-                </SidebarGroupLabel>
-              </CollapsibleTrigger>
+              {!isCollapsed && (
+                <CollapsibleTrigger className="w-full">
+                  <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-2 py-1 transition-colors">
+                    <span>Configuration</span>
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminConfigOpen ? 'rotate-180' : ''}`} />
+                  </SidebarGroupLabel>
+                </CollapsibleTrigger>
+              )}
               <CollapsibleContent>
                 <SidebarGroupContent>
                   <SidebarMenu>
@@ -462,15 +470,17 @@ export function AppSidebar() {
         )}
 
         {/* Super Admin Section - Monitoring */}
-        {isSuperAdmin && !isCollapsed && (
+        {isSuperAdmin && (
           <Collapsible open={adminMonitoringOpen} onOpenChange={setAdminMonitoringOpen}>
             <SidebarGroup>
-              <CollapsibleTrigger className="w-full">
-                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-2 py-1 transition-colors">
-                  <span>Monitoring</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminMonitoringOpen ? 'rotate-180' : ''}`} />
-                </SidebarGroupLabel>
-              </CollapsibleTrigger>
+              {!isCollapsed && (
+                <CollapsibleTrigger className="w-full">
+                  <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-2 py-1 transition-colors">
+                    <span>Monitoring</span>
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminMonitoringOpen ? 'rotate-180' : ''}`} />
+                  </SidebarGroupLabel>
+                </CollapsibleTrigger>
+              )}
               <CollapsibleContent>
                 <SidebarGroupContent>
                   <SidebarMenu>
