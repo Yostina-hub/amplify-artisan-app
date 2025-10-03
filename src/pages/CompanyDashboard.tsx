@@ -312,14 +312,14 @@ export default function CompanyDashboard() {
             <div className="space-y-1">
               <h3 className="text-lg font-semibold">Track Your Performance</h3>
               <p className="text-sm text-muted-foreground">
-                View comprehensive analytics for views, shares, likes, saves, ad campaigns, and AI-powered insights
+                View comprehensive analytics hub with social posts, ad campaigns, growth metrics, and AI insights
               </p>
             </div>
             <Button 
               onClick={() => navigate('/admin/reach-analytics')}
               className="bg-gradient-to-r from-primary to-accent hover:opacity-90"
             >
-              View Analytics
+              Open Analytics Hub
             </Button>
           </div>
         </CardContent>

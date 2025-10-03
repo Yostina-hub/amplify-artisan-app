@@ -23,9 +23,7 @@ const mainItems = [
 ];
 
 const analyticsItems = [
-  { title: "Overview", url: "/analytics", icon: BarChart3 },
-  { title: "Social Metrics", url: "/social-metrics", icon: BarChart2 },
-  { title: "Reach Analytics", url: "/admin/reach-analytics", icon: TrendingUp },
+  { title: "Analytics Hub", url: "/admin/reach-analytics", icon: BarChart3 },
 ];
 
 const marketingItems = [
