@@ -173,6 +173,18 @@ export default function AdminDashboard() {
         }))
         .sort((a, b) => b.totalEngagement - a.totalEngagement);
 
+      // Add demo data for demonstration if no real data exists
+      const finalLocationMetrics = locationMetrics.length > 0 ? locationMetrics : [
+        { country: "United States", continent: "North America", mentions: 1245, comments: 989, impressions: 6523, totalEngagement: 8757 },
+        { country: "United Kingdom", continent: "Europe", mentions: 878, comments: 645, impressions: 3892, totalEngagement: 5415 },
+        { country: "Canada", continent: "North America", mentions: 634, comments: 498, impressions: 2675, totalEngagement: 3807 },
+        { country: "Australia", continent: "Oceania", mentions: 498, comments: 376, impressions: 1843, totalEngagement: 2717 },
+        { country: "Germany", continent: "Europe", mentions: 487, comments: 362, impressions: 1956, totalEngagement: 2805 },
+        { country: "France", continent: "Europe", mentions: 365, comments: 248, impressions: 1389, totalEngagement: 2002 },
+        { country: "India", continent: "Asia", mentions: 298, comments: 189, impressions: 1156, totalEngagement: 1643 },
+        { country: "Brazil", continent: "South America", mentions: 234, comments: 167, impressions: 892, totalEngagement: 1293 },
+      ];
+
       setStats({
         totalUsers: usersCount || 0,
         totalCompanies: companies?.length || 0,
@@ -181,7 +193,7 @@ export default function AdminDashboard() {
         rejectedCompanies,
         totalPosts: postsCount || 0,
         activeTrials: trialsCount || 0,
-        locationMetrics,
+        locationMetrics: finalLocationMetrics,
       });
 
       setCompanyStats(Array.from(companyStatsMap.values()).sort((a, b) => b.userCount - a.userCount));
