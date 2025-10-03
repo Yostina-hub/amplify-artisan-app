@@ -46,7 +46,7 @@ export default function CompanyApplication() {
     try {
       const validation = companyApplicationSchema.safeParse(formData);
       if (!validation.success) {
-        toast.error(validation.error.errors[0].message);
+        toast.error(validation.error.issues[0].message);
         return;
       }
 

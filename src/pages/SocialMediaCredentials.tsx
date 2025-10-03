@@ -102,7 +102,7 @@ export default function SocialMediaCredentials() {
       // Validate input
       const validationResult = socialMediaAccountSchema.safeParse(formData);
       if (!validationResult.success) {
-        const firstError = validationResult.error.errors[0];
+        const firstError = validationResult.error.issues[0];
         throw new Error(firstError.message);
       }
 
