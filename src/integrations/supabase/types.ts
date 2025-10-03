@@ -1223,6 +1223,7 @@ export type Database = {
           full_name: string
           id: string
           industry: string | null
+          is_trial: boolean | null
           message: string | null
           payment_instructions: string | null
           payment_method: string | null
@@ -1232,6 +1233,9 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           status: string | null
+          trial_converted: boolean | null
+          trial_ends_at: string | null
+          trial_started_at: string | null
           updated_at: string | null
         }
         Insert: {
@@ -1241,6 +1245,7 @@ export type Database = {
           full_name: string
           id?: string
           industry?: string | null
+          is_trial?: boolean | null
           message?: string | null
           payment_instructions?: string | null
           payment_method?: string | null
@@ -1250,6 +1255,9 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string | null
+          trial_converted?: boolean | null
+          trial_ends_at?: string | null
+          trial_started_at?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -1259,6 +1267,7 @@ export type Database = {
           full_name?: string
           id?: string
           industry?: string | null
+          is_trial?: boolean | null
           message?: string | null
           payment_instructions?: string | null
           payment_method?: string | null
@@ -1268,6 +1277,9 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string | null
+          trial_converted?: boolean | null
+          trial_ends_at?: string | null
+          trial_started_at?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -1351,6 +1363,33 @@ export type Database = {
           platform?: string
           topic?: string
           volume?: number | null
+        }
+        Relationships: []
+      }
+      trial_settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_trial_enabled: boolean
+          trial_duration_days: number
+          trial_features: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_trial_enabled?: boolean
+          trial_duration_days?: number
+          trial_features?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_trial_enabled?: boolean
+          trial_duration_days?: number
+          trial_features?: Json | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -1573,6 +1612,19 @@ export type Database = {
       get_user_roles: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"][]
+      }
+      get_user_trial_info: {
+        Args: { _user_id: string }
+        Returns: {
+          days_remaining: number
+          is_trial: boolean
+          trial_converted: boolean
+          trial_ends_at: string
+        }[]
+      }
+      has_active_trial: {
+        Args: { _user_id: string }
+        Returns: boolean
       }
       has_role: {
         Args: {

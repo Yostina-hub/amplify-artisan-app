@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ServiceSection } from "@/features/dashboard/ServiceSection";
 import { AIDrawer } from "@/features/dashboard/AIDrawer";
+import { FreeTrialBanner } from "@/components/FreeTrialBanner";
 import { SERVICE_CATEGORIES } from "@/features/dashboard/data";
 import { Service } from "@/features/dashboard/types";
 import { PersonalizedAds } from "@/components/PersonalizedAds";

@@ -41,6 +41,7 @@ import IndustryManagement from "./pages/admin/IndustryManagement";
 import Industry from "./pages/Industry";
 import PricingManagement from "./pages/admin/PricingManagement";
 import SubscriptionManagement from "./pages/admin/SubscriptionManagement";
+import TrialSettings from "./pages/admin/TrialSettings";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +83,7 @@ const App = () => (
             <Route path="/admin/industries" element={<ProtectedRoute requiredRole="admin"><Layout><IndustryManagement /></Layout></ProtectedRoute>} />
             <Route path="/admin/pricing" element={<ProtectedRoute requiredRole="admin"><Layout><PricingManagement /></Layout></ProtectedRoute>} />
             <Route path="/admin/subscriptions" element={<ProtectedRoute requiredRole="admin"><Layout><SubscriptionManagement /></Layout></ProtectedRoute>} />
+            <Route path="/admin/trial-settings" element={<ProtectedRoute requiredRole="admin"><Layout><TrialSettings /></Layout></ProtectedRoute>} />
             <Route path="/company/email-settings" element={<ProtectedRoute><Layout><CompanyEmailSettings /></Layout></ProtectedRoute>} />
             <Route path="/company/platform-subscriptions" element={<ProtectedRoute><Layout><CompanyPlatformSubscriptions /></Layout></ProtectedRoute>} />
             <Route path="/company/platform-settings" element={<ProtectedRoute><Layout><CompanyPlatformSettings /></Layout></ProtectedRoute>} />

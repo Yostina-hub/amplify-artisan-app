@@ -13,8 +13,9 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const navigate = useNavigate();
-  const [showSubscriptionForm, setShowSubscriptionForm] = useState(false);
+  const [subscriptionFormOpen, setSubscriptionFormOpen] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState<string>();
+  const [isTrialMode, setIsTrialMode] = useState(false);
 
   const { data: pricingPlans, isLoading: pricingLoading } = useQuery({
     queryKey: ['pricing-plans'],
@@ -30,9 +31,10 @@ const Index = () => {
     },
   });
 
-  const handleSubscribeClick = (planId: string) => {
+  const handleGetStarted = (planId?: string, isTrial: boolean = false) => {
     setSelectedPlanId(planId);
-    setShowSubscriptionForm(true);
+    setIsTrialMode(isTrial);
+    setSubscriptionFormOpen(true);
   };
 
   const scrollToSection = (sectionId: string) => {
@@ -128,7 +130,7 @@ const Index = () => {
               Log in
             </Button>
             <Button 
-              onClick={() => navigate("/auth")} 
+              onClick={() => handleGetStarted(undefined, true)} 
               className="text-sm font-semibold hidden md:flex bg-gradient-to-r from-primary to-accent hover:opacity-90 shadow-lg hover:shadow-xl transition-all hover:scale-105"
             >
               Start Free Trial
@@ -170,7 +172,7 @@ const Index = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700 delay-300">
               <Button
                 size="lg"
-                onClick={() => navigate("/auth")}
+                onClick={() => handleGetStarted(undefined, true)}
                 className="text-base font-semibold px-10 h-14 rounded-xl shadow-lg hover:shadow-2xl transition-all hover:scale-105 bg-gradient-to-r from-primary to-accent"
               >
                 Start Free Trial - No Credit Card
@@ -442,7 +444,7 @@ const Index = () => {
                     </ul>
                     
                     <Button
-                      onClick={() => handleSubscribeClick(plan.id)}
+                      onClick={() => handleGetStarted(plan.id, false)}
                       variant={plan.is_popular ? "default" : "outline"}
                       size="lg"
                       className={`w-full font-semibold transition-all hover:scale-105 ${
@@ -597,9 +599,10 @@ const Index = () => {
 
       {/* Subscription Form Modal */}
       <SubscriptionForm 
-        open={showSubscriptionForm} 
-        onOpenChange={setShowSubscriptionForm}
+        open={subscriptionFormOpen} 
+        onOpenChange={setSubscriptionFormOpen}
         selectedPlanId={selectedPlanId}
+        isTrialMode={isTrialMode}
       />
     </div>
   );

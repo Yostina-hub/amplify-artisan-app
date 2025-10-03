@@ -49,6 +49,7 @@ const adminItems = [
   { title: "Platform Subscriptions", url: "/admin/platform-subscriptions", icon: Package },
   { title: "Reach Analytics", url: "/admin/reach-analytics", icon: BarChart2 },
   { title: "Subscription Management", url: "/admin/subscriptions", icon: CreditCard },
+  { title: "Trial Settings", url: "/admin/trial-settings", icon: Settings },
   { title: "Industry Management", url: "/admin/industries", icon: Layers },
   { title: "Pricing Management", url: "/admin/pricing", icon: DollarSign },
   { title: "Landing Page Manager", url: "/admin/landing-page", icon: FileText },

@@ -7,18 +7,33 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 interface SubscriptionFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   selectedPlanId?: string;
+  isTrialMode?: boolean;
 }
 
-export const SubscriptionForm = ({ open, onOpenChange, selectedPlanId }: SubscriptionFormProps) => {
+export const SubscriptionForm = ({ open, onOpenChange, selectedPlanId, isTrialMode = false }: SubscriptionFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  const { data: trialSettings } = useQuery({
+    queryKey: ['trial-settings'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('trial_settings')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+      return data;
+    },
+    enabled: isTrialMode,
+  });
 
   const { data: plans } = useQuery({
     queryKey: ['pricing-plans-form'],
@@ -36,12 +51,25 @@ export const SubscriptionForm = ({ open, onOpenChange, selectedPlanId }: Subscri
 
   const submitMutation = useMutation({
     mutationFn: async (formData: any) => {
+      let dataToInsert = { ...formData, status: 'pending' };
+      
+      if (isTrialMode && trialSettings) {
+        const trialStartsAt = new Date();
+        const trialEndsAt = new Date();
+        trialEndsAt.setDate(trialEndsAt.getDate() + trialSettings.trial_duration_days);
+        
+        dataToInsert = {
+          ...formData,
+          is_trial: true,
+          trial_started_at: trialStartsAt.toISOString(),
+          trial_ends_at: trialEndsAt.toISOString(),
+          status: 'approved',
+        };
+      }
+      
       const { error } = await supabase
         .from('subscription_requests')
-        .insert({
-          ...formData,
-          status: 'pending'
-        });
+        .insert(dataToInsert);
       
       if (error) throw error;
     },
@@ -109,28 +137,36 @@ export const SubscriptionForm = ({ open, onOpenChange, selectedPlanId }: Subscri
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Start Your Subscription</DialogTitle>
+          <DialogTitle className="text-2xl flex items-center gap-2">
+            {isTrialMode && <Sparkles className="h-6 w-6 text-primary" />}
+            {isTrialMode ? 'Start Your Free Trial' : 'Start Your Subscription'}
+          </DialogTitle>
           <DialogDescription>
-            Fill out this form and our team will review your request. You'll receive payment instructions after approval.
+            {isTrialMode 
+              ? `Start your ${trialSettings?.trial_duration_days || 3}-day free trial instantly - no credit card required!`
+              : 'Fill out this form and our team will review your request. You\'ll receive payment instructions after approval.'
+            }
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <div className="space-y-2">
-            <Label htmlFor="plan_id">Select Plan *</Label>
-            <Select name="plan_id" defaultValue={selectedPlanId} required>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose a plan" />
-              </SelectTrigger>
-              <SelectContent>
-                {plans?.map((plan) => (
-                  <SelectItem key={plan.id} value={plan.id}>
-                    {plan.name} - ${plan.price}/{plan.billing_period}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {!isTrialMode && (
+            <div className="space-y-2">
+              <Label htmlFor="plan_id">Select Plan *</Label>
+              <Select name="plan_id" defaultValue={selectedPlanId} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a plan" />
+                </SelectTrigger>
+                <SelectContent>
+                  {plans?.map((plan) => (
+                    <SelectItem key={plan.id} value={plan.id}>
+                      {plan.name} - ${plan.price}/{plan.billing_period}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -230,10 +266,10 @@ export const SubscriptionForm = ({ open, onOpenChange, selectedPlanId }: Subscri
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting...
+                  {isTrialMode ? 'Starting Trial...' : 'Submitting...'}
                 </>
               ) : (
-                'Submit Request'
+                isTrialMode ? 'Start Free Trial Now' : 'Submit Request'
               )}
             </Button>
           </div>
