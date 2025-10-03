@@ -81,7 +81,8 @@ export default function CompanyPlatformSettings() {
           .from("company_platform_subscriptions")
           .select("platform_id, social_platforms(*)")
           .eq("company_id", profile.company_id)
-          .eq("is_active", true),
+          .eq("is_active", true)
+          .eq("status", "approved"),
         supabase.from("company_platform_configs").select("*").eq("company_id", profile.company_id),
       ]);
 
