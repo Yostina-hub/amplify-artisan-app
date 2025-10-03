@@ -44,8 +44,10 @@ export const platformConfigSchema = z.object({
   redirect_url: z
     .string()
     .trim()
-    .url("Must be a valid URL")
     .max(500, "Redirect URL must be less than 500 characters")
+    .refine((val) => !val || z.string().url().safeParse(val).success, {
+      message: "Must be a valid URL",
+    })
     .optional(),
   api_key: z
     .string()
@@ -60,8 +62,10 @@ export const platformConfigSchema = z.object({
   webhook_url: z
     .string()
     .trim()
-    .url("Must be a valid URL")
     .max(500, "Webhook URL must be less than 500 characters")
+    .refine((val) => !val || z.string().url().safeParse(val).success, {
+      message: "Must be a valid URL",
+    })
     .optional(),
 });
 
