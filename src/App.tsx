@@ -33,7 +33,7 @@ import CompanyApplication from "./pages/CompanyApplication";
 import CompanyManagement from "./pages/admin/CompanyManagement";
 import SocialPlatformManagement from "./pages/admin/SocialPlatformManagement";
 import SocialMediaCredentials from "./pages/SocialMediaCredentials";
-import CompanyPlatformSettings from "./pages/CompanyPlatformSettings";
+import CompanyPlatformSettings from "./pages/PlatformConfigs";
 import CompanyPlatformSubscriptions from "./pages/CompanyPlatformSubscriptions";
 import AdminCompanyPlatformSubscriptions from "./pages/admin/CompanyPlatformSubscriptions";
 import ReachAnalytics from "./pages/admin/ReachAnalytics";
