@@ -1168,9 +1168,13 @@ export type Database = {
           content: string
           created_at: string | null
           engagement_rate: number | null
+          flag_reason: string | null
+          flagged: boolean | null
           id: string
           likes: number | null
           metrics_last_synced_at: string | null
+          moderated_at: string | null
+          moderated_by: string | null
           platform_post_ids: Json | null
           platforms: string[]
           reach: number | null
@@ -1189,9 +1193,13 @@ export type Database = {
           content: string
           created_at?: string | null
           engagement_rate?: number | null
+          flag_reason?: string | null
+          flagged?: boolean | null
           id?: string
           likes?: number | null
           metrics_last_synced_at?: string | null
+          moderated_at?: string | null
+          moderated_by?: string | null
           platform_post_ids?: Json | null
           platforms: string[]
           reach?: number | null
@@ -1210,9 +1218,13 @@ export type Database = {
           content?: string
           created_at?: string | null
           engagement_rate?: number | null
+          flag_reason?: string | null
+          flagged?: boolean | null
           id?: string
           likes?: number | null
           metrics_last_synced_at?: string | null
+          moderated_at?: string | null
+          moderated_by?: string | null
           platform_post_ids?: Json | null
           platforms?: string[]
           reach?: number | null
