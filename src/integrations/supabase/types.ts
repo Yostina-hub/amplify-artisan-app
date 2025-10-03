@@ -1023,6 +1023,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "social_media_comments_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "social_media_accounts_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "social_media_comments_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: false
@@ -1113,6 +1120,13 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "social_media_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_media_metrics_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "social_media_accounts_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -1598,6 +1612,53 @@ export type Database = {
             foreignKeyName: "email_configurations_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_media_accounts_safe: {
+        Row: {
+          account_id: string | null
+          account_name: string | null
+          company_id: string | null
+          created_at: string | null
+          id: string | null
+          is_active: boolean | null
+          platform: string | null
+          token_expires_at: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          account_name?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          platform?: string | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          account_name?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          platform?: string | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_media_accounts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
