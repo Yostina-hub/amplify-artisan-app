@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { TrendingUp, Eye, MousePointerClick, Ban, Sparkles, AlertTriangle, TrendingDown, Users } from "lucide-react";
+import { TrendingUp, Eye, MousePointerClick, Ban, Sparkles, AlertTriangle, TrendingDown, Users, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +40,8 @@ export default function ReachAnalytics() {
   const [loading, setLoading] = useState(true);
   const [analyzingAI, setAnalyzingAI] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState<string>('all');
+  const [selectedCampaign, setSelectedCampaign] = useState<any>(null);
+  const [isCampaignDetailsOpen, setIsCampaignDetailsOpen] = useState(false);
   const { toast } = useToast();
 
   const platforms = [
@@ -176,6 +180,11 @@ export default function ReachAnalytics() {
     }
   };
 
+  const handleViewCampaignDetails = (campaign: any) => {
+    setSelectedCampaign(campaign);
+    setIsCampaignDetailsOpen(true);
+  };
+
   if (loading) {
     return <div className="p-8">Loading analytics...</div>;
   }
@@ -268,16 +277,26 @@ export default function ReachAnalytics() {
         <CardContent>
           <div className="space-y-4">
             {analytics?.topPerformingCampaigns.map((campaign, i) => (
-              <div key={i} className="flex items-center justify-between p-4 border rounded-lg">
+              <div key={i} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                 <div className="flex-1">
                   <p className="font-medium">{campaign.name}</p>
                   <p className="text-sm text-muted-foreground">
                     {campaign.impressions} impressions • {campaign.clicks} clicks
                   </p>
                 </div>
-                <div className="text-right">
-                  <p className="text-2xl font-bold text-primary">{campaign.ctr.toFixed(1)}%</p>
-                  <p className="text-xs text-muted-foreground">CTR</p>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-primary">{campaign.ctr.toFixed(1)}%</p>
+                    <p className="text-xs text-muted-foreground">CTR</p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewCampaignDetails(campaign)}
+                  >
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Details
+                  </Button>
                 </div>
               </div>
             ))}
@@ -489,6 +508,109 @@ export default function ReachAnalytics() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Campaign Details Dialog */}
+      <Dialog open={isCampaignDetailsOpen} onOpenChange={setIsCampaignDetailsOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Campaign Performance Details</DialogTitle>
+            <DialogDescription>Detailed metrics and analysis</DialogDescription>
+          </DialogHeader>
+          
+          {selectedCampaign && (
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-4">{selectedCampaign.name}</h3>
+                
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm text-muted-foreground">Total Impressions</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold">{selectedCampaign.impressions}</div>
+                      <p className="text-xs text-muted-foreground mt-1">Total views</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm text-muted-foreground">Total Clicks</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold">{selectedCampaign.clicks}</div>
+                      <p className="text-xs text-muted-foreground mt-1">User interactions</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Separator className="my-4" />
+
+                <div className="bg-muted p-6 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Click-Through Rate</p>
+                      <p className="text-4xl font-bold text-primary">{selectedCampaign.ctr.toFixed(2)}%</p>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant={selectedCampaign.ctr > 2 ? "default" : "secondary"} className="text-lg px-4 py-2">
+                        {selectedCampaign.ctr > 5 ? "Excellent" : selectedCampaign.ctr > 2 ? "Good" : "Average"}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator className="my-4" />
+
+                <div className="space-y-3">
+                  <h4 className="font-medium">Performance Breakdown</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center p-3 bg-muted rounded">
+                      <span className="text-sm">Engagement Rate</span>
+                      <span className="font-semibold">
+                        {selectedCampaign.impressions > 0 
+                          ? ((selectedCampaign.clicks / selectedCampaign.impressions) * 100).toFixed(2) 
+                          : 0}%
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-muted rounded">
+                      <span className="text-sm">Impressions per Click</span>
+                      <span className="font-semibold">
+                        {selectedCampaign.clicks > 0 
+                          ? (selectedCampaign.impressions / selectedCampaign.clicks).toFixed(1) 
+                          : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator className="my-4" />
+
+                <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                  <h4 className="font-medium mb-2 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-blue-600" />
+                    Quick Insights
+                  </h4>
+                  <ul className="space-y-1 text-sm">
+                    {selectedCampaign.ctr > 3 && (
+                      <li className="text-green-700 dark:text-green-400">✓ Above average CTR - Campaign is performing well</li>
+                    )}
+                    {selectedCampaign.impressions > 1000 && (
+                      <li className="text-blue-700 dark:text-blue-400">✓ High reach - Good visibility achieved</li>
+                    )}
+                    {selectedCampaign.clicks > 50 && (
+                      <li className="text-purple-700 dark:text-purple-400">✓ Strong engagement - Users are interested</li>
+                    )}
+                    {selectedCampaign.ctr < 1 && (
+                      <li className="text-orange-700 dark:text-orange-400">⚠ Low CTR - Consider optimizing ad content</li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

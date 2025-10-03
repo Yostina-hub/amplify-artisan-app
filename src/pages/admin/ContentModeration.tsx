@@ -3,39 +3,69 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
+import { CheckCircle, XCircle, AlertTriangle, Eye, Calendar, User, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 
+interface Post {
+  id: number;
+  user: string;
+  platform: string;
+  content: string;
+  status: string;
+  flagged: boolean;
+  timestamp: string;
+  fullContent?: string;
+  media?: string[];
+  engagement?: { likes: number; shares: number; comments: number };
+  flagReason?: string;
+  moderatedBy?: string;
+  moderatedAt?: string;
+}
+
 export default function ContentModeration() {
-  const [pendingPosts] = useState([
+  const [pendingPosts] = useState<Post[]>([
     {
       id: 1,
       user: "john@example.com",
       platform: "Twitter",
       content: "Check out our new product launch! Amazing features coming soon...",
+      fullContent: "Check out our new product launch! Amazing features coming soon. We've been working hard on this and can't wait to share it with you all. Limited time offer - first 100 customers get 30% off!",
       status: "pending",
       flagged: false,
-      timestamp: "2024-10-02 10:30 AM"
+      timestamp: "2024-10-02 10:30 AM",
+      media: ["product-image-1.jpg", "product-image-2.jpg"],
+      engagement: { likes: 45, shares: 12, comments: 8 }
     },
     {
       id: 2,
       user: "sarah@example.com",
       platform: "Instagram",
       content: "Summer sale starting now! Get 50% off everything!",
+      fullContent: "🌞 Summer sale starting now! Get 50% off everything! 🎉 Don't miss out on these amazing deals. Shop now at our store!",
       status: "pending",
       flagged: true,
-      timestamp: "2024-10-02 09:15 AM"
+      flagReason: "Possible misleading discount claim",
+      timestamp: "2024-10-02 09:15 AM",
+      media: ["sale-banner.jpg"],
+      engagement: { likes: 89, shares: 34, comments: 15 }
     },
     {
       id: 3,
       user: "mike@example.com",
       platform: "LinkedIn",
       content: "Excited to announce our latest partnership with...",
+      fullContent: "Excited to announce our latest partnership with TechCorp! This collaboration will bring innovative solutions to our customers and expand our market reach significantly.",
       status: "pending",
       flagged: false,
-      timestamp: "2024-10-02 08:45 AM"
+      timestamp: "2024-10-02 08:45 AM",
+      engagement: { likes: 156, shares: 45, comments: 23 }
     },
   ]);
+
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   const handleApprove = (postId: number) => {
     toast.success("Post approved and published");
@@ -47,6 +77,11 @@ export default function ContentModeration() {
 
   const handleFlag = (postId: number) => {
     toast.warning("Post flagged for review");
+  };
+
+  const handleViewDetails = (post: Post) => {
+    setSelectedPost(post);
+    setIsDetailsOpen(true);
   };
 
   return (
@@ -85,6 +120,14 @@ export default function ContentModeration() {
               <CardContent className="space-y-4">
                 <p className="text-sm">{post.content}</p>
                 <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleViewDetails(post)}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Details
+                  </Button>
                   <Button
                     size="sm"
                     className="bg-success hover:bg-success/90"
@@ -134,13 +177,24 @@ export default function ContentModeration() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm">{post.content}</p>
-                <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
-                  <p className="text-xs text-destructive">
-                    <AlertTriangle className="h-3 w-3 inline mr-1" />
-                    This content has been flagged for potential policy violations
-                  </p>
-                </div>
+                {post.flagReason && (
+                  <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+                    <p className="text-xs text-destructive font-medium mb-1">
+                      <AlertTriangle className="h-3 w-3 inline mr-1" />
+                      Flag Reason:
+                    </p>
+                    <p className="text-xs text-destructive">{post.flagReason}</p>
+                  </div>
+                )}
                 <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleViewDetails(post)}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Details
+                  </Button>
                   <Button
                     size="sm"
                     className="bg-success hover:bg-success/90"
@@ -193,6 +247,123 @@ export default function ContentModeration() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Details Dialog */}
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Content Details</DialogTitle>
+            <DialogDescription>Full information about this post</DialogDescription>
+          </DialogHeader>
+          
+          {selectedPost && (
+            <div className="space-y-4">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">{selectedPost.user}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Calendar className="h-4 w-4" />
+                    <span>{selectedPost.timestamp}</span>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Badge variant="outline">{selectedPost.platform}</Badge>
+                  {selectedPost.flagged && (
+                    <Badge variant="destructive">Flagged</Badge>
+                  )}
+                </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  Full Content
+                </h4>
+                <p className="text-sm text-foreground leading-relaxed bg-muted p-3 rounded-lg">
+                  {selectedPost.fullContent || selectedPost.content}
+                </p>
+              </div>
+
+              {selectedPost.media && selectedPost.media.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Media Attachments</h4>
+                  <div className="flex gap-2 flex-wrap">
+                    {selectedPost.media.map((media, i) => (
+                      <Badge key={i} variant="secondary">{media}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedPost.engagement && (
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Engagement Metrics</h4>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="bg-muted p-3 rounded-lg text-center">
+                      <div className="text-2xl font-bold">{selectedPost.engagement.likes}</div>
+                      <div className="text-xs text-muted-foreground">Likes</div>
+                    </div>
+                    <div className="bg-muted p-3 rounded-lg text-center">
+                      <div className="text-2xl font-bold">{selectedPost.engagement.shares}</div>
+                      <div className="text-xs text-muted-foreground">Shares</div>
+                    </div>
+                    <div className="bg-muted p-3 rounded-lg text-center">
+                      <div className="text-2xl font-bold">{selectedPost.engagement.comments}</div>
+                      <div className="text-xs text-muted-foreground">Comments</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedPost.flagReason && (
+                <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+                  <h4 className="text-sm font-medium text-destructive mb-2 flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    Flag Reason
+                  </h4>
+                  <p className="text-sm text-destructive">{selectedPost.flagReason}</p>
+                </div>
+              )}
+
+              <Separator />
+
+              <div className="flex gap-2 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDetailsOpen(false)}
+                >
+                  Close
+                </Button>
+                <Button
+                  className="bg-success hover:bg-success/90"
+                  onClick={() => {
+                    handleApprove(selectedPost.id);
+                    setIsDetailsOpen(false);
+                  }}
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Approve
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    handleReject(selectedPost.id);
+                    setIsDetailsOpen(false);
+                  }}
+                >
+                  <XCircle className="h-4 w-4 mr-2" />
+                  Reject
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

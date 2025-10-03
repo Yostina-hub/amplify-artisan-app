@@ -148,14 +148,35 @@ export default function UserManagement() {
 
   const fetchUsers = async () => {
     try {
+      setLoading(true);
+      
+      // Get current user info first
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (!currentUser) return;
+
+      // Get current user's profile and roles
+      const { data: currentProfile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', currentUser.id)
+        .single();
+
+      const { data: currentUserRoles } = await supabase
+        .from('user_roles')
+        .select('role, company_id')
+        .eq('user_id', currentUser.id);
+
+      const isSuperAdminUser = currentUserRoles?.some(r => r.role === 'admin' && !r.company_id);
+      const currentCompanyId = currentProfile?.company_id;
+
       // Build query - company admins only see their company's users
       let query = supabase
         .from('profiles')
         .select('*, companies(id, name, status)');
 
       // Filter by company for company admins
-      if (!isSuperAdmin && userCompanyId) {
-        query = query.eq('company_id', userCompanyId);
+      if (!isSuperAdminUser && currentCompanyId) {
+        query = query.eq('company_id', currentCompanyId);
       }
 
       const { data: profiles, error: profilesError } = await query
