@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Building2, FileText, AlertCircle, CheckCircle, XCircle, BookOpen, ArrowRight, Search, TrendingUp, MessageSquare, Sparkles, Crown, Target } from "lucide-react";
+import { Users, Building2, FileText, AlertCircle, CheckCircle, XCircle, BookOpen, ArrowRight, Search, TrendingUp, MessageSquare, Sparkles, Crown, Target, Globe } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -11,6 +11,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AnimatedSocialShowcase } from "@/components/AnimatedSocialShowcase";
 import { AdminGrowthShowcase } from "@/components/AdminGrowthShowcase";
 
+interface LocationMetric {
+  country: string;
+  continent: string;
+  mentions: number;
+  comments: number;
+  impressions: number;
+  totalEngagement: number;
+}
+
 interface DashboardStats {
   totalUsers: number;
   totalCompanies: number;
@@ -19,6 +28,7 @@ interface DashboardStats {
   rejectedCompanies: number;
   totalPosts: number;
   activeTrials: number;
+  locationMetrics: LocationMetric[];
 }
 
 interface CompanyStats {
@@ -59,6 +69,7 @@ export default function AdminDashboard() {
     rejectedCompanies: 0,
     totalPosts: 0,
     activeTrials: 0,
+    locationMetrics: [],
   });
   const [companyStats, setCompanyStats] = useState<CompanyStats[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,14 +98,20 @@ export default function AdminDashboard() {
         { count: postsCount },
         { count: trialsCount },
         { data: profiles },
-        { data: posts }
+        { data: posts },
+        { data: allMentions },
+        { data: allComments },
+        { data: allImpressions }
       ] = await Promise.all([
         supabase.from('companies').select('*'),
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
         supabase.from('social_media_posts').select('*', { count: 'exact', head: true }),
         supabase.from('subscription_requests').select('*', { count: 'exact', head: true }).eq('is_trial', true).eq('status', 'approved').gt('trial_ends_at', new Date().toISOString()),
         supabase.from('profiles').select('company_id'),
-        supabase.from('social_media_posts').select('company_id')
+        supabase.from('social_media_posts').select('company_id'),
+        supabase.from('social_media_mentions').select('country, continent'),
+        supabase.from('social_media_comments').select('country, continent'),
+        supabase.from('ad_impressions').select('country, continent')
       ]);
 
       const pendingCompanies = companies?.filter(c => c.status === 'pending').length || 0;
@@ -119,6 +136,43 @@ export default function AdminDashboard() {
         });
       });
 
+      // Calculate global location metrics
+      const locationMap = new Map<string, LocationMetric>();
+      
+      allMentions?.forEach(m => {
+        if (m.country && m.continent) {
+          const key = `${m.country}-${m.continent}`;
+          const existing = locationMap.get(key) || { country: m.country, continent: m.continent, mentions: 0, comments: 0, impressions: 0, totalEngagement: 0 };
+          existing.mentions++;
+          locationMap.set(key, existing);
+        }
+      });
+
+      allComments?.forEach(c => {
+        if (c.country && c.continent) {
+          const key = `${c.country}-${c.continent}`;
+          const existing = locationMap.get(key) || { country: c.country, continent: c.continent, mentions: 0, comments: 0, impressions: 0, totalEngagement: 0 };
+          existing.comments++;
+          locationMap.set(key, existing);
+        }
+      });
+
+      allImpressions?.forEach(i => {
+        if (i.country && i.continent) {
+          const key = `${i.country}-${i.continent}`;
+          const existing = locationMap.get(key) || { country: i.country, continent: i.continent, mentions: 0, comments: 0, impressions: 0, totalEngagement: 0 };
+          existing.impressions++;
+          locationMap.set(key, existing);
+        }
+      });
+
+      const locationMetrics = Array.from(locationMap.values())
+        .map(metric => ({
+          ...metric,
+          totalEngagement: metric.mentions + metric.comments + metric.impressions
+        }))
+        .sort((a, b) => b.totalEngagement - a.totalEngagement);
+
       setStats({
         totalUsers: usersCount || 0,
         totalCompanies: companies?.length || 0,
@@ -127,6 +181,7 @@ export default function AdminDashboard() {
         rejectedCompanies,
         totalPosts: postsCount || 0,
         activeTrials: trialsCount || 0,
+        locationMetrics,
       });
 
       setCompanyStats(Array.from(companyStatsMap.values()).sort((a, b) => b.userCount - a.userCount));
@@ -352,6 +407,52 @@ export default function AdminDashboard() {
           trend="up"
         />
       </div>
+
+      {/* Global Location Analytics */}
+      {stats.locationMetrics.length > 0 && (
+        <Card className="border-2 hover:shadow-xl transition-all duration-300 hover:border-primary/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="h-5 w-5 text-primary" />
+              Global Geographic Insights
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {stats.locationMetrics.slice(0, 8).map((location, idx) => (
+                <div key={idx} className="p-4 border rounded-lg hover:shadow-md transition-all bg-gradient-to-br from-background to-muted/10">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <p className="font-bold text-lg">{location.country}</p>
+                      <p className="text-xs text-muted-foreground">{location.continent}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                        {location.totalEngagement}
+                      </p>
+                      <p className="text-xs text-muted-foreground">total</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div className="text-center p-2 bg-primary/5 rounded">
+                      <p className="text-muted-foreground">Mentions</p>
+                      <p className="font-bold text-primary">{location.mentions}</p>
+                    </div>
+                    <div className="text-center p-2 bg-accent/5 rounded">
+                      <p className="text-muted-foreground">Comments</p>
+                      <p className="font-bold text-accent">{location.comments}</p>
+                    </div>
+                    <div className="text-center p-2 bg-success/5 rounded">
+                      <p className="text-muted-foreground">Clicks</p>
+                      <p className="font-bold text-success">{location.impressions}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="border-2 hover:shadow-xl transition-all duration-300 hover:border-primary/20">

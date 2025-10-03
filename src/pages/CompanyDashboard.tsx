@@ -13,6 +13,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { CompanyGrowthShowcase } from "@/components/CompanyGrowthShowcase";
 
+interface LocationMetric {
+  country: string;
+  continent: string;
+  mentions: number;
+  comments: number;
+  impressions: number;
+  engagement: number;
+}
+
 interface CompanyData {
   name: string;
   userCount: number;
@@ -35,6 +44,7 @@ interface CompanyData {
     icon: any;
     color: string;
   }>;
+  locationMetrics: LocationMetric[];
 }
 
 export default function CompanyDashboard() {
@@ -74,7 +84,10 @@ export default function CompanyDashboard() {
         { data: campaigns, count: campaignCount },
         { count: influencerCount },
         { data: accounts },
-        { data: auditLogs }
+        { data: auditLogs },
+        { data: mentions },
+        { data: comments },
+        { data: impressions }
       ] = await Promise.all([
         supabase.from('companies').select('name').eq('id', profile.company_id).single(),
         supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('company_id', profile.company_id),
@@ -83,7 +96,10 @@ export default function CompanyDashboard() {
         supabase.from('ad_campaigns').select('*', { count: 'exact' }).eq('company_id', profile.company_id),
         supabase.from('influencers').select('*', { count: 'exact', head: true }).eq('company_id', profile.company_id),
         supabase.from('social_media_accounts').select('platform, is_active').eq('company_id', profile.company_id),
-        supabase.from('audit_log_view').select('*').eq('company_id', profile.company_id).order('created_at', { ascending: false }).limit(6)
+        supabase.from('audit_log_view').select('*').eq('company_id', profile.company_id).order('created_at', { ascending: false }).limit(6),
+        supabase.from('social_media_mentions').select('country, continent').eq('account_id', profile.company_id),
+        supabase.from('social_media_comments').select('country, continent').eq('account_id', profile.company_id),
+        supabase.from('ad_impressions').select('country, continent').eq('company_id', profile.company_id)
       ]);
 
       // Calculate metrics
@@ -138,6 +154,43 @@ export default function CompanyDashboard() {
           : "Not Connected",
       }));
 
+      // Calculate location metrics
+      const locationMap = new Map<string, LocationMetric>();
+      
+      mentions?.forEach(m => {
+        if (m.country && m.continent) {
+          const key = `${m.country}-${m.continent}`;
+          const existing = locationMap.get(key) || { country: m.country, continent: m.continent, mentions: 0, comments: 0, impressions: 0, engagement: 0 };
+          existing.mentions++;
+          locationMap.set(key, existing);
+        }
+      });
+
+      comments?.forEach(c => {
+        if (c.country && c.continent) {
+          const key = `${c.country}-${c.continent}`;
+          const existing = locationMap.get(key) || { country: c.country, continent: c.continent, mentions: 0, comments: 0, impressions: 0, engagement: 0 };
+          existing.comments++;
+          locationMap.set(key, existing);
+        }
+      });
+
+      impressions?.forEach(i => {
+        if (i.country && i.continent) {
+          const key = `${i.country}-${i.continent}`;
+          const existing = locationMap.get(key) || { country: i.country, continent: i.continent, mentions: 0, comments: 0, impressions: 0, engagement: 0 };
+          existing.impressions++;
+          locationMap.set(key, existing);
+        }
+      });
+
+      const locationMetrics = Array.from(locationMap.values())
+        .map(metric => ({
+          ...metric,
+          engagement: metric.mentions + metric.comments + metric.impressions
+        }))
+        .sort((a, b) => b.engagement - a.engagement);
+
       setCompanyData({
         name: company?.name || 'Your Company',
         userCount: userCount || 0,
@@ -156,6 +209,7 @@ export default function CompanyDashboard() {
           { platform: "TikTok", action: "Trending post", time: "4 days ago", icon: MessageCircle, color: "text-foreground" },
         ],
         connectedPlatforms,
+        locationMetrics,
       });
     } catch (error) {
       console.error('Error fetching company data:', error);
@@ -240,6 +294,50 @@ export default function CompanyDashboard() {
 
       {/* Company Growth Showcase */}
       <CompanyGrowthShowcase />
+
+      {/* Location Analytics */}
+      {companyData && companyData.locationMetrics.length > 0 && (
+        <Card className="border-2 hover:shadow-xl transition-all duration-300 hover:border-primary/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              Geographic Insights
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {companyData.locationMetrics.slice(0, 6).map((location, idx) => (
+                <div key={idx} className="p-4 border rounded-lg hover:shadow-md transition-all">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <p className="font-semibold text-lg">{location.country}</p>
+                      <p className="text-xs text-muted-foreground">{location.continent}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-primary">{location.engagement}</p>
+                      <p className="text-xs text-muted-foreground">interactions</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div>
+                      <p className="text-muted-foreground">Mentions</p>
+                      <p className="font-semibold">{location.mentions}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Comments</p>
+                      <p className="font-semibold">{location.comments}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Clicks</p>
+                      <p className="font-semibold">{location.impressions}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4 border-2 hover:shadow-xl transition-all duration-300 hover:border-primary/20">
