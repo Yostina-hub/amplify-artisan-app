@@ -367,17 +367,35 @@ export default function ContentModeration() {
                   <CardContent className="space-y-4">
                     <p className="text-sm line-clamp-3">{post.content}</p>
                     {post.media_urls && post.media_urls.length > 0 && (
-                      <div className="flex gap-2 flex-wrap">
-                        {post.media_urls.map((media, idx) => (
-                          <div key={idx} className="relative w-24 h-24 rounded-lg overflow-hidden border">
-                            {media.type === 'video' ? (
-                              <video src={media.url} className="w-full h-full object-cover" />
-                            ) : (
-                              <img src={media.url} alt={`Media ${idx + 1}`} className="w-full h-full object-cover" />
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                    <div className="flex gap-2 flex-wrap">
+                      {post.media_urls.map((media, idx) => {
+                        const t = media.type || '';
+                        if (t === 'video' || t === 'photo') {
+                          return (
+                            <div key={idx} className="relative w-24 h-24 rounded-lg overflow-hidden border">
+                              {t === 'video' ? (
+                                <video src={media.url} className="w-full h-full object-cover" />
+                              ) : (
+                                <img src={media.url} alt={`Media ${idx + 1}`} className="w-full h-full object-cover" />
+                              )}
+                            </div>
+                          );
+                        }
+                        // External links (YouTube, Vimeo, generic)
+                        return (
+                          <a
+                            key={idx}
+                            href={media.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-2 py-1 text-xs rounded-md border bg-muted hover:underline"
+                            title={media.url}
+                          >
+                            {(t || 'link')}: {(() => { try { return new URL(media.url).hostname; } catch { return media.url; } })()}
+                          </a>
+                        );
+                      })}
+                    </div>
                     )}
                     <div className="flex gap-2 flex-wrap">
                       <Button
@@ -459,15 +477,33 @@ export default function ContentModeration() {
                     <p className="text-sm line-clamp-3">{post.content}</p>
                     {post.media_urls && post.media_urls.length > 0 && (
                       <div className="flex gap-2 flex-wrap">
-                        {post.media_urls.map((media, idx) => (
-                          <div key={idx} className="relative w-24 h-24 rounded-lg overflow-hidden border">
-                            {media.type === 'video' ? (
-                              <video src={media.url} className="w-full h-full object-cover" />
-                            ) : (
-                              <img src={media.url} alt={`Media ${idx + 1}`} className="w-full h-full object-cover" />
-                            )}
-                          </div>
-                        ))}
+                        {post.media_urls.map((media, idx) => {
+                          const t = media.type || '';
+                          if (t === 'video' || t === 'photo') {
+                            return (
+                              <div key={idx} className="relative w-24 h-24 rounded-lg overflow-hidden border">
+                                {t === 'video' ? (
+                                  <video src={media.url} className="w-full h-full object-cover" />
+                                ) : (
+                                  <img src={media.url} alt={`Media ${idx + 1}`} className="w-full h-full object-cover" />
+                                )}
+                              </div>
+                            );
+                          }
+                          // External links (YouTube, Vimeo, generic)
+                          return (
+                            <a
+                              key={idx}
+                              href={media.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-2 py-1 text-xs rounded-md border bg-muted hover:underline"
+                              title={media.url}
+                            >
+                              {(t || 'link')}: {(() => { try { return new URL(media.url).hostname; } catch { return media.url; } })()}
+                            </a>
+                          );
+                        })}
                       </div>
                     )}
                     {post.flag_reason && (
@@ -608,23 +644,41 @@ export default function ContentModeration() {
                 <div>
                   <h4 className="text-sm font-medium mb-2">Media</h4>
                   <div className="grid grid-cols-2 gap-4">
-                    {selectedPost.media_urls.map((media, idx) => (
-                      <div key={idx} className="relative rounded-lg overflow-hidden border aspect-video">
-                        {media.type === 'video' ? (
-                          <video 
-                            src={media.url} 
-                            controls 
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <img 
-                            src={media.url} 
-                            alt={`Media ${idx + 1}`} 
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                      </div>
-                    ))}
+                      {selectedPost.media_urls.map((media, idx) => {
+                        const t = media.type || '';
+                        if (t === 'video' || t === 'photo') {
+                          return (
+                            <div key={idx} className="relative rounded-lg overflow-hidden border aspect-video">
+                              {t === 'video' ? (
+                                <video 
+                                  src={media.url} 
+                                  controls 
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <img 
+                                  src={media.url} 
+                                  alt={`Media ${idx + 1}`} 
+                                  className="w-full h-full object-cover"
+                                />
+                              )}
+                            </div>
+                          );
+                        }
+                        // External links (YouTube, Vimeo, generic)
+                        return (
+                          <a
+                            key={idx}
+                            href={media.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center border rounded-lg p-2 text-xs bg-muted"
+                            title={media.url}
+                          >
+                            {(t || 'link')}: {(() => { try { return new URL(media.url).hostname; } catch { return media.url; } })()}
+                          </a>
+                        );
+                      })}
                   </div>
                 </div>
               )}

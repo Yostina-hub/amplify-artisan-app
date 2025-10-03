@@ -73,12 +73,21 @@ serve(async (req) => {
     }
 
     // Send message to Telegram (with or without media)
-    const mediaUrls = post.media_urls || [];
+    const mediaItems = Array.isArray(post.media_urls) ? post.media_urls : [];
+    const supportedMedia = mediaItems.filter((m: any) => (m?.type === 'photo' || m?.type === 'video'));
+    const linkItems = mediaItems.filter((m: any) => !(m?.type === 'photo' || m?.type === 'video'));
+
+    // Append non-photo/video links (e.g., YouTube, Vimeo, generic links) to the caption
+    const linksText = linkItems.length
+      ? '\n\n' + linkItems.map((l: any) => `${l.url}`).join('\n')
+      : '';
+    const caption = `${post.content || ''}${linksText}`.trim();
+
     let telegramData;
     let telegramUrl;
 
-    if (mediaUrls.length === 0) {
-      // Send text-only message
+    if (supportedMedia.length === 0) {
+      // Only links or text -> send as a text message including the links
       telegramUrl = `https://api.telegram.org/bot${config.api_key}/sendMessage`;
       const telegramResponse = await fetch(telegramUrl, {
         method: 'POST',
@@ -87,7 +96,7 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           chat_id: config.channel_id,
-          text: post.content,
+          text: caption,
           parse_mode: 'HTML',
         }),
       });
@@ -95,18 +104,18 @@ serve(async (req) => {
       telegramData = await telegramResponse.json();
 
       if (!telegramResponse.ok) {
-        console.error("Telegram API error:", telegramData);
+        console.error('Telegram API error:', telegramData);
         throw new Error(`Telegram API error: ${telegramData.description || 'Unknown error'}`);
       }
-    } else if (mediaUrls.length === 1) {
-      // Send single media with caption
-      const media = mediaUrls[0];
-      const mediaType = media.type || 'photo'; // photo or video
-      
-      telegramUrl = mediaType === 'video' 
+    } else if (supportedMedia.length === 1) {
+      // Single media item with caption that includes any links
+      const media = supportedMedia[0];
+      const mediaType = media.type; // 'photo' | 'video'
+
+      telegramUrl = mediaType === 'video'
         ? `https://api.telegram.org/bot${config.api_key}/sendVideo`
         : `https://api.telegram.org/bot${config.api_key}/sendPhoto`;
-      
+
       const telegramResponse = await fetch(telegramUrl, {
         method: 'POST',
         headers: {
@@ -115,7 +124,7 @@ serve(async (req) => {
         body: JSON.stringify({
           chat_id: config.channel_id,
           [mediaType === 'video' ? 'video' : 'photo']: media.url,
-          caption: post.content,
+          caption,
           parse_mode: 'HTML',
         }),
       });
@@ -123,15 +132,15 @@ serve(async (req) => {
       telegramData = await telegramResponse.json();
 
       if (!telegramResponse.ok) {
-        console.error("Telegram API error:", telegramData);
+        console.error('Telegram API error:', telegramData);
         throw new Error(`Telegram API error: ${telegramData.description || 'Unknown error'}`);
       }
     } else {
-      // Send multiple media (album)
-      const mediaGroup = mediaUrls.map((media: any, index: number) => ({
-        type: media.type || 'photo',
+      // Multiple media items -> send album, add caption (with links) on the first item
+      const mediaGroup = supportedMedia.map((media: any, index: number) => ({
+        type: media.type,
         media: media.url,
-        ...(index === 0 && post.content ? { caption: post.content, parse_mode: 'HTML' } : {}),
+        ...(index === 0 && caption ? { caption, parse_mode: 'HTML' } : {}),
       }));
 
       telegramUrl = `https://api.telegram.org/bot${config.api_key}/sendMediaGroup`;
@@ -149,7 +158,7 @@ serve(async (req) => {
       telegramData = await telegramResponse.json();
 
       if (!telegramResponse.ok) {
-        console.error("Telegram API error:", telegramData);
+        console.error('Telegram API error:', telegramData);
         throw new Error(`Telegram API error: ${telegramData.description || 'Unknown error'}`);
       }
     }
@@ -183,7 +192,7 @@ serve(async (req) => {
         chatId: Array.isArray(telegramData.result) 
           ? telegramData.result[0].chat.id 
           : telegramData.result.chat.id,
-        mediaCount: mediaUrls.length
+        mediaCount: supportedMedia.length
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
