@@ -18,6 +18,8 @@ export default function Composer() {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const [mediaLinks, setMediaLinks] = useState<string[]>([]);
+  const [linkInput, setLinkInput] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast: showToast } = useToast();
 
@@ -54,6 +56,20 @@ export default function Composer() {
     setMediaFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleAddLink = () => {
+    if (!linkInput.trim()) {
+      toast.error("Please enter a valid link");
+      return;
+    }
+    setMediaLinks((prev) => [...prev, linkInput.trim()]);
+    setLinkInput("");
+    toast.success("Link added");
+  };
+
+  const handleRemoveLink = (index: number) => {
+    setMediaLinks((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSchedule = async () => {
     if (!content.trim()) {
       toast.error("Please write some content first");
@@ -76,9 +92,10 @@ export default function Composer() {
         .eq('id', user.id)
         .single();
 
-      // Upload media files to storage and get public URLs
+      // Prepare media URLs: upload files + add external links
       const mediaUrls: Array<{ url: string; type: string }> = [];
       
+      // Upload files to storage
       if (mediaFiles.length > 0) {
         for (const file of mediaFiles) {
           const fileExt = file.name.split('.').pop();
@@ -97,7 +114,6 @@ export default function Composer() {
             throw new Error(`Failed to upload ${file.name}: ${uploadError.message}`);
           }
 
-          // Get public URL
           const { data: { publicUrl } } = supabase.storage
             .from('post-media')
             .getPublicUrl(fileName);
@@ -105,6 +121,28 @@ export default function Composer() {
           mediaUrls.push({
             url: publicUrl,
             type: fileType
+          });
+        }
+      }
+
+      // Add external media links
+      if (mediaLinks.length > 0) {
+        for (const link of mediaLinks) {
+          // Detect media type based on URL
+          let type = 'link';
+          if (link.includes('youtube.com') || link.includes('youtu.be')) {
+            type = 'youtube';
+          } else if (link.includes('vimeo.com')) {
+            type = 'vimeo';
+          } else if (link.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+            type = 'photo';
+          } else if (link.match(/\.(mp4|mov|avi|webm)$/i)) {
+            type = 'video';
+          }
+
+          mediaUrls.push({
+            url: link,
+            type: type
           });
         }
       }
@@ -149,6 +187,8 @@ export default function Composer() {
       setDate(undefined);
       setSelectedPlatforms([]);
       setMediaFiles([]);
+      setMediaLinks([]);
+      setLinkInput("");
     } catch (error: any) {
       showToast({
         title: "Error",
@@ -189,46 +229,92 @@ export default function Composer() {
           </div>
 
           <div className="space-y-3">
-            <div className="flex gap-2">
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleMediaSelect}
-                accept="image/*,video/*"
-                multiple
-                className="hidden"
-              />
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Image className="h-4 w-4 mr-2" />
-                Add Media
-              </Button>
-              <Button variant="outline" size="sm">
-                <Smile className="h-4 w-4 mr-2" />
-                Emoji
-              </Button>
-            </div>
-            {mediaFiles.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {mediaFiles.map((file, index) => (
-                  <div key={index} className="relative">
-                    <div className="px-3 py-2 bg-muted rounded-lg text-sm flex items-center gap-2">
-                      <Image className="h-4 w-4" />
-                      <span className="max-w-[150px] truncate">{file.name}</span>
-                      <button
-                        onClick={() => handleRemoveMedia(index)}
-                        className="text-destructive hover:text-destructive/80"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  </div>
-                ))}
+            <Label>Media (Optional)</Label>
+            <div className="space-y-3 p-4 border rounded-lg">
+              <div className="flex gap-2">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleMediaSelect}
+                  accept="image/*,video/*"
+                  multiple
+                  className="hidden"
+                />
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Image className="h-4 w-4 mr-2" />
+                  Upload Files
+                </Button>
+                <Button variant="outline" size="sm">
+                  <Smile className="h-4 w-4 mr-2" />
+                  Emoji
+                </Button>
               </div>
-            )}
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Or paste YouTube, Vimeo, or image link..."
+                  value={linkInput}
+                  onChange={(e) => setLinkInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddLink()}
+                  className="flex-1 px-3 py-2 text-sm border rounded-md"
+                />
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleAddLink}
+                >
+                  Add Link
+                </Button>
+              </div>
+
+              {mediaFiles.length > 0 && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2">Uploaded Files:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {mediaFiles.map((file, index) => (
+                      <div key={index} className="relative">
+                        <div className="px-3 py-2 bg-muted rounded-lg text-sm flex items-center gap-2">
+                          <Image className="h-4 w-4" />
+                          <span className="max-w-[150px] truncate">{file.name}</span>
+                          <button
+                            onClick={() => handleRemoveMedia(index)}
+                            className="text-destructive hover:text-destructive/80"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {mediaLinks.length > 0 && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2">External Links:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {mediaLinks.map((link, index) => (
+                      <div key={index} className="relative">
+                        <div className="px-3 py-2 bg-primary/10 rounded-lg text-sm flex items-center gap-2">
+                          <span className="max-w-[200px] truncate">{link}</span>
+                          <button
+                            onClick={() => handleRemoveLink(index)}
+                            className="text-destructive hover:text-destructive/80"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="space-y-3">
@@ -300,6 +386,8 @@ export default function Composer() {
               setDate(undefined);
               setSelectedPlatforms([]);
               setMediaFiles([]);
+              setMediaLinks([]);
+              setLinkInput("");
             }}>Clear</Button>
           </div>
         </CardContent>
