@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,11 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Mail, Save, AlertCircle } from "lucide-react";
+import { Mail, Save, AlertCircle, Shield } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function CompanyEmailSettings() {
   const { toast } = useToast();
+  const { isCompanyAdmin, isSuperAdmin } = useAuth();
   const [loading, setLoading] = useState(false);
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [config, setConfig] = useState({
@@ -126,6 +128,21 @@ export default function CompanyEmailSettings() {
     }
   };
 
+  const isAdmin = isCompanyAdmin || isSuperAdmin;
+
+  if (!isAdmin) {
+    return (
+      <div className="container mx-auto py-8">
+        <Alert variant="destructive">
+          <Shield className="h-4 w-4" />
+          <AlertDescription>
+            Only company administrators can access email configuration settings.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto py-8 space-y-6">
       <div>
@@ -136,9 +153,9 @@ export default function CompanyEmailSettings() {
       </div>
 
       <Alert>
-        <AlertCircle className="h-4 w-4" />
+        <Shield className="h-4 w-4" />
         <AlertDescription>
-          Configure your company's SMTP server settings to send emails from your own email account.
+          <strong>Admin Access Required:</strong> SMTP credentials are sensitive. Only company administrators can configure email settings.
         </AlertDescription>
       </Alert>
 

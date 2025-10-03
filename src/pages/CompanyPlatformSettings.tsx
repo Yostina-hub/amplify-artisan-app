@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Save, AlertCircle } from "lucide-react";
+import { Save, AlertCircle, Shield } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import * as Icons from "lucide-react";
 import { platformConfigSchema } from "@/lib/validations";
@@ -33,12 +34,15 @@ interface CompanyConfig {
 }
 
 export default function CompanyPlatformSettings() {
+  const { isCompanyAdmin, isSuperAdmin } = useAuth();
   const [platforms, setPlatforms] = useState<Platform[]>([]);
   const [configs, setConfigs] = useState<Record<string, CompanyConfig>>({});
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const isAdmin = isCompanyAdmin || isSuperAdmin;
 
   useEffect(() => {
     fetchData();
@@ -185,6 +189,19 @@ export default function CompanyPlatformSettings() {
     return <div className="p-8">Loading...</div>;
   }
 
+  if (!isAdmin) {
+    return (
+      <div className="p-8">
+        <Alert variant="destructive">
+          <Shield className="h-4 w-4" />
+          <AlertDescription>
+            Only company administrators can access platform API settings.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   if (!companyId) {
     return (
       <div className="p-8">
@@ -208,9 +225,9 @@ export default function CompanyPlatformSettings() {
       </div>
 
       <Alert>
-        <AlertCircle className="h-4 w-4" />
+        <Shield className="h-4 w-4" />
         <AlertDescription>
-          These are your company's OAuth app credentials. Each user will then connect their own accounts using these credentials. Only platforms your company is subscribed to are shown here.
+          <strong>Admin Access Required:</strong> These are sensitive OAuth credentials. Only company administrators can view and modify these settings. Each user will connect their own accounts using these credentials.
         </AlertDescription>
       </Alert>
 

@@ -1,10 +1,21 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schema
+const notificationRequestSchema = z.object({
+  postId: z.string().uuid("Invalid post ID format"),
+  userId: z.string().uuid("Invalid user ID format"),
+  action: z.enum(['approved', 'rejected', 'flagged'], {
+    errorMap: () => ({ message: "Action must be 'approved', 'rejected', or 'flagged'" })
+  }),
+  reason: z.string().max(500, "Reason too long (max 500 characters)").optional(),
+});
 
 interface NotificationRequest {
   postId: string;
@@ -19,11 +30,19 @@ serve(async (req) => {
   }
 
   try {
-    const { postId, userId, action, reason }: NotificationRequest = await req.json();
-
-    if (!postId || !userId || !action) {
-      throw new Error('Missing required fields: postId, userId, action');
+    const rawBody = await req.json();
+    
+    // Validate input
+    const validationResult = notificationRequestSchema.safeParse(rawBody);
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+      return new Response(
+        JSON.stringify({ error: `Validation failed: ${errors}` }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
     }
+
+    const { postId, userId, action, reason } = validationResult.data;
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',

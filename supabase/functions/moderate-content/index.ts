@@ -1,13 +1,25 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Input validation schema
+const moderationRequestSchema = z.object({
+  postId: z.string().uuid("Invalid post ID format").optional(),
+  content: z.string()
+    .min(1, "Content cannot be empty")
+    .max(10000, "Content too long (max 10000 characters)"),
+  platforms: z.array(z.string())
+    .min(1, "At least one platform required")
+    .max(10, "Too many platforms specified"),
+});
+
 interface ModerationRequest {
-  postId: string;
+  postId?: string;
   content: string;
   platforms: string[];
 }
@@ -25,11 +37,19 @@ serve(async (req) => {
   }
 
   try {
-    const { postId, content, platforms }: ModerationRequest = await req.json();
-
-    if (!content) {
-      throw new Error('Content is required for moderation');
+    const rawBody = await req.json();
+    
+    // Validate input
+    const validationResult = moderationRequestSchema.safeParse(rawBody);
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+      return new Response(
+        JSON.stringify({ error: `Validation failed: ${errors}` }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
     }
+
+    const { postId, content, platforms } = validationResult.data;
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
