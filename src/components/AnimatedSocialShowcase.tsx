@@ -28,22 +28,25 @@ export function AnimatedSocialShowcase() {
 
   return (
     <Card className="relative overflow-hidden border-2 hover:shadow-2xl transition-all duration-500 animate-in fade-in-50 scale-in duration-700">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-primary/5 animate-pulse" style={{ animationDuration: '3s' }} />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-primary/5" style={{ animation: 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
       
       {/* Animated background particles */}
       <div className="absolute inset-0 overflow-hidden">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-2 h-2 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full animate-float"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${3 + Math.random() * 4}s`,
-            }}
-          />
-        ))}
+        {[...Array(20)].map((_, i) => {
+          const delay = Math.random() * 5;
+          const duration = 3 + Math.random() * 4;
+          return (
+            <div
+              key={i}
+              className="absolute w-2 h-2 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animation: `float ${duration}s ease-in-out ${delay}s infinite`,
+              }}
+            />
+          );
+        })}
       </div>
 
       <CardContent className="relative z-10 p-8">
@@ -84,8 +87,7 @@ export function AnimatedSocialShowcase() {
                 className="absolute transition-all duration-1000"
                 style={{
                   transform: `translate(${x}px, ${y}px) ${isActive ? 'scale(1.3)' : 'scale(1)'}`,
-                  animation: isVisible ? `orbit 20s linear infinite` : 'none',
-                  animationDelay: `${platform.delay}s`,
+                  animation: isVisible ? `orbit 20s linear ${platform.delay}s infinite` : 'none',
                 }}
               >
                 <div
@@ -158,8 +160,10 @@ export function AnimatedSocialShowcase() {
           ].map((stat, idx) => (
             <div
               key={stat.label}
-              className="text-center p-3 rounded-lg bg-gradient-to-br from-primary/5 to-accent/5 hover:from-primary/10 hover:to-accent/10 transition-all duration-300 hover:scale-105 animate-in fade-in-50 duration-500"
-              style={{ animationDelay: `${idx * 100}ms` }}
+              className="text-center p-3 rounded-lg bg-gradient-to-br from-primary/5 to-accent/5 hover:from-primary/10 hover:to-accent/10 transition-all duration-300 hover:scale-105"
+              style={{ 
+                animation: `fade-in 0.5s ease-out ${idx * 100}ms both`,
+              }}
             >
               <div className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 {stat.value}
@@ -191,8 +195,15 @@ export function AnimatedSocialShowcase() {
           }
         }
 
-        .animate-float {
-          animation: float ease-in-out infinite;
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
       `}</style>
     </Card>
