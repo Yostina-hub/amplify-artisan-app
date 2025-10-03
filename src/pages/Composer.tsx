@@ -76,6 +76,39 @@ export default function Composer() {
         .eq('id', user.id)
         .single();
 
+      // Upload media files to storage and get public URLs
+      const mediaUrls: Array<{ url: string; type: string }> = [];
+      
+      if (mediaFiles.length > 0) {
+        for (const file of mediaFiles) {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+          const fileType = file.type.startsWith('video/') ? 'video' : 'photo';
+
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('post-media')
+            .upload(fileName, file, {
+              cacheControl: '3600',
+              upsert: false
+            });
+
+          if (uploadError) {
+            console.error('Upload error:', uploadError);
+            throw new Error(`Failed to upload ${file.name}: ${uploadError.message}`);
+          }
+
+          // Get public URL
+          const { data: { publicUrl } } = supabase.storage
+            .from('post-media')
+            .getPublicUrl(fileName);
+
+          mediaUrls.push({
+            url: publicUrl,
+            type: fileType
+          });
+        }
+      }
+
       const { data: newPost, error } = await supabase
         .from('social_media_posts')
         .insert({
@@ -85,6 +118,7 @@ export default function Composer() {
           status: 'draft', // Start as draft
           user_id: user.id,
           company_id: profile?.company_id || null,
+          media_urls: mediaUrls,
         })
         .select()
         .single();
