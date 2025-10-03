@@ -68,7 +68,7 @@ export default function Composer() {
           content: content.trim(),
           platforms: selectedPlatforms,
           scheduled_at: date?.toISOString() || null,
-          status: 'pending', // Start as pending for moderation
+          status: 'draft', // Start as draft
           user_id: user.id,
           company_id: profile?.company_id || null,
         })
