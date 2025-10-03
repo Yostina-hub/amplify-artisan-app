@@ -24,8 +24,8 @@ const mainItems = [
 
 const analyticsItems = [
   { title: "Overview", url: "/analytics", icon: BarChart3 },
-  { title: "Social Analytics", url: "/social-analytics", icon: TrendingUp },
   { title: "Social Metrics", url: "/social-metrics", icon: BarChart2 },
+  { title: "Reach Analytics", url: "/admin/reach-analytics", icon: TrendingUp },
 ];
 
 const marketingItems = [
@@ -46,7 +46,6 @@ const agentItems = [
 const companyAdminItems = [
   { title: "User Management", url: "/admin/users", icon: Users },
   { title: "Content Moderation", url: "/admin/moderation", icon: Flag },
-  { title: "Reach Analytics", url: "/admin/reach-analytics", icon: BarChart2 },
   { title: "Company Email Settings", url: "/company/email-settings", icon: Mail },
   { title: "Platform Subscriptions", url: "/company/platform-subscriptions", icon: Package },
   { title: "Platform API Settings", url: "/company/platform-settings", icon: Key },
@@ -60,7 +59,6 @@ const adminItems = [
   { title: "Content Moderation", url: "/admin/moderation", icon: Flag },
   { title: "Social Platforms", url: "/admin/social-platforms", icon: Globe },
   { title: "Platform Subscriptions", url: "/admin/platform-subscriptions", icon: Package },
-  { title: "Reach Analytics", url: "/admin/reach-analytics", icon: BarChart2 },
   { title: "Subscription Management", url: "/admin/subscriptions", icon: CreditCard },
   { title: "Trial Settings", url: "/admin/trial-settings", icon: Settings },
   { title: "Industry Management", url: "/admin/industries", icon: Layers },

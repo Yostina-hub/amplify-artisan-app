@@ -4,10 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { TrendingUp, Eye, MousePointerClick, Ban, Sparkles, AlertTriangle, TrendingDown, Users, BarChart3 } from "lucide-react";
+import { TrendingUp, Eye, MousePointerClick, Ban, Sparkles, AlertTriangle, Users, BarChart3, Heart, Share2, Bookmark, Video, Target, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface AnalyticsData {
   totalUsers: number;
@@ -34,6 +35,34 @@ interface AIInsights {
   platform_specific_tips: string[];
 }
 
+interface PostMetrics {
+  id: string;
+  content: string;
+  platforms: string[];
+  status: string;
+  views: number;
+  shares: number;
+  likes: number;
+  saves: number;
+  clicks: number;
+  reach: number;
+  engagement_rate: number;
+  video_watch_time_seconds: number;
+  created_at: string;
+}
+
+interface SocialAggregateMetrics {
+  totalViews: number;
+  totalShares: number;
+  totalLikes: number;
+  totalSaves: number;
+  totalClicks: number;
+  totalReach: number;
+  avgEngagementRate: number;
+  totalVideoWatchTime: number;
+  totalPosts: number;
+}
+
 export default function ReachAnalytics() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [aiInsights, setAiInsights] = useState<AIInsights | null>(null);
@@ -43,6 +72,22 @@ export default function ReachAnalytics() {
   const [selectedCampaign, setSelectedCampaign] = useState<any>(null);
   const [isCampaignDetailsOpen, setIsCampaignDetailsOpen] = useState(false);
   const { toast } = useToast();
+
+  // Social Analytics State
+  const [posts, setPosts] = useState<PostMetrics[]>([]);
+  const [socialMetrics, setSocialMetrics] = useState<SocialAggregateMetrics>({
+    totalViews: 0,
+    totalShares: 0,
+    totalLikes: 0,
+    totalSaves: 0,
+    totalClicks: 0,
+    totalReach: 0,
+    avgEngagementRate: 0,
+    totalVideoWatchTime: 0,
+    totalPosts: 0,
+  });
+  const [timeRange, setTimeRange] = useState<string>("30");
+  const [platformFilter, setPlatformFilter] = useState<string>("all");
 
   const platforms = [
     { value: 'all', label: 'All Platforms', icon: '🌐' },
@@ -57,27 +102,25 @@ export default function ReachAnalytics() {
   useEffect(() => {
     fetchAnalytics();
     fetchAIInsights();
-  }, []);
+    fetchSocialAnalytics();
+  }, [timeRange, platformFilter]);
 
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
 
-      // Get user reach scores
       const { data: reachScores, error: scoresError } = await supabase
         .from("user_reach_scores")
         .select("reach_score");
 
       if (scoresError) throw scoresError;
 
-      // Get impressions data
       const { data: impressions, error: impressionsError } = await supabase
         .from("ad_impressions")
         .select("*, ad_campaigns(name)");
 
       if (impressionsError) throw impressionsError;
 
-      // Calculate analytics
       const totalUsers = reachScores?.length || 0;
       const averageReachScore = reachScores?.reduce((sum, s) => sum + (s.reach_score || 0), 0) / totalUsers || 0;
       
@@ -86,7 +129,6 @@ export default function ReachAnalytics() {
       const dismissals = impressions?.filter(i => i.impression_type === 'dismiss').length || 0;
       const ctr = views > 0 ? (clicks / views) * 100 : 0;
 
-      // Calculate top campaigns
       const campaignStats: Record<string, any> = {};
       impressions?.forEach((imp: any) => {
         const campaignName = imp.ad_campaigns?.name || 'Unknown';
@@ -125,6 +167,60 @@ export default function ReachAnalytics() {
     }
   };
 
+  const fetchSocialAnalytics = async () => {
+    try {
+      const daysAgo = parseInt(timeRange);
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - daysAgo);
+
+      let query = supabase
+        .from('social_media_posts')
+        .select('*')
+        .gte('created_at', startDate.toISOString())
+        .order('engagement_rate', { ascending: false });
+
+      const { data: postsData } = await query;
+
+      let filteredPosts = postsData || [];
+      if (platformFilter !== 'all') {
+        filteredPosts = filteredPosts.filter(post => 
+          post.platforms.includes(platformFilter)
+        );
+      }
+
+      const aggregate = filteredPosts.reduce((acc, post) => ({
+        totalViews: acc.totalViews + (post.views || 0),
+        totalShares: acc.totalShares + (post.shares || 0),
+        totalLikes: acc.totalLikes + (post.likes || 0),
+        totalSaves: acc.totalSaves + (post.saves || 0),
+        totalClicks: acc.totalClicks + (post.clicks || 0),
+        totalReach: acc.totalReach + (post.reach || 0),
+        avgEngagementRate: acc.avgEngagementRate + (post.engagement_rate || 0),
+        totalVideoWatchTime: acc.totalVideoWatchTime + (post.video_watch_time_seconds || 0),
+        totalPosts: acc.totalPosts + 1,
+      }), {
+        totalViews: 0,
+        totalShares: 0,
+        totalLikes: 0,
+        totalSaves: 0,
+        totalClicks: 0,
+        totalReach: 0,
+        avgEngagementRate: 0,
+        totalVideoWatchTime: 0,
+        totalPosts: 0,
+      });
+
+      aggregate.avgEngagementRate = aggregate.totalPosts > 0 
+        ? aggregate.avgEngagementRate / aggregate.totalPosts 
+        : 0;
+
+      setPosts(filteredPosts);
+      setSocialMetrics(aggregate);
+    } catch (error) {
+      console.error('Error fetching social analytics:', error);
+    }
+  };
+
   const fetchAIInsights = async (platform: string = selectedPlatform) => {
     try {
       setAnalyzingAI(true);
@@ -136,11 +232,6 @@ export default function ReachAnalytics() {
       setAiInsights(data.insights);
     } catch (error: any) {
       console.error('AI Analysis error:', error);
-      toast({
-        title: "AI Analysis unavailable",
-        description: "Could not load AI insights",
-        variant: "destructive",
-      });
     } finally {
       setAnalyzingAI(false);
     }
@@ -180,9 +271,11 @@ export default function ReachAnalytics() {
     }
   };
 
-  const handleViewCampaignDetails = (campaign: any) => {
-    setSelectedCampaign(campaign);
-    setIsCampaignDetailsOpen(true);
+  const formatWatchTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
   };
 
   if (loading) {
@@ -193,123 +286,321 @@ export default function ReachAnalytics() {
     <div className="container mx-auto p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Social Media & Reach Analytics</h1>
+          <h1 className="text-3xl font-bold">Comprehensive Analytics</h1>
           <p className="text-muted-foreground mt-2">
-            AI-powered insights across social metrics, influencers, and brand monitoring
+            Social media performance, ad campaigns, and AI-powered insights
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => fetchAIInsights()} disabled={analyzingAI}>
-            <Sparkles className="h-4 w-4 mr-2" />
-            {analyzingAI ? 'Analyzing...' : 'Refresh AI Analysis'}
-          </Button>
-          <Button onClick={recalculateAllScores}>
-            Recalculate All Scores
-          </Button>
-        </div>
+        <Button variant="outline" onClick={() => fetchAIInsights()} disabled={analyzingAI}>
+          <Sparkles className="h-4 w-4 mr-2" />
+          {analyzingAI ? 'Analyzing...' : 'Refresh AI Analysis'}
+        </Button>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-6">
+      <Tabs defaultValue="social" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="social">Social Analytics</TabsTrigger>
+          <TabsTrigger value="ads">Ad Campaigns</TabsTrigger>
           <TabsTrigger value="ai-insights">AI Insights</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
-          {/* Key Metrics */}
+        {/* Social Analytics Tab */}
+        <TabsContent value="social" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-semibold">Organic Post Performance</h2>
+            <div className="flex gap-3">
+              <Select value={timeRange} onValueChange={setTimeRange}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select period" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">Last 7 days</SelectItem>
+                  <SelectItem value="30">Last 30 days</SelectItem>
+                  <SelectItem value="90">Last 90 days</SelectItem>
+                  <SelectItem value="365">Last year</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={platformFilter} onValueChange={setPlatformFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="All platforms" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Platforms</SelectItem>
+                  <SelectItem value="Twitter">Twitter</SelectItem>
+                  <SelectItem value="Instagram">Instagram</SelectItem>
+                  <SelectItem value="Facebook">Facebook</SelectItem>
+                  <SelectItem value="LinkedIn">LinkedIn</SelectItem>
+                  <SelectItem value="YouTube">YouTube</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Key Social Metrics */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Users Tracked</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{analytics?.totalUsers || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Avg Score: {analytics?.averageReachScore.toFixed(1) || 0}/100
-            </p>
-          </CardContent>
-        </Card>
+            <Card className="hover:shadow-lg transition-all">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Views</CardTitle>
+                <Eye className="h-4 w-4 text-primary" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{socialMetrics.totalViews.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground">
+                  Avg {Math.round(socialMetrics.totalViews / Math.max(socialMetrics.totalPosts, 1))} per post
+                </p>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Ad Impressions</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{analytics?.totalImpressions || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">Total views</p>
-          </CardContent>
-        </Card>
+            <Card className="hover:shadow-lg transition-all">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Engagement</CardTitle>
+                <Heart className="h-4 w-4 text-red-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {(socialMetrics.totalLikes + socialMetrics.totalShares + socialMetrics.totalSaves).toLocaleString()}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {socialMetrics.avgEngagementRate.toFixed(2)}% avg rate
+                </p>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Clicks</CardTitle>
-            <MousePointerClick className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{analytics?.totalClicks || 0}</div>
-            <p className="text-xs text-success mt-1">
-              CTR: {analytics?.clickThroughRate.toFixed(2)}%
-            </p>
-          </CardContent>
-        </Card>
+            <Card className="hover:shadow-lg transition-all">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Reach</CardTitle>
+                <Target className="h-4 w-4 text-accent" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{socialMetrics.totalReach.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground">Unique users reached</p>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Dismissals</CardTitle>
-            <Ban className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{analytics?.totalDismissals || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">User dismissed ads</p>
-          </CardContent>
-        </Card>
-      </div>
+            <Card className="hover:shadow-lg transition-all">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Link Clicks</CardTitle>
+                <MousePointerClick className="h-4 w-4 text-primary-glow" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{socialMetrics.totalClicks.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground">
+                  CTR: {((socialMetrics.totalClicks / Math.max(socialMetrics.totalViews, 1)) * 100).toFixed(2)}%
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Detailed Social Metrics */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card className="hover:shadow-lg transition-all">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Shares</CardTitle>
+                <Share2 className="h-4 w-4 text-blue-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{socialMetrics.totalShares.toLocaleString()}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-all">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Likes</CardTitle>
+                <Heart className="h-4 w-4 text-red-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{socialMetrics.totalLikes.toLocaleString()}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-all">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Saves</CardTitle>
+                <Bookmark className="h-4 w-4 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{socialMetrics.totalSaves.toLocaleString()}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-all">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Watch Time</CardTitle>
+                <Video className="h-4 w-4 text-purple-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {formatWatchTime(socialMetrics.totalVideoWatchTime)}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Top Performing Posts */}
+          <Card className="border-2 hover:shadow-xl transition-all">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Award className="h-5 w-5 text-primary" />
+                Top Performing Posts
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {posts.length === 0 ? (
+                <div className="text-center py-12">
+                  <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No posts found for the selected period</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {posts.slice(0, 5).map((post, index) => (
+                    <div 
+                      key={post.id} 
+                      className="p-4 border rounded-lg hover:shadow-md transition-all hover:border-primary/30"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="bg-gradient-to-r from-primary/10 to-accent/10">
+                              #{index + 1}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(post.created_at).toLocaleDateString()}
+                            </span>
+                            {post.platforms.map(platform => (
+                              <Badge key={platform} variant="secondary">{platform}</Badge>
+                            ))}
+                          </div>
+                          <p className="text-sm font-medium line-clamp-2">{post.content}</p>
+                          
+                          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 text-xs">
+                            <div className="flex items-center gap-1">
+                              <Eye className="h-3 w-3 text-muted-foreground" />
+                              <span>{post.views.toLocaleString()}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Heart className="h-3 w-3 text-red-500" />
+                              <span>{post.likes.toLocaleString()}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Share2 className="h-3 w-3 text-blue-500" />
+                              <span>{post.shares.toLocaleString()}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Bookmark className="h-3 w-3 text-green-500" />
+                              <span>{post.saves.toLocaleString()}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <MousePointerClick className="h-3 w-3 text-primary" />
+                              <span>{post.clicks.toLocaleString()}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <TrendingUp className="h-3 w-3 text-accent" />
+                              <span>{post.engagement_rate.toFixed(2)}%</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Ad Campaigns Tab */}
+        <TabsContent value="ads" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-semibold">Ad Campaign Performance</h2>
+            <Button onClick={recalculateAllScores}>
+              Recalculate All Scores
+            </Button>
+          </div>
+
+          {/* Key Ad Metrics */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Total Users Tracked</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analytics?.totalUsers || 0}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Avg Score: {analytics?.averageReachScore.toFixed(1) || 0}/100
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Ad Impressions</CardTitle>
+                <Eye className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analytics?.totalImpressions || 0}</div>
+                <p className="text-xs text-muted-foreground mt-1">Total views</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Clicks</CardTitle>
+                <MousePointerClick className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analytics?.totalClicks || 0}</div>
+                <p className="text-xs text-success mt-1">
+                  CTR: {analytics?.clickThroughRate.toFixed(2)}%
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Dismissals</CardTitle>
+                <Ban className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analytics?.totalDismissals || 0}</div>
+                <p className="text-xs text-muted-foreground mt-1">User dismissed ads</p>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Top Performing Campaigns */}
           <Card>
-        <CardHeader>
-          <CardTitle>Top Performing Campaigns</CardTitle>
-          <CardDescription>Based on click-through rate and engagement</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {analytics?.topPerformingCampaigns.map((campaign, i) => (
-              <div key={i} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                <div className="flex-1">
-                  <p className="font-medium">{campaign.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {campaign.impressions} impressions • {campaign.clicks} clicks
-                  </p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-primary">{campaign.ctr.toFixed(1)}%</p>
-                    <p className="text-xs text-muted-foreground">CTR</p>
+            <CardHeader>
+              <CardTitle>Top Performing Campaigns</CardTitle>
+              <CardDescription>Based on click-through rate and engagement</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {analytics?.topPerformingCampaigns.map((campaign, i) => (
+                  <div key={i} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                    <div className="flex-1">
+                      <p className="font-medium">{campaign.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {campaign.impressions} impressions • {campaign.clicks} clicks
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-primary">{campaign.ctr.toFixed(1)}%</p>
+                      <p className="text-xs text-muted-foreground">CTR</p>
+                    </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleViewCampaignDetails(campaign)}
-                  >
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    Details
-                  </Button>
-                </div>
+                ))}
+                {(!analytics?.topPerformingCampaigns || analytics.topPerformingCampaigns.length === 0) && (
+                  <p className="text-center text-muted-foreground py-8">
+                    No campaign data available yet
+                  </p>
+                )}
               </div>
-            ))}
-            {(!analytics?.topPerformingCampaigns || analytics.topPerformingCampaigns.length === 0) && (
-              <p className="text-center text-muted-foreground py-8">
-                No campaign data available yet
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
         </TabsContent>
 
+        {/* AI Insights Tab */}
         <TabsContent value="ai-insights" className="space-y-6">
           {/* Platform Selector */}
           <Card>
@@ -349,15 +640,15 @@ export default function ReachAnalytics() {
             <>
               {/* AI Overview */}
               <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Sparkles className="h-5 w-5 text-primary" />
-                      AI-Powered Overview
-                      <Badge variant="secondary">
-                        {platforms.find(p => p.value === selectedPlatform)?.label}
-                      </Badge>
-                    </CardTitle>
-                  </CardHeader>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    AI-Powered Overview
+                    <Badge variant="secondary">
+                      {platforms.find(p => p.value === selectedPlatform)?.label}
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
                 <CardContent>
                   <p className="text-foreground leading-relaxed">{aiInsights.overview}</p>
                 </CardContent>
@@ -463,154 +754,32 @@ export default function ReachAnalytics() {
                 </Card>
               </div>
 
-              {/* Platform-Specific Tips */}
-              {aiInsights.platform_specific_tips && aiInsights.platform_specific_tips.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      {platforms.find(p => p.value === selectedPlatform)?.icon}
-                      {platforms.find(p => p.value === selectedPlatform)?.label} Pro Tips
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2">
-                      {aiInsights.platform_specific_tips.map((tip, i) => (
-                        <li key={i} className="flex items-start gap-2">
-                          <span className="text-primary mt-1">💡</span>
-                          <span>{tip}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              )}
+              {/* Platform Specific Tips */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Platform-Specific Tips</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {aiInsights.platform_specific_tips.map((tip, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span className="text-primary mt-1">💡</span>
+                        <span>{tip}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
             </>
           ) : (
             <Card>
               <CardContent className="p-12 text-center">
-                <TrendingDown className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground mb-4">No AI insights available yet</p>
-                <Button onClick={() => fetchAIInsights()}>
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Generate AI Analysis
-                </Button>
+                <p className="text-muted-foreground">Click "Refresh AI Analysis" to generate insights</p>
               </CardContent>
             </Card>
           )}
         </TabsContent>
-
-        <TabsContent value="performance" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Detailed Performance Metrics</CardTitle>
-              <CardDescription>Coming soon: Deep dive into campaign performance</CardDescription>
-            </CardHeader>
-          </Card>
-        </TabsContent>
       </Tabs>
-
-      {/* Campaign Details Dialog */}
-      <Dialog open={isCampaignDetailsOpen} onOpenChange={setIsCampaignDetailsOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Campaign Performance Details</DialogTitle>
-            <DialogDescription>Detailed metrics and analysis</DialogDescription>
-          </DialogHeader>
-          
-          {selectedCampaign && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold mb-4">{selectedCampaign.name}</h3>
-                
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-muted-foreground">Total Impressions</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-3xl font-bold">{selectedCampaign.impressions}</div>
-                      <p className="text-xs text-muted-foreground mt-1">Total views</p>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-muted-foreground">Total Clicks</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-3xl font-bold">{selectedCampaign.clicks}</div>
-                      <p className="text-xs text-muted-foreground mt-1">User interactions</p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <Separator className="my-4" />
-
-                <div className="bg-muted p-6 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Click-Through Rate</p>
-                      <p className="text-4xl font-bold text-primary">{selectedCampaign.ctr.toFixed(2)}%</p>
-                    </div>
-                    <div className="text-right">
-                      <Badge variant={selectedCampaign.ctr > 2 ? "default" : "secondary"} className="text-lg px-4 py-2">
-                        {selectedCampaign.ctr > 5 ? "Excellent" : selectedCampaign.ctr > 2 ? "Good" : "Average"}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-
-                <Separator className="my-4" />
-
-                <div className="space-y-3">
-                  <h4 className="font-medium">Performance Breakdown</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center p-3 bg-muted rounded">
-                      <span className="text-sm">Engagement Rate</span>
-                      <span className="font-semibold">
-                        {selectedCampaign.impressions > 0 
-                          ? ((selectedCampaign.clicks / selectedCampaign.impressions) * 100).toFixed(2) 
-                          : 0}%
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-muted rounded">
-                      <span className="text-sm">Impressions per Click</span>
-                      <span className="font-semibold">
-                        {selectedCampaign.clicks > 0 
-                          ? (selectedCampaign.impressions / selectedCampaign.clicks).toFixed(1) 
-                          : 'N/A'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <Separator className="my-4" />
-
-                <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                  <h4 className="font-medium mb-2 flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-blue-600" />
-                    Quick Insights
-                  </h4>
-                  <ul className="space-y-1 text-sm">
-                    {selectedCampaign.ctr > 3 && (
-                      <li className="text-green-700 dark:text-green-400">✓ Above average CTR - Campaign is performing well</li>
-                    )}
-                    {selectedCampaign.impressions > 1000 && (
-                      <li className="text-blue-700 dark:text-blue-400">✓ High reach - Good visibility achieved</li>
-                    )}
-                    {selectedCampaign.clicks > 50 && (
-                      <li className="text-purple-700 dark:text-purple-400">✓ Strong engagement - Users are interested</li>
-                    )}
-                    {selectedCampaign.ctr < 1 && (
-                      <li className="text-orange-700 dark:text-orange-400">⚠ Low CTR - Consider optimizing ad content</li>
-                    )}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
