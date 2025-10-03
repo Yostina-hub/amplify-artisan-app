@@ -79,49 +79,26 @@ export default function AdminDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch companies stats
-      const { data: companies, error: companiesError } = await supabase
-        .from('companies')
-        .select('*');
-
-      if (companiesError) throw companiesError;
+      // Fetch ALL data in parallel for instant loading
+      const [
+        { data: companies },
+        { count: usersCount },
+        { count: postsCount },
+        { count: trialsCount },
+        { data: profiles },
+        { data: posts }
+      ] = await Promise.all([
+        supabase.from('companies').select('*'),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('social_media_posts').select('*', { count: 'exact', head: true }),
+        supabase.from('subscription_requests').select('*', { count: 'exact', head: true }).eq('is_trial', true).eq('status', 'approved').gt('trial_ends_at', new Date().toISOString()),
+        supabase.from('profiles').select('company_id'),
+        supabase.from('social_media_posts').select('company_id')
+      ]);
 
       const pendingCompanies = companies?.filter(c => c.status === 'pending').length || 0;
       const approvedCompanies = companies?.filter(c => c.status === 'approved').length || 0;
       const rejectedCompanies = companies?.filter(c => c.status === 'rejected').length || 0;
-
-      // Fetch total users
-      const { count: usersCount, error: usersError } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
-
-      if (usersError) throw usersError;
-
-      // Fetch total posts
-      const { count: postsCount, error: postsError } = await supabase
-        .from('social_media_posts')
-        .select('*', { count: 'exact', head: true });
-
-      if (postsError) throw postsError;
-
-      // Fetch active trials
-      const { count: trialsCount, error: trialsError } = await supabase
-        .from('subscription_requests')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_trial', true)
-        .eq('status', 'approved')
-        .gt('trial_ends_at', new Date().toISOString());
-
-      if (trialsError) throw trialsError;
-
-      // Fetch company-wise stats
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('company_id');
-
-      const { data: posts } = await supabase
-        .from('social_media_posts')
-        .select('company_id');
 
       const companyStatsMap = new Map<string, CompanyStats>();
       
@@ -167,38 +144,22 @@ export default function AdminDashboard() {
   const fetchCompanyDetails = async (companyId: string) => {
     setLoadingDetails(true);
     try {
-      const { data: company } = await supabase
-        .from('companies')
-        .select('*')
-        .eq('id', companyId)
-        .single();
-
-      const { data: users } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('company_id', companyId);
-
-      const { data: posts } = await supabase
-        .from('social_media_posts')
-        .select('*')
-        .eq('company_id', companyId);
-
-      const { data: campaigns } = await supabase
-        .from('ad_campaigns')
-        .select('*')
-        .eq('company_id', companyId);
-
-      const { data: influencers } = await supabase
-        .from('influencers')
-        .select('*')
-        .eq('company_id', companyId);
-
-      const { data: auditLogs } = await supabase
-        .from('audit_log_view')
-        .select('*')
-        .eq('company_id', companyId)
-        .order('created_at', { ascending: false })
-        .limit(5);
+      // Fetch all company details in parallel
+      const [
+        { data: company },
+        { data: users },
+        { data: posts },
+        { data: campaigns },
+        { data: influencers },
+        { data: auditLogs }
+      ] = await Promise.all([
+        supabase.from('companies').select('*').eq('id', companyId).single(),
+        supabase.from('profiles').select('*').eq('company_id', companyId),
+        supabase.from('social_media_posts').select('*').eq('company_id', companyId),
+        supabase.from('ad_campaigns').select('*').eq('company_id', companyId),
+        supabase.from('influencers').select('*').eq('company_id', companyId),
+        supabase.from('audit_log_view').select('*').eq('company_id', companyId).order('created_at', { ascending: false }).limit(5)
+      ]);
 
       const avgEngagement = campaigns?.reduce((acc, c) => {
         const impressions = c.impressions || 0;
@@ -243,18 +204,12 @@ export default function AdminDashboard() {
     company.industry.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-muted-foreground">Loading dashboard...</div>
-      </div>
-    );
-  }
+  // Show dashboard immediately, no loading screen
 
   return (
     <div className="space-y-6">
       {/* Hero Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary-glow to-accent p-12 shadow-2xl animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary-glow to-accent p-12 shadow-2xl">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,hsl(6_78%_57%_/_0.4),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_100%,hsl(184_91%_30%_/_0.3),transparent_50%)]" />
         <div className="absolute top-10 right-10 opacity-20 animate-pulse">
@@ -266,17 +221,17 @@ export default function AdminDashboard() {
         
         <div className="relative z-10 flex items-center justify-between">
           <div className="space-y-4 max-w-2xl">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full animate-in zoom-in-50 duration-500">
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
               <Target className="h-4 w-4 text-white" />
               <span className="text-white text-sm font-medium">Master Control Center</span>
             </div>
-            <h1 className="text-5xl font-bold tracking-tight text-white animate-in fade-in-50 duration-500 delay-100">
+            <h1 className="text-5xl font-bold tracking-tight text-white">
               Building Empires Together 🚀
             </h1>
-            <p className="text-white/90 text-xl animate-in fade-in-50 duration-500 delay-200">
+            <p className="text-white/90 text-xl">
               Command your digital kingdom. Empower companies. Shape the future of social media management.
             </p>
-            <div className="flex gap-3 animate-in fade-in-50 duration-500 delay-300">
+            <div className="flex gap-3">
               <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
                 <div className="text-white/80 text-xs">Total Companies</div>
                 <div className="text-white text-2xl font-bold">{stats.totalCompanies}</div>
@@ -294,7 +249,7 @@ export default function AdminDashboard() {
           <Button 
             variant="outline"
             onClick={() => setShowGuide(!showGuide)}
-            className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 hover:scale-105 transition-all duration-300 animate-in zoom-in-50 duration-500 delay-400"
+            className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 transition-all duration-300"
           >
             <BookOpen className="mr-2 h-4 w-4" />
             {showGuide ? 'Hide' : 'Show'} Guide
@@ -303,7 +258,7 @@ export default function AdminDashboard() {
       </div>
 
       {showGuide && (
-        <Card className="border-primary animate-in fade-in-50 slide-in-from-top-4 duration-500 shadow-xl">
+        <Card className="border-primary shadow-xl">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
@@ -367,46 +322,38 @@ export default function AdminDashboard() {
       )}
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-100 hover-scale">
-          <StatCard
-            title="Total Companies"
-            value={stats.totalCompanies.toString()}
-            change={`${stats.pendingCompanies} pending`}
-            icon={Building2}
-            trend="up"
-          />
-        </div>
-        <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-200 hover-scale">
-          <StatCard
-            title="Approved Companies"
-            value={stats.approvedCompanies.toString()}
-            change={`${stats.rejectedCompanies} rejected`}
-            icon={CheckCircle}
-            trend="up"
-          />
-        </div>
-        <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-300 hover-scale">
-          <StatCard
-            title="Total Users"
-            value={stats.totalUsers.toString()}
-            change="Across all companies"
-            icon={Users}
-            trend="up"
-          />
-        </div>
-        <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-[400ms] hover-scale">
-          <StatCard
-            title="Total Posts"
-            value={stats.totalPosts.toString()}
-            change={`${stats.activeTrials} active trials`}
-            icon={FileText}
-            trend="up"
-          />
-        </div>
+        <StatCard
+          title="Total Companies"
+          value={stats.totalCompanies.toString()}
+          change={`${stats.pendingCompanies} pending`}
+          icon={Building2}
+          trend="up"
+        />
+        <StatCard
+          title="Approved Companies"
+          value={stats.approvedCompanies.toString()}
+          change={`${stats.rejectedCompanies} rejected`}
+          icon={CheckCircle}
+          trend="up"
+        />
+        <StatCard
+          title="Total Users"
+          value={stats.totalUsers.toString()}
+          change="Across all companies"
+          icon={Users}
+          trend="up"
+        />
+        <StatCard
+          title="Total Posts"
+          value={stats.totalPosts.toString()}
+          change={`${stats.activeTrials} active trials`}
+          icon={FileText}
+          trend="up"
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border-2 hover:shadow-xl transition-all duration-300 hover:border-primary/20 animate-in fade-in-50 slide-in-from-left-4 duration-500 delay-500">
+        <Card className="border-2 hover:shadow-xl transition-all duration-300 hover:border-primary/20">
           <CardHeader>
             <CardTitle>Companies by Status</CardTitle>
           </CardHeader>

@@ -65,57 +65,26 @@ export default function CompanyDashboard() {
         return;
       }
 
-      // Get company info
-      const { data: company } = await supabase
-        .from('companies')
-        .select('name')
-        .eq('id', profile.company_id)
-        .single();
-
-      // Get company users count
-      const { count: userCount } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('company_id', profile.company_id);
-
-      // Get company posts
-      const { data: posts, count: postCount } = await supabase
-        .from('social_media_posts')
-        .select('*', { count: 'exact' })
-        .eq('company_id', profile.company_id);
-
-      // Get scheduled posts
-      const { count: scheduledCount } = await supabase
-        .from('social_media_posts')
-        .select('*', { count: 'exact', head: true })
-        .eq('company_id', profile.company_id)
-        .eq('status', 'scheduled');
-
-      // Get campaigns
-      const { data: campaigns, count: campaignCount } = await supabase
-        .from('ad_campaigns')
-        .select('*', { count: 'exact' })
-        .eq('company_id', profile.company_id);
-
-      // Get influencers
-      const { count: influencerCount } = await supabase
-        .from('influencers')
-        .select('*', { count: 'exact', head: true })
-        .eq('company_id', profile.company_id);
-
-      // Get social accounts
-      const { data: accounts } = await supabase
-        .from('social_media_accounts')
-        .select('platform, is_active')
-        .eq('company_id', profile.company_id);
-
-      // Get recent audit logs
-      const { data: auditLogs } = await supabase
-        .from('audit_log_view')
-        .select('*')
-        .eq('company_id', profile.company_id)
-        .order('created_at', { ascending: false })
-        .limit(6);
+      // Fetch ALL data in parallel for instant loading
+      const [
+        { data: company },
+        { count: userCount },
+        { data: posts, count: postCount },
+        { count: scheduledCount },
+        { data: campaigns, count: campaignCount },
+        { count: influencerCount },
+        { data: accounts },
+        { data: auditLogs }
+      ] = await Promise.all([
+        supabase.from('companies').select('name').eq('id', profile.company_id).single(),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('company_id', profile.company_id),
+        supabase.from('social_media_posts').select('*', { count: 'exact' }).eq('company_id', profile.company_id),
+        supabase.from('social_media_posts').select('*', { count: 'exact', head: true }).eq('company_id', profile.company_id).eq('status', 'scheduled'),
+        supabase.from('ad_campaigns').select('*', { count: 'exact' }).eq('company_id', profile.company_id),
+        supabase.from('influencers').select('*', { count: 'exact', head: true }).eq('company_id', profile.company_id),
+        supabase.from('social_media_accounts').select('platform, is_active').eq('company_id', profile.company_id),
+        supabase.from('audit_log_view').select('*').eq('company_id', profile.company_id).order('created_at', { ascending: false }).limit(6)
+      ]);
 
       // Calculate metrics
       const totalFollowers = 45231; // This would come from aggregated social metrics
@@ -200,16 +169,10 @@ export default function CompanyDashboard() {
     setAiDrawerOpen(true);
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-muted-foreground">Loading dashboard...</div>
-      </div>
-    );
-  }
+  // Show dashboard immediately, no loading screen
 
   return (
-    <div className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
+    <div className="space-y-6">
       {/* Hero Section */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary-glow to-accent p-8 shadow-elegant">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,hsl(6_78%_57%_/_0.3),transparent_50%)]" />
@@ -245,48 +208,40 @@ export default function CompanyDashboard() {
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-100">
-          <StatCard
-            title="Total Followers"
-            value={companyData?.totalFollowers.toLocaleString() || "0"}
-            change="+20.1%"
-            icon={Users}
-            trend="up"
-          />
-        </div>
-        <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-200">
-          <StatCard
-            title="Engagement Rate"
-            value={`${companyData?.engagementRate.toFixed(1) || "0"}%`}
-            change="+4.3%"
-            icon={TrendingUp}
-            trend="up"
-          />
-        </div>
-        <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-300">
-          <StatCard
-            title="Scheduled Posts"
-            value={companyData?.scheduledPosts.toString() || "0"}
-            change={companyData?.scheduledPosts ? "+2" : "0"}
-            icon={Calendar}
-            trend={companyData?.scheduledPosts ? "up" : "down"}
-          />
-        </div>
-        <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-[400ms]">
-          <StatCard
-            title="Total Posts"
-            value={companyData?.postCount.toLocaleString() || "0"}
-            change="+12%"
-            icon={MessageSquare}
-            trend="up"
-          />
-        </div>
+        <StatCard
+          title="Total Followers"
+          value={companyData?.totalFollowers.toLocaleString() || "0"}
+          change="+20.1%"
+          icon={Users}
+          trend="up"
+        />
+        <StatCard
+          title="Engagement Rate"
+          value={`${companyData?.engagementRate.toFixed(1) || "0"}%`}
+          change="+4.3%"
+          icon={TrendingUp}
+          trend="up"
+        />
+        <StatCard
+          title="Scheduled Posts"
+          value={companyData?.scheduledPosts.toString() || "0"}
+          change={companyData?.scheduledPosts ? "+2" : "0"}
+          icon={Calendar}
+          trend={companyData?.scheduledPosts ? "up" : "down"}
+        />
+        <StatCard
+          title="Total Posts"
+          value={companyData?.postCount.toLocaleString() || "0"}
+          change="+12%"
+          icon={MessageSquare}
+          trend="up"
+        />
       </div>
 
       {/* Company Growth Showcase */}
       <CompanyGrowthShowcase />
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 animate-in fade-in-50 duration-700 delay-500">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4 border-2 hover:shadow-xl transition-all duration-300 hover:border-primary/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
