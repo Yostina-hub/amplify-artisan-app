@@ -33,7 +33,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MoreHorizontal, Search, UserPlus, Mail, KeyRound } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { MoreHorizontal, Search, UserPlus, Mail, KeyRound, Eye, Calendar, Building, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
@@ -63,6 +65,14 @@ interface User {
   roles: UserRole[];
 }
 
+interface AuditLog {
+  id: string;
+  action: string;
+  table_name: string;
+  created_at: string;
+  details: any;
+}
+
 export default function UserManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [users, setUsers] = useState<User[]>([]);
@@ -83,6 +93,10 @@ export default function UserManagement() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [userCompanyId, setUserCompanyId] = useState<string | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+  const [userDetails, setUserDetails] = useState<User | null>(null);
+  const [userAuditLogs, setUserAuditLogs] = useState<AuditLog[]>([]);
+  const [loadingDetails, setLoadingDetails] = useState(false);
 
   useEffect(() => {
     checkUserRole();
@@ -334,6 +348,39 @@ export default function UserManagement() {
     }
   };
 
+  const handleViewDetails = async (user: User) => {
+    setUserDetails(user);
+    setIsDetailsDialogOpen(true);
+    setLoadingDetails(true);
+
+    try {
+      // Fetch recent audit logs for this user
+      const { data: logs, error } = await supabase
+        .from('security_audit_log')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      setUserAuditLogs(logs || []);
+    } catch (error) {
+      console.error('Error fetching audit logs:', error);
+      toast.error('Failed to load user activity');
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
+  const getActionBadgeColor = (action: string) => {
+    switch (action) {
+      case 'INSERT': return 'default';
+      case 'UPDATE': return 'secondary';
+      case 'DELETE': return 'destructive';
+      default: return 'outline';
+    }
+  };
+
   const filteredUsers = users.filter(user =>
     user.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.email.toLowerCase().includes(searchQuery.toLowerCase())
@@ -450,11 +497,18 @@ export default function UserManagement() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem 
+                            onClick={() => handleViewDetails(user)}
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
                             onClick={() => {
                               setSelectedUser(user);
                               setIsRoleDialogOpen(true);
                             }}
                           >
+                            <Shield className="mr-2 h-4 w-4" />
                             Assign Role
                           </DropdownMenuItem>
                           <DropdownMenuItem
@@ -631,6 +685,153 @@ export default function UserManagement() {
             </Button>
             <Button onClick={handleCreateUser} disabled={isCreating}>
               {isCreating ? 'Creating...' : 'Create User'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>User Details</DialogTitle>
+            <DialogDescription>
+              Complete information and activity for {userDetails?.email}
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="max-h-[600px] pr-4">
+            {userDetails && (
+              <div className="space-y-6">
+                {/* Profile Information */}
+                <div>
+                  <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    Profile Information
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-muted-foreground text-xs">Full Name</Label>
+                      <p className="text-sm font-medium mt-1">
+                        {userDetails.full_name || 'No name provided'}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground text-xs">Email Address</Label>
+                      <p className="text-sm font-medium mt-1">{userDetails.email}</p>
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground text-xs">User ID</Label>
+                      <p className="text-sm font-mono text-xs mt-1">{userDetails.id}</p>
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground text-xs">Account Created</Label>
+                      <p className="text-sm font-medium mt-1 flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {new Date(userDetails.created_at).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Company Information */}
+                {userDetails.company && (
+                  <>
+                    <div>
+                      <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                        <Building className="h-4 w-4" />
+                        Company Information
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-muted-foreground text-xs">Company Name</Label>
+                          <p className="text-sm font-medium mt-1">{userDetails.company.name}</p>
+                        </div>
+                        <div>
+                          <Label className="text-muted-foreground text-xs">Status</Label>
+                          <div className="mt-1">
+                            <Badge variant={userDetails.company.status === 'approved' ? 'default' : 'secondary'}>
+                              {userDetails.company.status}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <Separator />
+                  </>
+                )}
+
+                {/* Roles & Permissions */}
+                <div>
+                  <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                    <Shield className="h-4 w-4" />
+                    Roles & Permissions
+                  </h3>
+                  {userDetails.roles.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {userDetails.roles.map((role) => (
+                        <Badge key={role} variant="default" className="text-sm">
+                          {role}
+                        </Badge>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No roles assigned</p>
+                  )}
+                </div>
+
+                <Separator />
+
+                {/* Recent Activity */}
+                <div>
+                  <h3 className="text-sm font-semibold mb-3">Recent Activity (Last 10 Actions)</h3>
+                  {loadingDetails ? (
+                    <p className="text-sm text-muted-foreground">Loading activity...</p>
+                  ) : userAuditLogs.length > 0 ? (
+                    <div className="space-y-2">
+                      {userAuditLogs.map((log) => (
+                        <div 
+                          key={log.id} 
+                          className="border rounded-lg p-3 space-y-1 hover:bg-accent/50 transition-colors"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Badge variant={getActionBadgeColor(log.action) as any}>
+                                {log.action}
+                              </Badge>
+                              <span className="text-sm font-medium">{log.table_name}</span>
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(log.created_at).toLocaleString()}
+                            </span>
+                          </div>
+                          {log.details && (
+                            <details className="text-xs">
+                              <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+                                View details
+                              </summary>
+                              <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-auto">
+                                {JSON.stringify(log.details, null, 2)}
+                              </pre>
+                            </details>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No recent activity</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </ScrollArea>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDetailsDialogOpen(false)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
