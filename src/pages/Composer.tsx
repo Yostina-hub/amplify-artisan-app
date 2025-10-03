@@ -125,9 +125,11 @@ export default function Composer() {
         }
       }
 
-      // Add external media links (including current input if not added yet)
+      // Add external media links (including current input if not added yet) and URLs found in content
+      const urlRegex = /https?:\/\/[^\s]+/g;
+      const contentLinks = Array.from(new Set((content.match(urlRegex) || [])));
       const pendingLink = linkInput?.trim() ? [linkInput.trim()] : [];
-      const allLinks = [...mediaLinks, ...pendingLink];
+      const allLinks = Array.from(new Set([...mediaLinks, ...pendingLink, ...contentLinks]));
       if (allLinks.length > 0) {
         for (const link of allLinks) {
           // Detect media type based on URL

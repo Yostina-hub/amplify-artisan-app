@@ -404,6 +404,33 @@ export default function ContentModeration() {
                         </div>
                       </div>
                     )}
+                    {(() => {
+                      const linksFromMedia = (post.media_urls || [])
+                        .filter((m: any) => ((m.type || '') !== 'photo' && (m.type || '') !== 'video'))
+                        .map((m: any) => m.url);
+                      const linksFromContent = Array.from(new Set((post.content.match(/https?:\/\/[^\s]+/g) || [])))
+                        .filter((u: string) => !linksFromMedia.includes(u));
+                      if (linksFromContent.length === 0) return null;
+                      return (
+                        <div className="space-y-2">
+                          <h4 className="text-xs font-medium text-muted-foreground">Links from content</h4>
+                          <div className="flex gap-2 flex-wrap">
+                            {linksFromContent.map((url: string, idx: number) => (
+                              <a
+                                key={`cnt-link-${idx}`}
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-2 py-1 text-xs rounded-md border bg-muted hover:underline"
+                                title={url}
+                              >
+                                {(() => { try { return new URL(url).hostname; } catch { return url; } })()}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
                     <div className="flex gap-2 flex-wrap">
                       <Button
                         size="sm"
@@ -520,6 +547,33 @@ export default function ContentModeration() {
                         </div>
                       </div>
                     )}
+                    {(() => {
+                      const linksFromMedia = (post.media_urls || [])
+                        .filter((m: any) => ((m.type || '') !== 'photo' && (m.type || '') !== 'video'))
+                        .map((m: any) => m.url);
+                      const linksFromContent = Array.from(new Set((post.content.match(/https?:\/\/[^\s]+/g) || [])))
+                        .filter((u: string) => !linksFromMedia.includes(u));
+                      if (linksFromContent.length === 0) return null;
+                      return (
+                        <div className="space-y-2">
+                          <h4 className="text-xs font-medium text-muted-foreground">Links from content</h4>
+                          <div className="flex gap-2 flex-wrap">
+                            {linksFromContent.map((url: string, idx: number) => (
+                              <a
+                                key={`flag-cnt-link-${idx}`}
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-2 py-1 text-xs rounded-md border bg-muted hover:underline"
+                                title={url}
+                              >
+                                {(() => { try { return new URL(url).hostname; } catch { return url; } })()}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
                     {post.flag_reason && (
                       <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
                         <p className="text-xs text-destructive font-medium mb-1">
