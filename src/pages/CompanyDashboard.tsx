@@ -11,6 +11,7 @@ import { Service } from "@/features/dashboard/types";
 import { PersonalizedAds } from "@/components/PersonalizedAds";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { CompanyGrowthShowcase } from "@/components/CompanyGrowthShowcase";
 
 interface CompanyData {
   name: string;
@@ -281,6 +282,9 @@ export default function CompanyDashboard() {
           />
         </div>
       </div>
+
+      {/* Company Growth Showcase */}
+      <CompanyGrowthShowcase />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 animate-in fade-in-50 duration-700 delay-500">
         <Card className="col-span-4 border-2 hover:shadow-xl transition-all duration-300 hover:border-primary/20">
