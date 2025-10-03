@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,6 +17,8 @@ export default function Composer() {
   const [date, setDate] = useState<Date>();
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast: showToast } = useToast();
 
   const platforms = [
@@ -38,6 +40,18 @@ export default function Composer() {
         ? prev.filter((id) => id !== platformId)
         : [...prev, platformId]
     );
+  };
+
+  const handleMediaSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setMediaFiles((prev) => [...prev, ...files]);
+      toast.success(`${files.length} file(s) selected`);
+    }
+  };
+
+  const handleRemoveMedia = (index: number) => {
+    setMediaFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSchedule = async () => {
@@ -100,6 +114,7 @@ export default function Composer() {
       setContent("");
       setDate(undefined);
       setSelectedPlatforms([]);
+      setMediaFiles([]);
     } catch (error: any) {
       showToast({
         title: "Error",
@@ -139,15 +154,47 @@ export default function Composer() {
             </div>
           </div>
 
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Image className="h-4 w-4 mr-2" />
-              Add Media
-            </Button>
-            <Button variant="outline" size="sm">
-              <Smile className="h-4 w-4 mr-2" />
-              Emoji
-            </Button>
+          <div className="space-y-3">
+            <div className="flex gap-2">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleMediaSelect}
+                accept="image/*,video/*"
+                multiple
+                className="hidden"
+              />
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Image className="h-4 w-4 mr-2" />
+                Add Media
+              </Button>
+              <Button variant="outline" size="sm">
+                <Smile className="h-4 w-4 mr-2" />
+                Emoji
+              </Button>
+            </div>
+            {mediaFiles.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {mediaFiles.map((file, index) => (
+                  <div key={index} className="relative">
+                    <div className="px-3 py-2 bg-muted rounded-lg text-sm flex items-center gap-2">
+                      <Image className="h-4 w-4" />
+                      <span className="max-w-[150px] truncate">{file.name}</span>
+                      <button
+                        onClick={() => handleRemoveMedia(index)}
+                        className="text-destructive hover:text-destructive/80"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="space-y-3">
@@ -218,6 +265,7 @@ export default function Composer() {
               setContent("");
               setDate(undefined);
               setSelectedPlatforms([]);
+              setMediaFiles([]);
             }}>Clear</Button>
           </div>
         </CardContent>

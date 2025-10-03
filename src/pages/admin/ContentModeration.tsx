@@ -96,13 +96,13 @@ export default function ContentModeration() {
 
       setPendingPosts(
         transformedPosts.filter(
-          p => (p.status === 'draft' || p.status === 'pending') && !p.flagged
+          p => (p.status === 'draft' || p.status === 'pending') && !p.flagged && !p.moderated_by
         )
       );
-      setFlaggedPosts(transformedPosts.filter(p => p.flagged));
+      setFlaggedPosts(transformedPosts.filter(p => p.flagged && !p.moderated_by));
       setHistory(
         transformedPosts.filter(
-          p => p.status === 'approved' || p.status === 'rejected'
+          p => p.moderated_by && (p.status === 'scheduled' || p.status === 'published' || p.status === 'failed')
         ).slice(0, 10)
       );
     } catch (error) {
@@ -500,8 +500,8 @@ export default function ContentModeration() {
                           </p>
                         </div>
                         <div className="text-right">
-                          <Badge variant={post.status === 'approved' ? "default" : "destructive"}>
-                            {post.status}
+                          <Badge variant={post.status === 'scheduled' || post.status === 'published' ? "default" : "destructive"}>
+                            {post.status === 'scheduled' ? 'Approved' : post.status}
                           </Badge>
                           <p className="text-xs text-muted-foreground mt-1">
                             {post.moderated_at && format(new Date(post.moderated_at), 'MMM d, h:mm a')}
