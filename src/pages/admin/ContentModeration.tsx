@@ -128,6 +128,19 @@ export default function ContentModeration() {
 
       if (error) throw error;
 
+      // Get post owner to send notification
+      const post = pendingPosts.find(p => p.id === postId) || flaggedPosts.find(p => p.id === postId);
+      if (post?.user_id) {
+        // Send notification (don't wait for it)
+        supabase.functions.invoke('notify-post-status', {
+          body: {
+            postId,
+            userId: post.user_id,
+            action: 'approved'
+          }
+        }).catch(err => console.error('Notification error:', err));
+      }
+
       toast({
         title: "Success",
         description: "Post approved and scheduled for publishing",
@@ -155,6 +168,20 @@ export default function ContentModeration() {
         .eq('id', postId);
 
       if (error) throw error;
+
+      // Get post owner and flag reason to send notification
+      const post = pendingPosts.find(p => p.id === postId) || flaggedPosts.find(p => p.id === postId);
+      if (post?.user_id) {
+        // Send notification (don't wait for it)
+        supabase.functions.invoke('notify-post-status', {
+          body: {
+            postId,
+            userId: post.user_id,
+            action: 'rejected',
+            reason: post.flag_reason || 'Content does not meet platform guidelines'
+          }
+        }).catch(err => console.error('Notification error:', err));
+      }
 
       toast({
         title: "Post Rejected",
@@ -184,6 +211,20 @@ export default function ContentModeration() {
 
       if (error) throw error;
 
+      // Get post owner to send notification
+      const post = pendingPosts.find(p => p.id === postId) || flaggedPosts.find(p => p.id === postId);
+      if (post?.user_id) {
+        // Send notification (don't wait for it)
+        supabase.functions.invoke('notify-post-status', {
+          body: {
+            postId,
+            userId: post.user_id,
+            action: 'flagged',
+            reason: reason || 'Flagged for manual review'
+          }
+        }).catch(err => console.error('Notification error:', err));
+      }
+
       toast({
         title: "Post Flagged",
         description: "The post has been flagged for review",
@@ -194,6 +235,50 @@ export default function ContentModeration() {
       toast({
         title: "Error",
         description: "Failed to flag post",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRunModerationCheck = async (postId: string) => {
+    const post = pendingPosts.find(p => p.id === postId) || flaggedPosts.find(p => p.id === postId);
+    if (!post) return;
+
+    try {
+      toast({
+        title: "Running AI Analysis",
+        description: "Checking content for policy violations...",
+      });
+
+      const { data, error } = await supabase.functions.invoke('moderate-content', {
+        body: {
+          postId: post.id,
+          content: post.content,
+          platforms: post.platforms
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.shouldFlag) {
+        toast({
+          title: "Violations Detected",
+          description: `${data.violations?.join(', ') || 'Policy violations found'}`,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Content Safe",
+          description: "No policy violations detected",
+        });
+      }
+
+      fetchPosts();
+    } catch (error) {
+      console.error('Error running moderation check:', error);
+      toast({
+        title: "Error",
+        description: "Failed to analyze content",
         variant: "destructive",
       });
     }
@@ -259,7 +344,7 @@ export default function ContentModeration() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <p className="text-sm line-clamp-3">{post.content}</p>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       <Button
                         size="sm"
                         variant="outline"
@@ -267,6 +352,15 @@ export default function ContentModeration() {
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         View Details
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-purple-500 text-purple-700 hover:bg-purple-50"
+                        onClick={() => handleRunModerationCheck(post.id)}
+                      >
+                        <AlertTriangle className="h-4 w-4 mr-2" />
+                        Run AI Check
                       </Button>
                       <Button
                         size="sm"
@@ -338,7 +432,7 @@ export default function ContentModeration() {
                         <p className="text-xs text-destructive">{post.flag_reason}</p>
                       </div>
                     )}
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       <Button
                         size="sm"
                         variant="outline"
@@ -346,6 +440,15 @@ export default function ContentModeration() {
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         View Details
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-purple-500 text-purple-700 hover:bg-purple-50"
+                        onClick={() => handleRunModerationCheck(post.id)}
+                      >
+                        <AlertTriangle className="h-4 w-4 mr-2" />
+                        Re-analyze
                       </Button>
                       <Button
                         size="sm"

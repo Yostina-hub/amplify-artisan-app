@@ -55,21 +55,46 @@ export default function Composer() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
-      const { error } = await supabase.from('social_media_posts').insert({
-        content: content.trim(),
-        platforms: selectedPlatforms,
-        scheduled_at: date?.toISOString() || null,
-        status: date ? 'scheduled' : 'draft',
-        user_id: user.id,
-      });
+      // Get user's company_id
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+
+      const { data: newPost, error } = await supabase
+        .from('social_media_posts')
+        .insert({
+          content: content.trim(),
+          platforms: selectedPlatforms,
+          scheduled_at: date?.toISOString() || null,
+          status: 'pending', // Start as pending for moderation
+          user_id: user.id,
+          company_id: profile?.company_id || null,
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
+      // Run AI moderation check in background (don't wait for it)
+      if (newPost?.id) {
+        supabase.functions.invoke('moderate-content', {
+          body: {
+            postId: newPost.id,
+            content: content.trim(),
+            platforms: selectedPlatforms
+          }
+        }).then(({ data: moderationData }) => {
+          if (moderationData?.shouldFlag) {
+            console.log('Post auto-flagged:', moderationData.flagReason);
+          }
+        }).catch(err => console.error('Auto-moderation error:', err));
+      }
+
       showToast({
-        title: date ? "Post scheduled" : "Draft saved",
-        description: date 
-          ? `Your post will be published on ${format(date, "PPP")}` 
-          : "Your post has been saved as a draft",
+        title: "Post created",
+        description: "Your post is pending review and will be published once approved",
       });
 
       setContent("");
