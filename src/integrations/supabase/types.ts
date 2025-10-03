@@ -79,7 +79,10 @@ export type Database = {
       ad_impressions: {
         Row: {
           ad_campaign_id: string | null
+          city: string | null
           company_id: string | null
+          continent: string | null
+          country: string | null
           created_at: string | null
           engagement_score: number | null
           id: string
@@ -89,7 +92,10 @@ export type Database = {
         }
         Insert: {
           ad_campaign_id?: string | null
+          city?: string | null
           company_id?: string | null
+          continent?: string | null
+          country?: string | null
           created_at?: string | null
           engagement_score?: number | null
           id?: string
@@ -99,7 +105,10 @@ export type Database = {
         }
         Update: {
           ad_campaign_id?: string | null
+          city?: string | null
           company_id?: string | null
+          continent?: string | null
+          country?: string | null
           created_at?: string | null
           engagement_score?: number | null
           id?: string
@@ -979,7 +988,10 @@ export type Database = {
           account_id: string
           author_id: string
           author_name: string
+          city: string | null
           content: string
+          continent: string | null
+          country: string | null
           created_at: string | null
           id: string
           platform_comment_id: string
@@ -992,7 +1004,10 @@ export type Database = {
           account_id: string
           author_id: string
           author_name: string
+          city?: string | null
           content: string
+          continent?: string | null
+          country?: string | null
           created_at?: string | null
           id?: string
           platform_comment_id: string
@@ -1005,7 +1020,10 @@ export type Database = {
           account_id?: string
           author_id?: string
           author_name?: string
+          city?: string | null
           content?: string
+          continent?: string | null
+          country?: string | null
           created_at?: string | null
           id?: string
           platform_comment_id?: string
@@ -1043,7 +1061,10 @@ export type Database = {
           account_id: string
           author_id: string
           author_name: string
+          city: string | null
           content: string
+          continent: string | null
+          country: string | null
           created_at: string | null
           engagement_count: number | null
           id: string
@@ -1058,7 +1079,10 @@ export type Database = {
           account_id: string
           author_id: string
           author_name: string
+          city?: string | null
           content: string
+          continent?: string | null
+          country?: string | null
           created_at?: string | null
           engagement_count?: number | null
           id?: string
@@ -1073,7 +1097,10 @@ export type Database = {
           account_id?: string
           author_id?: string
           author_name?: string
+          city?: string | null
           content?: string
+          continent?: string | null
+          country?: string | null
           created_at?: string | null
           engagement_count?: number | null
           id?: string
@@ -1094,6 +1121,7 @@ export type Database = {
           followers_count: number | null
           id: string
           last_synced_at: string | null
+          location_breakdown: Json | null
           posts_count: number | null
         }
         Insert: {
@@ -1103,6 +1131,7 @@ export type Database = {
           followers_count?: number | null
           id?: string
           last_synced_at?: string | null
+          location_breakdown?: Json | null
           posts_count?: number | null
         }
         Update: {
@@ -1112,6 +1141,7 @@ export type Database = {
           followers_count?: number | null
           id?: string
           last_synced_at?: string | null
+          location_breakdown?: Json | null
           posts_count?: number | null
         }
         Relationships: [
