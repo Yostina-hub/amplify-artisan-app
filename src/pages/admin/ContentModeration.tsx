@@ -74,14 +74,18 @@ export default function ContentModeration() {
 
       if (error) throw error;
 
-      // Fetch user profiles separately
+      // Fetch user profiles separately (only if we have posts)
       const userIds = [...new Set((data || []).map(p => p.user_id))];
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, email, full_name')
-        .in('id', userIds);
-
-      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      let profileMap = new Map();
+      
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, email, full_name')
+          .in('id', userIds);
+        
+        profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      }
 
       // Transform and categorize posts
       const transformedPosts = (data || []).map(post => ({
