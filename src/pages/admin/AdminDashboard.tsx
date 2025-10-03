@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Building2, FileText, AlertCircle, CheckCircle, XCircle, BookOpen, ArrowRight, Search, TrendingUp, MessageSquare } from "lucide-react";
+import { Users, Building2, FileText, AlertCircle, CheckCircle, XCircle, BookOpen, ArrowRight, Search, TrendingUp, MessageSquare, Sparkles, Crown, Target } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -251,29 +251,65 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in-50 duration-500">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-          <p className="text-muted-foreground mt-1">
-            Company-wise system overview and management
-          </p>
+    <div className="space-y-6">
+      {/* Hero Banner */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary-glow to-accent p-12 shadow-2xl animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,hsl(6_78%_57%_/_0.4),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_100%,hsl(184_91%_30%_/_0.3),transparent_50%)]" />
+        <div className="absolute top-10 right-10 opacity-20 animate-pulse">
+          <Crown className="h-32 w-32 text-white" />
         </div>
-        <Button variant="outline" onClick={() => setShowGuide(!showGuide)}>
-          <BookOpen className="mr-2 h-4 w-4" />
-          {showGuide ? 'Hide' : 'Show'} Guide
-        </Button>
+        <div className="absolute bottom-10 left-10 opacity-10 animate-pulse" style={{ animationDelay: '1s' }}>
+          <Sparkles className="h-24 w-24 text-white" />
+        </div>
+        
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="space-y-4 max-w-2xl">
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full animate-in zoom-in-50 duration-500">
+              <Target className="h-4 w-4 text-white" />
+              <span className="text-white text-sm font-medium">Master Control Center</span>
+            </div>
+            <h1 className="text-5xl font-bold tracking-tight text-white animate-in fade-in-50 duration-500 delay-100">
+              Building Empires Together 🚀
+            </h1>
+            <p className="text-white/90 text-xl animate-in fade-in-50 duration-500 delay-200">
+              Command your digital kingdom. Empower companies. Shape the future of social media management.
+            </p>
+            <div className="flex gap-3 animate-in fade-in-50 duration-500 delay-300">
+              <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
+                <div className="text-white/80 text-xs">Total Companies</div>
+                <div className="text-white text-2xl font-bold">{stats.totalCompanies}</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
+                <div className="text-white/80 text-xs">Active Users</div>
+                <div className="text-white text-2xl font-bold">{stats.totalUsers}</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
+                <div className="text-white/80 text-xs">Total Posts</div>
+                <div className="text-white text-2xl font-bold">{stats.totalPosts}</div>
+              </div>
+            </div>
+          </div>
+          <Button 
+            variant="outline"
+            onClick={() => setShowGuide(!showGuide)}
+            className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 hover:scale-105 transition-all duration-300 animate-in zoom-in-50 duration-500 delay-400"
+          >
+            <BookOpen className="mr-2 h-4 w-4" />
+            {showGuide ? 'Hide' : 'Show'} Guide
+          </Button>
+        </div>
       </div>
 
       {showGuide && (
-        <Card className="border-primary">
+        <Card className="border-primary animate-in fade-in-50 slide-in-from-top-4 duration-500 shadow-xl">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5" />
+                <BookOpen className="h-5 w-5 text-primary" />
                 Getting Started Guide
               </CardTitle>
-              <Button variant="ghost" size="sm" onClick={dismissGuide}>
+              <Button variant="ghost" size="sm" onClick={dismissGuide} className="hover:bg-destructive/10">
                 Dismiss
               </Button>
             </div>
@@ -330,88 +366,100 @@ export default function AdminDashboard() {
       )}
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Total Companies"
-          value={stats.totalCompanies.toString()}
-          change={`${stats.pendingCompanies} pending`}
-          icon={Building2}
-          trend="up"
-        />
-        <StatCard
-          title="Approved Companies"
-          value={stats.approvedCompanies.toString()}
-          change={`${stats.rejectedCompanies} rejected`}
-          icon={CheckCircle}
-          trend="up"
-        />
-        <StatCard
-          title="Total Users"
-          value={stats.totalUsers.toString()}
-          change="Across all companies"
-          icon={Users}
-          trend="up"
-        />
-        <StatCard
-          title="Total Posts"
-          value={stats.totalPosts.toString()}
-          change={`${stats.activeTrials} active trials`}
-          icon={FileText}
-          trend="up"
-        />
+        <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-100 hover-scale">
+          <StatCard
+            title="Total Companies"
+            value={stats.totalCompanies.toString()}
+            change={`${stats.pendingCompanies} pending`}
+            icon={Building2}
+            trend="up"
+          />
+        </div>
+        <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-200 hover-scale">
+          <StatCard
+            title="Approved Companies"
+            value={stats.approvedCompanies.toString()}
+            change={`${stats.rejectedCompanies} rejected`}
+            icon={CheckCircle}
+            trend="up"
+          />
+        </div>
+        <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-300 hover-scale">
+          <StatCard
+            title="Total Users"
+            value={stats.totalUsers.toString()}
+            change="Across all companies"
+            icon={Users}
+            trend="up"
+          />
+        </div>
+        <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-[400ms] hover-scale">
+          <StatCard
+            title="Total Posts"
+            value={stats.totalPosts.toString()}
+            change={`${stats.activeTrials} active trials`}
+            icon={FileText}
+            trend="up"
+          />
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
+        <Card className="border-2 hover:shadow-xl transition-all duration-300 hover:border-primary/20 animate-in fade-in-50 slide-in-from-left-4 duration-500 delay-500">
           <CardHeader>
             <CardTitle>Companies by Status</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 border rounded-lg">
+              <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-success/5 transition-colors duration-300 group">
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-success" />
+                  <CheckCircle className="h-4 w-4 text-success group-hover:scale-110 transition-transform" />
                   <span className="font-medium">Approved</span>
                 </div>
-                <span className="text-2xl font-bold">{stats.approvedCompanies}</span>
+                <span className="text-2xl font-bold animate-in zoom-in-50 duration-300">{stats.approvedCompanies}</span>
               </div>
-              <div className="flex items-center justify-between p-3 border rounded-lg">
+              <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-warning/5 transition-colors duration-300 group">
                 <div className="flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-warning" />
+                  <AlertCircle className="h-4 w-4 text-warning group-hover:scale-110 transition-transform" />
                   <span className="font-medium">Pending</span>
                 </div>
-                <span className="text-2xl font-bold">{stats.pendingCompanies}</span>
+                <span className="text-2xl font-bold animate-in zoom-in-50 duration-300 delay-100">{stats.pendingCompanies}</span>
               </div>
-              <div className="flex items-center justify-between p-3 border rounded-lg">
+              <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-destructive/5 transition-colors duration-300 group">
                 <div className="flex items-center gap-2">
-                  <XCircle className="h-4 w-4 text-destructive" />
+                  <XCircle className="h-4 w-4 text-destructive group-hover:scale-110 transition-transform" />
                   <span className="font-medium">Rejected</span>
                 </div>
-                <span className="text-2xl font-bold">{stats.rejectedCompanies}</span>
+                <span className="text-2xl font-bold animate-in zoom-in-50 duration-300 delay-200">{stats.rejectedCompanies}</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-2 hover:shadow-xl transition-all duration-300 hover:border-accent/20 animate-in fade-in-50 slide-in-from-right-4 duration-500 delay-500">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Top Companies by Users</CardTitle>
               <Link to="/admin/companies">
-                <Button variant="ghost" size="sm">View All</Button>
+                <Button variant="ghost" size="sm" className="hover:scale-105 transition-transform">View All</Button>
               </Link>
             </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {companyStats.slice(0, 5).map((company) => (
-                <div key={company.id} className="flex items-center justify-between p-3 border rounded-lg">
+              {companyStats.slice(0, 5).map((company, idx) => (
+                <div 
+                  key={company.id} 
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-gradient-to-r hover:from-primary/5 hover:to-accent/5 transition-all duration-300 hover:shadow-md group cursor-pointer animate-in fade-in-50 duration-300"
+                  style={{ animationDelay: `${idx * 100}ms` }}
+                >
                   <div>
-                    <p className="text-sm font-medium">{company.name}</p>
+                    <p className="text-sm font-medium group-hover:text-primary transition-colors">{company.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {company.userCount} users • {company.postCount} posts
                     </p>
                   </div>
-                  <span className={`text-xs px-2 py-1 rounded-full ${
+                  <span className={`text-xs px-2 py-1 rounded-full transition-all duration-300 group-hover:scale-110 ${
                     company.status === 'approved' ? 'bg-success/10 text-success' :
                     company.status === 'pending' ? 'bg-warning/10 text-warning' :
                     'bg-destructive/10 text-destructive'
@@ -431,26 +479,29 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
+        <Card className="border-2 hover:shadow-xl transition-all duration-300 hover:border-primary/20 animate-in fade-in-50 slide-in-from-left-4 duration-500 delay-700">
           <CardHeader>
-            <CardTitle>Select Company to View Details</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="h-5 w-5 text-primary" />
+              Select Company to View Details
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <div className="relative animate-in fade-in-50 duration-300">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground animate-pulse" />
               <Input
                 placeholder="Search companies by name, email, or industry..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 transition-all duration-300 focus:scale-[1.02]"
               />
             </div>
             
             <Select value={selectedCompanyId || ""} onValueChange={handleCompanySelect}>
-              <SelectTrigger>
+              <SelectTrigger className="transition-all duration-300 hover:border-primary">
                 <SelectValue placeholder="Select a company" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[300px]">
                 {filteredCompanies.map((company) => (
                   <SelectItem key={company.id} value={company.id}>
                     <div className="flex items-center justify-between w-full">
@@ -476,10 +527,10 @@ export default function AdminDashboard() {
 
             <div className="max-h-[300px] overflow-y-auto space-y-2">
               {filteredCompanies.slice(0, 10).map((company) => (
-                <div
+              <div
                   key={company.id}
-                  className={`p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors ${
-                    selectedCompanyId === company.id ? 'border-primary bg-muted/50' : ''
+                  className={`p-3 border rounded-lg cursor-pointer hover:bg-gradient-to-r hover:from-primary/5 hover:to-accent/5 transition-all duration-300 hover:shadow-md hover:scale-[1.02] ${
+                    selectedCompanyId === company.id ? 'border-primary bg-gradient-to-r from-primary/10 to-accent/10 shadow-lg scale-[1.02]' : ''
                   }`}
                   onClick={() => handleCompanySelect(company.id)}
                 >
@@ -504,9 +555,12 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-2 hover:shadow-xl transition-all duration-300 hover:border-accent/20 animate-in fade-in-50 slide-in-from-right-4 duration-500 delay-700">
           <CardHeader>
-            <CardTitle>Company Details</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-accent" />
+              Company Details
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {!selectedCompanyId && (
@@ -522,10 +576,10 @@ export default function AdminDashboard() {
             )}
 
             {companyDetails && !loadingDetails && (
-              <div className="space-y-4">
+              <div className="space-y-4 animate-in fade-in-50 scale-in duration-500">
                 <div className="space-y-2">
-                  <h3 className="font-semibold text-lg">{companyDetails.name}</h3>
-                  <p className="text-sm text-muted-foreground">{companyDetails.email}</p>
+                  <h3 className="font-semibold text-lg animate-in slide-in-from-left-4 duration-300">{companyDetails.name}</h3>
+                  <p className="text-sm text-muted-foreground animate-in slide-in-from-left-4 duration-300 delay-100">{companyDetails.email}</p>
                   <div className="flex items-center gap-2">
                     <span className={`text-xs px-2 py-1 rounded-full ${
                       companyDetails.status === 'approved' ? 'bg-success/10 text-success' :
@@ -539,39 +593,39 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 border rounded-lg">
+                  <div className="p-3 border rounded-lg hover:bg-gradient-to-br hover:from-primary/5 hover:to-accent/5 transition-all duration-300 hover:shadow-md hover:scale-105 group animate-in zoom-in-50 duration-300 delay-200">
                     <div className="flex items-center gap-2 mb-1">
-                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <Users className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
                       <span className="text-xs text-muted-foreground">Users</span>
                     </div>
                     <p className="text-2xl font-bold">{companyDetails.userCount}</p>
                   </div>
-                  <div className="p-3 border rounded-lg">
+                  <div className="p-3 border rounded-lg hover:bg-gradient-to-br hover:from-primary/5 hover:to-accent/5 transition-all duration-300 hover:shadow-md hover:scale-105 group animate-in zoom-in-50 duration-300 delay-300">
                     <div className="flex items-center gap-2 mb-1">
-                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <FileText className="h-4 w-4 text-accent group-hover:scale-110 transition-transform" />
                       <span className="text-xs text-muted-foreground">Posts</span>
                     </div>
                     <p className="text-2xl font-bold">{companyDetails.postCount}</p>
                   </div>
-                  <div className="p-3 border rounded-lg">
+                  <div className="p-3 border rounded-lg hover:bg-gradient-to-br hover:from-primary/5 hover:to-accent/5 transition-all duration-300 hover:shadow-md hover:scale-105 group animate-in zoom-in-50 duration-300 delay-[400ms]">
                     <div className="flex items-center gap-2 mb-1">
-                      <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                      <TrendingUp className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
                       <span className="text-xs text-muted-foreground">Campaigns</span>
                     </div>
                     <p className="text-2xl font-bold">{companyDetails.campaignCount}</p>
                   </div>
-                  <div className="p-3 border rounded-lg">
+                  <div className="p-3 border rounded-lg hover:bg-gradient-to-br hover:from-primary/5 hover:to-accent/5 transition-all duration-300 hover:shadow-md hover:scale-105 group animate-in zoom-in-50 duration-300 delay-500">
                     <div className="flex items-center gap-2 mb-1">
-                      <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                      <MessageSquare className="h-4 w-4 text-accent group-hover:scale-110 transition-transform" />
                       <span className="text-xs text-muted-foreground">Influencers</span>
                     </div>
                     <p className="text-2xl font-bold">{companyDetails.influencerCount}</p>
                   </div>
                 </div>
 
-                <div className="p-3 border rounded-lg">
+                <div className="p-3 border rounded-lg bg-gradient-to-br from-primary/10 to-accent/10 hover:shadow-lg transition-all duration-300 hover:scale-105 animate-in zoom-in-50 duration-300 delay-700">
                   <p className="text-xs text-muted-foreground mb-1">Avg Engagement Rate</p>
-                  <p className="text-xl font-bold">{companyDetails.avgEngagement.toFixed(2)}%</p>
+                  <p className="text-xl font-bold text-primary">{companyDetails.avgEngagement.toFixed(2)}%</p>
                 </div>
 
                 {companyDetails.recentActivity.length > 0 && (
@@ -594,32 +648,35 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      <Card>
+      <Card className="border-2 hover:shadow-xl transition-all duration-300 hover:border-primary/20 animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-900">
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            Quick Actions
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
-            <Link to="/admin/companies">
-              <Button variant="outline" className="w-full justify-start">
-                <Building2 className="mr-2 h-4 w-4" />
+            <Link to="/admin/companies" className="hover-scale">
+              <Button variant="outline" className="w-full justify-start hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10 transition-all duration-300 group">
+                <Building2 className="mr-2 h-4 w-4 group-hover:text-primary transition-colors" />
                 Manage Companies
                 {stats.pendingCompanies > 0 && (
-                  <span className="ml-auto bg-primary text-primary-foreground px-2 py-1 rounded-full text-xs">
+                  <span className="ml-auto bg-primary text-primary-foreground px-2 py-1 rounded-full text-xs animate-pulse">
                     {stats.pendingCompanies}
                   </span>
                 )}
               </Button>
             </Link>
-            <Link to="/admin/users">
-              <Button variant="outline" className="w-full justify-start">
-                <Users className="mr-2 h-4 w-4" />
+            <Link to="/admin/users" className="hover-scale">
+              <Button variant="outline" className="w-full justify-start hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10 transition-all duration-300 group">
+                <Users className="mr-2 h-4 w-4 group-hover:text-accent transition-colors" />
                 Manage Users
               </Button>
             </Link>
-            <Link to="/admin/subscriptions">
-              <Button variant="outline" className="w-full justify-start">
-                <FileText className="mr-2 h-4 w-4" />
+            <Link to="/admin/subscriptions" className="hover-scale">
+              <Button variant="outline" className="w-full justify-start hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10 transition-all duration-300 group">
+                <FileText className="mr-2 h-4 w-4 group-hover:text-primary transition-colors" />
                 Platform Subscriptions
               </Button>
             </Link>
