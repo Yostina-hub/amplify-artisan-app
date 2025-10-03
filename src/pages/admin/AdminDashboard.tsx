@@ -260,7 +260,7 @@ export default function AdminDashboard() {
         <div className="absolute top-10 right-10 opacity-20 animate-pulse">
           <Crown className="h-32 w-32 text-white" />
         </div>
-        <div className="absolute bottom-10 left-10 opacity-10 animate-pulse" style={{ animationDelay: '1s' }}>
+        <div className="absolute bottom-10 left-10 opacity-10" style={{ animation: 'pulse 2s cubic-bezier(0.4,0,0.6,1) 1s infinite' }}>
           <Sparkles className="h-24 w-24 text-white" />
         </div>
         

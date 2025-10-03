@@ -47,8 +47,8 @@ export function CompanyGrowthShowcase() {
         
         {/* Animated background waves */}
         <div className="absolute inset-0 overflow-hidden opacity-20">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent animate-wave" style={{ animationDelay: '0s' }} />
-          <div className="absolute inset-0 bg-gradient-to-r from-accent to-primary animate-wave" style={{ animationDelay: '1s' }} />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent" style={{ animation: 'wave 3s ease-in-out 0s infinite' }} />
+          <div className="absolute inset-0 bg-gradient-to-r from-accent to-primary" style={{ animation: 'wave 3s ease-in-out 1s infinite' }} />
         </div>
 
         <CardContent className="relative z-10 p-8">
