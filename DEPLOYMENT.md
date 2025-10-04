@@ -70,11 +70,12 @@ DATABASE_URL=postgresql://app_user:YourStrongPassword123!@localhost:5432/social_
 ### 5. Run Database Migration (Automatic!)
 
 ```bash
-# Run the migration script - this creates all tables automatically
+# Run the migration script - this creates auth schema and all tables automatically
 npm run migrate
 
 # You should see:
 # ✅ Connected to database
+# ✅ Auth schema created
 # 🚀 Running database migration...
 # ✅ Database migration completed successfully!
 ```
@@ -170,44 +171,25 @@ GRANT ALL ON ALL TABLES IN SCHEMA public TO app_user;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO app_user;
 ```
 
-## ⚠️ CRITICAL: Authentication Setup Required
+## ⚠️ IMPORTANT: Authentication Setup
 
-**IMPORTANT**: This migration includes Row Level Security (RLS) policies that rely on `auth.uid()` function. This requires setting up authentication:
+**NOTE**: The migration script automatically creates the auth schema and `auth.uid()` function for self-hosted environments. This happens automatically when you run `npm run migrate`.
 
-### Option 1: Use Supabase Auth (Recommended)
-If you're using Supabase, auth.uid() works automatically. No additional setup needed.
+The auth schema includes:
+- `auth.users` table for user authentication
+- `auth.uid()` function for Row Level Security policies
+- Necessary permissions for database operations
 
-### Option 2: Self-Hosted Auth
-If self-hosting, you need to implement `auth.uid()` function:
+### Using Authentication in Your Application
 
-```sql
--- Create auth schema
-CREATE SCHEMA IF NOT EXISTS auth;
+For session-based auth, set the user context before database operations:
 
--- Create a function to get current user
-CREATE OR REPLACE FUNCTION auth.uid()
-RETURNS uuid
-LANGUAGE sql
-STABLE
-AS $$
-  SELECT nullif(current_setting('request.jwt.claims', true)::json->>'sub', '')::uuid;
-$$;
-
--- Or for simpler session-based auth:
-CREATE OR REPLACE FUNCTION auth.uid()
-RETURNS uuid
-LANGUAGE sql
-STABLE
-AS $$
-  SELECT nullif(current_setting('app.current_user_id', true), '')::uuid;
-$$;
-```
-
-Then in your application, set the user context before queries:
 ```javascript
 // Set user context before database operations
 await client.query('SET app.current_user_id = $1', [userId]);
 ```
+
+For JWT-based auth, configure your application to pass JWT claims through PostgreSQL settings.
 
 ## Setting Up First Admin User
 

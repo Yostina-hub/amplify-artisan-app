@@ -31,6 +31,14 @@ async function runMigration() {
     await client.connect();
     console.log('✅ Connected to database');
 
+    console.log('📄 Setting up auth schema...');
+    const authSetupSQL = readFileSync(
+      join(__dirname, 'setup-auth.sql'),
+      'utf8'
+    );
+    await client.query(authSetupSQL);
+    console.log('✅ Auth schema created');
+
     console.log('📄 Reading migration file...');
     const migrationSQL = readFileSync(
       join(__dirname, '..', 'database-migration.sql'),
