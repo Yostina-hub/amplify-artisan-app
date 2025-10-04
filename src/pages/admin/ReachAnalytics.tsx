@@ -231,13 +231,59 @@ export default function ReachAnalytics() {
 
   const fetchAccountData = async () => {
     try {
-      const [accountsRes, metricsRes, commentsRes] = await Promise.all([
-        querySocialMediaAccountsSafe().select('*').eq('is_active', true),
+      // Get user's company ID
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', (await supabase.auth.getUser()).data.user?.id)
+        .single();
+
+      if (!profile?.company_id) return;
+
+      // Fetch configured platforms from company_platform_configs
+      const { data: configuredPlatforms } = await supabase
+        .from('company_platform_configs')
+        .select('id, platform_id, is_active, social_platforms(id, name, display_name, icon_name)')
+        .eq('company_id', profile.company_id)
+        .eq('is_active', true);
+
+      // Fetch connected accounts from social_media_accounts
+      const { data: connectedAccounts } = await querySocialMediaAccountsSafe()
+        .select('*')
+        .eq('is_active', true)
+        .eq('company_id', profile.company_id);
+
+      // Combine both sources - prefer connected accounts, fall back to configured platforms
+      const accountsMap = new Map();
+      
+      // Add connected accounts first
+      connectedAccounts?.forEach(acc => {
+        accountsMap.set(acc.platform, {
+          id: acc.id,
+          platform: acc.platform,
+          account_name: acc.account_name,
+        });
+      });
+
+      // Add configured platforms that aren't already in connected accounts
+      configuredPlatforms?.forEach(config => {
+        const platform = (config.social_platforms as any)?.name;
+        const displayName = (config.social_platforms as any)?.display_name;
+        if (platform && !accountsMap.has(platform)) {
+          accountsMap.set(platform, {
+            id: config.id,
+            platform: platform,
+            account_name: displayName || platform,
+          });
+        }
+      });
+
+      const [metricsRes, commentsRes] = await Promise.all([
         supabase.from('social_media_metrics').select('*'),
         supabase.from('social_media_comments').select('*').order('created_at', { ascending: false }).limit(10),
       ]);
 
-      setAccounts(accountsRes.data || []);
+      setAccounts(Array.from(accountsMap.values()));
       setAccountMetrics(metricsRes.data || []);
       setComments(commentsRes.data || []);
     } catch (error: any) {
