@@ -664,11 +664,635 @@ CREATE INDEX idx_ad_campaigns_user_id ON public.ad_campaigns(user_id);
 CREATE INDEX idx_influencers_user_id ON public.influencers(user_id);
 
 -- ============================================
--- DONE!
+-- 7. ENABLE ROW LEVEL SECURITY (RLS)
 -- ============================================
 
--- Your database is now ready!
+ALTER TABLE public.companies ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.industries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pricing_plans ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.subscription_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.payment_transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.social_media_accounts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.social_media_posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ad_campaigns ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.influencers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.influencer_campaigns ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.campaign_influencers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.social_media_comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ad_impressions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_engagement ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.landing_page_content ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.social_platforms ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.company_platform_subscriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.company_platform_configs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.email_configurations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.oauth_provider_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.security_audit_log ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.social_media_mentions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.influencer_communications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.influencer_contracts ENABLE ROW LEVEL SECURITY;
+
+-- ============================================
+-- 8. CREATE RLS POLICIES
+-- ============================================
+
+-- COMPANIES TABLE POLICIES
+CREATE POLICY "Anyone can insert company applications" ON public.companies
+FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Only admins can view companies" ON public.companies
+FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Super admins can update all companies" ON public.companies
+FOR UPDATE USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Super admins can delete companies" ON public.companies
+FOR DELETE USING (public.has_role(auth.uid(), 'admin'));
+
+-- PROFILES TABLE POLICIES
+CREATE POLICY "Authenticated users can view profiles" ON public.profiles
+FOR SELECT USING (
+  auth.uid() IS NOT NULL AND (
+    auth.uid() = id OR 
+    public.has_role(auth.uid(), 'admin') OR 
+    (company_id IS NOT NULL AND company_id = public.get_user_company_id(auth.uid()))
+  )
+);
+
+CREATE POLICY "Users can update their own profile" ON public.profiles
+FOR UPDATE USING (auth.uid() = id);
+
+CREATE POLICY "Users can delete their own profile" ON public.profiles
+FOR DELETE USING (auth.uid() = id);
+
+CREATE POLICY "Block direct profile inserts" ON public.profiles
+FOR INSERT WITH CHECK (false);
+
+-- USER ROLES TABLE POLICIES
+CREATE POLICY "Users can view their own roles" ON public.user_roles
+FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Admins can view all roles" ON public.user_roles
+FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can manage roles" ON public.user_roles
+FOR ALL USING (public.has_role(auth.uid(), 'admin'));
+
+-- INDUSTRIES TABLE POLICIES
+CREATE POLICY "Anyone can view active industries" ON public.industries
+FOR SELECT USING (is_active = true);
+
+CREATE POLICY "Admins can manage industries" ON public.industries
+FOR ALL USING (public.has_role(auth.uid(), 'admin'));
+
+-- PRICING PLANS TABLE POLICIES
+CREATE POLICY "Anyone can view active pricing plans" ON public.pricing_plans
+FOR SELECT USING (is_active = true);
+
+CREATE POLICY "Admins can manage pricing plans" ON public.pricing_plans
+FOR ALL USING (public.has_role(auth.uid(), 'admin'));
+
+-- SUBSCRIPTION REQUESTS TABLE POLICIES
+CREATE POLICY "Anyone can create subscription requests" ON public.subscription_requests
+FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Users can view their own requests" ON public.subscription_requests
+FOR SELECT USING (email = (SELECT email FROM public.profiles WHERE id = auth.uid()));
+
+CREATE POLICY "Admins can view all requests" ON public.subscription_requests
+FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can update requests" ON public.subscription_requests
+FOR UPDATE USING (public.has_role(auth.uid(), 'admin'));
+
+-- PAYMENT TRANSACTIONS TABLE POLICIES
+CREATE POLICY "Users can view their payment transactions" ON public.payment_transactions
+FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM public.subscription_requests sr
+    WHERE sr.id = subscription_request_id 
+    AND sr.email = (SELECT email FROM public.profiles WHERE id = auth.uid())
+  )
+);
+
+CREATE POLICY "Admins can view all payment transactions" ON public.payment_transactions
+FOR ALL USING (public.has_role(auth.uid(), 'admin'));
+
+-- SOCIAL MEDIA ACCOUNTS TABLE POLICIES
+CREATE POLICY "Users can view their own accounts" ON public.social_media_accounts
+FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own accounts" ON public.social_media_accounts
+FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own accounts" ON public.social_media_accounts
+FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own accounts" ON public.social_media_accounts
+FOR DELETE USING (auth.uid() = user_id);
+
+CREATE POLICY "Admins can view all accounts" ON public.social_media_accounts
+FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can insert accounts" ON public.social_media_accounts
+FOR INSERT WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can update accounts" ON public.social_media_accounts
+FOR UPDATE USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can delete any account" ON public.social_media_accounts
+FOR DELETE USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Agents can view all accounts" ON public.social_media_accounts
+FOR SELECT USING (public.has_role(auth.uid(), 'agent'));
+
+-- SOCIAL MEDIA POSTS TABLE POLICIES
+CREATE POLICY "Users can view their own posts" ON public.social_media_posts
+FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own posts" ON public.social_media_posts
+FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own posts" ON public.social_media_posts
+FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own posts" ON public.social_media_posts
+FOR DELETE USING (auth.uid() = user_id);
+
+CREATE POLICY "Admins can view all posts" ON public.social_media_posts
+FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can insert posts" ON public.social_media_posts
+FOR INSERT WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can update posts" ON public.social_media_posts
+FOR UPDATE USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can delete any post" ON public.social_media_posts
+FOR DELETE USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Agents can view all posts" ON public.social_media_posts
+FOR SELECT USING (public.has_role(auth.uid(), 'agent'));
+
+-- AD CAMPAIGNS TABLE POLICIES
+CREATE POLICY "Users can view their company campaigns" ON public.ad_campaigns
+FOR SELECT USING (
+  auth.uid() = user_id AND 
+  company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid())
+);
+
+CREATE POLICY "Users can insert their company campaigns" ON public.ad_campaigns
+FOR INSERT WITH CHECK (
+  auth.uid() = user_id AND 
+  company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid())
+);
+
+CREATE POLICY "Users can update their company campaigns" ON public.ad_campaigns
+FOR UPDATE USING (
+  auth.uid() = user_id AND 
+  company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid())
+);
+
+CREATE POLICY "Users can delete their company campaigns" ON public.ad_campaigns
+FOR DELETE USING (
+  auth.uid() = user_id AND 
+  company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid())
+);
+
+CREATE POLICY "Agents can view their company campaigns" ON public.ad_campaigns
+FOR SELECT USING (
+  public.has_role(auth.uid(), 'agent') AND 
+  company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid())
+);
+
+CREATE POLICY "Agents can insert their company campaigns" ON public.ad_campaigns
+FOR INSERT WITH CHECK (
+  public.has_role(auth.uid(), 'agent') AND 
+  company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid())
+);
+
+CREATE POLICY "Agents can update their company campaigns" ON public.ad_campaigns
+FOR UPDATE USING (
+  public.has_role(auth.uid(), 'agent') AND 
+  company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid())
+);
+
+CREATE POLICY "Admins can view all campaigns" ON public.ad_campaigns
+FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can insert any campaign" ON public.ad_campaigns
+FOR INSERT WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can update any campaign" ON public.ad_campaigns
+FOR UPDATE USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can delete any campaign" ON public.ad_campaigns
+FOR DELETE USING (public.has_role(auth.uid(), 'admin'));
+
+-- INFLUENCERS TABLE POLICIES
+CREATE POLICY "Users can view their own influencers" ON public.influencers
+FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own influencers" ON public.influencers
+FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own influencers" ON public.influencers
+FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own influencers" ON public.influencers
+FOR DELETE USING (auth.uid() = user_id);
+
+CREATE POLICY "Admins can view all influencers" ON public.influencers
+FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can insert influencers" ON public.influencers
+FOR INSERT WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can update influencers" ON public.influencers
+FOR UPDATE USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can delete influencers" ON public.influencers
+FOR DELETE USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Agents can view all influencers" ON public.influencers
+FOR SELECT USING (public.has_role(auth.uid(), 'agent'));
+
+-- INFLUENCER CAMPAIGNS TABLE POLICIES
+CREATE POLICY "Users can view their own campaigns" ON public.influencer_campaigns
+FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own campaigns" ON public.influencer_campaigns
+FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own campaigns" ON public.influencer_campaigns
+FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own campaigns" ON public.influencer_campaigns
+FOR DELETE USING (auth.uid() = user_id);
+
+CREATE POLICY "Admins can view all campaigns" ON public.influencer_campaigns
+FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can insert campaigns" ON public.influencer_campaigns
+FOR INSERT WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can update campaigns" ON public.influencer_campaigns
+FOR UPDATE USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can delete campaigns" ON public.influencer_campaigns
+FOR DELETE USING (auth.uid() = user_id);
+
+CREATE POLICY "Agents can view all campaigns" ON public.influencer_campaigns
+FOR SELECT USING (public.has_role(auth.uid(), 'agent'));
+
+-- CAMPAIGN INFLUENCERS TABLE POLICIES
+CREATE POLICY "Users can view campaign influencers for their campaigns" ON public.campaign_influencers
+FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM public.influencer_campaigns
+    WHERE id = campaign_id AND user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Users can insert campaign influencers for their campaigns" ON public.campaign_influencers
+FOR INSERT WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM public.influencer_campaigns
+    WHERE id = campaign_id AND user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Users can update campaign influencers for their campaigns" ON public.campaign_influencers
+FOR UPDATE USING (
+  EXISTS (
+    SELECT 1 FROM public.influencer_campaigns
+    WHERE id = campaign_id AND user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Users can delete campaign influencers for their campaigns" ON public.campaign_influencers
+FOR DELETE USING (
+  EXISTS (
+    SELECT 1 FROM public.influencer_campaigns
+    WHERE id = campaign_id AND user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Admins can manage all campaign influencers" ON public.campaign_influencers
+FOR ALL USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Agents can manage all campaign influencers" ON public.campaign_influencers
+FOR ALL USING (public.has_role(auth.uid(), 'agent'));
+
+-- SOCIAL MEDIA COMMENTS TABLE POLICIES
+CREATE POLICY "Users can view their account comments" ON public.social_media_comments
+FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM public.social_media_accounts
+    WHERE id = account_id AND user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Users can insert comments on their accounts" ON public.social_media_comments
+FOR INSERT WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM public.social_media_accounts
+    WHERE id = account_id AND user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Users can update their account comments" ON public.social_media_comments
+FOR UPDATE USING (
+  EXISTS (
+    SELECT 1 FROM public.social_media_accounts
+    WHERE id = account_id AND user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Users can delete comments on their accounts" ON public.social_media_comments
+FOR DELETE USING (
+  EXISTS (
+    SELECT 1 FROM public.social_media_accounts
+    WHERE id = account_id AND user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Admins can view all comments" ON public.social_media_comments
+FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can insert any comment" ON public.social_media_comments
+FOR INSERT WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can update all comments" ON public.social_media_comments
+FOR UPDATE USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can delete any comment" ON public.social_media_comments
+FOR DELETE USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Agents can view all comments" ON public.social_media_comments
+FOR SELECT USING (public.has_role(auth.uid(), 'agent'));
+
+CREATE POLICY "Agents can insert any comment" ON public.social_media_comments
+FOR INSERT WITH CHECK (public.has_role(auth.uid(), 'agent'));
+
+CREATE POLICY "Agents can update all comments" ON public.social_media_comments
+FOR UPDATE USING (public.has_role(auth.uid(), 'agent'));
+
+CREATE POLICY "Agents can delete any comment" ON public.social_media_comments
+FOR DELETE USING (public.has_role(auth.uid(), 'agent'));
+
+-- AD IMPRESSIONS TABLE POLICIES
+CREATE POLICY "Users can view their own impressions" ON public.ad_impressions
+FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own impressions" ON public.ad_impressions
+FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Companies can view their ad impressions" ON public.ad_impressions
+FOR SELECT USING (company_id = public.get_user_company_id(auth.uid()));
+
+CREATE POLICY "Admins can view all impressions" ON public.ad_impressions
+FOR ALL USING (public.has_role(auth.uid(), 'admin'));
+
+-- USER ENGAGEMENT TABLE POLICIES
+CREATE POLICY "Users can insert their own engagement" ON public.user_engagement
+FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can view their own engagement" ON public.user_engagement
+FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Admins can view all engagement" ON public.user_engagement
+FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
+
+-- LANDING PAGE CONTENT TABLE POLICIES
+CREATE POLICY "Anyone can view active landing content" ON public.landing_page_content
+FOR SELECT USING (is_active = true);
+
+CREATE POLICY "Admins can manage landing content" ON public.landing_page_content
+FOR ALL USING (public.has_role(auth.uid(), 'admin'));
+
+-- SOCIAL PLATFORMS TABLE POLICIES
+CREATE POLICY "Anyone can view active platforms" ON public.social_platforms
+FOR SELECT USING (is_active = true);
+
+CREATE POLICY "Admins can manage platforms" ON public.social_platforms
+FOR ALL USING (public.has_role(auth.uid(), 'admin'));
+
+-- COMPANY PLATFORM SUBSCRIPTIONS TABLE POLICIES
+CREATE POLICY "Companies can view their own subscriptions" ON public.company_platform_subscriptions
+FOR SELECT USING (company_id = public.get_user_company_id(auth.uid()));
+
+CREATE POLICY "Companies can request subscriptions" ON public.company_platform_subscriptions
+FOR INSERT WITH CHECK (
+  company_id = public.get_user_company_id(auth.uid()) AND 
+  status = 'pending'
+);
+
+CREATE POLICY "Admins can manage all subscriptions" ON public.company_platform_subscriptions
+FOR ALL USING (public.has_role(auth.uid(), 'admin'));
+
+-- COMPANY PLATFORM CONFIGS TABLE POLICIES
+CREATE POLICY "Company admins can manage their configs" ON public.company_platform_configs
+FOR ALL USING (
+  company_id = public.get_user_company_id(auth.uid()) AND
+  EXISTS (
+    SELECT 1 FROM public.user_roles
+    WHERE user_id = auth.uid() 
+    AND role = 'admin' 
+    AND company_id = public.get_user_company_id(auth.uid())
+  )
+);
+
+CREATE POLICY "Super admins can manage all configs" ON public.company_platform_configs
+FOR ALL USING (public.has_role(auth.uid(), 'admin'));
+
+-- EMAIL CONFIGURATIONS TABLE POLICIES
+CREATE POLICY "Admins can view all email configs" ON public.email_configurations
+FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can insert email configs" ON public.email_configurations
+FOR INSERT WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can update email configs" ON public.email_configurations
+FOR UPDATE USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can delete email configs" ON public.email_configurations
+FOR DELETE USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Company admins can view their email config" ON public.email_configurations
+FOR SELECT USING (
+  (company_id IS NOT NULL AND 
+   company_id = public.get_user_company_id(auth.uid()) AND 
+   public.has_role(auth.uid(), 'admin')) OR 
+  public.has_role(auth.uid(), 'admin')
+);
+
+CREATE POLICY "Company admins can update their email config" ON public.email_configurations
+FOR UPDATE USING (
+  (company_id IS NOT NULL AND 
+   company_id = public.get_user_company_id(auth.uid()) AND 
+   public.has_role(auth.uid(), 'admin')) OR 
+  public.has_role(auth.uid(), 'admin')
+);
+
+-- OAUTH PROVIDER SETTINGS TABLE POLICIES
+CREATE POLICY "Only admins can view OAuth settings" ON public.oauth_provider_settings
+FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Only admins can insert OAuth settings" ON public.oauth_provider_settings
+FOR INSERT WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Only admins can update OAuth settings" ON public.oauth_provider_settings
+FOR UPDATE USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Only admins can delete OAuth settings" ON public.oauth_provider_settings
+FOR DELETE USING (public.has_role(auth.uid(), 'admin'));
+
+-- SECURITY AUDIT LOG TABLE POLICIES
+CREATE POLICY "System can insert audit logs" ON public.security_audit_log
+FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Admins can view audit logs" ON public.security_audit_log
+FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Company users can view their company audit logs" ON public.security_audit_log
+FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM public.profiles p1
+    WHERE p1.id = auth.uid() 
+    AND p1.company_id IS NOT NULL 
+    AND EXISTS (
+      SELECT 1 FROM public.profiles p2
+      WHERE p2.id = security_audit_log.user_id 
+      AND p2.company_id = p1.company_id
+    )
+  )
+);
+
+-- SOCIAL MEDIA MENTIONS TABLE POLICIES
+CREATE POLICY "Users can view mentions for their accounts" ON public.social_media_mentions
+FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM public.social_media_accounts
+    WHERE id = account_id AND user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Admins can view all mentions" ON public.social_media_mentions
+FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can insert mentions" ON public.social_media_mentions
+FOR INSERT WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can update mentions" ON public.social_media_mentions
+FOR UPDATE USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can delete mentions" ON public.social_media_mentions
+FOR DELETE USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Agents can view all mentions" ON public.social_media_mentions
+FOR SELECT USING (public.has_role(auth.uid(), 'agent'));
+
+CREATE POLICY "Agents can insert mentions" ON public.social_media_mentions
+FOR INSERT WITH CHECK (public.has_role(auth.uid(), 'agent'));
+
+-- INFLUENCER COMMUNICATIONS TABLE POLICIES
+CREATE POLICY "Users can view communications for their influencers" ON public.influencer_communications
+FOR SELECT USING (
+  auth.uid() = user_id OR 
+  EXISTS (
+    SELECT 1 FROM public.influencers
+    WHERE id = influencer_id AND user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Users can insert communications for their influencers" ON public.influencer_communications
+FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Admins can view all communications" ON public.influencer_communications
+FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can insert communications" ON public.influencer_communications
+FOR INSERT WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can update communications" ON public.influencer_communications
+FOR UPDATE USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can delete communications" ON public.influencer_communications
+FOR DELETE USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Agents can view all communications" ON public.influencer_communications
+FOR SELECT USING (public.has_role(auth.uid(), 'agent'));
+
+-- INFLUENCER CONTRACTS TABLE POLICIES
+CREATE POLICY "Users can view contracts for their campaigns" ON public.influencer_contracts
+FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM public.campaign_influencers ci
+    JOIN public.influencer_campaigns ic ON ic.id = ci.campaign_id
+    WHERE ci.id = campaign_influencer_id AND ic.user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Users can insert contracts for their campaigns" ON public.influencer_contracts
+FOR INSERT WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM public.campaign_influencers ci
+    JOIN public.influencer_campaigns ic ON ic.id = ci.campaign_id
+    WHERE ci.id = campaign_influencer_id AND ic.user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Users can update contracts for their campaigns" ON public.influencer_contracts
+FOR UPDATE USING (
+  EXISTS (
+    SELECT 1 FROM public.campaign_influencers ci
+    JOIN public.influencer_campaigns ic ON ic.id = ci.campaign_id
+    WHERE ci.id = campaign_influencer_id AND ic.user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Admins can manage all contracts" ON public.influencer_contracts
+FOR ALL USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Agents can manage all contracts" ON public.influencer_contracts
+FOR ALL USING (public.has_role(auth.uid(), 'agent'));
+
+-- ============================================
+-- 9. GRANT PERMISSIONS
+-- ============================================
+
+-- Grant usage on schema
+GRANT USAGE ON SCHEMA public TO postgres, anon, authenticated, service_role;
+
+-- Grant permissions on all tables
+GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO authenticated;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO anon;
+
+-- Grant permissions on all sequences
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres, service_role;
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO authenticated;
+
+-- Grant execute on functions
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO postgres, anon, authenticated, service_role;
+
+-- ============================================
+-- DONE! SECURITY ENABLED
+-- ============================================
+
+-- Your database is now ready with:
+-- ✅ All tables created
+-- ✅ Row Level Security (RLS) enabled
+-- ✅ Comprehensive RLS policies
+-- ✅ Security definer functions
+-- ✅ Proper role-based access control
+-- ✅ Audit logging enabled
+-- ✅ Views for sensitive data protection
+
 -- Next steps:
 -- 1. Update your .env file with the database connection string
--- 2. Run your application migrations if any
--- 3. Set up your first admin user
+-- 2. Set up your first admin user (see DEPLOYMENT.md)
+-- 3. Configure auth.uid() to work (requires Supabase Auth or custom auth)

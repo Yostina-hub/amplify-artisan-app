@@ -170,17 +170,60 @@ GRANT ALL ON ALL TABLES IN SCHEMA public TO app_user;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO app_user;
 ```
 
+## ⚠️ CRITICAL: Authentication Setup Required
+
+**IMPORTANT**: This migration includes Row Level Security (RLS) policies that rely on `auth.uid()` function. This requires setting up authentication:
+
+### Option 1: Use Supabase Auth (Recommended)
+If you're using Supabase, auth.uid() works automatically. No additional setup needed.
+
+### Option 2: Self-Hosted Auth
+If self-hosting, you need to implement `auth.uid()` function:
+
+```sql
+-- Create auth schema
+CREATE SCHEMA IF NOT EXISTS auth;
+
+-- Create a function to get current user
+CREATE OR REPLACE FUNCTION auth.uid()
+RETURNS uuid
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT nullif(current_setting('request.jwt.claims', true)::json->>'sub', '')::uuid;
+$$;
+
+-- Or for simpler session-based auth:
+CREATE OR REPLACE FUNCTION auth.uid()
+RETURNS uuid
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT nullif(current_setting('app.current_user_id', true), '')::uuid;
+$$;
+```
+
+Then in your application, set the user context before queries:
+```javascript
+// Set user context before database operations
+await client.query('SET app.current_user_id = $1', [userId]);
+```
+
 ## Setting Up First Admin User
 
-After deployment, you'll need to manually create your first admin user in the database:
+After deployment, create your first admin user:
 
 ```bash
-# Connect to database
+# 1. Connect to database
 psql -U app_user -d social_media_app
 
-# Create admin role for your user (replace user_id with actual UUID)
+# 2. First, create a user account in your app's signup flow
+# 3. Then add admin role in database:
 INSERT INTO user_roles (user_id, role) 
 VALUES ('your-user-uuid-here', 'admin');
+
+# To find your user UUID after signup:
+SELECT id, email FROM profiles;
 ```
 
 ## Security Recommendations
