@@ -32,3 +32,9 @@ verify_jwt = true
 
 [functions.fetch-social-messages]
 verify_jwt = true
+
+[functions.execute-automation]
+verify_jwt = false
+
+[functions.schedule-automation]
+verify_jwt = false

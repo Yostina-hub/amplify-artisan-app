@@ -57,6 +57,7 @@ import CompanyAPIManagement from "./pages/CompanyAPIManagement";
 import AIStudio from "./pages/AIStudio";
 import SocialInbox from "./pages/SocialInbox";
 import SocialIntelligence from "./pages/SocialIntelligence";
+import Automation from "./pages/Automation";
 
 const queryClient = new QueryClient();
 
@@ -117,6 +118,7 @@ const App = () => (
             <Route path="/ai-studio" element={<ProtectedRoute><Layout><AIStudio /></Layout></ProtectedRoute>} />
             <Route path="/social-inbox" element={<ProtectedRoute><Layout><SocialInbox /></Layout></ProtectedRoute>} />
             <Route path="/social-intelligence" element={<ProtectedRoute><Layout><SocialIntelligence /></Layout></ProtectedRoute>} />
+            <Route path="/automation" element={<ProtectedRoute><Layout><Automation /></Layout></ProtectedRoute>} />
             
             <Route path="/social-accounts" element={<ProtectedRoute><Layout><SocialMediaCredentials /></Layout></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
