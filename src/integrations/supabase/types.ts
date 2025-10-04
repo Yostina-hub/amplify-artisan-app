@@ -737,6 +737,48 @@ export type Database = {
         }
         Relationships: []
       }
+      oauth_provider_settings: {
+        Row: {
+          client_id: string | null
+          client_secret: string | null
+          config: Json | null
+          created_at: string | null
+          display_name: string
+          id: string
+          is_configured: boolean | null
+          is_enabled: boolean | null
+          provider_name: string
+          redirect_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          client_secret?: string | null
+          config?: Json | null
+          created_at?: string | null
+          display_name: string
+          id?: string
+          is_configured?: boolean | null
+          is_enabled?: boolean | null
+          provider_name: string
+          redirect_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          client_secret?: string | null
+          config?: Json | null
+          created_at?: string | null
+          display_name?: string
+          id?: string
+          is_configured?: boolean | null
+          is_enabled?: boolean | null
+          provider_name?: string
+          redirect_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       payment_transactions: {
         Row: {
           amount: number

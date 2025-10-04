@@ -2,20 +2,22 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, CheckCircle, XCircle, ExternalLink, Info, KeyRound } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, ExternalLink, Info, KeyRound, Save, Edit, Eye, EyeOff } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 type Provider = {
   id: string;
-  name: string;
+  provider_name: string;
   display_name: string;
-  icon: string;
-  description: string;
-  setup_url: string;
-  redirect_url: string;
+  client_id: string | null;
+  client_secret: string | null;
+  redirect_url: string | null;
   is_configured: boolean;
   is_enabled: boolean;
 };
@@ -23,7 +25,11 @@ type Provider = {
 export default function SocialAuthSettings() {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [testingAuth, setTestingAuth] = useState<string | null>(null);
+  const [editingProvider, setEditingProvider] = useState<string | null>(null);
+  const [showSecret, setShowSecret] = useState<Record<string, boolean>>({});
+  const [formData, setFormData] = useState<Record<string, { client_id: string; client_secret: string }>>({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -34,46 +40,20 @@ export default function SocialAuthSettings() {
     try {
       setLoading(true);
       
-      // Get project URL for redirect configuration
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data, error } = await supabase
+        .from('oauth_provider_settings')
+        .select('*')
+        .order('provider_name');
+
+      if (error) throw error;
+
       const projectUrl = window.location.origin;
-      
-      // Define available social providers
-      const availableProviders = [
-        {
-          id: 'google',
-          name: 'google',
-          display_name: 'Google',
-          icon: '🔵',
-          description: 'Allow users to sign in with their Google account',
-          setup_url: 'https://console.cloud.google.com/',
-          redirect_url: `${projectUrl}/auth/callback`,
-        },
-        {
-          id: 'facebook',
-          name: 'facebook',
-          display_name: 'Facebook',
-          icon: '📘',
-          description: 'Allow users to sign in with their Facebook account',
-          setup_url: 'https://developers.facebook.com/',
-          redirect_url: `${projectUrl}/auth/callback`,
-        },
-      ];
+      const providersWithRedirect = (data || []).map(provider => ({
+        ...provider,
+        redirect_url: provider.redirect_url || `${projectUrl}/auth/callback`,
+      }));
 
-      // Check which providers are actually configured by testing them
-      const providersWithStatus = await Promise.all(
-        availableProviders.map(async (provider) => {
-          // Try to get OAuth provider settings (this will help determine if configured)
-          // Note: We can't directly check secrets, but we can check if the provider works
-          return {
-            ...provider,
-            is_configured: false, // Will be true if credentials are set in Cloud dashboard
-            is_enabled: true, // Can be toggled by admin
-          };
-        })
-      );
-
-      setProviders(providersWithStatus);
+      setProviders(providersWithRedirect);
     } catch (error: any) {
       console.error('Error fetching providers:', error);
       toast({
@@ -83,6 +63,61 @@ export default function SocialAuthSettings() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEdit = (provider: Provider) => {
+    setEditingProvider(provider.id);
+    setFormData({
+      ...formData,
+      [provider.id]: {
+        client_id: provider.client_id || '',
+        client_secret: provider.client_secret || '',
+      }
+    });
+  };
+
+  const handleSave = async (providerId: string, providerName: string) => {
+    try {
+      setSaving(true);
+      const data = formData[providerId];
+
+      if (!data.client_id || !data.client_secret) {
+        toast({
+          title: "Validation error",
+          description: "Client ID and Client Secret are required",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error } = await supabase
+        .from('oauth_provider_settings')
+        .update({
+          client_id: data.client_id,
+          client_secret: data.client_secret,
+          is_configured: true,
+          redirect_url: window.location.origin + '/auth/callback',
+        })
+        .eq('id', providerId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `${providerName} credentials saved securely`,
+      });
+
+      setEditingProvider(null);
+      fetchProviders();
+    } catch (error: any) {
+      toast({
+        title: "Error saving credentials",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -100,7 +135,7 @@ export default function SocialAuthSettings() {
       if (error) {
         toast({
           title: "Provider not configured",
-          description: `${providerName} OAuth is not set up. Please configure it in the Lovable Cloud dashboard.`,
+          description: `${providerName} OAuth is not set up properly.`,
           variant: "destructive",
         });
       } else {
@@ -118,6 +153,11 @@ export default function SocialAuthSettings() {
     } finally {
       setTestingAuth(null);
     }
+  };
+
+  const maskCredential = (value: string | null) => {
+    if (!value) return '';
+    return '••••••••••••••••';
   };
 
   if (loading) {
@@ -140,13 +180,10 @@ export default function SocialAuthSettings() {
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription>
-          <div className="space-y-2">
-            <p className="font-medium">OAuth credentials are managed securely in the Lovable Cloud dashboard.</p>
-            <p className="text-sm">
-              For security reasons, OAuth Client IDs and Secrets cannot be viewed or edited through this interface.
-              Configure them in: <strong>Users → Auth Settings → Provider Settings</strong>
-            </p>
-          </div>
+          <p className="text-sm">
+            OAuth credentials are stored encrypted in the database. 
+            For self-hosted deployments, configure your providers below.
+          </p>
         </AlertDescription>
       </Alert>
 
@@ -163,70 +200,172 @@ export default function SocialAuthSettings() {
         <CardContent className="space-y-6">
           {providers.map((provider) => (
             <div key={provider.id}>
-              <div className="flex items-start justify-between">
-                <div className="space-y-3 flex-1">
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-4 flex-1">
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">{provider.icon}</span>
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <KeyRound className="h-5 w-5 text-primary" />
+                    </div>
                     <div>
                       <h3 className="text-lg font-semibold">{provider.display_name}</h3>
-                      <p className="text-sm text-muted-foreground">{provider.description}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        {provider.is_configured ? (
+                          <Badge variant="default" className="gap-1">
+                            <CheckCircle className="h-3 w-3" />
+                            Configured
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="gap-1">
+                            <XCircle className="h-3 w-3" />
+                            Not Configured
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="space-y-2 ml-11">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">Status:</span>
-                      {provider.is_configured ? (
-                        <Badge variant="default" className="gap-1">
-                          <CheckCircle className="h-3 w-3" />
-                          Configured
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary" className="gap-1">
-                          <XCircle className="h-3 w-3" />
-                          Not Configured
-                        </Badge>
-                      )}
-                    </div>
+                  {editingProvider === provider.id ? (
+                    <div className="space-y-4 ml-13">
+                      <div className="space-y-2">
+                        <Label htmlFor={`client-id-${provider.id}`}>Client ID / App ID</Label>
+                        <Input
+                          id={`client-id-${provider.id}`}
+                          value={formData[provider.id]?.client_id || ''}
+                          onChange={(e) => setFormData({
+                            ...formData,
+                            [provider.id]: {
+                              ...formData[provider.id],
+                              client_id: e.target.value
+                            }
+                          })}
+                          placeholder="Enter your OAuth Client ID"
+                        />
+                      </div>
 
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">
-                        <strong>Redirect URL:</strong>
-                      </p>
-                      <code className="text-xs bg-muted px-2 py-1 rounded block">
-                        {provider.redirect_url}
-                      </code>
-                      <p className="text-xs text-muted-foreground">
-                        Add this URL to your {provider.display_name} OAuth app configuration
-                      </p>
+                      <div className="space-y-2">
+                        <Label htmlFor={`client-secret-${provider.id}`}>Client Secret / App Secret</Label>
+                        <div className="relative">
+                          <Input
+                            id={`client-secret-${provider.id}`}
+                            type={showSecret[provider.id] ? "text" : "password"}
+                            value={formData[provider.id]?.client_secret || ''}
+                            onChange={(e) => setFormData({
+                              ...formData,
+                              [provider.id]: {
+                                ...formData[provider.id],
+                                client_secret: e.target.value
+                              }
+                            })}
+                            placeholder="Enter your OAuth Client Secret"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3"
+                            onClick={() => setShowSecret({
+                              ...showSecret,
+                              [provider.id]: !showSecret[provider.id]
+                            })}
+                          >
+                            {showSecret[provider.id] ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleSave(provider.id, provider.display_name)}
+                          disabled={saving}
+                        >
+                          {saving ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Saving...
+                            </>
+                          ) : (
+                            <>
+                              <Save className="h-4 w-4 mr-2" />
+                              Save
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setEditingProvider(null)}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="space-y-3 ml-13">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">Client ID:</span>
+                          <code className="text-xs bg-muted px-2 py-1 rounded">
+                            {provider.client_id ? maskCredential(provider.client_id) : 'Not set'}
+                          </code>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">Client Secret:</span>
+                          <code className="text-xs bg-muted px-2 py-1 rounded">
+                            {provider.client_secret ? maskCredential(provider.client_secret) : 'Not set'}
+                          </code>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <p className="text-xs text-muted-foreground">
+                          <strong>Redirect URL:</strong>
+                        </p>
+                        <code className="text-xs bg-muted px-2 py-1 rounded block">
+                          {provider.redirect_url}
+                        </code>
+                        <p className="text-xs text-muted-foreground">
+                          Add this URL to your {provider.display_name} OAuth app
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => window.open(provider.setup_url, '_blank')}
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Setup Guide
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => testProvider(provider.name)}
-                    disabled={testingAuth === provider.name}
-                  >
-                    {testingAuth === provider.name ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Testing...
-                      </>
-                    ) : (
-                      'Test Login'
-                    )}
-                  </Button>
+                  {editingProvider !== provider.id && (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(provider)}
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Configure
+                      </Button>
+                      {provider.is_configured && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => testProvider(provider.provider_name)}
+                          disabled={testingAuth === provider.provider_name}
+                        >
+                          {testingAuth === provider.provider_name ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Testing...
+                            </>
+                          ) : (
+                            'Test Login'
+                          )}
+                        </Button>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
 
