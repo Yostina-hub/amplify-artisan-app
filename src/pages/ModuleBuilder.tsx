@@ -10,8 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Box, Edit, Trash2, Database, Settings } from "lucide-react";
+import { Loader2, Plus, Box, Edit, Trash2, Database, Settings, GripVertical } from "lucide-react";
 import { Layout } from "@/components/Layout";
+import { FieldEditor } from "@/components/FieldEditor";
 
 const ICON_OPTIONS = [
   'Box', 'Database', 'Folder', 'FileText', 'Users', 'ShoppingCart', 
@@ -24,6 +25,8 @@ export default function ModuleBuilder() {
   const [isCreating, setIsCreating] = useState(false);
   const [selectedModule, setSelectedModule] = useState<any>(null);
   const [editingModule, setEditingModule] = useState<any>(null);
+  const [editingField, setEditingField] = useState<any>(null);
+  const [isFieldEditorOpen, setIsFieldEditorOpen] = useState(false);
 
   // Form state for new module
   const [newModule, setNewModule] = useState({
@@ -132,6 +135,32 @@ export default function ModuleBuilder() {
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to update module",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete field mutation
+  const deleteFieldMutation = useMutation({
+    mutationFn: async (fieldId: string) => {
+      const { error } = await supabase
+        .from('custom_module_fields')
+        .delete()
+        .eq('id', fieldId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['custom-module-fields'] });
+      toast({
+        title: "Field deleted",
+        description: "The field has been deleted successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete field",
         variant: "destructive",
       });
     },
@@ -452,11 +481,8 @@ export default function ModuleBuilder() {
                         <Button
                           size="sm"
                           onClick={() => {
-                            // Navigate to field builder (Phase 1 extension)
-                            toast({
-                              title: "Coming soon",
-                              description: "Field editor will be available in the next step",
-                            });
+                            setEditingField(null);
+                            setIsFieldEditorOpen(true);
                           }}
                         >
                           <Plus className="mr-2 h-4 w-4" />
@@ -469,17 +495,51 @@ export default function ModuleBuilder() {
                           {fields.map((field) => (
                             <div
                               key={field.id}
-                              className="flex items-center justify-between p-3 rounded border"
+                              className="flex items-center justify-between p-3 rounded border hover:bg-accent/50 transition-colors group"
                             >
-                              <div>
-                                <p className="font-medium">{field.display_name}</p>
-                                <p className="text-sm text-muted-foreground">
-                                  {field.field_type}
-                                  {field.is_required && ' • Required'}
-                                  {field.is_unique && ' • Unique'}
-                                </p>
+                              <div className="flex items-center gap-3 flex-1">
+                                <GripVertical className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <p className="font-medium">{field.display_name}</p>
+                                    {field.is_required && (
+                                      <Badge variant="destructive" className="text-xs">Required</Badge>
+                                    )}
+                                    {field.is_unique && (
+                                      <Badge variant="secondary" className="text-xs">Unique</Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-muted-foreground">
+                                    {field.field_type}
+                                    {field.help_text && ` • ${field.help_text.substring(0, 50)}${field.help_text.length > 50 ? '...' : ''}`}
+                                  </p>
+                                </div>
                               </div>
-                              <Badge variant="outline">{field.field_type}</Badge>
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline">{field.field_type}</Badge>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingField(field);
+                                    setIsFieldEditorOpen(true);
+                                  }}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    if (confirm('Are you sure you want to delete this field?')) {
+                                      deleteFieldMutation.mutate(field.id);
+                                    }
+                                  }}
+                                  disabled={deleteFieldMutation.isPending}
+                                >
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -508,6 +568,19 @@ export default function ModuleBuilder() {
               )}
             </div>
           </div>
+        )}
+
+        {/* Field Editor Dialog */}
+        {selectedModule && (
+          <FieldEditor
+            moduleId={selectedModule.id}
+            field={editingField}
+            open={isFieldEditorOpen}
+            onClose={() => {
+              setIsFieldEditorOpen(false);
+              setEditingField(null);
+            }}
+          />
         )}
       </div>
     </Layout>
