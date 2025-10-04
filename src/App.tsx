@@ -66,6 +66,8 @@ import ReportingDashboard from "./pages/ReportingDashboard";
 import CRMFeatureStatus from "./pages/CRMFeatureStatus";
 import Contacts from "./pages/Contacts";
 import Accounts from "./pages/Accounts";
+import Leads from "./pages/Leads";
+import SalesPipeline from "./pages/SalesPipeline";
 
 const queryClient = new QueryClient();
 
@@ -138,6 +140,8 @@ const App = () => (
           <Route path="/crm-roadmap" element={<ProtectedRoute><Layout><CRMFeatureStatus /></Layout></ProtectedRoute>} />
           <Route path="/contacts" element={<ProtectedRoute><Layout><Contacts /></Layout></ProtectedRoute>} />
           <Route path="/accounts" element={<ProtectedRoute><Layout><Accounts /></Layout></ProtectedRoute>} />
+          <Route path="/leads" element={<ProtectedRoute><Layout><Leads /></Layout></ProtectedRoute>} />
+          <Route path="/pipeline" element={<ProtectedRoute><Layout><SalesPipeline /></Layout></ProtectedRoute>} />
             
             <Route path="/social-accounts" element={<ProtectedRoute><Layout><SocialMediaCredentials /></Layout></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />

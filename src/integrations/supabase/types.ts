@@ -1564,6 +1564,112 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          address: string | null
+          city: string | null
+          company: string | null
+          company_id: string | null
+          converted: boolean | null
+          converted_account_id: string | null
+          converted_at: string | null
+          converted_contact_id: string | null
+          country: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          email: string | null
+          first_name: string
+          id: string
+          last_name: string
+          lead_score: number | null
+          lead_source: string | null
+          lead_status: string | null
+          metadata: Json | null
+          phone: string | null
+          state: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          company?: string | null
+          company_id?: string | null
+          converted?: boolean | null
+          converted_account_id?: string | null
+          converted_at?: string | null
+          converted_contact_id?: string | null
+          country?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          email?: string | null
+          first_name: string
+          id?: string
+          last_name: string
+          lead_score?: number | null
+          lead_source?: string | null
+          lead_status?: string | null
+          metadata?: Json | null
+          phone?: string | null
+          state?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          company?: string | null
+          company_id?: string | null
+          converted?: boolean | null
+          converted_account_id?: string | null
+          converted_at?: string | null
+          converted_contact_id?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          lead_score?: number | null
+          lead_source?: string | null
+          lead_status?: string | null
+          metadata?: Json | null
+          phone?: string | null
+          state?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_converted_account_id_fkey"
+            columns: ["converted_account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_converted_contact_id_fkey"
+            columns: ["converted_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       oauth_provider_settings: {
         Row: {
           client_id: string | null
@@ -1605,6 +1711,104 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      opportunities: {
+        Row: {
+          account_id: string | null
+          amount: number | null
+          closed_date: string | null
+          company_id: string | null
+          contact_id: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          expected_close_date: string | null
+          id: string
+          lead_source: string | null
+          metadata: Json | null
+          name: string
+          next_step: string | null
+          owner_id: string | null
+          probability: number | null
+          stage_id: string | null
+          status: string | null
+          tags: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          amount?: number | null
+          closed_date?: string | null
+          company_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          expected_close_date?: string | null
+          id?: string
+          lead_source?: string | null
+          metadata?: Json | null
+          name: string
+          next_step?: string | null
+          owner_id?: string | null
+          probability?: number | null
+          stage_id?: string | null
+          status?: string | null
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          amount?: number | null
+          closed_date?: string | null
+          company_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          expected_close_date?: string | null
+          id?: string
+          lead_source?: string | null
+          metadata?: Json | null
+          name?: string
+          next_step?: string | null
+          owner_id?: string | null
+          probability?: number | null
+          stage_id?: string | null
+          status?: string | null
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunities_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "pipeline_stages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payment_transactions: {
         Row: {
@@ -1661,6 +1865,50 @@ export type Database = {
             columns: ["subscription_request_id"]
             isOneToOne: false
             referencedRelation: "subscription_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pipeline_stages: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          probability: number | null
+          stage_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          probability?: number | null
+          stage_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          probability?: number | null
+          stage_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pipeline_stages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
