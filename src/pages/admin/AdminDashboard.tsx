@@ -384,6 +384,17 @@ export default function AdminDashboard() {
                   </Link>
                 </AccordionContent>
               </AccordionItem>
+              <AccordionItem value="item-5">
+                <AccordionTrigger>5. API Integration Management</AccordionTrigger>
+                <AccordionContent className="space-y-2">
+                  <p>Manage all API integrations through a graphical interface. Create, configure, and monitor any type of integration with dynamic field management.</p>
+                  <Link to="/admin/api-management">
+                    <Button variant="link" className="p-0 h-auto">
+                      Go to API Management <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </AccordionContent>
+              </AccordionItem>
             </Accordion>
           </CardContent>
         </Card>

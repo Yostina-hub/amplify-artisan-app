@@ -52,6 +52,7 @@ import PublicContentManager from "./pages/admin/PublicContentManager";
 import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Help from "./pages/Help";
+import APIManagement from "./pages/admin/APIManagement";
 
 const queryClient = new QueryClient();
 
@@ -101,6 +102,7 @@ const App = () => (
             <Route path="/admin/audit-log" element={<ProtectedRoute requiredRole="admin"><Layout><AuditLog /></Layout></ProtectedRoute>} />
             <Route path="/admin/social-auth" element={<ProtectedRoute requiredRole="admin"><Layout><SocialAuthSettings /></Layout></ProtectedRoute>} />
             <Route path="/admin/public-content" element={<ProtectedRoute requiredRole="admin"><Layout><PublicContentManager /></Layout></ProtectedRoute>} />
+            <Route path="/admin/api-management" element={<ProtectedRoute requiredRole="admin"><Layout><APIManagement /></Layout></ProtectedRoute>} />
             <Route path="/company/email-settings" element={<ProtectedRoute><Layout><CompanyEmailSettings /></Layout></ProtectedRoute>} />
             <Route path="/company/audit-log" element={<ProtectedRoute><Layout><CompanyAuditLog /></Layout></ProtectedRoute>} />
             <Route path="/company/platform-subscriptions" element={<ProtectedRoute><Layout><CompanyPlatformSubscriptions /></Layout></ProtectedRoute>} />

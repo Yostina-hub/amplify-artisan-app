@@ -133,6 +133,163 @@ export type Database = {
           },
         ]
       }
+      api_integration_fields: {
+        Row: {
+          created_at: string
+          default_value: string | null
+          field_label: string
+          field_name: string
+          field_order: number | null
+          field_type: string
+          id: string
+          integration_id: string
+          is_required: boolean | null
+          options: Json | null
+          validation_rules: Json | null
+        }
+        Insert: {
+          created_at?: string
+          default_value?: string | null
+          field_label: string
+          field_name: string
+          field_order?: number | null
+          field_type: string
+          id?: string
+          integration_id: string
+          is_required?: boolean | null
+          options?: Json | null
+          validation_rules?: Json | null
+        }
+        Update: {
+          created_at?: string
+          default_value?: string | null
+          field_label?: string
+          field_name?: string
+          field_order?: number | null
+          field_type?: string
+          id?: string
+          integration_id?: string
+          is_required?: boolean | null
+          options?: Json | null
+          validation_rules?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_integration_fields_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "api_integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_integration_logs: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          execution_time_ms: number | null
+          id: string
+          integration_id: string
+          request_body: Json | null
+          request_headers: Json | null
+          request_method: string | null
+          request_url: string | null
+          response_body: Json | null
+          response_status: number | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          integration_id: string
+          request_body?: Json | null
+          request_headers?: Json | null
+          request_method?: string | null
+          request_url?: string | null
+          response_body?: Json | null
+          response_status?: number | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          integration_id?: string
+          request_body?: Json | null
+          request_headers?: Json | null
+          request_method?: string | null
+          request_url?: string | null
+          response_body?: Json | null
+          response_status?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_integration_logs_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "api_integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_integrations: {
+        Row: {
+          auth_config: Json | null
+          auth_type: string | null
+          base_url: string | null
+          created_at: string
+          description: string | null
+          headers: Json | null
+          id: string
+          integration_type: string
+          is_active: boolean | null
+          metadata: Json | null
+          name: string
+          rate_limit: number | null
+          retry_attempts: number | null
+          timeout_seconds: number | null
+          updated_at: string
+          webhook_url: string | null
+        }
+        Insert: {
+          auth_config?: Json | null
+          auth_type?: string | null
+          base_url?: string | null
+          created_at?: string
+          description?: string | null
+          headers?: Json | null
+          id?: string
+          integration_type: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          name: string
+          rate_limit?: number | null
+          retry_attempts?: number | null
+          timeout_seconds?: number | null
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Update: {
+          auth_config?: Json | null
+          auth_type?: string | null
+          base_url?: string | null
+          created_at?: string
+          description?: string | null
+          headers?: Json | null
+          id?: string
+          integration_type?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          name?: string
+          rate_limit?: number | null
+          retry_attempts?: number | null
+          timeout_seconds?: number | null
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Relationships: []
+      }
       campaign_influencers: {
         Row: {
           agreed_price: number | null
