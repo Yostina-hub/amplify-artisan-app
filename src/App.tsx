@@ -48,6 +48,7 @@ import AuditLog from "./pages/admin/AuditLog";
 import CompanyAuditLog from "./pages/CompanyAuditLog";
 import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Help from "./pages/Help";
 
 const queryClient = new QueryClient();
 
@@ -60,8 +61,9 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/terms-of-service" element={<TermsOfService />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/help" element={<Help />} />
             <Route path="/industry/:slug" element={<Industry />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/company-application" element={<CompanyApplication />} />
