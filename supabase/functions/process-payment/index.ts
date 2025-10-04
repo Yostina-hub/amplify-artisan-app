@@ -82,7 +82,7 @@ serve(async (req) => {
       throw txError;
     }
 
-    // If payment completed, update subscription request
+    // If payment completed, update subscription request and trigger AI analysis
     if (status === 'completed') {
       const { error: subError } = await supabase
         .from('subscription_requests')
@@ -94,6 +94,30 @@ serve(async (req) => {
 
       if (subError) {
         console.error('Subscription update error:', subError);
+      }
+
+      // Get subscription details for AI analysis
+      const { data: subscription } = await supabase
+        .from('subscription_requests')
+        .select('pricing_plan_id')
+        .eq('id', payload.subscriptionRequestId)
+        .single();
+
+      // Trigger AI-driven subscription analysis
+      if (subscription?.pricing_plan_id) {
+        const { error: analysisError } = await supabase.functions.invoke('analyze-subscription', {
+          body: {
+            subscriptionId: payload.subscriptionRequestId,
+            planId: subscription.pricing_plan_id,
+          }
+        });
+
+        if (analysisError) {
+          console.error('AI analysis error:', analysisError);
+          // Don't fail the payment if analysis fails
+        } else {
+          console.log('AI subscription analysis triggered successfully');
+        }
       }
     }
 
