@@ -14,6 +14,8 @@ export default function CRMFeatureStatus() {
   const [aiResponse, setAiResponse] = useState("");
   const [currentReportIndex, setCurrentReportIndex] = useState(0);
   const recognitionRef = useRef<any>(null);
+  const speechSynthRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [realtimeMetrics, setRealtimeMetrics] = useState({
     revenue: 2847239,
     deals: 143,
@@ -177,14 +179,26 @@ export default function CRMFeatureStatus() {
         setVoiceTranscript(transcript);
         
         // Simulate AI response based on keywords
+        let response = "";
         if (transcript.toLowerCase().includes('revenue')) {
-          setAiResponse("Revenue is currently at $2.85M with a 12.5% increase from last quarter. Top performing sectors are Enterprise Sales and SaaS subscriptions.");
+          response = "Revenue is currently at $2.85M with a 12.5% increase from last quarter. Top performing sectors are Enterprise Sales and SaaS subscriptions.";
         } else if (transcript.toLowerCase().includes('deals')) {
-          setAiResponse("We have 143 active deals in the pipeline. 67% are in advanced negotiation stages. Expected close rate is 68% based on historical data.");
+          response = "We have 143 active deals in the pipeline. 67% are in advanced negotiation stages. Expected close rate is 68% based on historical data.";
         } else if (transcript.toLowerCase().includes('team') || transcript.toLowerCase().includes('performance')) {
-          setAiResponse("Team performance is exceptional at 89.2% engagement. Sarah J. leads with 3 closed deals today worth $245K. 8 meetings scheduled for tomorrow.");
+          response = "Team performance is exceptional at 89.2% engagement. Sarah J. leads with 3 closed deals today worth $245K. 8 meetings scheduled for tomorrow.";
         } else if (transcript.toLowerCase().includes('risk') || transcript.toLowerCase().includes('alert')) {
-          setAiResponse("5 high-value opportunities need follow-up within 24 hours. Client ABC may churn - proactive outreach recommended. System health is at 99.7%.");
+          response = "5 high-value opportunities need follow-up within 24 hours. Client ABC may churn - proactive outreach recommended. System health is at 99.7%.";
+        } else if (transcript.toLowerCase().includes('report') || transcript.toLowerCase().includes('overview')) {
+          response = "Currently showing " + systemReports[currentReportIndex].title + ". All systems are operational. Would you like details on a specific metric?";
+        } else if (transcript.toLowerCase().includes('customer') || transcript.toLowerCase().includes('satisfaction')) {
+          response = "Customer satisfaction is at 96% with an NPS score of 72. Response time is 2.3 hours, well below our 4-hour benchmark.";
+        } else if (response === "" && transcript.length > 10) {
+          response = "I'm analyzing that data for you. Please specify which metric you'd like to review: revenue, deals, team performance, or customer satisfaction.";
+        }
+        
+        if (response) {
+          setAiResponse(response);
+          speakResponse(response);
         }
       };
 
@@ -204,7 +218,50 @@ export default function CRMFeatureStatus() {
         }
       };
     }
-  }, [isListening, toast]);
+  }, [isListening, toast, currentReportIndex]);
+
+  // Text-to-Speech function
+  const speakResponse = (text: string) => {
+    // Cancel any ongoing speech
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+    
+    // Try to use a professional-sounding voice
+    const voices = window.speechSynthesis.getVoices();
+    const preferredVoice = voices.find(voice => 
+      voice.name.includes('Google') || 
+      voice.name.includes('Microsoft') ||
+      voice.name.includes('Samantha') ||
+      voice.name.includes('Alex')
+    );
+    
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+    }
+
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    speechSynthRef.current = utterance;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // Load voices (some browsers need this)
+  useEffect(() => {
+    if (window.speechSynthesis) {
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
+  }, []);
 
   const toggleVoice = () => {
     if (!recognitionRef.current) {
@@ -221,13 +278,25 @@ export default function CRMFeatureStatus() {
       setIsListening(true);
       setVoiceTranscript("");
       setAiResponse("");
+      
+      // Speak welcome message
+      const welcomeMessage = "Hello, I'm your AI executive assistant. How can I help you today?";
+      setAiResponse(welcomeMessage);
+      speakResponse(welcomeMessage);
+      
       toast({
-        title: "Listening...",
-        description: "AI is now listening to your commands",
+        title: "AI Assistant Active",
+        description: "Listening and ready to respond with voice",
       });
     } else {
       recognitionRef.current.stop();
       setIsListening(false);
+      
+      // Stop any ongoing speech
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+      }
+      setIsSpeaking(false);
     }
   };
 
@@ -322,21 +391,30 @@ export default function CRMFeatureStatus() {
                 </div>
               </div>
 
-              <Button
-                onClick={toggleVoice}
-                size="lg"
-                className={`relative overflow-hidden transition-all duration-500 ${
-                  isListening 
-                    ? 'bg-gradient-to-r from-red-500 to-pink-600 shadow-[0_0_30px_rgba(239,68,68,0.6)] scale-110' 
-                    : 'bg-gradient-to-r from-purple-500 to-blue-600 hover:shadow-[0_0_30px_rgba(147,51,234,0.6)]'
-                }`}
-              >
-                <Mic className={`mr-2 h-5 w-5 ${isListening ? 'animate-pulse' : ''}`} />
-                {isListening ? 'Listening...' : 'Voice Command'}
-                {isListening && (
-                  <div className="absolute inset-0 bg-white/30 animate-shimmer" />
+              <div className="flex items-center gap-3">
+                <Button
+                  onClick={toggleVoice}
+                  size="lg"
+                  className={`relative overflow-hidden transition-all duration-500 ${
+                    isListening 
+                      ? 'bg-gradient-to-r from-red-500 to-pink-600 shadow-[0_0_30px_rgba(239,68,68,0.6)] scale-110' 
+                      : 'bg-gradient-to-r from-purple-500 to-blue-600 hover:shadow-[0_0_30px_rgba(147,51,234,0.6)]'
+                  }`}
+                >
+                  <Mic className={`mr-2 h-5 w-5 ${isListening ? 'animate-pulse' : ''}`} />
+                  {isListening ? 'Listening...' : 'Voice Command'}
+                  {isListening && (
+                    <div className="absolute inset-0 bg-white/30 animate-shimmer" />
+                  )}
+                </Button>
+                
+                {isSpeaking && (
+                  <Badge className="bg-blue-500/50 text-white font-bold animate-pulse border-2 border-blue-300/50 shadow-[0_0_20px_rgba(59,130,246,0.8)]">
+                    <MessageSquare className="h-4 w-4 mr-1" />
+                    AI Speaking
+                  </Badge>
                 )}
-              </Button>
+              </div>
             </div>
 
             {/* AI Insight Banner */}
@@ -371,11 +449,20 @@ export default function CRMFeatureStatus() {
                   {aiResponse && (
                     <div className="relative">
                       <div className="flex items-start gap-3">
-                        <div className="p-2 rounded-xl bg-purple-500/30 border border-purple-400/50">
+                        <div className={`p-2 rounded-xl bg-purple-500/30 border border-purple-400/50 ${isSpeaking ? 'animate-pulse' : ''}`}>
                           <Brain className="h-5 w-5 text-purple-300 animate-float" />
                         </div>
                         <div className="flex-1">
-                          <p className="text-xs text-white/60 font-semibold mb-1">AI Response:</p>
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="text-xs text-white/60 font-semibold">AI Response:</p>
+                            {isSpeaking && (
+                              <div className="flex items-center gap-1">
+                                <div className="w-1 h-3 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '0ms' }} />
+                                <div className="w-1 h-4 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
+                                <div className="w-1 h-3 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
+                              </div>
+                            )}
+                          </div>
                           <p className="text-white font-medium drop-shadow-lg">{aiResponse}</p>
                         </div>
                       </div>
