@@ -33,6 +33,8 @@ import {
 import { Search, MoreHorizontal, CheckCircle, XCircle, Pause, Mail, Eye, Trash2, UserCog, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { usePagination } from "@/hooks/usePagination";
+import { PaginationControls } from "@/components/PaginationControls";
 
 interface Company {
   id: string;
@@ -63,20 +65,44 @@ export default function CompanyManagement() {
   const [rejectionReason, setRejectionReason] = useState("");
   const [companyAdmin, setCompanyAdmin] = useState<any>(null);
   const [loadingAdmin, setLoadingAdmin] = useState(false);
-
+  
+  const pagination = usePagination(25);
+  
   useEffect(() => {
     fetchCompanies();
   }, []);
+  
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      pagination.goToPage(1);
+      fetchCompanies();
+    }, 300);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery]);
+  
+  useEffect(() => {
+    fetchCompanies();
+  }, [pagination.currentPage, pagination.pageSize]);
 
   const fetchCompanies = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from("companies")
-        .select("*")
-        .order("applied_at", { ascending: false });
+        .select("*", { count: 'exact' });
+      
+      // Apply search filter
+      if (searchQuery.trim()) {
+        query = query.or(`name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`);
+      }
+
+      const { data, error, count } = await query
+        .order("applied_at", { ascending: false })
+        .range(pagination.getRangeStart(), pagination.getRangeEnd());
 
       if (error) throw error;
       setCompanies(data || []);
+      pagination.setTotalItems(count || 0);
     } catch (error) {
       console.error("Error fetching companies:", error);
       toast.error("Failed to load companies");
@@ -307,12 +333,6 @@ export default function CompanyManagement() {
     );
   };
 
-  const filteredCompanies = companies.filter(
-    (company) =>
-      company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      company.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   return (
     <div className="space-y-6 animate-in fade-in-50 duration-500">
       <div>
@@ -356,14 +376,14 @@ export default function CompanyManagement() {
                     Loading companies...
                   </TableCell>
                 </TableRow>
-              ) : filteredCompanies.length === 0 ? (
+              ) : companies.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center text-muted-foreground">
                     No companies found
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredCompanies.map((company) => (
+                companies.map((company) => (
                   <TableRow key={company.id}>
                     <TableCell className="font-medium">{company.name}</TableCell>
                     <TableCell>{company.email}</TableCell>
@@ -456,6 +476,15 @@ export default function CompanyManagement() {
               )}
             </TableBody>
           </Table>
+          
+          <PaginationControls
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            pageSize={pagination.pageSize}
+            totalItems={pagination.totalItems}
+            onPageChange={pagination.goToPage}
+            onPageSizeChange={pagination.setPageSize}
+          />
         </CardContent>
       </Card>
 

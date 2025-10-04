@@ -40,6 +40,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { z } from "zod";
+import { usePagination } from "@/hooks/usePagination";
+import { PaginationControls } from "@/components/PaginationControls";
 
 const createUserSchema = z.object({
   email: z.string().trim().email({ message: "Invalid email address" }).max(255),
@@ -97,12 +99,26 @@ export default function UserManagement() {
   const [userDetails, setUserDetails] = useState<User | null>(null);
   const [userAuditLogs, setUserAuditLogs] = useState<AuditLog[]>([]);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  
+  const pagination = usePagination(25);
 
   useEffect(() => {
     checkUserRole();
-    fetchUsers();
     fetchCompanies();
   }, []);
+  
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      pagination.goToPage(1); // Reset to page 1 on search
+      fetchUsers();
+    }, 300);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery]);
+  
+  useEffect(() => {
+    fetchUsers();
+  }, [pagination.currentPage, pagination.pageSize]);
 
   const checkUserRole = async () => {
     try {
@@ -172,15 +188,21 @@ export default function UserManagement() {
       // Build query - company admins only see their company's users
       let query = supabase
         .from('profiles')
-        .select('*, companies(id, name, status)');
+        .select('*, companies(id, name, status)', { count: 'exact' });
 
       // Filter by company for company admins
       if (!isSuperAdminUser && currentCompanyId) {
         query = query.eq('company_id', currentCompanyId);
       }
 
-      const { data: profiles, error: profilesError } = await query
-        .order('created_at', { ascending: false });
+      // Apply search filter
+      if (searchQuery.trim()) {
+        query = query.or(`full_name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`);
+      }
+
+      const { data: profiles, error: profilesError, count } = await query
+        .order('created_at', { ascending: false })
+        .range(pagination.getRangeStart(), pagination.getRangeEnd());
 
       if (profilesError) throw profilesError;
 
@@ -209,6 +231,7 @@ export default function UserManagement() {
       });
 
       setUsers(usersWithRoles);
+      pagination.setTotalItems(count || 0);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast.error('Failed to load users');
@@ -402,11 +425,6 @@ export default function UserManagement() {
     }
   };
 
-  const filteredUsers = users.filter(user =>
-    user.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   return (
     <div className="space-y-6 animate-in fade-in-50 duration-500">
       <div className="flex items-center justify-between">
@@ -452,18 +470,18 @@ export default function UserManagement() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground">
+                  <TableCell colSpan={isSuperAdmin ? 7 : 6} className="text-center text-muted-foreground">
                     Loading users...
                   </TableCell>
                 </TableRow>
-              ) : filteredUsers.length === 0 ? (
+              ) : users.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={isSuperAdmin ? 7 : 6} className="text-center text-muted-foreground">
                     No users found
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredUsers.map((user) => (
+                users.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">
                       {user.full_name || 'No name'}
@@ -552,6 +570,15 @@ export default function UserManagement() {
               )}
             </TableBody>
           </Table>
+          
+          <PaginationControls
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            pageSize={pagination.pageSize}
+            totalItems={pagination.totalItems}
+            onPageChange={pagination.goToPage}
+            onPageSizeChange={pagination.setPageSize}
+          />
         </CardContent>
       </Card>
 
