@@ -589,10 +589,8 @@ export default function CRMFeatureStatus() {
           </div>
         </div>
 
-        {/* Real-Time Metrics Grid */}
-
-            {/* Query Data Visualization */}
-            {queryData && (
+        {/* Query Data Visualization */}
+        {queryData && (
               <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-600/40 via-blue-600/40 to-purple-600/40 backdrop-blur-xl border-2 border-white/30 p-6 animate-scale-in shadow-[0_0_50px_rgba(34,211,238,0.6)] mt-4">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_70%)]" />
                 
@@ -704,16 +702,6 @@ export default function CRMFeatureStatus() {
                 </div>
               </div>
             )}
-                </Button>
-                
-                {isSpeaking && (
-                  <Badge className="bg-blue-500/50 text-white font-bold animate-pulse border-2 border-blue-300/50 shadow-[0_0_20px_rgba(59,130,246,0.8)]">
-                    <MessageSquare className="h-4 w-4 mr-1" />
-                    AI Speaking
-                  </Badge>
-                )}
-              </div>
-            </div>
 
             {/* AI Insight Banner */}
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600/40 via-blue-600/40 to-emerald-600/40 backdrop-blur-xl border-2 border-white/30 p-5 animate-slide-up shadow-[0_0_40px_rgba(59,130,246,0.5)]">
@@ -769,8 +757,6 @@ export default function CRMFeatureStatus() {
                 </div>
               </div>
             )}
-          </div>
-        </div>
 
         {/* Real-Time Metrics Grid */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
