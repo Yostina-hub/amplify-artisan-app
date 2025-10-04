@@ -1,4 +1,4 @@
-import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2, Mail, Link2, Globe, Key, Package, BarChart2, Layers, DollarSign, CreditCard, FileSearch, ChevronDown, Wallet, Layout, Database, Sparkles, Brain, Zap, LineChart, Box } from "lucide-react";
+import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2, Mail, Link2, Globe, Key, Package, BarChart2, Layers, DollarSign, CreditCard, FileSearch, ChevronDown, Wallet, Layout, Database, Sparkles, Brain, Zap, LineChart, Box, Target } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
@@ -39,6 +39,7 @@ const builderItems = [
   { title: "Form Builder", url: "/form-builder", icon: Box },
   { title: "Workflow Builder", url: "/workflow-builder", icon: Zap },
   { title: "Analytics Dashboard", url: "/reporting-dashboard", icon: BarChart3 },
+  { title: "CRM Roadmap", url: "/crm-roadmap", icon: Target },
 ];
 
 const marketingItems = [
