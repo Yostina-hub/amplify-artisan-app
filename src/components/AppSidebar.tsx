@@ -71,6 +71,7 @@ const adminBusinessItems = [
 
 const adminConfigItems = [
   { title: "Email Settings", url: "/admin/email-settings", icon: Mail },
+  { title: "Social Auth Settings", url: "/admin/social-auth", icon: Key },
   { title: "Trial Settings", url: "/admin/trial-settings", icon: Settings },
   { title: "System Settings", url: "/admin/settings", icon: Cog },
 ];
