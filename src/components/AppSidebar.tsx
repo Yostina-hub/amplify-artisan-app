@@ -51,6 +51,7 @@ const builderItems = [
     { title: "Products", url: "/products", icon: ShoppingCart },
     { title: "Quotes", url: "/quotes", icon: FileSpreadsheet },
     { title: "Invoices", url: "/invoices", icon: Receipt },
+    { title: "Reports", url: "/reports", icon: BarChart3 },
   ];
 
 const marketingItems = [
