@@ -70,6 +70,7 @@ import Leads from "./pages/Leads";
 import SalesPipeline from "./pages/SalesPipeline";
 import Activities from "./pages/Activities";
 import Products from "./pages/Products";
+import Quotes from "./pages/Quotes";
 
 const queryClient = new QueryClient();
 
@@ -146,6 +147,7 @@ const App = () => (
           <Route path="/pipeline" element={<ProtectedRoute><Layout><SalesPipeline /></Layout></ProtectedRoute>} />
           <Route path="/activities" element={<ProtectedRoute><Layout><Activities /></Layout></ProtectedRoute>} />
           <Route path="/products" element={<ProtectedRoute><Layout><Products /></Layout></ProtectedRoute>} />
+          <Route path="/quotes" element={<ProtectedRoute><Layout><Quotes /></Layout></ProtectedRoute>} />
             
             <Route path="/social-accounts" element={<ProtectedRoute><Layout><SocialMediaCredentials /></Layout></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
