@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { TrendingUp, Eye, MousePointerClick, Ban, Sparkles, AlertTriangle, Users, BarChart3, Heart, Share2, Bookmark, Video, Target, Award, MessageCircle, Twitter, Facebook, Instagram, Linkedin, Youtube } from "lucide-react";
+import { TrendingUp, Eye, MousePointerClick, Ban, Sparkles, AlertTriangle, Users, BarChart3, Heart, Share2, Bookmark, Video, Target, Award, MessageCircle, Twitter, Facebook, Instagram, Linkedin, Youtube, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -339,15 +339,41 @@ export default function ReachAnalytics() {
 
   const getPlatformIcon = (platform: string) => {
     const icons: Record<string, any> = {
-      twitter: Twitter, facebook: Facebook, instagram: Instagram,
-      linkedin: Linkedin, youtube: Youtube
+      twitter: Twitter,
+      facebook: Facebook,
+      instagram: Instagram,
+      linkedin: Linkedin,
+      youtube: Youtube,
+      telegram: Send,
     };
-    const Icon = icons[platform.toLowerCase()];
+    const Icon = icons[platform?.toLowerCase?.() || ''];
     return Icon ? <Icon className="h-5 w-5" /> : null;
   };
 
   const getMetricsForAccount = (accountId: string) => {
-    return accountMetrics.find(m => m.account_id === accountId);
+    const direct = accountMetrics.find(m => m.account_id === accountId);
+    if (direct) return direct;
+
+    // Fallback: derive metrics from posts when no account-level metrics are stored
+    const account = accounts.find(a => a.id === accountId);
+    if (!account) return undefined;
+
+    const postsForPlatform = posts.filter(p => p.platforms.includes(account.platform));
+    const posts_count = postsForPlatform.length;
+    const engagement_rate = posts_count > 0
+      ? postsForPlatform.reduce((sum, p) => sum + (p.engagement_rate || 0), 0) / posts_count
+      : 0;
+
+    const derived: Metric = {
+      id: `derived-${accountId}`,
+      account_id: accountId,
+      followers_count: 0, // Unknown without platform sync
+      posts_count,
+      engagement_rate,
+      last_synced_at: new Date().toISOString(),
+    } as Metric;
+
+    return derived;
   };
 
   const formatWatchTime = (seconds: number) => {
