@@ -38,3 +38,9 @@ verify_jwt = false
 
 [functions.schedule-automation]
 verify_jwt = false
+
+[functions.publish-to-platform]
+verify_jwt = true
+
+[functions.oauth-callback]
+verify_jwt = false

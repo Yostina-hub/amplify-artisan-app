@@ -90,6 +90,32 @@ export default function AIStudio() {
     });
   };
 
+  const publishMutation = useMutation({
+    mutationFn: async ({ contentId, platforms }: { contentId: string; platforms: string[] }) => {
+      const { data, error } = await supabase.functions.invoke('publish-to-platform', {
+        body: { contentId, platforms }
+      });
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['ai-generated-content'] });
+      const successCount = data.results.filter((r: any) => r.success).length;
+      toast({
+        title: "Published!",
+        description: `Successfully published to ${successCount} platform(s)`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Publishing failed",
+        description: error instanceof Error ? error.message : "Failed to publish content",
+        variant: "destructive",
+      });
+    },
+  });
+
   return (
     <Layout>
       <div className="container mx-auto p-6 space-y-6">
@@ -219,17 +245,36 @@ export default function AIStudio() {
                         <Card key={content.id} className="p-4">
                           <div className="flex items-start justify-between gap-2 mb-2">
                             <Badge variant="secondary">{content.platform}</Badge>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => copyToClipboard(content.generated_text, content.id)}
-                            >
-                              {copiedId === content.id ? (
-                                <Check className="h-4 w-4" />
-                              ) : (
-                                <Copy className="h-4 w-4" />
-                              )}
-                            </Button>
+                            <div className="flex gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => copyToClipboard(content.generated_text, content.id)}
+                              >
+                                {copiedId === content.id ? (
+                                  <Check className="h-4 w-4" />
+                                ) : (
+                                  <Copy className="h-4 w-4" />
+                                )}
+                              </Button>
+                              <Button
+                                variant="default"
+                                size="sm"
+                                onClick={() => publishMutation.mutate({ 
+                                  contentId: content.id, 
+                                  platforms: [content.platform] 
+                                })}
+                                disabled={publishMutation.isPending || content.status === 'published'}
+                              >
+                                {publishMutation.isPending ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : content.status === 'published' ? (
+                                  "Published"
+                                ) : (
+                                  "Publish"
+                                )}
+                              </Button>
+                            </div>
                           </div>
                           <p className="text-sm whitespace-pre-wrap">{content.generated_text}</p>
                           {content.hashtags && Array.isArray(content.hashtags) && content.hashtags.length > 0 && (

@@ -42,7 +42,7 @@ const marketingItems = [
 const monitoringItems = [
   { title: "Brand Monitoring", url: "/brand-monitoring", icon: MessageCircle },
   { title: "Social Listening", url: "/social-listening", icon: Radio },
-  { title: "Social Accounts", url: "/social-accounts", icon: Link2 },
+  { title: "Social Accounts", url: "/social-media-credentials", icon: Link2 },
 ];
 
 const agentItems = [
