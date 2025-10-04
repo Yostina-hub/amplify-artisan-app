@@ -95,7 +95,7 @@ export default function CompanyDashboard() {
         supabase.from('social_media_posts').select('*', { count: 'exact', head: true }).eq('company_id', profile.company_id).eq('status', 'scheduled'),
         supabase.from('ad_campaigns').select('*', { count: 'exact' }).eq('company_id', profile.company_id),
         supabase.from('influencers').select('*', { count: 'exact', head: true }).eq('company_id', profile.company_id),
-        supabase.from('social_media_accounts').select('platform, is_active, id').eq('company_id', profile.company_id),
+        supabase.from('company_platform_configs').select('platform_id, is_active, social_platforms(name)').eq('company_id', profile.company_id).eq('is_active', true),
         supabase.from('audit_log_view').select('*').eq('company_id', profile.company_id).order('created_at', { ascending: false }).limit(6),
         supabase.from('social_media_mentions').select('country, continent, account_id'),
         supabase.from('social_media_comments').select('country, continent, account_id'),
@@ -149,17 +149,17 @@ export default function CompanyDashboard() {
 
       const connectedPlatforms = allPlatforms.map(platform => ({
         ...platform,
-        status: accounts?.some(a => a.platform.toLowerCase() === platform.name.toLowerCase() && a.is_active) 
+        status: accounts?.some(config => 
+          (config.social_platforms as any)?.name?.toLowerCase() === platform.name.toLowerCase()
+        ) 
           ? "Connected" 
           : "Not Connected",
       }));
 
-      // Calculate location metrics - filter by company's accounts
-      const accountIds = accounts?.map(a => a.id) || [];
+      // Calculate location metrics
       const locationMap = new Map<string, LocationMetric>();
       
-      // Filter mentions/comments for this company's accounts only
-      mentions?.filter(m => accountIds.includes(m.account_id)).forEach(m => {
+      mentions?.forEach(m => {
         if (m.country && m.continent) {
           const key = `${m.country}-${m.continent}`;
           const existing = locationMap.get(key) || { country: m.country, continent: m.continent, mentions: 0, comments: 0, impressions: 0, engagement: 0 };
@@ -168,7 +168,7 @@ export default function CompanyDashboard() {
         }
       });
 
-      comments?.filter(c => accountIds.includes(c.account_id)).forEach(c => {
+      comments?.forEach(c => {
         if (c.country && c.continent) {
           const key = `${c.country}-${c.continent}`;
           const existing = locationMap.get(key) || { country: c.country, continent: c.continent, mentions: 0, comments: 0, impressions: 0, engagement: 0 };

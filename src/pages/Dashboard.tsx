@@ -103,11 +103,12 @@ export default function Dashboard() {
         .select('*', { count: 'exact', head: true })
         .eq('company_id', profile.company_id);
 
-      // Get social accounts
-      const { data: accounts } = await supabase
-        .from('social_media_accounts')
-        .select('platform, is_active')
-        .eq('company_id', profile.company_id);
+      // Get configured platforms
+      const { data: platformConfigs } = await supabase
+        .from('company_platform_configs')
+        .select('platform_id, is_active, social_platforms(name)')
+        .eq('company_id', profile.company_id)
+        .eq('is_active', true);
 
       // Get recent audit logs
       const { data: auditLogs } = await supabase
@@ -164,7 +165,9 @@ export default function Dashboard() {
 
       const connectedPlatforms = allPlatforms.map(platform => ({
         ...platform,
-        status: accounts?.some(a => a.platform.toLowerCase() === platform.name.toLowerCase() && a.is_active) 
+        status: platformConfigs?.some(config => 
+          (config.social_platforms as any)?.name?.toLowerCase() === platform.name.toLowerCase()
+        ) 
           ? "Connected" 
           : "Not Connected",
       }));
