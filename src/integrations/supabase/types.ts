@@ -1052,6 +1052,115 @@ export type Database = {
           },
         ]
       }
+      commission_assignments: {
+        Row: {
+          assigned_by: string
+          commission_plan_id: string
+          created_at: string
+          end_date: string | null
+          id: string
+          notes: string | null
+          start_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_by: string
+          commission_plan_id: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          start_date?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_by?: string
+          commission_plan_id?: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          start_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commission_assignments_commission_plan_id_fkey"
+            columns: ["commission_plan_id"]
+            isOneToOne: false
+            referencedRelation: "commission_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commission_plans: {
+        Row: {
+          applies_to: string | null
+          base_rate: number | null
+          company_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          effective_from: string
+          effective_to: string | null
+          id: string
+          is_active: boolean | null
+          metadata: Json | null
+          name: string
+          plan_type: string | null
+          product_ids: string[] | null
+          tiers: Json | null
+          updated_at: string
+        }
+        Insert: {
+          applies_to?: string | null
+          base_rate?: number | null
+          company_id: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          name: string
+          plan_type?: string | null
+          product_ids?: string[] | null
+          tiers?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          applies_to?: string | null
+          base_rate?: number | null
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          name?: string
+          plan_type?: string | null
+          product_ids?: string[] | null
+          tiers?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commission_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           address: string | null
@@ -3173,6 +3282,158 @@ export type Database = {
           },
         ]
       }
+      sales_performance: {
+        Row: {
+          activities_completed: number | null
+          average_deal_size: number | null
+          calls_made: number | null
+          commission_earned: number | null
+          company_id: string
+          created_at: string
+          deals_closed: number | null
+          deals_lost: number | null
+          deals_won: number | null
+          emails_sent: number | null
+          id: string
+          leads_converted: number | null
+          leads_generated: number | null
+          meetings_held: number | null
+          metadata: Json | null
+          period_end: string
+          period_start: string
+          period_type: string
+          pipeline_value: number | null
+          quota_achieved: number | null
+          quota_assigned: number | null
+          revenue_generated: number | null
+          updated_at: string
+          user_id: string
+          win_rate: number | null
+        }
+        Insert: {
+          activities_completed?: number | null
+          average_deal_size?: number | null
+          calls_made?: number | null
+          commission_earned?: number | null
+          company_id: string
+          created_at?: string
+          deals_closed?: number | null
+          deals_lost?: number | null
+          deals_won?: number | null
+          emails_sent?: number | null
+          id?: string
+          leads_converted?: number | null
+          leads_generated?: number | null
+          meetings_held?: number | null
+          metadata?: Json | null
+          period_end: string
+          period_start: string
+          period_type: string
+          pipeline_value?: number | null
+          quota_achieved?: number | null
+          quota_assigned?: number | null
+          revenue_generated?: number | null
+          updated_at?: string
+          user_id: string
+          win_rate?: number | null
+        }
+        Update: {
+          activities_completed?: number | null
+          average_deal_size?: number | null
+          calls_made?: number | null
+          commission_earned?: number | null
+          company_id?: string
+          created_at?: string
+          deals_closed?: number | null
+          deals_lost?: number | null
+          deals_won?: number | null
+          emails_sent?: number | null
+          id?: string
+          leads_converted?: number | null
+          leads_generated?: number | null
+          meetings_held?: number | null
+          metadata?: Json | null
+          period_end?: string
+          period_start?: string
+          period_type?: string
+          pipeline_value?: number | null
+          quota_achieved?: number | null
+          quota_assigned?: number | null
+          revenue_generated?: number | null
+          updated_at?: string
+          user_id?: string
+          win_rate?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_performance_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_teams: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          manager_id: string | null
+          metadata: Json | null
+          name: string
+          parent_team_id: string | null
+          team_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          manager_id?: string | null
+          metadata?: Json | null
+          name: string
+          parent_team_id?: string | null
+          team_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          manager_id?: string | null
+          metadata?: Json | null
+          name?: string
+          parent_team_id?: string | null
+          team_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_teams_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_teams_parent_team_id_fkey"
+            columns: ["parent_team_id"]
+            isOneToOne: false
+            referencedRelation: "sales_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       security_audit_log: {
         Row: {
           action: string
@@ -3818,6 +4079,195 @@ export type Database = {
             columns: ["pricing_plan_id"]
             isOneToOne: false
             referencedRelation: "pricing_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_members: {
+        Row: {
+          added_by: string
+          commission_rate: number | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          join_date: string
+          leave_date: string | null
+          notes: string | null
+          quota: number | null
+          role: string | null
+          team_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          added_by: string
+          commission_rate?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          join_date?: string
+          leave_date?: string | null
+          notes?: string | null
+          quota?: number | null
+          role?: string | null
+          team_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          added_by?: string
+          commission_rate?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          join_date?: string
+          leave_date?: string | null
+          notes?: string | null
+          quota?: number | null
+          role?: string | null
+          team_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "sales_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      territories: {
+        Row: {
+          account_size_range: string | null
+          annual_revenue_max: number | null
+          annual_revenue_min: number | null
+          city: string | null
+          company_id: string
+          country: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          industry_focus: string[] | null
+          is_active: boolean | null
+          metadata: Json | null
+          name: string
+          postal_codes: string[] | null
+          region: string | null
+          state: string | null
+          target_quota: number | null
+          territory_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_size_range?: string | null
+          annual_revenue_max?: number | null
+          annual_revenue_min?: number | null
+          city?: string | null
+          company_id: string
+          country?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          industry_focus?: string[] | null
+          is_active?: boolean | null
+          metadata?: Json | null
+          name: string
+          postal_codes?: string[] | null
+          region?: string | null
+          state?: string | null
+          target_quota?: number | null
+          territory_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_size_range?: string | null
+          annual_revenue_max?: number | null
+          annual_revenue_min?: number | null
+          city?: string | null
+          company_id?: string
+          country?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          industry_focus?: string[] | null
+          is_active?: boolean | null
+          metadata?: Json | null
+          name?: string
+          postal_codes?: string[] | null
+          region?: string | null
+          state?: string | null
+          target_quota?: number | null
+          territory_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "territories_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      territory_assignments: {
+        Row: {
+          assigned_by: string
+          commission_rate: number | null
+          created_at: string
+          end_date: string | null
+          id: string
+          is_primary: boolean | null
+          notes: string | null
+          quota: number | null
+          role: string | null
+          start_date: string
+          territory_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_by: string
+          commission_rate?: number | null
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_primary?: boolean | null
+          notes?: string | null
+          quota?: number | null
+          role?: string | null
+          start_date?: string
+          territory_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_by?: string
+          commission_rate?: number | null
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_primary?: boolean | null
+          notes?: string | null
+          quota?: number | null
+          role?: string | null
+          start_date?: string
+          territory_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "territory_assignments_territory_id_fkey"
+            columns: ["territory_id"]
+            isOneToOne: false
+            referencedRelation: "territories"
             referencedColumns: ["id"]
           },
         ]

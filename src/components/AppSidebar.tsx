@@ -52,6 +52,7 @@ const builderItems = [
     { title: "Quotes", url: "/quotes", icon: FileSpreadsheet },
     { title: "Invoices", url: "/invoices", icon: Receipt },
     { title: "Payments", url: "/payments", icon: Banknote },
+    { title: "Territory Management", url: "/territory-management", icon: Target },
     { title: "Reports", url: "/reports", icon: BarChart3 },
     { title: "Email Marketing", url: "/email-marketing", icon: Mail },
     { title: "Documents", url: "/documents", icon: FileText },
