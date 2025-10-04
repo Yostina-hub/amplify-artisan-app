@@ -293,6 +293,23 @@ export default function PlatformConfigs() {
         {/* TikTok Configuration */}
         {platformName === 'tiktok' && (
           <>
+            <div className="space-y-3 p-4 bg-muted/50 rounded-lg border">
+              <h4 className="font-semibold text-sm flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                How to get your Access Token
+              </h4>
+              <ol className="text-xs space-y-2 list-decimal list-inside text-muted-foreground">
+                <li>Go to <a href="https://developers.tiktok.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">TikTok Developer Portal</a></li>
+                <li>Create or select your app to get Client Key & Client Secret</li>
+                <li>Build OAuth authorization URL with your Client Key</li>
+                <li>Authorize and exchange code for access token</li>
+                <li>Paste the access_token below</li>
+              </ol>
+              <p className="text-xs text-muted-foreground">
+                📘 <a href="https://developers.tiktok.com/doc/login-kit-web/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">TikTok OAuth Documentation</a>
+              </p>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="access_token">Access Token *</Label>
               <div className="flex gap-2">
