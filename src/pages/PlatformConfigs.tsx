@@ -251,6 +251,30 @@ export default function PlatformConfigs() {
         {/* Telegram Configuration */}
         {platformName === 'telegram' && (
           <>
+            <div className="space-y-3 p-4 bg-muted/50 rounded-lg border">
+              <h4 className="font-semibold text-sm flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                How to set up Telegram Bot
+              </h4>
+              <ol className="text-xs space-y-2 list-decimal list-inside text-muted-foreground">
+                <li>Open Telegram and search for <span className="font-mono text-foreground">@BotFather</span></li>
+                <li>Send <span className="font-mono text-foreground">/newbot</span> command to create a new bot</li>
+                <li>Choose a name and username for your bot</li>
+                <li>Copy the <span className="font-semibold">Bot Token</span> provided by BotFather</li>
+                <li>Create or use an existing channel</li>
+                <li>Add your bot as an administrator to the channel</li>
+                <li>Get channel ID using <span className="font-mono text-foreground">@userinfobot</span> or forward a message to <span className="font-mono text-foreground">@getidsbot</span></li>
+              </ol>
+              <div className="pt-2 border-t space-y-1">
+                <p className="text-xs font-medium">📌 Important Notes:</p>
+                <ul className="text-xs space-y-1 list-disc list-inside text-muted-foreground ml-2">
+                  <li>Bot must be admin in channel to post messages</li>
+                  <li>Channel ID starts with <span className="font-mono">-100</span> for supergroups/channels</li>
+                  <li>Public channels can use <span className="font-mono">@username</span> format</li>
+                </ul>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="api_key">Bot Token *</Label>
               <div className="flex gap-2">
@@ -271,7 +295,7 @@ export default function PlatformConfigs() {
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Get from @BotFather on Telegram
+                Get this token from @BotFather on Telegram
               </p>
             </div>
 
@@ -284,7 +308,7 @@ export default function PlatformConfigs() {
                 placeholder="@yourchannel or -1001234567890"
               />
               <p className="text-xs text-muted-foreground">
-                Your channel username (e.g., @mychannel) or ID
+                Channel username (e.g., @mychannel) or numeric ID (e.g., -1001234567890)
               </p>
             </div>
           </>
@@ -296,18 +320,39 @@ export default function PlatformConfigs() {
             <div className="space-y-3 p-4 bg-muted/50 rounded-lg border">
               <h4 className="font-semibold text-sm flex items-center gap-2">
                 <AlertCircle className="h-4 w-4" />
-                How to get your Access Token
+                How to get your TikTok Access Token
               </h4>
               <ol className="text-xs space-y-2 list-decimal list-inside text-muted-foreground">
-                <li>Go to <a href="https://developers.tiktok.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">TikTok Developer Portal</a></li>
-                <li>Create or select your app to get Client Key & Client Secret</li>
-                <li>Build OAuth authorization URL with your Client Key</li>
-                <li>Authorize and exchange code for access token</li>
-                <li>Paste the access_token below</li>
+                <li>Visit <a href="https://developers.tiktok.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">TikTok Developer Portal</a> and sign in</li>
+                <li>Create a new app or select an existing one</li>
+                <li>In App Dashboard, get your <span className="font-semibold">Client Key</span> and <span className="font-semibold">Client Secret</span></li>
+                <li>Add required scopes: <span className="font-mono text-foreground">user.info.basic</span>, <span className="font-mono text-foreground">video.publish</span></li>
+                <li>Set your redirect URI in app settings</li>
+                <li>Build OAuth URL: 
+                  <code className="block mt-1 p-2 bg-background rounded text-[10px] overflow-x-auto">
+                    https://www.tiktok.com/v2/auth/authorize/?client_key=YOUR_KEY&scope=user.info.basic,video.publish&response_type=code&redirect_uri=YOUR_URI
+                  </code>
+                </li>
+                <li>User authorizes → receive authorization code in redirect</li>
+                <li>Exchange code for access token via POST to:
+                  <code className="block mt-1 p-2 bg-background rounded text-[10px] overflow-x-auto">
+                    https://open.tiktokapis.com/v2/oauth/token/
+                  </code>
+                </li>
+                <li>Copy the <span className="font-semibold">access_token</span> from response</li>
               </ol>
-              <p className="text-xs text-muted-foreground">
-                📘 <a href="https://developers.tiktok.com/doc/login-kit-web/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">TikTok OAuth Documentation</a>
-              </p>
+              <div className="pt-2 border-t space-y-1">
+                <p className="text-xs font-medium">📌 Important Requirements:</p>
+                <ul className="text-xs space-y-1 list-disc list-inside text-muted-foreground ml-2">
+                  <li>App must have valid Terms of Service and Privacy Policy URLs</li>
+                  <li>App must be approved by TikTok (review process required)</li>
+                  <li>Access tokens expire - implement refresh token flow</li>
+                  <li>Videos must meet TikTok content guidelines</li>
+                </ul>
+                <p className="text-xs text-muted-foreground pt-2">
+                  📘 <a href="https://developers.tiktok.com/doc/content-posting-api-get-started" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Full Documentation</a>
+                </p>
+              </div>
             </div>
 
             <div className="space-y-2">
