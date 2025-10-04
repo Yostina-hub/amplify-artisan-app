@@ -34,6 +34,10 @@ const aiItems = [
   { title: "AI Analytics", url: "/ai-analytics", icon: LineChart },
 ];
 
+const builderItems = [
+  { title: "Module Builder", url: "/module-builder", icon: Database },
+];
+
 const marketingItems = [
   { title: "Ad Campaigns", url: "/ad-campaigns", icon: Megaphone },
   { title: "Influencer Marketing", url: "/influencer-marketing", icon: Users },
@@ -226,6 +230,45 @@ export function AppSidebar() {
               <SidebarGroupContent>
                 <SidebarMenu>
                   {aiItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink
+                          to={item.url}
+                          className={({ isActive }) =>
+                            isActive
+                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                              : "hover:bg-sidebar-accent/50"
+                          }
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
+
+        {/* Enterprise Builder Section - Collapsible */}
+        <Collapsible open={true} onOpenChange={() => {}}>
+          <SidebarGroup>
+            {!isCollapsed && (
+              <CollapsibleTrigger className="w-full" asChild>
+                <button className="w-full">
+                  <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
+                    <span className="font-medium">Enterprise Builder</span>
+                    <ChevronDown className="h-4 w-4 transition-transform duration-200 rotate-180" />
+                  </SidebarGroupLabel>
+                </button>
+              </CollapsibleTrigger>
+            )}
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {builderItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
                         <NavLink

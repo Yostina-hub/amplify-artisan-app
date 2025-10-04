@@ -59,6 +59,7 @@ import SocialInbox from "./pages/SocialInbox";
 import SocialIntelligence from "./pages/SocialIntelligence";
 import Automation from "./pages/Automation";
 import AIAnalytics from "./pages/AIAnalytics";
+import ModuleBuilder from "./pages/ModuleBuilder";
 
 const queryClient = new QueryClient();
 
@@ -122,6 +123,9 @@ const App = () => (
           <Route path="/automation" element={<ProtectedRoute><Layout><Automation /></Layout></ProtectedRoute>} />
           <Route path="/ai-analytics" element={<ProtectedRoute><Layout><AIAnalytics /></Layout></ProtectedRoute>} />
           <Route path="/social-media-credentials" element={<ProtectedRoute><Layout><SocialMediaCredentials /></Layout></ProtectedRoute>} />
+          
+          {/* Enterprise Builder */}
+          <Route path="/module-builder" element={<ProtectedRoute><Layout><ModuleBuilder /></Layout></ProtectedRoute>} />
             
             <Route path="/social-accounts" element={<ProtectedRoute><Layout><SocialMediaCredentials /></Layout></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />

@@ -812,6 +812,187 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_module_data: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          created_by: string
+          data: Json
+          id: string
+          module_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          created_by: string
+          data?: Json
+          id?: string
+          module_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          created_by?: string
+          data?: Json
+          id?: string
+          module_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_module_data_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "custom_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_module_fields: {
+        Row: {
+          created_at: string | null
+          default_value: string | null
+          display_name: string
+          field_name: string
+          field_options: Json | null
+          field_order: number | null
+          field_type: string
+          help_text: string | null
+          id: string
+          is_required: boolean | null
+          is_unique: boolean | null
+          module_id: string
+          updated_at: string | null
+          validation_rules: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          default_value?: string | null
+          display_name: string
+          field_name: string
+          field_options?: Json | null
+          field_order?: number | null
+          field_type: string
+          help_text?: string | null
+          id?: string
+          is_required?: boolean | null
+          is_unique?: boolean | null
+          module_id: string
+          updated_at?: string | null
+          validation_rules?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          default_value?: string | null
+          display_name?: string
+          field_name?: string
+          field_options?: Json | null
+          field_order?: number | null
+          field_type?: string
+          help_text?: string | null
+          id?: string
+          is_required?: boolean | null
+          is_unique?: boolean | null
+          module_id?: string
+          updated_at?: string | null
+          validation_rules?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_module_fields_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "custom_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_module_relationships: {
+        Row: {
+          created_at: string | null
+          id: string
+          relationship_name: string
+          relationship_type: string
+          source_module_id: string
+          target_module_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          relationship_name: string
+          relationship_type: string
+          source_module_id: string
+          target_module_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          relationship_name?: string
+          relationship_type?: string
+          source_module_id?: string
+          target_module_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_module_relationships_source_module_id_fkey"
+            columns: ["source_module_id"]
+            isOneToOne: false
+            referencedRelation: "custom_modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_module_relationships_target_module_id_fkey"
+            columns: ["target_module_id"]
+            isOneToOne: false
+            referencedRelation: "custom_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_modules: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          created_by: string
+          description: string | null
+          display_name: string
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          metadata: Json | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          created_by: string
+          description?: string | null
+          display_name: string
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          display_name?: string
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       email_configurations: {
         Row: {
           company_id: string | null
