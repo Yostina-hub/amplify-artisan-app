@@ -566,13 +566,16 @@ export default function ReachAnalytics() {
                 <SelectTrigger className="w-[180px]">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background z-50">
                   <SelectItem value="all">All Platforms</SelectItem>
-                  <SelectItem value="Twitter">Twitter</SelectItem>
-                  <SelectItem value="Instagram">Instagram</SelectItem>
-                  <SelectItem value="Facebook">Facebook</SelectItem>
-                  <SelectItem value="LinkedIn">LinkedIn</SelectItem>
-                  <SelectItem value="YouTube">YouTube</SelectItem>
+                  <SelectItem value="telegram">Telegram</SelectItem>
+                  <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                  <SelectItem value="twitter">Twitter</SelectItem>
+                  <SelectItem value="instagram">Instagram</SelectItem>
+                  <SelectItem value="facebook">Facebook</SelectItem>
+                  <SelectItem value="linkedin">LinkedIn</SelectItem>
+                  <SelectItem value="youtube">YouTube</SelectItem>
+                  <SelectItem value="tiktok">TikTok</SelectItem>
                 </SelectContent>
               </Select>
             </div>
