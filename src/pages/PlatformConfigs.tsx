@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { AlertCircle, CheckCircle2, Settings, Send, MessageCircle, Loader2, Eye, EyeOff } from "lucide-react";
+import { AlertCircle, CheckCircle2, Settings, Send, MessageCircle, Loader2, Eye, EyeOff, Facebook, Linkedin, Instagram, Twitter, Youtube, Share2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -54,6 +54,13 @@ interface PlatformConfig {
 const platformIcons: Record<string, any> = {
   telegram: Send,
   tiktok: MessageCircle,
+  facebook: Facebook,
+  instagram: Instagram,
+  linkedin: Linkedin,
+  twitter: Twitter,
+  youtube: Youtube,
+  whatsapp: MessageCircle,
+  pinterest: Share2,
 };
 
 export default function PlatformConfigs() {
@@ -166,9 +173,20 @@ export default function PlatformConfigs() {
         }
       }
       
-      if (platformName === 'tiktok') {
+      if (platformName === 'tiktok' || platformName === 'facebook' || platformName === 'instagram' || 
+          platformName === 'linkedin' || platformName === 'twitter' || platformName === 'youtube' ||
+          platformName === 'pinterest') {
         if (!formData.access_token?.trim()) {
-          throw new Error("Access Token is required for TikTok");
+          throw new Error(`Access Token is required for ${selectedPlatform.display_name}`);
+        }
+      }
+
+      if (platformName === 'whatsapp') {
+        if (!formData.api_key?.trim()) {
+          throw new Error("WhatsApp Business API Token is required");
+        }
+        if (!formData.config?.phone_number_id?.trim()) {
+          throw new Error("Phone Number ID is required for WhatsApp");
         }
       }
 
@@ -397,6 +415,481 @@ export default function PlatformConfigs() {
                   <SelectItem value="SELF_ONLY">Private</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+          </>
+        )}
+
+        {/* Facebook Configuration */}
+        {platformName === 'facebook' && (
+          <>
+            <div className="space-y-3 p-4 bg-muted/50 rounded-lg border">
+              <h4 className="font-semibold text-sm flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                How to set up Facebook API
+              </h4>
+              <ol className="text-xs space-y-2 list-decimal list-inside text-muted-foreground">
+                <li>Visit <a href="https://developers.facebook.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">Facebook Developers</a> and create an app</li>
+                <li>Add <span className="font-semibold">Facebook Login</span> and <span className="font-semibold">Pages API</span> products</li>
+                <li>In App Settings, note your <span className="font-semibold">App ID</span> and <span className="font-semibold">App Secret</span></li>
+                <li>Configure OAuth redirect URIs</li>
+                <li>Request permissions: <span className="font-mono text-foreground">pages_manage_posts</span>, <span className="font-mono text-foreground">pages_read_engagement</span></li>
+                <li>Complete App Review to go live</li>
+                <li>Generate long-lived Page Access Token via Graph API</li>
+              </ol>
+              <div className="pt-2 border-t space-y-1">
+                <p className="text-xs font-medium">📌 Important Notes:</p>
+                <ul className="text-xs space-y-1 list-disc list-inside text-muted-foreground ml-2">
+                  <li>App must pass Facebook App Review for production</li>
+                  <li>Use long-lived tokens (60 days) for posting</li>
+                  <li>Each Page requires separate access token</li>
+                </ul>
+                <p className="text-xs text-muted-foreground pt-2">
+                  📘 <a href="https://developers.facebook.com/docs/pages-api" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Facebook Pages API Docs</a>
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="access_token">Page Access Token *</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="access_token"
+                  type={showSecrets['access_token'] ? 'text' : 'password'}
+                  value={formData.access_token || ''}
+                  onChange={(e) => setFormData({ ...formData, access_token: e.target.value })}
+                  placeholder="EAAG..."
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => toggleShowSecret('access_token')}
+                >
+                  {showSecrets['access_token'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="channel_id">Page ID (Optional)</Label>
+              <Input
+                id="channel_id"
+                value={formData.channel_id || ''}
+                onChange={(e) => setFormData({ ...formData, channel_id: e.target.value })}
+                placeholder="Your Facebook Page ID"
+              />
+            </div>
+          </>
+        )}
+
+        {/* Instagram Configuration */}
+        {platformName === 'instagram' && (
+          <>
+            <div className="space-y-3 p-4 bg-muted/50 rounded-lg border">
+              <h4 className="font-semibold text-sm flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                How to set up Instagram API
+              </h4>
+              <ol className="text-xs space-y-2 list-decimal list-inside text-muted-foreground">
+                <li>Create a Facebook App at <a href="https://developers.facebook.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">Facebook Developers</a></li>
+                <li>Add <span className="font-semibold">Instagram Basic Display</span> or <span className="font-semibold">Instagram Graph API</span> product</li>
+                <li>Connect your Instagram Business Account to Facebook Page</li>
+                <li>Request permissions: <span className="font-mono text-foreground">instagram_basic</span>, <span className="font-mono text-foreground">instagram_content_publish</span></li>
+                <li>Generate access token via OAuth flow</li>
+                <li>Exchange for long-lived token (60 days)</li>
+              </ol>
+              <div className="pt-2 border-t space-y-1">
+                <p className="text-xs font-medium">📌 Important Notes:</p>
+                <ul className="text-xs space-y-1 list-disc list-inside text-muted-foreground ml-2">
+                  <li>Must be Instagram Business or Creator Account</li>
+                  <li>Account must be linked to Facebook Page</li>
+                  <li>Videos under 60 seconds, images up to 8MB</li>
+                </ul>
+                <p className="text-xs text-muted-foreground pt-2">
+                  📘 <a href="https://developers.facebook.com/docs/instagram-api" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Instagram Graph API Docs</a>
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="access_token">Access Token *</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="access_token"
+                  type={showSecrets['access_token'] ? 'text' : 'password'}
+                  value={formData.access_token || ''}
+                  onChange={(e) => setFormData({ ...formData, access_token: e.target.value })}
+                  placeholder="IGQ..."
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => toggleShowSecret('access_token')}
+                >
+                  {showSecrets['access_token'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="channel_id">Instagram Business Account ID (Optional)</Label>
+              <Input
+                id="channel_id"
+                value={formData.channel_id || ''}
+                onChange={(e) => setFormData({ ...formData, channel_id: e.target.value })}
+                placeholder="Instagram Account ID"
+              />
+            </div>
+          </>
+        )}
+
+        {/* LinkedIn Configuration */}
+        {platformName === 'linkedin' && (
+          <>
+            <div className="space-y-3 p-4 bg-muted/50 rounded-lg border">
+              <h4 className="font-semibold text-sm flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                How to set up LinkedIn API
+              </h4>
+              <ol className="text-xs space-y-2 list-decimal list-inside text-muted-foreground">
+                <li>Create an app at <a href="https://www.linkedin.com/developers/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">LinkedIn Developers</a></li>
+                <li>Request access to <span className="font-semibold">Share on LinkedIn</span> and <span className="font-semibold">Sign In with LinkedIn</span></li>
+                <li>Configure OAuth 2.0 redirect URLs</li>
+                <li>Note your <span className="font-semibold">Client ID</span> and <span className="font-semibold">Client Secret</span></li>
+                <li>Request scopes: <span className="font-mono text-foreground">w_member_social</span>, <span className="font-mono text-foreground">r_basicprofile</span></li>
+                <li>Complete OAuth flow to get access token</li>
+              </ol>
+              <div className="pt-2 border-t space-y-1">
+                <p className="text-xs font-medium">📌 Important Notes:</p>
+                <ul className="text-xs space-y-1 list-disc list-inside text-muted-foreground ml-2">
+                  <li>Tokens expire after 60 days - implement refresh flow</li>
+                  <li>Company pages require Organization permissions</li>
+                  <li>UGC posts for personal profiles</li>
+                </ul>
+                <p className="text-xs text-muted-foreground pt-2">
+                  📘 <a href="https://learn.microsoft.com/en-us/linkedin/marketing/integrations/community-management/shares/share-api" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">LinkedIn Share API Docs</a>
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="access_token">Access Token *</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="access_token"
+                  type={showSecrets['access_token'] ? 'text' : 'password'}
+                  value={formData.access_token || ''}
+                  onChange={(e) => setFormData({ ...formData, access_token: e.target.value })}
+                  placeholder="AQV..."
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => toggleShowSecret('access_token')}
+                >
+                  {showSecrets['access_token'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Twitter/X Configuration */}
+        {platformName === 'twitter' && (
+          <>
+            <div className="space-y-3 p-4 bg-muted/50 rounded-lg border">
+              <h4 className="font-semibold text-sm flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                How to set up Twitter/X API
+              </h4>
+              <ol className="text-xs space-y-2 list-decimal list-inside text-muted-foreground">
+                <li>Apply for API access at <a href="https://developer.twitter.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">Twitter Developer Portal</a></li>
+                <li>Create a new Project and App</li>
+                <li>Get your API credentials: <span className="font-semibold">API Key</span>, <span className="font-semibold">API Secret</span>, <span className="font-semibold">Access Token</span>, <span className="font-semibold">Access Token Secret</span></li>
+                <li>Set app permissions to <span className="font-semibold">Read and Write</span></li>
+                <li>For OAuth 2.0, configure callback URLs</li>
+              </ol>
+              <div className="pt-2 border-t space-y-1">
+                <p className="text-xs font-medium">📌 Important Notes:</p>
+                <ul className="text-xs space-y-1 list-disc list-inside text-muted-foreground ml-2">
+                  <li>Free tier has strict rate limits</li>
+                  <li>Elevated or Premium access may be required</li>
+                  <li>OAuth 1.0a or OAuth 2.0 supported</li>
+                </ul>
+                <p className="text-xs text-muted-foreground pt-2">
+                  📘 <a href="https://developer.twitter.com/en/docs/twitter-api" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Twitter API v2 Docs</a>
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="access_token">Access Token *</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="access_token"
+                  type={showSecrets['access_token'] ? 'text' : 'password'}
+                  value={formData.access_token || ''}
+                  onChange={(e) => setFormData({ ...formData, access_token: e.target.value })}
+                  placeholder="Access Token"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => toggleShowSecret('access_token')}
+                >
+                  {showSecrets['access_token'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="api_secret">Access Token Secret</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="api_secret"
+                  type={showSecrets['api_secret'] ? 'text' : 'password'}
+                  value={formData.api_secret || ''}
+                  onChange={(e) => setFormData({ ...formData, api_secret: e.target.value })}
+                  placeholder="Token Secret (for OAuth 1.0a)"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => toggleShowSecret('api_secret')}
+                >
+                  {showSecrets['api_secret'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* YouTube Configuration */}
+        {platformName === 'youtube' && (
+          <>
+            <div className="space-y-3 p-4 bg-muted/50 rounded-lg border">
+              <h4 className="font-semibold text-sm flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                How to set up YouTube API
+              </h4>
+              <ol className="text-xs space-y-2 list-decimal list-inside text-muted-foreground">
+                <li>Go to <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">Google Cloud Console</a></li>
+                <li>Create a new project or select existing</li>
+                <li>Enable <span className="font-semibold">YouTube Data API v3</span></li>
+                <li>Create OAuth 2.0 credentials (Client ID & Secret)</li>
+                <li>Configure authorized redirect URIs</li>
+                <li>Request scopes: <span className="font-mono text-foreground">youtube.upload</span>, <span className="font-mono text-foreground">youtube.readonly</span></li>
+                <li>Complete OAuth flow to get access token and refresh token</li>
+              </ol>
+              <div className="pt-2 border-t space-y-1">
+                <p className="text-xs font-medium">📌 Important Notes:</p>
+                <ul className="text-xs space-y-1 list-disc list-inside text-muted-foreground ml-2">
+                  <li>Videos uploaded as unlisted/private first, then published</li>
+                  <li>Daily quota: 10,000 units (1 upload = 1,600 units)</li>
+                  <li>Access tokens expire after 1 hour - use refresh tokens</li>
+                </ul>
+                <p className="text-xs text-muted-foreground pt-2">
+                  📘 <a href="https://developers.google.com/youtube/v3" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">YouTube Data API Docs</a>
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="access_token">Access Token *</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="access_token"
+                  type={showSecrets['access_token'] ? 'text' : 'password'}
+                  value={formData.access_token || ''}
+                  onChange={(e) => setFormData({ ...formData, access_token: e.target.value })}
+                  placeholder="ya29..."
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => toggleShowSecret('access_token')}
+                >
+                  {showSecrets['access_token'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="refresh_token">Refresh Token (Recommended)</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="refresh_token"
+                  type={showSecrets['refresh_token'] ? 'text' : 'password'}
+                  value={formData.config?.refresh_token || ''}
+                  onChange={(e) => setFormData({ 
+                    ...formData, 
+                    config: { ...formData.config, refresh_token: e.target.value }
+                  })}
+                  placeholder="1//..."
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => toggleShowSecret('refresh_token')}
+                >
+                  {showSecrets['refresh_token'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* WhatsApp Configuration */}
+        {platformName === 'whatsapp' && (
+          <>
+            <div className="space-y-3 p-4 bg-muted/50 rounded-lg border">
+              <h4 className="font-semibold text-sm flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                How to set up WhatsApp Business API
+              </h4>
+              <ol className="text-xs space-y-2 list-decimal list-inside text-muted-foreground">
+                <li>Create a Meta Business Account at <a href="https://business.facebook.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">Meta Business</a></li>
+                <li>Set up WhatsApp Business Platform in Meta App Dashboard</li>
+                <li>Create or select a WhatsApp Business Account</li>
+                <li>Add a phone number and verify it</li>
+                <li>Generate <span className="font-semibold">System User Token</span> with <span className="font-mono text-foreground">whatsapp_business_messaging</span> permission</li>
+                <li>Get your <span className="font-semibold">Phone Number ID</span> from WhatsApp settings</li>
+                <li>Configure webhook for message delivery status</li>
+              </ol>
+              <div className="pt-2 border-t space-y-1">
+                <p className="text-xs font-medium">📌 Important Notes:</p>
+                <ul className="text-xs space-y-1 list-disc list-inside text-muted-foreground ml-2">
+                  <li>Requires approved Business Account</li>
+                  <li>Template messages must be pre-approved</li>
+                  <li>24-hour session window for conversations</li>
+                  <li>Free tier: 1,000 conversations/month</li>
+                </ul>
+                <p className="text-xs text-muted-foreground pt-2">
+                  📘 <a href="https://developers.facebook.com/docs/whatsapp/cloud-api" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">WhatsApp Cloud API Docs</a>
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="api_key">Access Token *</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="api_key"
+                  type={showSecrets['api_key'] ? 'text' : 'password'}
+                  value={formData.api_key || ''}
+                  onChange={(e) => setFormData({ ...formData, api_key: e.target.value })}
+                  placeholder="EAAG..."
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => toggleShowSecret('api_key')}
+                >
+                  {showSecrets['api_key'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                System User Token from Meta Business Account
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone_number_id">Phone Number ID *</Label>
+              <Input
+                id="phone_number_id"
+                value={formData.config?.phone_number_id || ''}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  config: { ...formData.config, phone_number_id: e.target.value }
+                })}
+                placeholder="1234567890"
+              />
+              <p className="text-xs text-muted-foreground">
+                From WhatsApp Business Account settings
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="webhook_verify_token">Webhook Verify Token (Optional)</Label>
+              <Input
+                id="webhook_verify_token"
+                value={formData.config?.webhook_verify_token || ''}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  config: { ...formData.config, webhook_verify_token: e.target.value }
+                })}
+                placeholder="Your custom verify token"
+              />
+            </div>
+          </>
+        )}
+
+        {/* Pinterest Configuration */}
+        {platformName === 'pinterest' && (
+          <>
+            <div className="space-y-3 p-4 bg-muted/50 rounded-lg border">
+              <h4 className="font-semibold text-sm flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                How to set up Pinterest API
+              </h4>
+              <ol className="text-xs space-y-2 list-decimal list-inside text-muted-foreground">
+                <li>Create an app at <a href="https://developers.pinterest.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">Pinterest Developers</a></li>
+                <li>Request API access and wait for approval</li>
+                <li>Get your <span className="font-semibold">App ID</span> and <span className="font-semibold">App Secret</span></li>
+                <li>Configure OAuth redirect URIs</li>
+                <li>Request scopes: <span className="font-mono text-foreground">boards:read</span>, <span className="font-mono text-foreground">pins:read</span>, <span className="font-mono text-foreground">pins:write</span></li>
+                <li>Complete OAuth 2.0 flow to get access token</li>
+              </ol>
+              <div className="pt-2 border-t space-y-1">
+                <p className="text-xs font-medium">📌 Important Notes:</p>
+                <ul className="text-xs space-y-1 list-disc list-inside text-muted-foreground ml-2">
+                  <li>API access requires approval process</li>
+                  <li>Access tokens don't expire but can be revoked</li>
+                  <li>Must specify board when creating pins</li>
+                  <li>Images must be publicly accessible URLs</li>
+                </ul>
+                <p className="text-xs text-muted-foreground pt-2">
+                  📘 <a href="https://developers.pinterest.com/docs/api/v5/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Pinterest API v5 Docs</a>
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="access_token">Access Token *</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="access_token"
+                  type={showSecrets['access_token'] ? 'text' : 'password'}
+                  value={formData.access_token || ''}
+                  onChange={(e) => setFormData({ ...formData, access_token: e.target.value })}
+                  placeholder="pina_..."
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => toggleShowSecret('access_token')}
+                >
+                  {showSecrets['access_token'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="channel_id">Default Board ID (Optional)</Label>
+              <Input
+                id="channel_id"
+                value={formData.channel_id || ''}
+                onChange={(e) => setFormData({ ...formData, channel_id: e.target.value })}
+                placeholder="Board ID for posting pins"
+              />
             </div>
           </>
         )}
