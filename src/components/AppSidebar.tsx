@@ -52,6 +52,7 @@ const builderItems = [
     { title: "Quotes", url: "/quotes", icon: FileSpreadsheet },
     { title: "Invoices", url: "/invoices", icon: Receipt },
     { title: "Reports", url: "/reports", icon: BarChart3 },
+    { title: "Email Marketing", url: "/email-marketing", icon: Mail },
   ];
 
 const marketingItems = [
