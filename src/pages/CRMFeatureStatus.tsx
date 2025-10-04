@@ -1,242 +1,355 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Circle, Zap } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Brain, TrendingUp, Users, DollarSign, Target, Zap, Activity, ArrowUp, ArrowDown, Mic, MessageSquare, Clock, Award, AlertCircle, CheckCircle2, Phone, Mail, Calendar, FileText, BarChart3 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 
 export default function CRMFeatureStatus() {
-  const implementedFeatures = [
-    { name: "Custom Fields / Layouts / Forms", module: "Module Builder", description: "15 field types with validation" },
-    { name: "Dashboard & Reporting", module: "Analytics Dashboard", description: "Visual charts, KPIs, CSV export" },
-    { name: "Workflow / Process Automation", module: "Workflow Builder", description: "Trigger-based actions and automations" },
-    { name: "Role-Based Access & Permissions", module: "Core System", description: "User roles with RLS policies" },
-    { name: "Audit Logs & Change History", module: "Core System", description: "Security audit tracking" },
-    { name: "Dynamic GUI / Runtime Module Creation", module: "Module Builder", description: "Create modules on-the-fly" },
-    { name: "Import / Export", module: "Analytics Dashboard", description: "CSV data export functionality" },
-    { name: "API & Integrations", module: "API Management", description: "Custom API integrations" },
+  const [isListening, setIsListening] = useState(false);
+  const [aiInsight, setAiInsight] = useState("Analyzing real-time data...");
+  const [realtimeMetrics, setRealtimeMetrics] = useState({
+    revenue: 2847239,
+    deals: 143,
+    conversion: 67.8,
+    engagement: 89.2
+  });
+
+  // Simulate real-time updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRealtimeMetrics(prev => ({
+        revenue: prev.revenue + Math.floor(Math.random() * 10000 - 5000),
+        deals: prev.deals + Math.floor(Math.random() * 3 - 1),
+        conversion: Math.min(100, Math.max(0, prev.conversion + (Math.random() * 2 - 1))),
+        engagement: Math.min(100, Math.max(0, prev.engagement + (Math.random() * 1.5 - 0.75)))
+      }));
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Simulate AI insights rotation
+  useEffect(() => {
+    const insights = [
+      "🎯 Top performer: Sarah J. closed 3 deals worth $245K today",
+      "⚠️ 5 high-value opportunities need follow-up within 24 hours",
+      "📈 Conversion rate up 12% this week - maintaining momentum",
+      "🔥 New lead from Fortune 500 company - immediate attention recommended",
+      "💡 Best time to contact prospects: 10 AM - 12 PM (87% success rate)",
+      "🎨 Email template 'Modern Approach' has 94% open rate",
+      "⏰ 8 meetings scheduled for tomorrow - preparation reminder sent"
+    ];
+    
+    let index = 0;
+    const insightInterval = setInterval(() => {
+      index = (index + 1) % insights.length;
+      setAiInsight(insights[index]);
+    }, 5000);
+
+    return () => clearInterval(insightInterval);
+  }, []);
+
+  const toggleVoice = () => {
+    setIsListening(!isListening);
+    if (!isListening) {
+      // Simulate voice activation
+      setTimeout(() => setIsListening(false), 3000);
+    }
+  };
+
+  const executiveMetrics = [
+    {
+      title: "Revenue Pipeline",
+      value: `$${(realtimeMetrics.revenue / 1000000).toFixed(2)}M`,
+      change: "+12.5%",
+      trend: "up",
+      icon: DollarSign,
+      color: "from-emerald-500 to-green-600",
+      glowColor: "emerald"
+    },
+    {
+      title: "Active Deals",
+      value: realtimeMetrics.deals,
+      change: "+8",
+      trend: "up",
+      icon: Target,
+      color: "from-blue-500 to-indigo-600",
+      glowColor: "blue"
+    },
+    {
+      title: "Win Rate",
+      value: `${realtimeMetrics.conversion.toFixed(1)}%`,
+      change: "+5.2%",
+      trend: "up",
+      icon: TrendingUp,
+      color: "from-purple-500 to-pink-600",
+      glowColor: "purple"
+    },
+    {
+      title: "Team Engagement",
+      value: `${realtimeMetrics.engagement.toFixed(1)}%`,
+      change: "+3.1%",
+      trend: "up",
+      icon: Users,
+      color: "from-orange-500 to-red-600",
+      glowColor: "orange"
+    }
   ];
 
-  const coreCRMNeeded = [
-    { name: "Contact & Account Management", priority: "High", description: "Store contacts, companies, relationships" },
-    { name: "Lead & Opportunity Management", priority: "High", description: "Capture leads, track qualification" },
-    { name: "Sales Pipeline / Deal Management", priority: "High", description: "Visual pipeline with stages" },
-    { name: "Tasks, Activities & Reminders", priority: "High", description: "Calls, meetings, follow-ups" },
-    { name: "Notes & Interaction History", priority: "High", description: "Log all communications" },
-    { name: "Email & Calendar Sync", priority: "Medium", description: "Two-way sync with email providers" },
-    { name: "Document / File Management", priority: "Medium", description: "Attach files to records" },
-    { name: "Duplicate / Data Quality Management", priority: "Medium", description: "Merge duplicates, validation" },
-    { name: "Customer Service / Ticketing", priority: "Medium", description: "Support cases and SLAs" },
-    { name: "Multi-Currency / Multi-Language", priority: "Low", description: "Global operations support" },
+  const liveActivities = [
+    { user: "Sarah J.", action: "closed deal with", client: "TechCorp Inc", value: "$125K", time: "2m ago", icon: CheckCircle2, color: "text-green-500" },
+    { user: "Mike R.", action: "scheduled meeting with", client: "Global Systems", value: "Tomorrow", time: "5m ago", icon: Calendar, color: "text-blue-500" },
+    { user: "Emma L.", action: "sent proposal to", client: "Innovation Labs", value: "$89K", time: "8m ago", icon: FileText, color: "text-purple-500" },
+    { user: "David K.", action: "called prospect", client: "Future Dynamics", value: "Follow-up", time: "12m ago", icon: Phone, color: "text-orange-500" },
+    { user: "Lisa M.", action: "emailed", client: "Smart Solutions", value: "Demo Request", time: "15m ago", icon: Mail, color: "text-pink-500" }
   ];
 
-  const advancedFeatures = [
-    { name: "AI / Predictive Analytics", priority: "High", description: "Deal scoring, churn prediction" },
-    { name: "LLM / Generative AI Assisted Content", priority: "High", description: "Auto-generate emails, proposals" },
-    { name: "Multi-Channel Tracking", priority: "High", description: "Email, SMS, chat, social in one view" },
-    { name: "Timeline / Historical Story View", priority: "Medium", description: "Chronological customer journey" },
-    { name: "Smart Suggestions / Next Best Action", priority: "Medium", description: "AI-powered recommendations" },
-    { name: "Relationship Graphs / Network Visualization", priority: "Medium", description: "Visual relationship mapping" },
-    { name: "Real-Time Data & Streaming", priority: "Medium", description: "Live updates and dashboards" },
-    { name: "Embedded Collaboration Tools", priority: "Medium", description: "Team messaging in CRM" },
-    { name: "Gamification / Incentive Tracking", priority: "Low", description: "Scoreboards and badges" },
-    { name: "Customer-Accessible Portals", priority: "Low", description: "Self-service customer dashboards" },
-  ];
-
-  const uniqueInnovations = [
-    { name: "Conversational AI Agents", description: "Multi-agent system for sales, support, data tasks" },
-    { name: "Visual Flow Pipeline UI", description: "Interface as visual flows instead of lists" },
-    { name: "Behavioral Analytics & Heatmaps", description: "Track customer behavior patterns" },
-    { name: "Smart Templates That Adapt", description: "Self-adjusting based on success" },
-    { name: "Micro-Apps / In-CRM Tools", description: "Built-in calculators, quote builders" },
-    { name: "Emotional / Sentiment Tracking", description: "Analyze sentiment from interactions" },
+  const aiPredictions = [
+    { title: "Hot Lead Alert", desc: "Enterprise Corp shows 94% conversion probability", priority: "critical", icon: Zap },
+    { title: "Churn Risk", desc: "Client ABC may churn - proactive outreach suggested", priority: "high", icon: AlertCircle },
+    { title: "Upsell Opportunity", desc: "5 accounts ready for premium upgrade", priority: "medium", icon: TrendingUp },
+    { title: "Performance Insight", desc: "Q4 projected to exceed target by 23%", priority: "low", icon: Award }
   ];
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">CRM Feature Roadmap</h1>
-        <p className="text-muted-foreground">Enterprise Builder System vs Modern CRM Requirements</p>
+    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="fixed inset-0 z-0">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-[120px] animate-glow-pulse" />
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-[120px] animate-glow-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-emerald-500/20 rounded-full blur-[120px] animate-glow-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px]" />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
-              Implemented
+      {/* Content */}
+      <div className="relative z-10 container mx-auto p-6 space-y-6">
+        {/* Revolutionary Header */}
+        <div className="relative overflow-hidden rounded-3xl p-12 bg-gradient-to-br from-purple-900/40 via-blue-900/40 to-emerald-900/40 backdrop-blur-xl border border-white/10 animate-fade-in">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-500/30 to-transparent rounded-full blur-3xl animate-glow-pulse" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-blue-500/30 to-transparent rounded-full blur-3xl animate-glow-pulse" style={{ animationDelay: '1s' }} />
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-6">
+              <div className="space-y-2">
+                <div className="flex items-center gap-3 animate-slide-up">
+                  <div className="relative">
+                    <Brain className="h-12 w-12 text-purple-400 animate-float" />
+                    <div className="absolute inset-0 bg-purple-500/50 blur-xl animate-pulse" />
+                  </div>
+                  <div>
+                    <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-blue-400 to-emerald-400 animate-scale-in">
+                      Executive Command Center
+                    </h1>
+                    <p className="text-white/70 text-lg mt-1">AI-Powered Real-Time Intelligence</p>
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                onClick={toggleVoice}
+                size="lg"
+                className={`relative overflow-hidden transition-all duration-500 ${
+                  isListening 
+                    ? 'bg-gradient-to-r from-red-500 to-pink-600 shadow-[0_0_30px_rgba(239,68,68,0.6)] scale-110' 
+                    : 'bg-gradient-to-r from-purple-500 to-blue-600 hover:shadow-[0_0_30px_rgba(147,51,234,0.6)]'
+                }`}
+              >
+                <Mic className={`mr-2 h-5 w-5 ${isListening ? 'animate-pulse' : ''}`} />
+                {isListening ? 'Listening...' : 'Voice Command'}
+                {isListening && (
+                  <div className="absolute inset-0 bg-white/30 animate-shimmer" />
+                )}
+              </Button>
+            </div>
+
+            {/* AI Insight Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-emerald-500/20 backdrop-blur-sm border border-white/20 p-4 animate-slide-up">
+              <div className="absolute inset-0 animate-shimmer" style={{ backgroundImage: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)', backgroundSize: '200% 100%' }} />
+              <div className="flex items-center gap-3">
+                <Activity className="h-5 w-5 text-emerald-400 animate-pulse" />
+                <p className="text-white text-sm font-medium">{aiInsight}</p>
+                <Badge className="ml-auto bg-emerald-500/20 text-emerald-300 border-emerald-500/30">
+                  LIVE
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Real-Time Metrics Grid */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {executiveMetrics.map((metric, index) => {
+            const Icon = metric.icon;
+            return (
+              <div
+                key={index}
+                className="relative group animate-scale-in"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl" 
+                     style={{ backgroundImage: `linear-gradient(to bottom right, var(--tw-gradient-from), var(--tw-gradient-to))` }} 
+                />
+                <Card className="relative overflow-hidden bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl border border-white/20 hover:border-white/40 transition-all duration-500 hover:scale-105 hover:shadow-[0_0_40px_rgba(255,255,255,0.2)]">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${metric.color} opacity-10 group-hover:opacity-20 transition-opacity duration-500`} />
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/10 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                  
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-white/70">{metric.title}</CardTitle>
+                    <div className={`p-3 rounded-xl bg-gradient-to-br ${metric.color} shadow-lg group-hover:scale-110 transition-transform duration-500`}>
+                      <Icon className="h-5 w-5 text-white animate-float" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">
+                      {metric.value}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className={`${metric.trend === 'up' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'} border-0`}>
+                        {metric.trend === 'up' ? <ArrowUp className="h-3 w-3 mr-1" /> : <ArrowDown className="h-3 w-3 mr-1" />}
+                        {metric.change}
+                      </Badge>
+                      <span className="text-xs text-white/50">vs last period</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Live Activity Feed */}
+          <Card className="lg:col-span-2 relative overflow-hidden bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl border border-white/20 animate-fade-in">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5" />
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-white">
+                <Activity className="h-5 w-5 text-blue-400 animate-pulse" />
+                Live Activity Stream
+                <Badge className="ml-auto bg-red-500 text-white animate-pulse">REAL-TIME</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {liveActivities.map((activity, i) => {
+                const Icon = activity.icon;
+                return (
+                  <div
+                    key={i}
+                    className="flex items-center gap-4 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/30 hover:bg-white/10 transition-all duration-500 group cursor-pointer animate-slide-up"
+                    style={{ animationDelay: `${i * 100}ms` }}
+                  >
+                    <div className="relative">
+                      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center group-hover:scale-125 transition-all duration-500`}>
+                        <Icon className={`w-5 h-5 ${activity.color}`} />
+                      </div>
+                      <div className={`absolute inset-0 ${activity.color} opacity-50 blur-lg group-hover:blur-xl transition-all duration-500`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white">
+                        <span className="text-blue-300">{activity.user}</span> {activity.action} <span className="text-purple-300">{activity.client}</span>
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-emerald-300 font-semibold">{activity.value}</span>
+                        <span className="text-xs text-white/40">•</span>
+                        <span className="text-xs text-white/40">{activity.time}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+
+          {/* AI Predictions Panel */}
+          <Card className="relative overflow-hidden bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl border border-white/20 animate-fade-in">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5" />
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-white">
+                <Brain className="h-5 w-5 text-purple-400 animate-float" />
+                AI Predictions
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {aiPredictions.map((pred, i) => {
+                const Icon = pred.icon;
+                const priorityColors = {
+                  critical: 'from-red-500/20 to-pink-500/20 border-red-500/50',
+                  high: 'from-orange-500/20 to-yellow-500/20 border-orange-500/50',
+                  medium: 'from-blue-500/20 to-cyan-500/20 border-blue-500/50',
+                  low: 'from-green-500/20 to-emerald-500/20 border-green-500/50'
+                };
+                return (
+                  <div
+                    key={i}
+                    className={`p-4 rounded-xl bg-gradient-to-br ${priorityColors[pred.priority as keyof typeof priorityColors]} backdrop-blur-sm border hover:scale-105 transition-all duration-500 cursor-pointer group animate-scale-in`}
+                    style={{ animationDelay: `${i * 150}ms` }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <Icon className="h-5 w-5 mt-0.5 group-hover:rotate-12 transition-transform duration-500" style={{ color: pred.priority === 'critical' ? '#ef4444' : pred.priority === 'high' ? '#f97316' : pred.priority === 'medium' ? '#3b82f6' : '#10b981' }} />
+                      <div>
+                        <p className="text-sm font-medium text-white mb-1">{pred.title}</p>
+                        <p className="text-xs text-white/60">{pred.desc}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Performance Overview */}
+        <Card className="relative overflow-hidden bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl border border-white/20 animate-fade-in">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-blue-500/5" />
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-white">
+              <BarChart3 className="h-5 w-5 text-emerald-400" />
+              Team Performance Overview
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{implementedFeatures.length}</div>
-            <p className="text-xs text-muted-foreground">Features ready</p>
+            <div className="grid gap-6 md:grid-cols-3">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-white/70">Sales Target</span>
+                  <span className="text-white font-semibold">$3.5M / $4M</span>
+                </div>
+                <Progress value={87.5} className="h-3 bg-white/10" />
+                <p className="text-xs text-emerald-300">87.5% achieved • On track to exceed</p>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-white/70">Team Activity</span>
+                  <span className="text-white font-semibold">892 / 1000</span>
+                </div>
+                <Progress value={89.2} className="h-3 bg-white/10" />
+                <p className="text-xs text-blue-300">89.2% of daily goal • Excellent pace</p>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-white/70">Customer Satisfaction</span>
+                  <span className="text-white font-semibold">4.8 / 5.0</span>
+                </div>
+                <Progress value={96} className="h-3 bg-white/10" />
+                <p className="text-xs text-purple-300">96% satisfaction rate • Outstanding</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Circle className="h-4 w-4 text-orange-500" />
-              Core CRM Needed
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{coreCRMNeeded.length}</div>
-            <p className="text-xs text-muted-foreground">Essential features</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Zap className="h-4 w-4 text-blue-500" />
-              Advanced Features
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{advancedFeatures.length + uniqueInnovations.length}</div>
-            <p className="text-xs text-muted-foreground">Differentiators</p>
-          </CardContent>
-        </Card>
+        {/* AI Chat Assistant */}
+        <div className="fixed bottom-6 right-6 z-50 animate-scale-in">
+          <Button 
+            size="lg"
+            className="h-16 w-16 rounded-full bg-gradient-to-br from-purple-500 via-blue-500 to-emerald-500 shadow-[0_0_40px_rgba(147,51,234,0.6)] hover:shadow-[0_0_60px_rgba(147,51,234,0.8)] hover:scale-110 transition-all duration-500 group relative overflow-hidden"
+          >
+            <MessageSquare className="h-6 w-6 text-white group-hover:rotate-12 transition-transform duration-500 relative z-10" />
+            <div className="absolute inset-0 bg-white/20 animate-shimmer" style={{ backgroundImage: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)', backgroundSize: '200% 100%' }} />
+            <div className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full border-2 border-black animate-pulse" />
+          </Button>
+        </div>
       </div>
-
-      <Tabs defaultValue="implemented" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="implemented">✅ Implemented</TabsTrigger>
-          <TabsTrigger value="core">🎯 Core CRM Needed</TabsTrigger>
-          <TabsTrigger value="advanced">⚡ Advanced Features</TabsTrigger>
-          <TabsTrigger value="innovations">💡 Unique Innovations</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="implemented" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Already Built in Enterprise Builder</CardTitle>
-              <CardDescription>Foundation features we have today</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {implementedFeatures.map((feature, i) => (
-                <div key={i} className="flex items-start gap-3 p-3 border rounded-lg">
-                  <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-                  <div className="flex-1">
-                    <div className="font-medium">{feature.name}</div>
-                    <div className="text-sm text-muted-foreground">{feature.description}</div>
-                    <Badge variant="outline" className="mt-2">{feature.module}</Badge>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="core" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Core CRM Features Needed</CardTitle>
-              <CardDescription>Essential functionality for a complete CRM</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {coreCRMNeeded.map((feature, i) => (
-                <div key={i} className="flex items-start gap-3 p-3 border rounded-lg">
-                  <Circle className="h-5 w-5 text-orange-500 mt-0.5" />
-                  <div className="flex-1">
-                    <div className="font-medium">{feature.name}</div>
-                    <div className="text-sm text-muted-foreground">{feature.description}</div>
-                    <Badge 
-                      variant={feature.priority === "High" ? "destructive" : feature.priority === "Medium" ? "default" : "secondary"}
-                      className="mt-2"
-                    >
-                      {feature.priority} Priority
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="advanced" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Advanced / Modern Features</CardTitle>
-              <CardDescription>Next-generation capabilities to stand out</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {advancedFeatures.map((feature, i) => (
-                <div key={i} className="flex items-start gap-3 p-3 border rounded-lg">
-                  <Zap className="h-5 w-5 text-blue-500 mt-0.5" />
-                  <div className="flex-1">
-                    <div className="font-medium">{feature.name}</div>
-                    <div className="text-sm text-muted-foreground">{feature.description}</div>
-                    <Badge 
-                      variant={feature.priority === "High" ? "destructive" : feature.priority === "Medium" ? "default" : "secondary"}
-                      className="mt-2"
-                    >
-                      {feature.priority} Priority
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="innovations" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Unique Innovations</CardTitle>
-              <CardDescription>Creative features to differentiate from competitors</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {uniqueInnovations.map((feature, i) => (
-                <div key={i} className="flex items-start gap-3 p-3 border rounded-lg bg-gradient-to-r from-primary/5 to-accent/5">
-                  <Zap className="h-5 w-5 text-primary mt-0.5" />
-                  <div className="flex-1">
-                    <div className="font-medium">{feature.name}</div>
-                    <div className="text-sm text-muted-foreground">{feature.description}</div>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      <Card className="border-primary">
-        <CardHeader>
-          <CardTitle>📋 Recommended Next Steps</CardTitle>
-          <CardDescription>Priority order for building complete CRM</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <h3 className="font-semibold">Phase 5: Core CRM Modules (High Priority)</h3>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground ml-4">
-              <li>Contact & Account Management - Central customer database</li>
-              <li>Lead & Opportunity Management - Sales funnel tracking</li>
-              <li>Sales Pipeline with Kanban View - Visual deal management</li>
-              <li>Tasks & Activities Management - Action tracking</li>
-              <li>Interaction History & Notes - Communication log</li>
-            </ol>
-          </div>
-
-          <div className="space-y-2">
-            <h3 className="font-semibold">Phase 6: AI-Powered Features (High Priority)</h3>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground ml-4">
-              <li>AI Content Generation - Email drafts, proposals</li>
-              <li>Predictive Analytics - Deal scoring, churn prediction</li>
-              <li>Smart Suggestions - Next best action recommendations</li>
-            </ol>
-          </div>
-
-          <div className="space-y-2">
-            <h3 className="font-semibold">Phase 7: Enhanced Capabilities (Medium Priority)</h3>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground ml-4">
-              <li>Email & Calendar Integration</li>
-              <li>Document Management</li>
-              <li>Customer Service / Ticketing</li>
-              <li>Timeline / Historical View</li>
-            </ol>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
