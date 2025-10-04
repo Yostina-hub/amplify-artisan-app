@@ -252,6 +252,7 @@ export type Database = {
       }
       company_platform_configs: {
         Row: {
+          access_token: string | null
           api_key: string | null
           api_secret: string | null
           channel_id: string | null
@@ -268,6 +269,7 @@ export type Database = {
           webhook_url: string | null
         }
         Insert: {
+          access_token?: string | null
           api_key?: string | null
           api_secret?: string | null
           channel_id?: string | null
@@ -284,6 +286,7 @@ export type Database = {
           webhook_url?: string | null
         }
         Update: {
+          access_token?: string | null
           api_key?: string | null
           api_secret?: string | null
           channel_id?: string | null
