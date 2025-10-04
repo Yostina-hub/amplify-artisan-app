@@ -683,6 +683,312 @@ export type Database = {
           },
         ]
       }
+      call_campaigns: {
+        Row: {
+          call_window_end: string | null
+          call_window_start: string | null
+          calls_completed: number | null
+          calls_failed: number | null
+          calls_made: number | null
+          campaign_type: string | null
+          company_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          end_date: string | null
+          id: string
+          leads_generated: number | null
+          max_attempts: number | null
+          metadata: Json | null
+          name: string
+          recurrence_pattern: string | null
+          retry_interval_hours: number | null
+          scheduled_at: string | null
+          script_id: string | null
+          start_date: string | null
+          status: string | null
+          target_audience: Json | null
+          total_contacts: number | null
+          updated_at: string
+        }
+        Insert: {
+          call_window_end?: string | null
+          call_window_start?: string | null
+          calls_completed?: number | null
+          calls_failed?: number | null
+          calls_made?: number | null
+          campaign_type?: string | null
+          company_id: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          leads_generated?: number | null
+          max_attempts?: number | null
+          metadata?: Json | null
+          name: string
+          recurrence_pattern?: string | null
+          retry_interval_hours?: number | null
+          scheduled_at?: string | null
+          script_id?: string | null
+          start_date?: string | null
+          status?: string | null
+          target_audience?: Json | null
+          total_contacts?: number | null
+          updated_at?: string
+        }
+        Update: {
+          call_window_end?: string | null
+          call_window_start?: string | null
+          calls_completed?: number | null
+          calls_failed?: number | null
+          calls_made?: number | null
+          campaign_type?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          leads_generated?: number | null
+          max_attempts?: number | null
+          metadata?: Json | null
+          name?: string
+          recurrence_pattern?: string | null
+          retry_interval_hours?: number | null
+          scheduled_at?: string | null
+          script_id?: string | null
+          start_date?: string | null
+          status?: string | null
+          target_audience?: Json | null
+          total_contacts?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_campaigns_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_campaigns_script_id_fkey"
+            columns: ["script_id"]
+            isOneToOne: false
+            referencedRelation: "call_scripts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      call_center_integrations: {
+        Row: {
+          account_sid: string | null
+          api_key_encrypted: string | null
+          company_id: string
+          configuration: Json | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          phone_number: string | null
+          provider: string
+          updated_at: string
+          webhook_url: string | null
+        }
+        Insert: {
+          account_sid?: string | null
+          api_key_encrypted?: string | null
+          company_id: string
+          configuration?: Json | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          phone_number?: string | null
+          provider: string
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Update: {
+          account_sid?: string | null
+          api_key_encrypted?: string | null
+          company_id?: string
+          configuration?: Json | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          phone_number?: string | null
+          provider?: string
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_center_integrations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      call_logs: {
+        Row: {
+          agent_id: string | null
+          agent_name: string | null
+          call_duration_seconds: number | null
+          call_ended_at: string | null
+          call_notes: string | null
+          call_outcome: string | null
+          call_recording_url: string | null
+          call_started_at: string | null
+          call_status: string | null
+          campaign_id: string | null
+          company_id: string
+          contact_id: string | null
+          contact_name: string | null
+          created_at: string
+          engagement_score: number | null
+          follow_up_date: string | null
+          follow_up_required: boolean | null
+          id: string
+          lead_id: string | null
+          metadata: Json | null
+          phone_number: string
+          updated_at: string
+        }
+        Insert: {
+          agent_id?: string | null
+          agent_name?: string | null
+          call_duration_seconds?: number | null
+          call_ended_at?: string | null
+          call_notes?: string | null
+          call_outcome?: string | null
+          call_recording_url?: string | null
+          call_started_at?: string | null
+          call_status?: string | null
+          campaign_id?: string | null
+          company_id: string
+          contact_id?: string | null
+          contact_name?: string | null
+          created_at?: string
+          engagement_score?: number | null
+          follow_up_date?: string | null
+          follow_up_required?: boolean | null
+          id?: string
+          lead_id?: string | null
+          metadata?: Json | null
+          phone_number: string
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string | null
+          agent_name?: string | null
+          call_duration_seconds?: number | null
+          call_ended_at?: string | null
+          call_notes?: string | null
+          call_outcome?: string | null
+          call_recording_url?: string | null
+          call_started_at?: string | null
+          call_status?: string | null
+          campaign_id?: string | null
+          company_id?: string
+          contact_id?: string | null
+          contact_name?: string | null
+          created_at?: string
+          engagement_score?: number | null
+          follow_up_date?: string | null
+          follow_up_required?: boolean | null
+          id?: string
+          lead_id?: string | null
+          metadata?: Json | null
+          phone_number?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_logs_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "call_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_logs_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_logs_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      call_scripts: {
+        Row: {
+          closing_message: string | null
+          company_id: string
+          created_at: string
+          created_by: string
+          id: string
+          is_active: boolean | null
+          name: string
+          objection_handling: Json | null
+          opening_message: string | null
+          script_content: string
+          script_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          closing_message?: string | null
+          company_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          objection_handling?: Json | null
+          opening_message?: string | null
+          script_content: string
+          script_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          closing_message?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          objection_handling?: Json | null
+          opening_message?: string | null
+          script_content?: string
+          script_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_scripts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_influencers: {
         Row: {
           agreed_price: number | null
