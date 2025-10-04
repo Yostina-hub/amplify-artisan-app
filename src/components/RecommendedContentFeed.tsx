@@ -46,19 +46,28 @@ export const RecommendedContentFeed = () => {
 
   const generateRecommendationsMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.functions.invoke('generate-recommendations', {
-        body: { userId: user?.id, limit: 10 }
-      });
-      
-      if (error) throw error;
+      try {
+        const { error } = await supabase.functions.invoke('generate-recommendations', {
+          body: { userId: user?.id, limit: 10 }
+        });
+        
+        if (error) throw error;
+      } catch (err) {
+        // Gracefully handle edge function not available (self-hosted)
+        console.warn('Edge function not available:', err);
+        throw err;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['content-recommendations'] });
       toast.success("New recommendations generated!");
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error generating recommendations:', error);
-      toast.error("Failed to generate recommendations");
+      const message = error?.message?.includes('FunctionsRelayError') 
+        ? "AI recommendations not available in self-hosted mode"
+        : "Failed to generate recommendations";
+      toast.error(message);
     },
   });
 
