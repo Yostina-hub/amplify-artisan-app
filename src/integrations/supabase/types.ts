@@ -1683,6 +1683,79 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_satisfaction_surveys: {
+        Row: {
+          comments: string | null
+          company_id: string
+          created_at: string
+          customer_id: string | null
+          id: string
+          nps_score: number | null
+          overall_rating: number | null
+          professionalism: number | null
+          response_quality: number | null
+          response_time: number | null
+          submitted_at: string | null
+          survey_type: string | null
+          ticket_id: string | null
+          would_recommend: boolean | null
+        }
+        Insert: {
+          comments?: string | null
+          company_id: string
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          nps_score?: number | null
+          overall_rating?: number | null
+          professionalism?: number | null
+          response_quality?: number | null
+          response_time?: number | null
+          submitted_at?: string | null
+          survey_type?: string | null
+          ticket_id?: string | null
+          would_recommend?: boolean | null
+        }
+        Update: {
+          comments?: string | null
+          company_id?: string
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          nps_score?: number | null
+          overall_rating?: number | null
+          professionalism?: number | null
+          response_quality?: number | null
+          response_time?: number | null
+          submitted_at?: string | null
+          survey_type?: string | null
+          ticket_id?: string | null
+          would_recommend?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_satisfaction_surveys_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_satisfaction_surveys_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_satisfaction_surveys_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_access_logs: {
         Row: {
           action: string
@@ -2342,6 +2415,83 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "influencers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_base_articles: {
+        Row: {
+          author_id: string
+          category: string
+          company_id: string
+          content: string
+          created_at: string
+          helpful_count: number | null
+          id: string
+          is_public: boolean | null
+          last_reviewed_at: string | null
+          last_reviewed_by: string | null
+          metadata: Json | null
+          not_helpful_count: number | null
+          related_articles: string[] | null
+          status: string
+          subcategory: string | null
+          summary: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          view_count: number | null
+        }
+        Insert: {
+          author_id: string
+          category: string
+          company_id: string
+          content: string
+          created_at?: string
+          helpful_count?: number | null
+          id?: string
+          is_public?: boolean | null
+          last_reviewed_at?: string | null
+          last_reviewed_by?: string | null
+          metadata?: Json | null
+          not_helpful_count?: number | null
+          related_articles?: string[] | null
+          status?: string
+          subcategory?: string | null
+          summary?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Update: {
+          author_id?: string
+          category?: string
+          company_id?: string
+          content?: string
+          created_at?: string
+          helpful_count?: number | null
+          id?: string
+          is_public?: boolean | null
+          last_reviewed_at?: string | null
+          last_reviewed_by?: string | null
+          metadata?: Json | null
+          not_helpful_count?: number | null
+          related_articles?: string[] | null
+          status?: string
+          subcategory?: string | null
+          summary?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_base_articles_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
@@ -3538,6 +3688,62 @@ export type Database = {
           },
         ]
       }
+      sla_policies: {
+        Row: {
+          applies_to_categories: string[] | null
+          business_hours_only: boolean | null
+          company_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          first_response_time_hours: number
+          id: string
+          is_active: boolean | null
+          name: string
+          priority_level: string
+          resolution_time_hours: number
+          updated_at: string
+        }
+        Insert: {
+          applies_to_categories?: string[] | null
+          business_hours_only?: boolean | null
+          company_id: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          first_response_time_hours: number
+          id?: string
+          is_active?: boolean | null
+          name: string
+          priority_level: string
+          resolution_time_hours: number
+          updated_at?: string
+        }
+        Update: {
+          applies_to_categories?: string[] | null
+          business_hours_only?: boolean | null
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          first_response_time_hours?: number
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          priority_level?: string
+          resolution_time_hours?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sla_policies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_conversations: {
         Row: {
           company_id: string
@@ -4083,6 +4289,212 @@ export type Database = {
           },
         ]
       }
+      support_team_members: {
+        Row: {
+          added_by: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          max_tickets_per_day: number | null
+          role: string | null
+          specializations: string[] | null
+          team_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          added_by: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          max_tickets_per_day?: number | null
+          role?: string | null
+          specializations?: string[] | null
+          team_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          added_by?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          max_tickets_per_day?: number | null
+          role?: string | null
+          specializations?: string[] | null
+          team_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "support_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_teams: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          manager_id: string | null
+          name: string
+          specialization: string[] | null
+          team_email: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          manager_id?: string | null
+          name: string
+          specialization?: string[] | null
+          team_email?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          manager_id?: string | null
+          name?: string
+          specialization?: string[] | null
+          team_email?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_teams_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          account_id: string | null
+          assigned_team: string | null
+          assigned_to: string | null
+          category: string | null
+          channel: string | null
+          closed_at: string | null
+          company_id: string
+          created_at: string
+          customer_id: string | null
+          description: string
+          due_date: string | null
+          first_response_at: string | null
+          id: string
+          metadata: Json | null
+          priority: string
+          reported_by: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          satisfaction_comment: string | null
+          satisfaction_rating: number | null
+          sla_breach: boolean | null
+          status: string
+          subject: string
+          tags: string[] | null
+          ticket_number: string
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          assigned_team?: string | null
+          assigned_to?: string | null
+          category?: string | null
+          channel?: string | null
+          closed_at?: string | null
+          company_id: string
+          created_at?: string
+          customer_id?: string | null
+          description: string
+          due_date?: string | null
+          first_response_at?: string | null
+          id?: string
+          metadata?: Json | null
+          priority?: string
+          reported_by: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          satisfaction_comment?: string | null
+          satisfaction_rating?: number | null
+          sla_breach?: boolean | null
+          status?: string
+          subject: string
+          tags?: string[] | null
+          ticket_number: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          assigned_team?: string | null
+          assigned_to?: string | null
+          category?: string | null
+          channel?: string | null
+          closed_at?: string | null
+          company_id?: string
+          created_at?: string
+          customer_id?: string | null
+          description?: string
+          due_date?: string | null
+          first_response_at?: string | null
+          id?: string
+          metadata?: Json | null
+          priority?: string
+          reported_by?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          satisfaction_comment?: string | null
+          satisfaction_rating?: number | null
+          sla_breach?: boolean | null
+          status?: string
+          subject?: string
+          tags?: string[] | null
+          ticket_number?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_members: {
         Row: {
           added_by: string
@@ -4268,6 +4680,50 @@ export type Database = {
             columns: ["territory_id"]
             isOneToOne: false
             referencedRelation: "territories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_comments: {
+        Row: {
+          attachments: Json | null
+          comment_text: string
+          created_at: string
+          created_by: string
+          id: string
+          is_internal: boolean | null
+          is_solution: boolean | null
+          ticket_id: string
+          updated_at: string
+        }
+        Insert: {
+          attachments?: Json | null
+          comment_text: string
+          created_at?: string
+          created_by: string
+          id?: string
+          is_internal?: boolean | null
+          is_solution?: boolean | null
+          ticket_id: string
+          updated_at?: string
+        }
+        Update: {
+          attachments?: Json | null
+          comment_text?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_internal?: boolean | null
+          is_solution?: boolean | null
+          ticket_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_comments_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
             referencedColumns: ["id"]
           },
         ]

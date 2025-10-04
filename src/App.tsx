@@ -77,6 +77,7 @@ import EmailMarketing from "./pages/EmailMarketing";
 import Documents from "./pages/Documents";
 import Payments from "./pages/Payments";
 import TerritoryManagement from "./pages/TerritoryManagement";
+import CustomerSupport from "./pages/CustomerSupport";
 
 const queryClient = new QueryClient();
 
@@ -160,6 +161,7 @@ const App = () => (
           <Route path="/documents" element={<ProtectedRoute><Layout><Documents /></Layout></ProtectedRoute>} />
           <Route path="/payments" element={<ProtectedRoute><Layout><Payments /></Layout></ProtectedRoute>} />
           <Route path="/territory-management" element={<ProtectedRoute><Layout><TerritoryManagement /></Layout></ProtectedRoute>} />
+          <Route path="/customer-support" element={<ProtectedRoute><Layout><CustomerSupport /></Layout></ProtectedRoute>} />
             
             <Route path="/social-accounts" element={<ProtectedRoute><Layout><SocialMediaCredentials /></Layout></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
