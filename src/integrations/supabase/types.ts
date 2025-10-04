@@ -238,6 +238,7 @@ export type Database = {
           auth_config: Json | null
           auth_type: string | null
           base_url: string | null
+          company_id: string | null
           created_at: string
           description: string | null
           headers: Json | null
@@ -256,6 +257,7 @@ export type Database = {
           auth_config?: Json | null
           auth_type?: string | null
           base_url?: string | null
+          company_id?: string | null
           created_at?: string
           description?: string | null
           headers?: Json | null
@@ -274,6 +276,7 @@ export type Database = {
           auth_config?: Json | null
           auth_type?: string | null
           base_url?: string | null
+          company_id?: string | null
           created_at?: string
           description?: string | null
           headers?: Json | null
@@ -288,7 +291,15 @@ export type Database = {
           updated_at?: string
           webhook_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "api_integrations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       campaign_influencers: {
         Row: {

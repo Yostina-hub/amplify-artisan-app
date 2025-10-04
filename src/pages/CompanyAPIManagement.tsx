@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,9 +13,10 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Edit, Trash2, Activity, Settings, Database, ArrowLeftRight } from "lucide-react";
+import { Plus, Edit, Trash2, Activity, Settings, Database, ArrowLeftRight, AlertCircle } from "lucide-react";
 import { IntegrationFields } from "@/components/admin/IntegrationFields";
 import { IntegrationLogs } from "@/components/admin/IntegrationLogs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ApiIntegration {
   id: string;
@@ -31,28 +33,47 @@ interface ApiIntegration {
   is_active: boolean;
   webhook_url: string | null;
   metadata: any;
-  company_id: string | null;
+  company_id: string;
   created_at: string;
   updated_at: string;
 }
 
-export default function APIManagement() {
+export default function CompanyAPIManagement() {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [selectedIntegration, setSelectedIntegration] = useState<ApiIntegration | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
+  // Get user's company_id from profile
+  const { data: profile } = useQuery({
+    queryKey: ['user-profile', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user?.id)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
   const { data: integrations, isLoading } = useQuery({
-    queryKey: ['api-integrations'],
+    queryKey: ['company-api-integrations', profile?.company_id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('api_integrations')
         .select('*')
+        .eq('company_id', profile?.company_id)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
       return data as ApiIntegration[];
     },
+    enabled: !!profile?.company_id,
   });
 
   const createMutation = useMutation({
@@ -71,7 +92,7 @@ export default function APIManagement() {
         is_active: data.is_active ?? true,
         webhook_url: data.webhook_url || null,
         metadata: data.metadata || {},
-        company_id: data.company_id || null, // Admin can specify company_id
+        company_id: profile?.company_id,
       };
       
       const { error } = await supabase
@@ -81,7 +102,7 @@ export default function APIManagement() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['api-integrations'] });
+      queryClient.invalidateQueries({ queryKey: ['company-api-integrations'] });
       toast.success('Integration created successfully');
       setIsCreateDialogOpen(false);
     },
@@ -100,7 +121,7 @@ export default function APIManagement() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['api-integrations'] });
+      queryClient.invalidateQueries({ queryKey: ['company-api-integrations'] });
       toast.success('Integration updated successfully');
       setIsEditDialogOpen(false);
       setSelectedIntegration(null);
@@ -120,7 +141,7 @@ export default function APIManagement() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['api-integrations'] });
+      queryClient.invalidateQueries({ queryKey: ['company-api-integrations'] });
       toast.success('Integration deleted successfully');
     },
     onError: (error) => {
@@ -138,7 +159,7 @@ export default function APIManagement() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['api-integrations'] });
+      queryClient.invalidateQueries({ queryKey: ['company-api-integrations'] });
     },
   });
 
@@ -151,13 +172,26 @@ export default function APIManagement() {
     }
   };
 
+  if (!profile?.company_id) {
+    return (
+      <div className="container mx-auto p-6">
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            You need to be associated with a company to manage API integrations.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">API Integration Management</h1>
           <p className="text-muted-foreground mt-2">
-            Manage all API integrations and their configurations
+            Manage your company's API integrations and configurations
           </p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -185,7 +219,10 @@ export default function APIManagement() {
         <Card>
           <CardContent className="pt-6 text-center">
             <Database className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <p className="text-muted-foreground">No integrations configured yet</p>
+            <p className="text-muted-foreground mb-4">No integrations configured yet</p>
+            <p className="text-sm text-muted-foreground mb-4">
+              Create your first API integration to connect with external services
+            </p>
           </CardContent>
         </Card>
       ) : (
