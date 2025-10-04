@@ -1,4 +1,4 @@
-import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2, Mail, Link2, Globe, Key, Package, BarChart2, Layers, DollarSign, CreditCard, FileSearch, ChevronDown, Wallet, Layout } from "lucide-react";
+import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2, Mail, Link2, Globe, Key, Package, BarChart2, Layers, DollarSign, CreditCard, FileSearch, ChevronDown, Wallet, Layout, Database } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
@@ -47,6 +47,7 @@ const companyAdminItems = [
   { title: "Email Settings", url: "/company/email-settings", icon: Mail },
   { title: "Platform Subscriptions", url: "/company/platform-subscriptions", icon: Package },
   { title: "Platform API Settings", url: "/company/platform-settings", icon: Key },
+  { title: "API Integrations", url: "/company/api-management", icon: Database },
   { title: "Audit Log", url: "/company/audit-log", icon: FileSearch },
 ];
 
@@ -71,6 +72,7 @@ const adminBusinessItems = [
 ];
 
 const adminConfigItems = [
+  { title: "API Integrations", url: "/admin/api-management", icon: Database },
   { title: "Public Content", url: "/admin/public-content", icon: Layout },
   { title: "Email Settings", url: "/admin/email-settings", icon: Mail },
   { title: "Social Auth Settings", url: "/admin/social-auth", icon: Key },
