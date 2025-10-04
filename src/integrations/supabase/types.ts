@@ -727,6 +727,7 @@ export type Database = {
           created_at: string | null
           id: string
           is_active: boolean | null
+          scheduled_publish: string | null
           section_key: string
           updated_at: string | null
         }
@@ -735,6 +736,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           is_active?: boolean | null
+          scheduled_publish?: string | null
           section_key: string
           updated_at?: string | null
         }
@@ -743,6 +745,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           is_active?: boolean | null
+          scheduled_publish?: string | null
           section_key?: string
           updated_at?: string | null
         }
@@ -1328,6 +1331,7 @@ export type Database = {
           industry: string | null
           is_trial: boolean | null
           message: string | null
+          metadata: Json | null
           payment_instructions: string | null
           payment_method: string | null
           phone: string
@@ -1350,6 +1354,7 @@ export type Database = {
           industry?: string | null
           is_trial?: boolean | null
           message?: string | null
+          metadata?: Json | null
           payment_instructions?: string | null
           payment_method?: string | null
           phone: string
@@ -1372,6 +1377,7 @@ export type Database = {
           industry?: string | null
           is_trial?: boolean | null
           message?: string | null
+          metadata?: Json | null
           payment_instructions?: string | null
           payment_method?: string | null
           phone?: string
