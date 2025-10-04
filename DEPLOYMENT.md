@@ -564,6 +564,26 @@ sudo systemctl restart nginx
 cat /etc/logrotate.d/nginx
 ```
 
+## Initial Admin Setup
+
+After successful deployment, you need to create the initial admin account:
+
+1. **Navigate to your application**: Open your deployed URL
+2. **Go to signup page**: Navigate to `/auth`
+3. **Register with admin email**: Use `abel.birara@gmail.com`
+4. **System auto-assigns admin role**: The system automatically assigns admin privileges to this email
+
+**Important**: 
+- Make sure email confirmation is disabled in Supabase Auth settings for initial setup
+- After first login, immediately change your password
+- See `SELF_HOST_SETUP.md` for detailed setup instructions
+
+If you cannot login:
+1. Check that Supabase Site URL matches your deployment URL
+2. Verify auth redirect URLs include your domain
+3. Run the SQL script in `scripts/create-admin-user.sql` to manually assign admin role
+4. Check browser console for authentication errors
+
 ## Need Help?
 
 - **Nginx issues**: `sudo nginx -t` to test configuration
