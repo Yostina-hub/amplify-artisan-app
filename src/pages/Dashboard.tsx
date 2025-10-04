@@ -10,6 +10,7 @@ import { FreeTrialBanner } from "@/components/FreeTrialBanner";
 import { SERVICE_CATEGORIES } from "@/features/dashboard/data";
 import { Service } from "@/features/dashboard/types";
 import { PersonalizedAds } from "@/components/PersonalizedAds";
+import { RecommendedContentFeed } from "@/components/RecommendedContentFeed";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -353,9 +354,14 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Personalized Ads Section */}
+      <PersonalizedAds />
+
+      {/* AI Recommended Content Feed */}
+      <RecommendedContentFeed />
+
       {/* Service Grid */}
-      <div className="space-y-8 mt-8">
-        {SERVICE_CATEGORIES.map(category => (
+      <div className="space-y-8 mt-8">{SERVICE_CATEGORIES.map(category => (
           <ServiceSection
             key={category.id}
             title={category.title}

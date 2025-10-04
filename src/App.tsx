@@ -73,6 +73,7 @@ const App = () => (
             <Route path="/force-password" element={<ProtectedRoute allowUnapproved><Layout><ForcePasswordChange /></Layout></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Layout><DashboardRedirect /></Layout></ProtectedRoute>} />
             <Route path="/company-dashboard" element={<ProtectedRoute><Layout><CompanyDashboard /></Layout></ProtectedRoute>} />
+            <Route path="/user-dashboard" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
             <Route path="/composer" element={<ProtectedRoute><Layout><Composer /></Layout></ProtectedRoute>} />
             <Route path="/calendar" element={<ProtectedRoute><Layout><CalendarView /></Layout></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Layout><Settings /></Layout></ProtectedRoute>} />

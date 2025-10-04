@@ -390,6 +390,51 @@ export type Database = {
           },
         ]
       }
+      content_recommendations: {
+        Row: {
+          ai_confidence: number | null
+          company_id: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_interacted: boolean | null
+          is_viewed: boolean | null
+          post_id: string
+          recommendation_reason: string | null
+          recommendation_score: number
+          recommended_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_confidence?: number | null
+          company_id?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_interacted?: boolean | null
+          is_viewed?: boolean | null
+          post_id: string
+          recommendation_reason?: string | null
+          recommendation_score?: number
+          recommended_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_confidence?: number | null
+          company_id?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_interacted?: boolean | null
+          is_viewed?: boolean | null
+          post_id?: string
+          recommendation_reason?: string | null
+          recommendation_score?: number
+          recommended_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       email_configurations: {
         Row: {
           company_id: string | null
@@ -1502,36 +1547,90 @@ export type Database = {
         }
         Relationships: []
       }
-      user_engagement: {
+      user_content_preferences: {
         Row: {
-          created_at: string | null
-          device_info: Json | null
+          ai_analysis: Json | null
+          company_id: string | null
+          created_at: string
+          engagement_score: number | null
           id: string
-          interactions: Json | null
-          page_visited: string
-          session_id: string
-          time_spent: number | null
-          user_id: string | null
+          last_analyzed_at: string | null
+          optimal_engagement_times: Json | null
+          preferred_content_types: Json | null
+          preferred_topics: Json | null
+          updated_at: string
+          user_id: string
         }
         Insert: {
-          created_at?: string | null
-          device_info?: Json | null
+          ai_analysis?: Json | null
+          company_id?: string | null
+          created_at?: string
+          engagement_score?: number | null
           id?: string
-          interactions?: Json | null
-          page_visited: string
-          session_id: string
-          time_spent?: number | null
-          user_id?: string | null
+          last_analyzed_at?: string | null
+          optimal_engagement_times?: Json | null
+          preferred_content_types?: Json | null
+          preferred_topics?: Json | null
+          updated_at?: string
+          user_id: string
         }
         Update: {
-          created_at?: string | null
-          device_info?: Json | null
+          ai_analysis?: Json | null
+          company_id?: string | null
+          created_at?: string
+          engagement_score?: number | null
           id?: string
-          interactions?: Json | null
-          page_visited?: string
-          session_id?: string
-          time_spent?: number | null
-          user_id?: string | null
+          last_analyzed_at?: string | null
+          optimal_engagement_times?: Json | null
+          preferred_content_types?: Json | null
+          preferred_topics?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_engagement: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          device_type: string | null
+          engagement_duration: number | null
+          engagement_metadata: Json | null
+          engagement_type: string
+          id: string
+          ip_address: string | null
+          location_data: Json | null
+          post_id: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          device_type?: string | null
+          engagement_duration?: number | null
+          engagement_metadata?: Json | null
+          engagement_type: string
+          id?: string
+          ip_address?: string | null
+          location_data?: Json | null
+          post_id?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          device_type?: string | null
+          engagement_duration?: number | null
+          engagement_metadata?: Json | null
+          engagement_type?: string
+          id?: string
+          ip_address?: string | null
+          location_data?: Json | null
+          post_id?: string | null
+          user_agent?: string | null
+          user_id?: string
         }
         Relationships: []
       }
