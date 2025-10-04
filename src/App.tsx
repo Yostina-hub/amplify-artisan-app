@@ -60,6 +60,7 @@ import SocialIntelligence from "./pages/SocialIntelligence";
 import Automation from "./pages/Automation";
 import AIAnalytics from "./pages/AIAnalytics";
 import ModuleBuilder from "./pages/ModuleBuilder";
+import FormBuilder from "./pages/FormBuilder";
 
 const queryClient = new QueryClient();
 
@@ -126,6 +127,7 @@ const App = () => (
           
           {/* Enterprise Builder */}
           <Route path="/module-builder" element={<ProtectedRoute><Layout><ModuleBuilder /></Layout></ProtectedRoute>} />
+          <Route path="/form-builder" element={<ProtectedRoute><Layout><FormBuilder /></Layout></ProtectedRoute>} />
             
             <Route path="/social-accounts" element={<ProtectedRoute><Layout><SocialMediaCredentials /></Layout></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
