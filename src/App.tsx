@@ -74,6 +74,7 @@ import Quotes from "./pages/Quotes";
 import Invoices from "./pages/Invoices";
 import Reports from "./pages/Reports";
 import EmailMarketing from "./pages/EmailMarketing";
+import Documents from "./pages/Documents";
 
 const queryClient = new QueryClient();
 
@@ -154,6 +155,7 @@ const App = () => (
           <Route path="/invoices" element={<ProtectedRoute><Layout><Invoices /></Layout></ProtectedRoute>} />
           <Route path="/reports" element={<ProtectedRoute><Layout><Reports /></Layout></ProtectedRoute>} />
           <Route path="/email-marketing" element={<ProtectedRoute><Layout><EmailMarketing /></Layout></ProtectedRoute>} />
+          <Route path="/documents" element={<ProtectedRoute><Layout><Documents /></Layout></ProtectedRoute>} />
             
             <Route path="/social-accounts" element={<ProtectedRoute><Layout><SocialMediaCredentials /></Layout></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />

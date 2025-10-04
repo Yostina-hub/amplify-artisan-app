@@ -53,6 +53,7 @@ const builderItems = [
     { title: "Invoices", url: "/invoices", icon: Receipt },
     { title: "Reports", url: "/reports", icon: BarChart3 },
     { title: "Email Marketing", url: "/email-marketing", icon: Mail },
+    { title: "Documents", url: "/documents", icon: FileText },
   ];
 
 const marketingItems = [

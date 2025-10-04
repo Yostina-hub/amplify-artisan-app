@@ -1574,6 +1574,125 @@ export type Database = {
         }
         Relationships: []
       }
+      document_access_logs: {
+        Row: {
+          action: string
+          created_at: string
+          document_id: string
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          document_id: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          document_id?: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_access_logs_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          file_size: number
+          file_type: string
+          file_url: string
+          folder_path: string | null
+          id: string
+          is_shared: boolean | null
+          metadata: Json | null
+          name: string
+          parent_document_id: string | null
+          related_to_id: string | null
+          related_to_type: string | null
+          shared_with: string[] | null
+          tags: string[] | null
+          updated_at: string
+          version: number | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          file_size: number
+          file_type: string
+          file_url: string
+          folder_path?: string | null
+          id?: string
+          is_shared?: boolean | null
+          metadata?: Json | null
+          name: string
+          parent_document_id?: string | null
+          related_to_id?: string | null
+          related_to_type?: string | null
+          shared_with?: string[] | null
+          tags?: string[] | null
+          updated_at?: string
+          version?: number | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          file_size?: number
+          file_type?: string
+          file_url?: string
+          folder_path?: string | null
+          id?: string
+          is_shared?: boolean | null
+          metadata?: Json | null
+          name?: string
+          parent_document_id?: string | null
+          related_to_id?: string | null
+          related_to_type?: string | null
+          shared_with?: string[] | null
+          tags?: string[] | null
+          updated_at?: string
+          version?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_parent_document_id_fkey"
+            columns: ["parent_document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_campaigns: {
         Row: {
           bounced_count: number | null
