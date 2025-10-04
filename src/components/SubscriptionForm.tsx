@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CheckCircle2, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { PaymentGatewaySelector } from "./PaymentGatewaySelector";
 
 interface SubscriptionFormProps {
   open: boolean;
@@ -21,7 +22,10 @@ interface SubscriptionFormProps {
 export const SubscriptionForm = ({ open, onOpenChange, selectedPlanId, isTrialMode = false, isUpgradeMode = false }: SubscriptionFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
   const [userEmail, setUserEmail] = useState<string>('');
+  const [pendingSubscriptionId, setPendingSubscriptionId] = useState<string | null>(null);
+  const [subscriptionAmount, setSubscriptionAmount] = useState(0);
 
   useEffect(() => {
     if (isUpgradeMode) {
@@ -137,10 +141,35 @@ export const SubscriptionForm = ({ open, onOpenChange, selectedPlanId, isTrialMo
           // Don't throw - subscription was created successfully
         }
       }
+
+      return requestData;
     },
-    onSuccess: () => {
-      setShowSuccess(true);
-      toast.success('Subscription request submitted successfully!');
+    onSuccess: (data) => {
+      console.log("Subscription request submitted successfully:", data);
+      
+      // For trial mode, skip payment and show success
+      if (isTrialMode) {
+        setShowSuccess(true);
+        toast.success("Trial started! Check your email for details.");
+        return;
+      }
+
+      // For upgrade mode, show success
+      if (isUpgradeMode) {
+        setShowSuccess(true);
+        toast.success("Subscription upgraded successfully!");
+        return;
+      }
+
+      // For paid subscriptions, show payment gateway
+      if (data) {
+        const selectedPlan = plans?.find(p => p.id === data.pricing_plan_id);
+        if (selectedPlan) {
+          setPendingSubscriptionId(data.id);
+          setSubscriptionAmount(selectedPlan.price);
+          setShowPayment(true);
+        }
+      }
     },
     onError: (error) => {
       console.error('Error submitting request:', error);
@@ -157,7 +186,7 @@ export const SubscriptionForm = ({ open, onOpenChange, selectedPlanId, isTrialMo
     
     const formData = new FormData(e.currentTarget);
     const data = {
-      pricing_plan_id: formData.get('plan_id'),
+      pricing_plan_id: isTrialMode ? selectedPlanId : formData.get('plan_id'),
       full_name: formData.get('full_name'),
       email: isUpgradeMode ? userEmail : formData.get('email'),
       phone: isUpgradeMode ? null : formData.get('phone'),
@@ -169,6 +198,50 @@ export const SubscriptionForm = ({ open, onOpenChange, selectedPlanId, isTrialMo
     submitMutation.mutate(data);
   };
 
+  const handlePaymentComplete = async (transactionId: string, method: string) => {
+    if (!pendingSubscriptionId) return;
+
+    try {
+      const { error } = await supabase.functions.invoke('process-payment', {
+        body: {
+          subscriptionRequestId: pendingSubscriptionId,
+          amount: subscriptionAmount,
+          currency: 'USD',
+          paymentMethod: method,
+        }
+      });
+
+      if (error) throw error;
+
+      setShowPayment(false);
+      setShowSuccess(true);
+      toast.success("Payment processed successfully!");
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast.error("Payment processing failed");
+    }
+  };
+
+  // Payment gateway state
+  if (showPayment) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-3xl">
+          <PaymentGatewaySelector
+            amount={subscriptionAmount}
+            currency="USD"
+            onPaymentComplete={handlePaymentComplete}
+            onCancel={() => {
+              setShowPayment(false);
+              onOpenChange(false);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Success state
   if (showSuccess) {
     return (
       <Dialog open={open} onOpenChange={(isOpen) => {
@@ -183,14 +256,14 @@ export const SubscriptionForm = ({ open, onOpenChange, selectedPlanId, isTrialMo
               <CheckCircle2 className="h-8 w-8 text-green-600" />
             </div>
             <DialogTitle className="text-2xl">
-              {isUpgradeMode ? 'Upgrade Request Submitted! 🎉' : isTrialMode ? 'Trial Activated! 🎉' : 'Request Submitted!'}
+              {isUpgradeMode ? 'Upgrade Request Submitted! 🎉' : isTrialMode ? 'Trial Activated! 🎉' : 'Payment Complete! 🎉'}
             </DialogTitle>
             <DialogDescription className="text-base">
               {isUpgradeMode
                 ? 'Thank you for upgrading! Our team will review your request and send you payment instructions via email within 24 hours.'
                 : isTrialMode 
                   ? 'Your trial account has been created! Check your email for login credentials. You can start exploring all features immediately.'
-                  : 'Thank you for your interest! Our team will review your subscription request and contact you within 24-48 hours via email with approval status and payment instructions.'
+                  : 'Thank you! Your payment has been received and your subscription is now active. Check your email for login credentials.'
               }
             </DialogDescription>
             <Button onClick={() => {
