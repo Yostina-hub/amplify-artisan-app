@@ -193,28 +193,41 @@ export default function ReachAnalytics() {
 
   const fetchSocialAnalytics = async () => {
     try {
-      // Get user's company ID
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('company_id')
-        .eq('id', (await supabase.auth.getUser()).data.user?.id)
-        .single();
-
-      if (!profile?.company_id) {
-        console.log('No company_id found for user');
-        return;
-      }
+      // Check if user is admin
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: userRoles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user?.id);
+      
+      const isAdmin = userRoles?.some(r => r.role === 'admin');
 
       const daysAgo = parseInt(timeRange);
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - daysAgo);
 
-      const { data: postsData } = await supabase
+      let query = supabase
         .from('social_media_posts')
         .select('*')
-        .eq('company_id', profile.company_id)
         .gte('created_at', startDate.toISOString())
         .order('engagement_rate', { ascending: false });
+
+      // If not admin, filter by company_id
+      if (!isAdmin) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('company_id')
+          .eq('id', user?.id)
+          .single();
+
+        if (!profile?.company_id) {
+          console.log('No company_id found for user');
+          return;
+        }
+        query = query.eq('company_id', profile.company_id);
+      }
+
+      const { data: postsData } = await query;
 
       console.log('Fetched posts:', postsData?.length, 'posts');
 
@@ -275,27 +288,56 @@ export default function ReachAnalytics() {
 
   const fetchAccountData = async () => {
     try {
-      // Get user's company ID
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('company_id')
-        .eq('id', (await supabase.auth.getUser()).data.user?.id)
-        .single();
+      // Check if user is admin
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: userRoles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user?.id);
+      
+      const isAdmin = userRoles?.some(r => r.role === 'admin');
 
-      if (!profile?.company_id) return;
+      let configuredPlatforms, connectedAccounts;
 
-      // Fetch configured platforms from company_platform_configs
-      const { data: configuredPlatforms } = await supabase
-        .from('company_platform_configs')
-        .select('id, platform_id, is_active, social_platforms(id, name, display_name, icon_name)')
-        .eq('company_id', profile.company_id)
-        .eq('is_active', true);
+      if (isAdmin) {
+        // Fetch ALL platforms and accounts for admin
+        const { data: platforms } = await supabase
+          .from('company_platform_configs')
+          .select('id, platform_id, company_id, is_active, social_platforms(id, name, display_name, icon_name)')
+          .eq('is_active', true);
+        
+        const { data: accounts } = await querySocialMediaAccountsSafe()
+          .select('*')
+          .eq('is_active', true);
 
-      // Fetch connected accounts from social_media_accounts
-      const { data: connectedAccounts } = await querySocialMediaAccountsSafe()
-        .select('*')
-        .eq('is_active', true)
-        .eq('company_id', profile.company_id);
+        configuredPlatforms = platforms;
+        connectedAccounts = accounts;
+      } else {
+        // Get user's company ID for non-admin users
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('company_id')
+          .eq('id', user?.id)
+          .single();
+
+        if (!profile?.company_id) return;
+
+        // Fetch configured platforms from company_platform_configs
+        const { data: platforms } = await supabase
+          .from('company_platform_configs')
+          .select('id, platform_id, is_active, social_platforms(id, name, display_name, icon_name)')
+          .eq('company_id', profile.company_id)
+          .eq('is_active', true);
+
+        // Fetch connected accounts from social_media_accounts
+        const { data: accounts } = await querySocialMediaAccountsSafe()
+          .select('*')
+          .eq('is_active', true)
+          .eq('company_id', profile.company_id);
+
+        configuredPlatforms = platforms;
+        connectedAccounts = accounts;
+      }
 
       // Combine both sources - prefer connected accounts, fall back to configured platforms
       const accountsMap = new Map();
