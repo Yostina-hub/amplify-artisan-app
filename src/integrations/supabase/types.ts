@@ -209,6 +209,7 @@ export type Database = {
           industry: string | null
           name: string
           phone: string | null
+          pricing_plan_id: string | null
           rejection_reason: string | null
           status: string
           updated_at: string
@@ -226,6 +227,7 @@ export type Database = {
           industry?: string | null
           name: string
           phone?: string | null
+          pricing_plan_id?: string | null
           rejection_reason?: string | null
           status?: string
           updated_at?: string
@@ -243,12 +245,21 @@ export type Database = {
           industry?: string | null
           name?: string
           phone?: string | null
+          pricing_plan_id?: string | null
           rejection_reason?: string | null
           status?: string
           updated_at?: string
           website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "companies_pricing_plan_id_fkey"
+            columns: ["pricing_plan_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       company_platform_configs: {
         Row: {
