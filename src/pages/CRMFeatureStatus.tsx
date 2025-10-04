@@ -1,13 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Brain, TrendingUp, Users, DollarSign, Target, Zap, Activity, ArrowUp, ArrowDown, Mic, MessageSquare, Clock, Award, AlertCircle, CheckCircle2, Phone, Mail, Calendar, FileText, BarChart3 } from "lucide-react";
+import { Brain, TrendingUp, Users, DollarSign, Target, Zap, Activity, ArrowUp, ArrowDown, Mic, MessageSquare, Clock, Award, AlertCircle, CheckCircle2, Phone, Mail, Calendar, FileText, BarChart3, Database, ShieldAlert, Megaphone, Package, Receipt, UserCheck, Workflow, LineChart, PieChart, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CRMFeatureStatus() {
+  const { toast } = useToast();
   const [isListening, setIsListening] = useState(false);
   const [aiInsight, setAiInsight] = useState("Analyzing real-time data...");
+  const [voiceTranscript, setVoiceTranscript] = useState("");
+  const [aiResponse, setAiResponse] = useState("");
+  const [currentReportIndex, setCurrentReportIndex] = useState(0);
+  const recognitionRef = useRef<any>(null);
   const [realtimeMetrics, setRealtimeMetrics] = useState({
     revenue: 2847239,
     deals: 143,
@@ -50,11 +56,178 @@ export default function CRMFeatureStatus() {
     return () => clearInterval(insightInterval);
   }, []);
 
+  // System-wide reports data
+  const systemReports = [
+    {
+      title: "Sales Pipeline Health",
+      icon: TrendingUp,
+      style: "gradient",
+      data: [
+        { label: "Hot Leads", value: "47", change: "+23%", color: "text-red-400" },
+        { label: "Warm Prospects", value: "89", change: "+15%", color: "text-orange-400" },
+        { label: "Qualified Leads", value: "156", change: "+8%", color: "text-yellow-400" },
+        { label: "Conversion Rate", value: "34%", change: "+5%", color: "text-green-400" }
+      ]
+    },
+    {
+      title: "System Performance Metrics",
+      icon: Database,
+      style: "stats",
+      data: [
+        { label: "API Response Time", value: "45ms", status: "excellent" },
+        { label: "Database Load", value: "67%", status: "good" },
+        { label: "Active Sessions", value: "1,247", status: "high" },
+        { label: "System Uptime", value: "99.98%", status: "excellent" }
+      ]
+    },
+    {
+      title: "Revenue Breakdown",
+      icon: DollarSign,
+      style: "chart",
+      data: [
+        { category: "Enterprise", amount: "$1.2M", percentage: 42 },
+        { category: "Mid-Market", amount: "$890K", percentage: 31 },
+        { category: "SMB", amount: "$520K", percentage: 18 },
+        { category: "Recurring", amount: "$237K", percentage: 9 }
+      ]
+    },
+    {
+      title: "Critical Alerts & Actions",
+      icon: ShieldAlert,
+      style: "alerts",
+      data: [
+        { priority: "high", message: "5 contracts expiring in 7 days", action: "Review & Renew" },
+        { priority: "medium", message: "3 payment failures detected", action: "Contact Clients" },
+        { priority: "high", message: "System backup scheduled tonight", action: "Monitor" },
+        { priority: "low", message: "Q4 forecast ready for review", action: "Schedule Meeting" }
+      ]
+    },
+    {
+      title: "Marketing Campaign ROI",
+      icon: Megaphone,
+      style: "performance",
+      data: [
+        { campaign: "Email Campaign Q4", roi: "340%", spent: "$45K", revenue: "$153K" },
+        { campaign: "Social Media Ads", roi: "280%", spent: "$67K", revenue: "$188K" },
+        { campaign: "Content Marketing", roi: "420%", spent: "$23K", revenue: "$97K" },
+        { campaign: "PPC Google Ads", roi: "195%", spent: "$89K", revenue: "$174K" }
+      ]
+    },
+    {
+      title: "Inventory & Product Status",
+      icon: Package,
+      style: "inventory",
+      data: [
+        { product: "Premium Plan", stock: "Unlimited", sales: "342 units", trend: "up" },
+        { product: "Enterprise Plan", stock: "Limited", sales: "89 units", trend: "up" },
+        { product: "Starter Plan", stock: "Available", sales: "1,247 units", trend: "stable" },
+        { product: "Add-on Services", stock: "Available", sales: "567 units", trend: "up" }
+      ]
+    },
+    {
+      title: "Customer Satisfaction Index",
+      icon: UserCheck,
+      style: "satisfaction",
+      data: [
+        { metric: "NPS Score", value: "72", benchmark: "68", status: "above" },
+        { metric: "CSAT", value: "4.8/5", benchmark: "4.5/5", status: "above" },
+        { metric: "Response Time", value: "2.3h", benchmark: "4h", status: "excellent" },
+        { metric: "Resolution Rate", value: "94%", benchmark: "85%", status: "excellent" }
+      ]
+    },
+    {
+      title: "Workflow Automation Status",
+      icon: Workflow,
+      style: "automation",
+      data: [
+        { workflow: "Lead Qualification", runs: "1,234", success: "98%", saved: "45h" },
+        { workflow: "Email Follow-ups", runs: "3,456", success: "96%", saved: "89h" },
+        { workflow: "Invoice Generation", runs: "567", success: "100%", saved: "23h" },
+        { workflow: "Report Distribution", runs: "234", success: "97%", saved: "12h" }
+      ]
+    }
+  ];
+
+  // Rotate reports every 5-8 seconds
+  useEffect(() => {
+    const randomInterval = Math.floor(Math.random() * 3000) + 5000; // 5-8 seconds
+    const rotationTimer = setInterval(() => {
+      setCurrentReportIndex((prev) => (prev + 1) % systemReports.length);
+    }, randomInterval);
+
+    return () => clearInterval(rotationTimer);
+  }, []);
+
+  const currentReport = systemReports[currentReportIndex];
+
+  // Initialize Web Speech API
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = Array.from(event.results)
+          .map((result: any) => result[0])
+          .map((result: any) => result.transcript)
+          .join('');
+        
+        setVoiceTranscript(transcript);
+        
+        // Simulate AI response based on keywords
+        if (transcript.toLowerCase().includes('revenue')) {
+          setAiResponse("Revenue is currently at $2.85M with a 12.5% increase from last quarter. Top performing sectors are Enterprise Sales and SaaS subscriptions.");
+        } else if (transcript.toLowerCase().includes('deals')) {
+          setAiResponse("We have 143 active deals in the pipeline. 67% are in advanced negotiation stages. Expected close rate is 68% based on historical data.");
+        } else if (transcript.toLowerCase().includes('team') || transcript.toLowerCase().includes('performance')) {
+          setAiResponse("Team performance is exceptional at 89.2% engagement. Sarah J. leads with 3 closed deals today worth $245K. 8 meetings scheduled for tomorrow.");
+        } else if (transcript.toLowerCase().includes('risk') || transcript.toLowerCase().includes('alert')) {
+          setAiResponse("5 high-value opportunities need follow-up within 24 hours. Client ABC may churn - proactive outreach recommended. System health is at 99.7%.");
+        }
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+        toast({
+          title: "Voice Error",
+          description: "Could not access microphone. Please check permissions.",
+          variant: "destructive"
+        });
+      };
+
+      recognitionRef.current.onend = () => {
+        if (isListening) {
+          recognitionRef.current.start();
+        }
+      };
+    }
+  }, [isListening, toast]);
+
   const toggleVoice = () => {
-    setIsListening(!isListening);
+    if (!recognitionRef.current) {
+      toast({
+        title: "Not Supported",
+        description: "Voice recognition is not supported in this browser.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!isListening) {
-      // Simulate voice activation
-      setTimeout(() => setIsListening(false), 3000);
+      recognitionRef.current.start();
+      setIsListening(true);
+      setVoiceTranscript("");
+      setAiResponse("");
+      toast({
+        title: "Listening...",
+        description: "AI is now listening to your commands",
+      });
+    } else {
+      recognitionRef.current.stop();
+      setIsListening(false);
     }
   };
 
@@ -177,6 +350,40 @@ export default function CRMFeatureStatus() {
                 </Badge>
               </div>
             </div>
+
+            {/* Voice Interaction Display */}
+            {(voiceTranscript || aiResponse) && (
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600/40 via-purple-600/40 to-pink-600/40 backdrop-blur-xl border-2 border-white/30 p-6 animate-scale-in shadow-[0_0_50px_rgba(168,85,247,0.6)] mt-4">
+                <div className="space-y-4">
+                  {voiceTranscript && (
+                    <div className="relative">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-xl bg-blue-500/30 border border-blue-400/50">
+                          <Mic className="h-5 w-5 text-blue-300 animate-pulse" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs text-white/60 font-semibold mb-1">You said:</p>
+                          <p className="text-white font-medium drop-shadow-lg">{voiceTranscript}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {aiResponse && (
+                    <div className="relative">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-xl bg-purple-500/30 border border-purple-400/50">
+                          <Brain className="h-5 w-5 text-purple-300 animate-float" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs text-white/60 font-semibold mb-1">AI Response:</p>
+                          <p className="text-white font-medium drop-shadow-lg">{aiResponse}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -218,6 +425,165 @@ export default function CRMFeatureStatus() {
             );
           })}
         </div>
+
+        {/* System-Wide Executive Report - Auto Rotating */}
+        <Card className="relative overflow-hidden bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border-2 border-white/30 animate-fade-in shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:shadow-[0_0_60px_rgba(168,85,247,0.6)] transition-all duration-500">
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan-600/20 to-blue-600/20" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-cyan-500/30 to-transparent rounded-full blur-3xl animate-glow-pulse" />
+          
+          <CardHeader className="relative z-10">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-3 text-white drop-shadow-lg">
+                <currentReport.icon className="h-7 w-7 text-cyan-300 animate-float drop-shadow-[0_0_12px_rgba(103,232,249,0.8)]" />
+                <span className="font-bold text-xl">{currentReport.title}</span>
+              </CardTitle>
+              <Badge className="bg-cyan-500/40 text-cyan-100 border-2 border-cyan-300/50 font-bold shadow-[0_0_20px_rgba(34,211,238,0.6)] animate-pulse">
+                LIVE REPORT {currentReportIndex + 1}/{systemReports.length}
+              </Badge>
+            </div>
+          </CardHeader>
+
+          <CardContent className="relative z-10">
+            {currentReport.style === 'gradient' && (
+              <div className="grid grid-cols-2 gap-4">
+                {currentReport.data.map((item: any, i: number) => (
+                  <div key={i} className="p-4 rounded-xl bg-gradient-to-br from-white/10 to-white/5 border-2 border-white/20 hover:border-cyan-400/50 transition-all duration-300 animate-scale-in" style={{ animationDelay: `${i * 100}ms` }}>
+                    <p className="text-xs text-white/70 font-semibold mb-2">{item.label}</p>
+                    <p className={`text-3xl font-bold ${item.color} drop-shadow-[0_0_15px_currentColor] mb-1`}>{item.value}</p>
+                    <p className="text-xs text-emerald-300 font-bold">{item.change}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {currentReport.style === 'stats' && (
+              <div className="space-y-3">
+                {currentReport.data.map((item: any, i: number) => (
+                  <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-white/10 to-white/5 border-2 border-white/20 hover:border-white/40 transition-all duration-300 animate-slide-up" style={{ animationDelay: `${i * 100}ms` }}>
+                    <span className="text-white/90 font-semibold">{item.label}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-white font-bold text-lg drop-shadow-lg">{item.value}</span>
+                      <Badge className={`${item.status === 'excellent' ? 'bg-green-500/40 border-green-400/50 text-green-200' : item.status === 'good' ? 'bg-blue-500/40 border-blue-400/50 text-blue-200' : 'bg-orange-500/40 border-orange-400/50 text-orange-200'} border-2 font-bold`}>
+                        {item.status}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {currentReport.style === 'chart' && (
+              <div className="space-y-4">
+                {currentReport.data.map((item: any, i: number) => (
+                  <div key={i} className="space-y-2 animate-scale-in" style={{ animationDelay: `${i * 100}ms` }}>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-white/90 font-semibold">{item.category}</span>
+                      <span className="text-white font-bold drop-shadow-lg">{item.amount}</span>
+                    </div>
+                    <div className="relative h-3 bg-white/10 rounded-full overflow-hidden">
+                      <div 
+                        className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full shadow-[0_0_20px_rgba(34,211,238,0.6)] transition-all duration-1000"
+                        style={{ width: `${item.percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {currentReport.style === 'alerts' && (
+              <div className="space-y-3">
+                {currentReport.data.map((item: any, i: number) => (
+                  <div key={i} className={`p-4 rounded-xl border-2 backdrop-blur-sm animate-slide-up transition-all duration-300 hover:scale-105 cursor-pointer ${
+                    item.priority === 'high' ? 'bg-gradient-to-r from-red-600/30 to-pink-600/30 border-red-400/50 shadow-[0_0_20px_rgba(239,68,68,0.4)]' :
+                    item.priority === 'medium' ? 'bg-gradient-to-r from-orange-600/30 to-yellow-600/30 border-orange-400/50 shadow-[0_0_20px_rgba(249,115,22,0.4)]' :
+                    'bg-gradient-to-r from-blue-600/30 to-cyan-600/30 border-blue-400/50 shadow-[0_0_20px_rgba(59,130,246,0.4)]'
+                  }`} style={{ animationDelay: `${i * 100}ms` }}>
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className={`h-5 w-5 mt-0.5 ${item.priority === 'high' ? 'text-red-300' : item.priority === 'medium' ? 'text-orange-300' : 'text-blue-300'} drop-shadow-[0_0_8px_currentColor]`} />
+                      <div className="flex-1">
+                        <p className="text-white font-semibold mb-1 drop-shadow-lg">{item.message}</p>
+                        <p className="text-xs text-white/70 font-medium">Action: {item.action}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {currentReport.style === 'performance' && (
+              <div className="space-y-3">
+                {currentReport.data.map((item: any, i: number) => (
+                  <div key={i} className="p-4 rounded-xl bg-gradient-to-r from-white/10 to-white/5 border-2 border-white/20 hover:border-emerald-400/50 transition-all duration-300 animate-scale-in" style={{ animationDelay: `${i * 100}ms` }}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white font-semibold">{item.campaign}</span>
+                      <Badge className="bg-emerald-500/40 text-emerald-200 border-2 border-emerald-400/50 font-bold shadow-[0_0_15px_rgba(16,185,129,0.6)]">
+                        ROI: {item.roi}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-white/70">Spent: <span className="text-white font-bold">{item.spent}</span></span>
+                      <span className="text-white/70">Revenue: <span className="text-emerald-300 font-bold drop-shadow-[0_0_8px_rgba(110,231,183,0.6)]">{item.revenue}</span></span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {currentReport.style === 'inventory' && (
+              <div className="space-y-3">
+                {currentReport.data.map((item: any, i: number) => (
+                  <div key={i} className="p-4 rounded-xl bg-gradient-to-r from-white/10 to-white/5 border-2 border-white/20 hover:border-purple-400/50 transition-all duration-300 animate-slide-up" style={{ animationDelay: `${i * 100}ms` }}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white font-semibold">{item.product}</span>
+                      {item.trend === 'up' ? <TrendingUp className="h-5 w-5 text-emerald-400 drop-shadow-[0_0_8px_rgba(110,231,183,0.6)]" /> : <Activity className="h-5 w-5 text-blue-400" />}
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-white/70">Stock: <span className="text-white font-bold">{item.stock}</span></span>
+                      <span className="text-white/70">Sales: <span className="text-purple-300 font-bold">{item.sales}</span></span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {currentReport.style === 'satisfaction' && (
+              <div className="grid grid-cols-2 gap-4">
+                {currentReport.data.map((item: any, i: number) => (
+                  <div key={i} className="p-4 rounded-xl bg-gradient-to-br from-white/10 to-white/5 border-2 border-white/20 hover:border-green-400/50 transition-all duration-300 animate-scale-in" style={{ animationDelay: `${i * 100}ms` }}>
+                    <p className="text-xs text-white/70 font-semibold mb-2">{item.metric}</p>
+                    <p className="text-2xl font-bold text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] mb-1">{item.value}</p>
+                    <div className="flex items-center gap-1">
+                      {item.status === 'excellent' || item.status === 'above' ? (
+                        <ArrowUp className="h-3 w-3 text-green-400" />
+                      ) : null}
+                      <p className="text-xs text-green-300 font-bold">vs {item.benchmark}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {currentReport.style === 'automation' && (
+              <div className="space-y-3">
+                {currentReport.data.map((item: any, i: number) => (
+                  <div key={i} className="p-4 rounded-xl bg-gradient-to-r from-white/10 to-white/5 border-2 border-white/20 hover:border-indigo-400/50 transition-all duration-300 animate-slide-up" style={{ animationDelay: `${i * 100}ms` }}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white font-semibold">{item.workflow}</span>
+                      <Badge className="bg-indigo-500/40 text-indigo-200 border-2 border-indigo-400/50 font-bold">
+                        {item.success}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-white/70">Runs: <span className="text-white font-bold">{item.runs}</span></span>
+                      <span className="text-white/70">Saved: <span className="text-indigo-300 font-bold">{item.saved}</span></span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Live Activity Feed */}
