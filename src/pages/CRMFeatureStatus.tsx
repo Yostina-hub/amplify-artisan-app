@@ -1,10 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Brain, TrendingUp, Users, DollarSign, Target, Zap, Activity, ArrowUp, ArrowDown, Mic, MessageSquare, Clock, Award, AlertCircle, CheckCircle2, Phone, Mail, Calendar, FileText, BarChart3, Database, ShieldAlert, Megaphone, Package, Receipt, UserCheck, Workflow, LineChart, PieChart, TrendingDown } from "lucide-react";
+import { Brain, TrendingUp, Users, DollarSign, Target, Zap, Activity, ArrowUp, ArrowDown, Mic, MessageSquare, Clock, Award, AlertCircle, CheckCircle2, Phone, Mail, Calendar, FileText, BarChart3, Database, ShieldAlert, Megaphone, Package, Receipt, UserCheck, Workflow, LineChart, PieChart, TrendingDown, Share2, ThumbsUp, Eye, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
+
+interface QueryData {
+  type: string;
+  data: any;
+  visualization: string;
+}
 
 export default function CRMFeatureStatus() {
   const { toast } = useToast();
@@ -16,6 +22,7 @@ export default function CRMFeatureStatus() {
   const recognitionRef = useRef<any>(null);
   const speechSynthRef = useRef<SpeechSynthesisUtterance | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [queryData, setQueryData] = useState<QueryData | null>(null);
   const [realtimeMetrics, setRealtimeMetrics] = useState({
     revenue: 2847239,
     deals: 143,
@@ -178,26 +185,189 @@ export default function CRMFeatureStatus() {
         
         setVoiceTranscript(transcript);
         
-        // Simulate AI response based on keywords
+        // Comprehensive AI response system
         let response = "";
-        if (transcript.toLowerCase().includes('revenue')) {
-          response = "Revenue is currently at $2.85M with a 12.5% increase from last quarter. Top performing sectors are Enterprise Sales and SaaS subscriptions.";
-        } else if (transcript.toLowerCase().includes('deals')) {
-          response = "We have 143 active deals in the pipeline. 67% are in advanced negotiation stages. Expected close rate is 68% based on historical data.";
-        } else if (transcript.toLowerCase().includes('team') || transcript.toLowerCase().includes('performance')) {
-          response = "Team performance is exceptional at 89.2% engagement. Sarah J. leads with 3 closed deals today worth $245K. 8 meetings scheduled for tomorrow.";
-        } else if (transcript.toLowerCase().includes('risk') || transcript.toLowerCase().includes('alert')) {
-          response = "5 high-value opportunities need follow-up within 24 hours. Client ABC may churn - proactive outreach recommended. System health is at 99.7%.";
-        } else if (transcript.toLowerCase().includes('report') || transcript.toLowerCase().includes('overview')) {
-          response = "Currently showing " + systemReports[currentReportIndex].title + ". All systems are operational. Would you like details on a specific metric?";
-        } else if (transcript.toLowerCase().includes('customer') || transcript.toLowerCase().includes('satisfaction')) {
-          response = "Customer satisfaction is at 96% with an NPS score of 72. Response time is 2.3 hours, well below our 4-hour benchmark.";
-        } else if (response === "" && transcript.length > 10) {
-          response = "I'm analyzing that data for you. Please specify which metric you'd like to review: revenue, deals, team performance, or customer satisfaction.";
+        let dataVisualization: QueryData | null = null;
+        
+        const query = transcript.toLowerCase();
+        
+        // Social Media queries
+        if (query.includes('social') || query.includes('post') || query.includes('engagement') || query.includes('followers')) {
+          response = "Social media performance is strong across all platforms. We have 245K total followers with an average engagement rate of 4.8%. Top performing platform is Instagram with 12.3K likes on recent posts. LinkedIn posts have 89% professional engagement. We've scheduled 47 posts for this week with AI-optimized content.";
+          dataVisualization = {
+            type: 'social',
+            data: [
+              { platform: 'Instagram', followers: '89.2K', engagement: '5.2%', posts: 23 },
+              { platform: 'LinkedIn', followers: '67.8K', engagement: '4.9%', posts: 18 },
+              { platform: 'Twitter', followers: '54.3K', engagement: '4.1%', posts: 31 },
+              { platform: 'Facebook', followers: '33.7K', engagement: '4.5%', posts: 15 }
+            ],
+            visualization: 'platforms'
+          };
+        }
+        // Revenue & Financial queries
+        else if (query.includes('revenue') || query.includes('income') || query.includes('profit') || query.includes('financial')) {
+          response = "Current revenue stands at $2.85M with a 12.5% increase from last quarter. Monthly recurring revenue is $487K. Top revenue sources are Enterprise Sales at $1.2M (42%), Mid-Market at $890K (31%), and SMB at $520K (18%). Profit margin is 34% with Q4 forecast showing 23% growth potential.";
+          dataVisualization = {
+            type: 'revenue',
+            data: {
+              total: '$2.85M',
+              growth: '+12.5%',
+              mrr: '$487K',
+              segments: [
+                { name: 'Enterprise', value: 1200000, percentage: 42 },
+                { name: 'Mid-Market', value: 890000, percentage: 31 },
+                { name: 'SMB', value: 520000, percentage: 18 },
+                { name: 'Other', value: 240000, percentage: 9 }
+              ]
+            },
+            visualization: 'revenue-chart'
+          };
+        }
+        // Customer & Support queries
+        else if (query.includes('customer') || query.includes('satisfaction') || query.includes('support') || query.includes('ticket')) {
+          response = "Customer satisfaction is exceptional at 96% with an NPS score of 72. We've resolved 234 support tickets this month with an average response time of 2.3 hours. Customer retention rate is 94% with only 3% churn. Top satisfaction drivers are product quality and support responsiveness.";
+          dataVisualization = {
+            type: 'customer',
+            data: {
+              satisfaction: '96%',
+              nps: 72,
+              tickets: 234,
+              responseTime: '2.3h',
+              retention: '94%'
+            },
+            visualization: 'customer-metrics'
+          };
+        }
+        // Deals & Sales Pipeline queries
+        else if (query.includes('deal') || query.includes('pipeline') || query.includes('sales') || query.includes('opportunity')) {
+          response = "We have 143 active deals in the pipeline valued at $8.7M. 67% are in advanced negotiation stages. Expected close rate is 68% based on historical data. Top sales rep Sarah J. has closed 3 deals worth $245K today. Average deal size is $60K with a 45-day sales cycle.";
+          dataVisualization = {
+            type: 'deals',
+            data: {
+              total: 143,
+              value: '$8.7M',
+              winRate: '68%',
+              stages: [
+                { stage: 'Qualified', count: 47, value: '$2.1M' },
+                { stage: 'Proposal', count: 38, value: '$2.8M' },
+                { stage: 'Negotiation', count: 35, value: '$2.5M' },
+                { stage: 'Closing', count: 23, value: '$1.3M' }
+              ]
+            },
+            visualization: 'pipeline'
+          };
+        }
+        // Team & HR queries
+        else if (query.includes('team') || query.includes('performance') || query.includes('employee') || query.includes('staff')) {
+          response = "Team performance is exceptional at 89.2% engagement. We have 47 active team members across 5 departments. Top performer Sarah J. leads with 3 closed deals today worth $245K. Team satisfaction score is 4.6/5. We have 8 meetings scheduled for tomorrow and 12 ongoing projects with 94% on-time delivery rate.";
+          dataVisualization = {
+            type: 'team',
+            data: {
+              members: 47,
+              engagement: '89.2%',
+              satisfaction: '4.6/5',
+              topPerformer: 'Sarah J.',
+              projects: 12,
+              onTime: '94%'
+            },
+            visualization: 'team-stats'
+          };
+        }
+        // Marketing & Campaigns queries
+        else if (query.includes('marketing') || query.includes('campaign') || query.includes('ad') || query.includes('roi')) {
+          response = "Marketing campaigns are performing excellently with an average ROI of 315%. Email Campaign Q4 achieved 340% ROI from $45K investment generating $153K revenue. Social Media Ads returned 280% ROI. Content Marketing leads with 420% ROI. Total marketing spend this quarter is $224K with $706K in attributed revenue.";
+          dataVisualization = {
+            type: 'marketing',
+            data: [
+              { campaign: 'Email Q4', roi: '340%', spent: '$45K', revenue: '$153K' },
+              { campaign: 'Social Ads', roi: '280%', spent: '$67K', revenue: '$188K' },
+              { campaign: 'Content', roi: '420%', spent: '$23K', revenue: '$97K' },
+              { campaign: 'PPC', roi: '195%', spent: '$89K', revenue: '$174K' }
+            ],
+            visualization: 'marketing-roi'
+          };
+        }
+        // System & Operations queries
+        else if (query.includes('system') || query.includes('operation') || query.includes('automation') || query.includes('workflow')) {
+          response = "All systems are operational at 99.98% uptime. We have 4 active automation workflows saving 169 hours per week. API response time is excellent at 45ms. Database load is 67% with 1,247 active sessions. Lead Qualification workflow has 98% success rate with 1,234 runs this week.";
+          dataVisualization = {
+            type: 'system',
+            data: {
+              uptime: '99.98%',
+              apiResponse: '45ms',
+              activeUsers: 1247,
+              automations: 4,
+              timeSaved: '169h/week'
+            },
+            visualization: 'system-health'
+          };
+        }
+        // Analytics & Reporting queries
+        else if (query.includes('analytic') || query.includes('report') || query.includes('metric') || query.includes('kpi')) {
+          response = "Key performance indicators are trending positively. Conversion rate is up 5.2% to 67.8%. Customer acquisition cost decreased 12% to $347. Lifetime value increased to $4,890. Website traffic is up 23% with 45K monthly visitors. Email open rate is 34% with 12% click-through rate.";
+          dataVisualization = {
+            type: 'analytics',
+            data: {
+              conversion: '67.8%',
+              cac: '$347',
+              ltv: '$4,890',
+              traffic: '45K',
+              emailOpen: '34%'
+            },
+            visualization: 'kpi-dashboard'
+          };
+        }
+        // Risk & Alerts queries
+        else if (query.includes('risk') || query.includes('alert') || query.includes('warning') || query.includes('issue')) {
+          response = "Current risk assessment shows 5 high-value opportunities needing follow-up within 24 hours. Client ABC shows 78% churn probability - immediate intervention recommended. 3 contracts expire in 7 days requiring renewal action. System health is optimal at 99.7%. No critical security alerts detected.";
+          dataVisualization = {
+            type: 'risk',
+            data: [
+              { priority: 'high', issue: '5 opportunities need follow-up', action: 'Contact within 24h' },
+              { priority: 'critical', issue: 'Client ABC churn risk 78%', action: 'Immediate call' },
+              { priority: 'medium', issue: '3 contracts expiring soon', action: 'Renewal process' },
+              { priority: 'low', issue: 'System backup tonight', action: 'Monitor' }
+            ],
+            visualization: 'risk-alerts'
+          };
+        }
+        // Inventory & Products queries
+        else if (query.includes('product') || query.includes('inventory') || query.includes('stock') || query.includes('catalog')) {
+          response = "Product catalog contains 4 main offerings. Premium Plan leads with 342 sales, Enterprise Plan has 89 units sold with limited availability. Starter Plan is our volume leader with 1,247 units. Add-on Services trending upward with 567 units. All critical products are in stock with healthy margins.";
+          dataVisualization = {
+            type: 'products',
+            data: [
+              { product: 'Premium Plan', sales: 342, status: 'Unlimited', trend: 'up' },
+              { product: 'Enterprise', sales: 89, status: 'Limited', trend: 'up' },
+              { product: 'Starter Plan', sales: 1247, status: 'Available', trend: 'stable' },
+              { product: 'Add-ons', sales: 567, status: 'Available', trend: 'up' }
+            ],
+            visualization: 'product-stats'
+          };
+        }
+        // General/Overview queries
+        else if (query.includes('overview') || query.includes('summary') || query.includes('status') || query.includes('how are we')) {
+          response = "Overall company health is excellent. Revenue at $2.85M (+12.5%), 143 active deals worth $8.7M, team engagement at 89.2%, customer satisfaction at 96%. Social media reach is 245K with strong engagement. All systems operational. Marketing ROI averaging 315%. We're on track to exceed Q4 targets by 23%.";
+          dataVisualization = {
+            type: 'overview',
+            data: {
+              revenue: '$2.85M',
+              deals: 143,
+              satisfaction: '96%',
+              engagement: '89.2%',
+              social: '245K'
+            },
+            visualization: 'executive-summary'
+          };
+        }
+        else if (response === "" && transcript.length > 10) {
+          response = "I'm your comprehensive AI business assistant. I can provide detailed insights about revenue, deals, team performance, customer satisfaction, social media metrics, marketing ROI, system operations, risk alerts, inventory, and all company analytics. What specific area would you like to explore?";
         }
         
         if (response) {
           setAiResponse(response);
+          setQueryData(dataVisualization);
           speakResponse(response);
         }
       };
@@ -406,6 +576,134 @@ export default function CRMFeatureStatus() {
                   {isListening && (
                     <div className="absolute inset-0 bg-white/30 animate-shimmer" />
                   )}
+                </Button>
+                
+                {isSpeaking && (
+                  <Badge className="bg-blue-500/50 text-white font-bold animate-pulse border-2 border-blue-300/50 shadow-[0_0_20px_rgba(59,130,246,0.8)]">
+                    <MessageSquare className="h-4 w-4 mr-1" />
+                    AI Speaking
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Real-Time Metrics Grid */}
+
+            {/* Query Data Visualization */}
+            {queryData && (
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-600/40 via-blue-600/40 to-purple-600/40 backdrop-blur-xl border-2 border-white/30 p-6 animate-scale-in shadow-[0_0_50px_rgba(34,211,238,0.6)] mt-4">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_70%)]" />
+                
+                <div className="relative z-10">
+                  <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    <BarChart3 className="h-6 w-6 text-cyan-300 animate-float" />
+                    {queryData.type === 'social' && 'Social Media Metrics'}
+                    {queryData.type === 'revenue' && 'Revenue Breakdown'}
+                    {queryData.type === 'customer' && 'Customer Intelligence'}
+                    {queryData.type === 'deals' && 'Sales Pipeline'}
+                    {queryData.type === 'team' && 'Team Performance'}
+                    {queryData.type === 'marketing' && 'Marketing ROI'}
+                    {queryData.type === 'system' && 'System Health'}
+                    {queryData.type === 'analytics' && 'Key Metrics'}
+                    {queryData.type === 'risk' && 'Risk Management'}
+                    {queryData.type === 'products' && 'Product Analytics'}
+                    {queryData.type === 'overview' && 'Executive Overview'}
+                  </h3>
+
+                  {/* Social Media Visualization */}
+                  {queryData.type === 'social' && (
+                    <div className="grid grid-cols-2 gap-4">
+                      {queryData.data.map((platform: any, i: number) => (
+                        <div key={i} className="p-4 rounded-xl bg-gradient-to-br from-white/10 to-white/5 border-2 border-white/20 hover:scale-105 transition-all duration-300">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Share2 className="h-5 w-5 text-cyan-300" />
+                            <span className="text-white font-bold">{platform.platform}</span>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-white/70">Followers</span>
+                              <span className="text-white font-bold">{platform.followers}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-white/70">Engagement</span>
+                              <span className="text-emerald-300 font-bold">{platform.engagement}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-white/70">Posts</span>
+                              <span className="text-blue-300 font-bold">{platform.posts}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Revenue Visualization */}
+                  {queryData.type === 'revenue' && (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-3 gap-4 mb-4">
+                        <div className="p-4 rounded-xl bg-emerald-500/20 border-2 border-emerald-400/50">
+                          <p className="text-xs text-white/70 mb-1">Total Revenue</p>
+                          <p className="text-3xl font-bold text-white">{queryData.data.total}</p>
+                        </div>
+                        <div className="p-4 rounded-xl bg-blue-500/20 border-2 border-blue-400/50">
+                          <p className="text-xs text-white/70 mb-1">Growth</p>
+                          <p className="text-3xl font-bold text-emerald-300">{queryData.data.growth}</p>
+                        </div>
+                        <div className="p-4 rounded-xl bg-purple-500/20 border-2 border-purple-400/50">
+                          <p className="text-xs text-white/70 mb-1">MRR</p>
+                          <p className="text-3xl font-bold text-white">{queryData.data.mrr}</p>
+                        </div>
+                      </div>
+                      {queryData.data.segments.map((segment: any, i: number) => (
+                        <div key={i} className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-white font-semibold">{segment.name}</span>
+                            <span className="text-white/70">${(segment.value / 1000).toFixed(0)}K ({segment.percentage}%)</span>
+                          </div>
+                          <Progress value={segment.percentage} className="h-3 bg-white/10" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Customer Metrics */}
+                  {queryData.type === 'customer' && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-4 rounded-xl bg-green-500/20 border-2 border-green-400/50">
+                        <UserCheck className="h-6 w-6 text-green-300 mb-2" />
+                        <p className="text-xs text-white/70">Satisfaction</p>
+                        <p className="text-3xl font-bold text-white">{queryData.data.satisfaction}</p>
+                      </div>
+                      <div className="p-4 rounded-xl bg-blue-500/20 border-2 border-blue-400/50">
+                        <Award className="h-6 w-6 text-blue-300 mb-2" />
+                        <p className="text-xs text-white/70">NPS Score</p>
+                        <p className="text-3xl font-bold text-white">{queryData.data.nps}</p>
+                      </div>
+                      <div className="p-4 rounded-xl bg-purple-500/20 border-2 border-purple-400/50">
+                        <CheckCircle2 className="h-6 w-6 text-purple-300 mb-2" />
+                        <p className="text-xs text-white/70">Tickets Resolved</p>
+                        <p className="text-3xl font-bold text-white">{queryData.data.tickets}</p>
+                      </div>
+                      <div className="p-4 rounded-xl bg-cyan-500/20 border-2 border-cyan-400/50">
+                        <Clock className="h-6 w-6 text-cyan-300 mb-2" />
+                        <p className="text-xs text-white/70">Response Time</p>
+                        <p className="text-3xl font-bold text-white">{queryData.data.responseTime}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Other visualizations can be added similarly */}
+                  {(queryData.type === 'deals' || queryData.type === 'team' || queryData.type === 'marketing') && (
+                    <div className="p-6 rounded-xl bg-white/5 border border-white/20">
+                      <p className="text-white text-center">📊 Detailed {queryData.type} analytics displayed</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
                 </Button>
                 
                 {isSpeaking && (
