@@ -41,6 +41,7 @@ export default function ContentModeration() {
   const [loading, setLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [batchScanning, setBatchScanning] = useState(false);
 
   useEffect(() => {
     fetchPosts();
@@ -325,6 +326,64 @@ export default function ContentModeration() {
     }
   };
 
+  const handleBatchScanAll = async () => {
+    if (pendingPosts.length === 0) {
+      toast({
+        title: "No Posts",
+        description: "No pending posts to scan",
+      });
+      return;
+    }
+
+    setBatchScanning(true);
+    let scanned = 0;
+    let flagged = 0;
+
+    try {
+      toast({
+        title: "Batch Scanning Started",
+        description: `Analyzing ${pendingPosts.length} posts...`,
+      });
+
+      for (const post of pendingPosts) {
+        try {
+          const { data, error } = await supabase.functions.invoke('moderate-content', {
+            body: {
+              postId: post.id,
+              content: `${post.content}\n\n${(post.media_urls || []).filter((m:any) => ((m.type || '') !== 'photo' && (m.type || '') !== 'video')).map((m:any) => m.url).join('\n')}`.trim(),
+              platforms: post.platforms
+            }
+          });
+
+          if (!error) {
+            scanned++;
+            if (data?.shouldFlag) {
+              flagged++;
+            }
+          }
+        } catch (err) {
+          console.error(`Error scanning post ${post.id}:`, err);
+        }
+      }
+
+      toast({
+        title: "Batch Scan Complete",
+        description: `Scanned ${scanned} posts, flagged ${flagged} for review`,
+      });
+
+      fetchPosts();
+    } catch (error) {
+      console.error('Batch scan error:', error);
+      toast({
+        title: "Error",
+        description: "Batch scan failed",
+        variant: "destructive",
+      });
+    } finally {
+      setBatchScanning(false);
+    }
+  };
+
   const handleViewDetails = (post: Post) => {
     setSelectedPost(post);
     setIsDetailsOpen(true);
@@ -332,11 +391,33 @@ export default function ContentModeration() {
 
   return (
     <div className="space-y-6 animate-in fade-in-50 duration-500">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Content Moderation</h1>
-        <p className="text-muted-foreground mt-1">
-          Review and approve user-generated content
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Content Moderation</h1>
+          <p className="text-muted-foreground mt-1">
+            Review and approve user-generated content
+          </p>
+        </div>
+        {pendingPosts.length > 0 && (
+          <Button
+            onClick={handleBatchScanAll}
+            disabled={batchScanning}
+            variant="outline"
+            className="border-purple-500 text-purple-700 hover:bg-purple-50"
+          >
+            {batchScanning ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Scanning...
+              </>
+            ) : (
+              <>
+                <AlertTriangle className="h-4 w-4 mr-2" />
+                AI Scan All ({pendingPosts.length})
+              </>
+            )}
+          </Button>
+        )}
       </div>
 
       {loading ? (
