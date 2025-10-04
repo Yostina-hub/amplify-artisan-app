@@ -515,8 +515,18 @@ export default function ReachAnalytics() {
         <TabsContent value="growth" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Growth Analytics</CardTitle>
-              <CardDescription>Track follower growth and engagement trends across platforms</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Growth Analytics</CardTitle>
+                  <CardDescription>Track follower growth and engagement trends across platforms</CardDescription>
+                </div>
+                {accountMetrics.length === 0 && accounts.length > 0 && (
+                  <Button onClick={() => syncPlatformMetrics(accounts[0].platform)} variant="outline">
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                    Sync Metrics
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
@@ -538,7 +548,9 @@ export default function ReachAnalytics() {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
-                        {(accountMetrics.reduce((sum, m) => sum + m.engagement_rate, 0) / Math.max(accountMetrics.length, 1)).toFixed(1)}%
+                        {accountMetrics.length > 0 
+                          ? (accountMetrics.reduce((sum, m) => sum + m.engagement_rate, 0) / accountMetrics.length).toFixed(1)
+                          : socialMetrics.avgEngagementRate.toFixed(1)}%
                       </div>
                       <p className="text-xs text-muted-foreground">Overall performance</p>
                     </CardContent>
@@ -549,15 +561,30 @@ export default function ReachAnalytics() {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
-                        {accountMetrics.reduce((sum, m) => sum + m.posts_count, 0).toLocaleString()}
+                        {accountMetrics.length > 0 
+                          ? accountMetrics.reduce((sum, m) => sum + m.posts_count, 0).toLocaleString()
+                          : posts.length.toLocaleString()}
                       </div>
                       <p className="text-xs text-muted-foreground">Content published</p>
                     </CardContent>
                   </Card>
                 </div>
-                <p className="text-muted-foreground text-center py-8">
-                  Detailed growth tracking and predictions coming soon...
-                </p>
+                {accountMetrics.length === 0 && accounts.length > 0 && (
+                  <div className="bg-muted/50 border border-primary/20 rounded-lg p-6 text-center space-y-3">
+                    <TrendingUp className="h-12 w-12 mx-auto text-primary" />
+                    <p className="text-muted-foreground">
+                      Click "Sync Metrics" above or go to the Account Metrics tab to sync your social media platform metrics for detailed growth analytics.
+                    </p>
+                  </div>
+                )}
+                {accountMetrics.length === 0 && accounts.length === 0 && (
+                  <div className="bg-muted/50 border border-primary/20 rounded-lg p-6 text-center space-y-3">
+                    <TrendingUp className="h-12 w-12 mx-auto text-primary" />
+                    <p className="text-muted-foreground">
+                      Connect your social media accounts in Platform Configurations to start tracking growth metrics.
+                    </p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
