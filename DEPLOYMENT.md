@@ -1,44 +1,76 @@
-# Self-Hosted Deployment Guide
+# Deployment Guide
 
-This guide explains how to deploy this application on your own VPS with automatic database setup.
+This application supports **automatic environment detection** with two deployment modes:
+
+## 🌟 Deployment Modes
+
+### Mode 1: Lovable Cloud (Default - Recommended)
+✅ **Automatically configured** - No setup needed
+- Fully managed backend with Supabase
+- Auto-scaling and high availability
+- Zero infrastructure maintenance
+
+### Mode 2: Self-Hosted VPS
+🛠️ **Full control** - Deploy on your own server
+- Complete data ownership
+- Custom infrastructure
+- Requires PostgreSQL + Supabase CLI setup
+
+---
+
+## 🚀 Automatic Environment Detection
+
+The application **automatically detects** which mode to use based on environment variables in `.env.local`:
+
+- **Lovable Cloud**: Uses `VITE_SUPABASE_URL` (already configured)
+- **Self-Hosted**: Uses `DATABASE_URL` for local PostgreSQL
+
+**No code changes needed** - just update `.env.local` and the app adapts automatically!
+
+---
+
+# 🏠 Self-Hosted Deployment (Mode 2)
 
 ## Prerequisites
 
 - Linux VPS (Ubuntu 22.04 LTS recommended)
 - Node.js 20+ installed
-- PostgreSQL 14+ installed
+- Docker & Docker Compose (for Supabase)
 - Git installed
 
-## Quick Start (Automatic Setup)
+## Quick Start (Automatic Setup with Supabase CLI)
 
-### 1. Install PostgreSQL
+### 1. Install Supabase CLI & Docker
 
 ```bash
-# Update package list
-sudo apt update
+# Install Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
 
-# Install PostgreSQL
-sudo apt install -y postgresql postgresql-contrib
+# Install Supabase CLI
+npm install -g supabase
 
-# Start PostgreSQL service
-sudo systemctl start postgresql
-sudo systemctl enable postgresql
+# Verify installation
+supabase --version
 ```
 
-### 2. Create Database and User
+### 2. Initialize Supabase Locally
 
 ```bash
-# Switch to postgres user and create database
-sudo -u postgres psql << EOF
-CREATE DATABASE social_media_app;
-CREATE USER app_user WITH PASSWORD 'YourStrongPassword123!';
-GRANT ALL PRIVILEGES ON DATABASE social_media_app TO app_user;
-\c social_media_app
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-GRANT ALL ON SCHEMA public TO app_user;
-ALTER DATABASE social_media_app OWNER TO app_user;
-EOF
+# Initialize Supabase in your project
+cd /path/to/your/project
+supabase init
+
+# Start Supabase (this starts PostgreSQL, Auth, Storage, etc.)
+supabase start
+
+# You'll see output like:
+# API URL: http://localhost:54321
+# DB URL: postgresql://postgres:postgres@localhost:54322/postgres
+# anon key: eyJh... (long key)
+# service_role key: eyJh... (long key)
+
+# Copy these values - you'll need them!
 ```
 
 ### 3. Clone Repository
@@ -52,35 +84,42 @@ cd yourrepo
 npm install
 ```
 
-### 4. Configure Environment
+### 4. Configure Environment (Automatic Detection!)
 
 ```bash
 # Copy example environment file
 cp .env.local.example .env.local
 
-# Edit with your database credentials
+# Edit with your LOCAL Supabase credentials
 nano .env.local
 ```
 
-Update `.env.local`:
+Update `.env.local` with the values from `supabase start`:
 ```bash
-DATABASE_URL=postgresql://app_user:YourStrongPassword123!@localhost:5432/social_media_app
+# Comment out Lovable Cloud settings
+# VITE_SUPABASE_URL=https://kdqibmhpebndlmzjhuvf.supabase.co
+# VITE_SUPABASE_PUBLISHABLE_KEY=eyJh...
+
+# Add your local Supabase settings
+VITE_SUPABASE_URL=http://localhost:54321
+VITE_SUPABASE_PUBLISHABLE_KEY=eyJh... # (use anon key from supabase start)
 ```
 
-### 5. Run Database Migration (Automatic!)
+### 5. Run Database Migration
 
 ```bash
-# Run the migration script - this creates auth schema and all tables automatically
-npm run migrate
+# Link your migrations to Supabase
+supabase db push
+
+# Or apply the migration file directly:
+supabase db reset
 
 # You should see:
-# ✅ Connected to database
-# ✅ Auth schema created
-# 🚀 Running database migration...
-# ✅ Database migration completed successfully!
+# ✅ Database migrated successfully
+# ✅ All tables and functions created
 ```
 
-### 6. Build and Run
+### 6. Build and Run (App Auto-Detects Environment!)
 
 ```bash
 # Build the frontend
@@ -120,9 +159,9 @@ server {
 sudo systemctl restart nginx
 ```
 
-## Updating Your Application
+## 🔄 Updating Your Application
 
-When you update your code:
+The app automatically adapts to your environment:
 
 ```bash
 # Pull latest changes
@@ -131,8 +170,8 @@ git pull origin main
 # Install any new dependencies
 npm install
 
-# Run migrations (safe to run multiple times)
-npm run migrate
+# Apply new migrations
+supabase db push
 
 # Rebuild frontend
 npm run build
@@ -140,6 +179,23 @@ npm run build
 # Copy to nginx (if using)
 sudo cp -r dist/* /var/www/html/
 ```
+
+## 🔀 Switching Between Environments
+
+To switch from Lovable Cloud to Self-Hosted (or vice versa):
+
+```bash
+# Edit .env.local
+nano .env.local
+
+# For Lovable Cloud: Use VITE_SUPABASE_URL with https://
+# For Self-Hosted: Use VITE_SUPABASE_URL with http://localhost:54321
+
+# Restart the app - it auto-detects the change!
+npm run dev
+```
+
+**That's it!** No code changes required - the app automatically uses the correct backend.
 
 ## Troubleshooting
 
