@@ -38,6 +38,7 @@ const builderItems = [
   { title: "Module Builder", url: "/module-builder", icon: Database },
   { title: "Form Builder", url: "/form-builder", icon: Box },
   { title: "Workflow Builder", url: "/workflow-builder", icon: Zap },
+  { title: "Analytics Dashboard", url: "/reporting-dashboard", icon: BarChart3 },
 ];
 
 const marketingItems = [

@@ -62,6 +62,7 @@ import AIAnalytics from "./pages/AIAnalytics";
 import ModuleBuilder from "./pages/ModuleBuilder";
 import FormBuilder from "./pages/FormBuilder";
 import WorkflowBuilder from "./pages/WorkflowBuilder";
+import ReportingDashboard from "./pages/ReportingDashboard";
 
 const queryClient = new QueryClient();
 
@@ -130,6 +131,7 @@ const App = () => (
           <Route path="/module-builder" element={<ProtectedRoute><Layout><ModuleBuilder /></Layout></ProtectedRoute>} />
           <Route path="/form-builder" element={<ProtectedRoute><Layout><FormBuilder /></Layout></ProtectedRoute>} />
           <Route path="/workflow-builder" element={<ProtectedRoute><Layout><WorkflowBuilder /></Layout></ProtectedRoute>} />
+          <Route path="/reporting-dashboard" element={<ProtectedRoute><Layout><ReportingDashboard /></Layout></ProtectedRoute>} />
             
             <Route path="/social-accounts" element={<ProtectedRoute><Layout><SocialMediaCredentials /></Layout></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
