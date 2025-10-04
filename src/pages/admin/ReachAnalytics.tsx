@@ -191,6 +191,18 @@ export default function ReachAnalytics() {
 
   const fetchSocialAnalytics = async () => {
     try {
+      // Get user's company ID
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', (await supabase.auth.getUser()).data.user?.id)
+        .single();
+
+      if (!profile?.company_id) {
+        console.log('No company_id found for user');
+        return;
+      }
+
       const daysAgo = parseInt(timeRange);
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - daysAgo);
@@ -198,12 +210,16 @@ export default function ReachAnalytics() {
       const { data: postsData } = await supabase
         .from('social_media_posts')
         .select('*')
+        .eq('company_id', profile.company_id)
         .gte('created_at', startDate.toISOString())
         .order('engagement_rate', { ascending: false });
+
+      console.log('Fetched posts:', postsData?.length, 'posts');
 
       let filteredPosts = postsData || [];
       if (platformFilter !== 'all') {
         filteredPosts = filteredPosts.filter(post => post.platforms.includes(platformFilter));
+        console.log('Filtered by platform:', platformFilter, '- Result:', filteredPosts.length, 'posts');
       }
 
       const aggregate = filteredPosts.reduce((acc, post) => ({
