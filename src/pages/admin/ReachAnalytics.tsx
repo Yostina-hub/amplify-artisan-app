@@ -245,6 +245,28 @@ export default function ReachAnalytics() {
     }
   };
 
+  const syncTelegramMetrics = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-telegram-metrics');
+      if (error) throw error;
+      
+      toast({
+        title: "Telegram metrics synced",
+        description: `Subscribers: ${data.metrics.subscribers}, Posts: ${data.metrics.posts}`,
+      });
+      
+      // Refresh data after sync
+      await fetchAccountData();
+    } catch (error: any) {
+      console.error('Error syncing Telegram metrics:', error);
+      toast({
+        title: "Sync failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const fetchAccountData = async () => {
     try {
       // Get user's company ID
@@ -701,7 +723,13 @@ export default function ReachAnalytics() {
 
         {/* Account Metrics Tab */}
         <TabsContent value="accounts" className="space-y-6">
-          <h2 className="text-2xl font-semibold">Connected Account Metrics</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-semibold">Connected Account Metrics</h2>
+            <Button variant="outline" onClick={syncTelegramMetrics}>
+              <TrendingUp className="h-4 w-4 mr-2" />
+              Sync Telegram Metrics
+            </Button>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {accounts.map((account) => {
