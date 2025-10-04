@@ -66,25 +66,52 @@ You're already set up! Your database migrations are handled via:
 
 ## Prerequisites
 
-- Linux VPS (Ubuntu 22.04 LTS recommended)
-- Node.js 20+ installed
-- Docker & Docker Compose (for Supabase)
-- Git installed
+- **Linux VPS** (Ubuntu 22.04 LTS recommended)
+- **Node.js 20+** and npm
+- **Docker & Docker Compose** (for Supabase)
+- **Nginx** (web server and reverse proxy)
+- **PM2** (process manager - optional but recommended)
+- **Certbot** (for SSL/HTTPS - optional but recommended)
+- **Git**
+- Domain name (optional, for production with SSL)
 
 ## Quick Start (Automatic Setup with Supabase CLI)
 
-### 1. Install Supabase CLI & Docker
+### 1. Install System Dependencies
 
 ```bash
+# Update system
+sudo apt update && sudo apt upgrade -y
+
+# Install Node.js 20.x (if not already installed)
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Verify Node version
+node --version  # Should be v20.x.x or higher
+
 # Install Docker
 curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
+sudo usermod -aG docker $USER
+newgrp docker
+
+# Install Nginx
+sudo apt install -y nginx
+
+# Install PM2 globally (process manager)
+sudo npm install -g pm2
+
+# Install Certbot for SSL (optional, for production with domain)
+sudo apt install -y certbot python3-certbot-nginx
 
 # Install Supabase CLI
 npm install -g supabase
 
-# Verify installation
+# Verify installations
 supabase --version
+nginx -v
+pm2 --version
 ```
 
 ### 2. Initialize Supabase Locally
@@ -172,25 +199,188 @@ sudo cp -r dist/* /var/www/html/
 sudo nano /etc/nginx/sites-available/default
 ```
 
-Nginx configuration:
+Create production Nginx configuration:
+
+```bash
+# Create app directory
+sudo mkdir -p /var/www/socialhub
+
+# Copy built files
+sudo cp -r dist/* /var/www/socialhub/
+
+# Create Nginx site configuration
+sudo nano /etc/nginx/sites-available/socialhub
+```
+
+Add this production-ready Nginx configuration:
+
 ```nginx
+# Cache configuration
+proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=api_cache:10m max_size=100m inactive=60m use_temp_path=off;
+
 server {
     listen 80;
-    server_name your-domain.com;
+    server_name yourdomain.com www.yourdomain.com;  # Replace with your domain or server IP
     
-    root /var/www/html;
+    root /var/www/socialhub;
     index index.html;
     
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+    
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_types text/plain text/css text/xml text/javascript 
+               application/x-javascript application/xml+rss 
+               application/javascript application/json application/xml 
+               image/svg+xml;
+    
+    # Main SPA location - serve index.html for all routes
     location / {
         try_files $uri $uri/ /index.html;
+        
+        # Additional headers for HTML
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+        add_header Pragma "no-cache";
+        add_header Expires "0";
+    }
+    
+    # Cache static assets aggressively
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|webp)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+    
+    # Proxy to local Supabase instance
+    location /supabase/ {
+        proxy_pass http://localhost:54321/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        
+        # Timeouts for long-running requests
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+    
+    # Deny access to sensitive files
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
     }
 }
 ```
 
+Enable the site and restart Nginx:
+
 ```bash
-# Restart nginx
+# Enable site
+sudo ln -s /etc/nginx/sites-available/socialhub /etc/nginx/sites-enabled/
+
+# Remove default site (optional)
+sudo rm /etc/nginx/sites-enabled/default
+
+# Test Nginx configuration
+sudo nginx -t
+
+# If test passes, restart Nginx
 sudo systemctl restart nginx
+
+# Enable Nginx to start on boot
+sudo systemctl enable nginx
 ```
+
+### 7. Setup SSL Certificate (Production Only)
+
+If you have a domain name, secure it with SSL:
+
+```bash
+# Get SSL certificate from Let's Encrypt
+sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+
+# Follow the prompts - Certbot will automatically:
+# - Obtain the certificate
+# - Configure Nginx for HTTPS
+# - Set up auto-renewal
+
+# Test auto-renewal
+sudo certbot renew --dry-run
+
+# Certificate will auto-renew every 90 days
+```
+
+### 8. Setup PM2 for Process Management (Optional but Recommended)
+
+Keep Supabase and other services running automatically:
+
+```bash
+# Create PM2 ecosystem configuration
+cat > ecosystem.config.js << 'EOF'
+module.exports = {
+  apps: [
+    {
+      name: 'supabase',
+      script: 'supabase',
+      args: 'start',
+      cwd: '/path/to/your/project',
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '1G',
+      env: {
+        NODE_ENV: 'production'
+      }
+    }
+  ]
+}
+EOF
+
+# Start services with PM2
+pm2 start ecosystem.config.js
+
+# Save PM2 configuration
+pm2 save
+
+# Setup PM2 to start on system boot
+pm2 startup
+
+# Check status
+pm2 status
+
+# View logs
+pm2 logs supabase
+```
+
+### 9. Configure Firewall
+
+```bash
+# Allow necessary ports
+sudo ufw allow 22/tcp   # SSH
+sudo ufw allow 80/tcp   # HTTP
+sudo ufw allow 443/tcp  # HTTPS
+
+# Enable firewall
+sudo ufw enable
+
+# Check status
+sudo ufw status
+```
+
+---
 
 ## 🔄 Updating Your Application
 
@@ -209,8 +399,14 @@ supabase db push
 # Rebuild frontend
 npm run build
 
-# Copy to nginx (if using)
-sudo cp -r dist/* /var/www/html/
+# Copy to nginx
+sudo cp -r dist/* /var/www/socialhub/
+
+# Restart Nginx
+sudo systemctl restart nginx
+
+# Restart PM2 services if using
+pm2 restart all
 ```
 
 ## 🔀 Switching Between Environments
@@ -316,8 +512,62 @@ sudo certbot --nginx -d your-domain.com
 
 4. **Restrict PostgreSQL access** (edit `/etc/postgresql/*/main/pg_hba.conf`)
 
+## Monitoring & Logs
+
+### Check Service Status
+```bash
+# Nginx status
+sudo systemctl status nginx
+
+# Supabase (if using PM2)
+pm2 status
+pm2 logs supabase
+
+# Docker containers (Supabase)
+docker ps
+docker logs supabase_db
+```
+
+### View Logs
+```bash
+# Nginx access logs
+sudo tail -f /var/log/nginx/access.log
+
+# Nginx error logs
+sudo tail -f /var/log/nginx/error.log
+
+# Supabase logs (via PM2)
+pm2 logs supabase --lines 100
+
+# Docker logs
+docker logs -f supabase_db
+```
+
+## Performance Optimization
+
+### Enable HTTP/2 (After SSL setup)
+```bash
+# Edit Nginx config
+sudo nano /etc/nginx/sites-available/socialhub
+
+# Change listen directives to:
+# listen 443 ssl http2;
+# listen [::]:443 ssl http2;
+
+sudo systemctl restart nginx
+```
+
+### Setup Log Rotation
+```bash
+# Nginx logs are rotated automatically
+# Check configuration:
+cat /etc/logrotate.d/nginx
+```
+
 ## Need Help?
 
-- Check application logs: `journalctl -u nginx -f`
-- Check PostgreSQL logs: `sudo tail -f /var/log/postgresql/postgresql-*.log`
-- Database connection issues: Verify DATABASE_URL in `.env.local`
+- **Nginx issues**: `sudo nginx -t` to test configuration
+- **Application logs**: `sudo tail -f /var/log/nginx/error.log`
+- **Supabase logs**: `pm2 logs supabase` or `docker logs supabase_db`
+- **Database connection**: Verify VITE_SUPABASE_URL in `.env.local`
+- **SSL issues**: `sudo certbot certificates` to check SSL status
