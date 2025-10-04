@@ -133,6 +133,87 @@ export type Database = {
           },
         ]
       }
+      ai_generated_content: {
+        Row: {
+          ai_model: string | null
+          company_id: string | null
+          content_type: string
+          created_at: string | null
+          generated_images: Json | null
+          generated_text: string
+          hashtags: string[] | null
+          id: string
+          language: string | null
+          metadata: Json | null
+          platform: string
+          post_id: string | null
+          posted_at: string | null
+          prompt: string
+          scheduled_for: string | null
+          status: string | null
+          tone: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          ai_model?: string | null
+          company_id?: string | null
+          content_type?: string
+          created_at?: string | null
+          generated_images?: Json | null
+          generated_text: string
+          hashtags?: string[] | null
+          id?: string
+          language?: string | null
+          metadata?: Json | null
+          platform: string
+          post_id?: string | null
+          posted_at?: string | null
+          prompt: string
+          scheduled_for?: string | null
+          status?: string | null
+          tone?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          ai_model?: string | null
+          company_id?: string | null
+          content_type?: string
+          created_at?: string | null
+          generated_images?: Json | null
+          generated_text?: string
+          hashtags?: string[] | null
+          id?: string
+          language?: string | null
+          metadata?: Json | null
+          platform?: string
+          post_id?: string | null
+          posted_at?: string | null
+          prompt?: string
+          scheduled_for?: string | null
+          status?: string | null
+          tone?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_generated_content_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_generated_content_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "social_media_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_integration_fields: {
         Row: {
           created_at: string
@@ -294,6 +375,134 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "api_integrations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_executions: {
+        Row: {
+          actions_executed: Json | null
+          company_id: string
+          completed_at: string | null
+          created_at: string | null
+          error_message: string | null
+          executed_at: string | null
+          execution_time_ms: number | null
+          id: string
+          metadata: Json | null
+          status: string
+          trigger_data: Json
+          workflow_id: string
+        }
+        Insert: {
+          actions_executed?: Json | null
+          company_id: string
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          executed_at?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          metadata?: Json | null
+          status?: string
+          trigger_data: Json
+          workflow_id: string
+        }
+        Update: {
+          actions_executed?: Json | null
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          executed_at?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          metadata?: Json | null
+          status?: string
+          trigger_data?: Json
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_executions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_executions_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "automation_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_workflows: {
+        Row: {
+          actions: Json
+          company_id: string
+          conditions: Json | null
+          created_at: string | null
+          created_by: string
+          description: string | null
+          error_count: number | null
+          execution_count: number | null
+          id: string
+          is_active: boolean | null
+          last_triggered_at: string | null
+          metadata: Json | null
+          name: string
+          success_count: number | null
+          trigger_config: Json
+          trigger_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          actions?: Json
+          company_id: string
+          conditions?: Json | null
+          created_at?: string | null
+          created_by: string
+          description?: string | null
+          error_count?: number | null
+          execution_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_triggered_at?: string | null
+          metadata?: Json | null
+          name: string
+          success_count?: number | null
+          trigger_config?: Json
+          trigger_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          actions?: Json
+          company_id?: string
+          conditions?: Json | null
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          error_count?: number | null
+          execution_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_triggered_at?: string | null
+          metadata?: Json | null
+          name?: string
+          success_count?: number | null
+          trigger_config?: Json
+          trigger_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_workflows_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
@@ -1205,6 +1414,148 @@ export type Database = {
         }
         Relationships: []
       }
+      sentiment_analysis: {
+        Row: {
+          ai_model: string | null
+          analyzed_at: string | null
+          company_id: string
+          confidence: number
+          content_id: string
+          content_text: string | null
+          content_type: string
+          created_at: string | null
+          emotions: Json | null
+          id: string
+          keywords: string[] | null
+          language: string | null
+          metadata: Json | null
+          platform: string
+          sentiment: string
+          sentiment_score: number
+          topics: string[] | null
+        }
+        Insert: {
+          ai_model?: string | null
+          analyzed_at?: string | null
+          company_id: string
+          confidence: number
+          content_id: string
+          content_text?: string | null
+          content_type: string
+          created_at?: string | null
+          emotions?: Json | null
+          id?: string
+          keywords?: string[] | null
+          language?: string | null
+          metadata?: Json | null
+          platform: string
+          sentiment: string
+          sentiment_score: number
+          topics?: string[] | null
+        }
+        Update: {
+          ai_model?: string | null
+          analyzed_at?: string | null
+          company_id?: string
+          confidence?: number
+          content_id?: string
+          content_text?: string | null
+          content_type?: string
+          created_at?: string | null
+          emotions?: Json | null
+          id?: string
+          keywords?: string[] | null
+          language?: string | null
+          metadata?: Json | null
+          platform?: string
+          sentiment?: string
+          sentiment_score?: number
+          topics?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sentiment_analysis_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_conversations: {
+        Row: {
+          company_id: string
+          content: string
+          conversation_id: string
+          created_at: string | null
+          direction: string
+          id: string
+          is_automated: boolean | null
+          media_urls: Json | null
+          message_type: string
+          metadata: Json | null
+          participant_avatar: string | null
+          participant_id: string
+          participant_name: string
+          platform: string
+          responded_at: string | null
+          responded_by: string | null
+          sentiment_score: number | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          content: string
+          conversation_id: string
+          created_at?: string | null
+          direction: string
+          id?: string
+          is_automated?: boolean | null
+          media_urls?: Json | null
+          message_type?: string
+          metadata?: Json | null
+          participant_avatar?: string | null
+          participant_id: string
+          participant_name: string
+          platform: string
+          responded_at?: string | null
+          responded_by?: string | null
+          sentiment_score?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          content?: string
+          conversation_id?: string
+          created_at?: string | null
+          direction?: string
+          id?: string
+          is_automated?: boolean | null
+          media_urls?: Json | null
+          message_type?: string
+          metadata?: Json | null
+          participant_avatar?: string | null
+          participant_id?: string
+          participant_name?: string
+          platform?: string
+          responded_at?: string | null
+          responded_by?: string | null
+          sentiment_score?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_conversations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_media_accounts: {
         Row: {
           access_token: string
@@ -1470,6 +1821,68 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "social_media_posts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_platform_tokens: {
+        Row: {
+          access_token: string
+          account_id: string
+          account_name: string
+          company_id: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          last_synced_at: string | null
+          metadata: Json | null
+          permissions: Json | null
+          platform: string
+          refresh_token: string | null
+          scopes: string[] | null
+          token_expires_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          access_token: string
+          account_id: string
+          account_name: string
+          company_id: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_synced_at?: string | null
+          metadata?: Json | null
+          permissions?: Json | null
+          platform: string
+          refresh_token?: string | null
+          scopes?: string[] | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          access_token?: string
+          account_id?: string
+          account_name?: string
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_synced_at?: string | null
+          metadata?: Json | null
+          permissions?: Json | null
+          platform?: string
+          refresh_token?: string | null
+          scopes?: string[] | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_platform_tokens_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"

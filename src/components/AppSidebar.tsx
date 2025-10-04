@@ -1,4 +1,4 @@
-import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2, Mail, Link2, Globe, Key, Package, BarChart2, Layers, DollarSign, CreditCard, FileSearch, ChevronDown, Wallet, Layout, Database } from "lucide-react";
+import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2, Mail, Link2, Globe, Key, Package, BarChart2, Layers, DollarSign, CreditCard, FileSearch, ChevronDown, Wallet, Layout, Database, Sparkles, Brain } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
@@ -24,6 +24,12 @@ const mainItems = [
 
 const analyticsItems = [
   { title: "Analytics Hub", url: "/admin/reach-analytics", icon: BarChart3 },
+];
+
+const aiItems = [
+  { title: "AI Content Studio", url: "/ai-studio", icon: Sparkles },
+  { title: "Social Inbox", url: "/social-inbox", icon: MessageCircle },
+  { title: "Social Intelligence", url: "/social-intelligence", icon: Brain },
 ];
 
 const marketingItems = [
@@ -179,6 +185,45 @@ export function AppSidebar() {
               <SidebarGroupContent>
                 <SidebarMenu>
                   {analyticsItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink
+                          to={item.url}
+                          className={({ isActive }) =>
+                            isActive
+                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                              : "hover:bg-sidebar-accent/50"
+                          }
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
+
+        {/* AI Features Section - Collapsible */}
+        <Collapsible open={true} onOpenChange={() => {}}>
+          <SidebarGroup>
+            {!isCollapsed && (
+              <CollapsibleTrigger className="w-full" asChild>
+                <button className="w-full">
+                  <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
+                    <span className="font-medium">AI Features</span>
+                    <ChevronDown className="h-4 w-4 transition-transform duration-200 rotate-180" />
+                  </SidebarGroupLabel>
+                </button>
+              </CollapsibleTrigger>
+            )}
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {aiItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
                         <NavLink

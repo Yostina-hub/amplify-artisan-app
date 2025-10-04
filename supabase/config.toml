@@ -23,3 +23,12 @@ verify_jwt = false
 
 [functions.generate-recommendations]
 verify_jwt = false
+
+[functions.generate-social-content]
+verify_jwt = true
+
+[functions.analyze-sentiment]
+verify_jwt = true
+
+[functions.fetch-social-messages]
+verify_jwt = true

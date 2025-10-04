@@ -54,6 +54,9 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Help from "./pages/Help";
 import APIManagement from "./pages/admin/APIManagement";
 import CompanyAPIManagement from "./pages/CompanyAPIManagement";
+import AIStudio from "./pages/AIStudio";
+import SocialInbox from "./pages/SocialInbox";
+import SocialIntelligence from "./pages/SocialIntelligence";
 
 const queryClient = new QueryClient();
 
@@ -109,6 +112,12 @@ const App = () => (
             <Route path="/company/platform-subscriptions" element={<ProtectedRoute><Layout><CompanyPlatformSubscriptions /></Layout></ProtectedRoute>} />
             <Route path="/company/platform-settings" element={<ProtectedRoute><Layout><CompanyPlatformSettings /></Layout></ProtectedRoute>} />
             <Route path="/company/api-management" element={<ProtectedRoute><Layout><CompanyAPIManagement /></Layout></ProtectedRoute>} />
+            
+            {/* AI Features */}
+            <Route path="/ai-studio" element={<ProtectedRoute><Layout><AIStudio /></Layout></ProtectedRoute>} />
+            <Route path="/social-inbox" element={<ProtectedRoute><Layout><SocialInbox /></Layout></ProtectedRoute>} />
+            <Route path="/social-intelligence" element={<ProtectedRoute><Layout><SocialIntelligence /></Layout></ProtectedRoute>} />
+            
             <Route path="/social-accounts" element={<ProtectedRoute><Layout><SocialMediaCredentials /></Layout></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
