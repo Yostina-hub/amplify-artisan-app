@@ -1,35 +1,68 @@
 # Deployment Guide
 
-This application supports **automatic environment detection** with two deployment modes:
+## ⚠️ IMPORTANT: Two Separate Deployment Paths
 
-## 🌟 Deployment Modes
+This application has **TWO DIFFERENT** deployment configurations that **CANNOT be mixed**:
 
-### Mode 1: Lovable Cloud (Default - Recommended)
-✅ **Automatically configured** - No setup needed
-- Fully managed backend with Supabase
-- Auto-scaling and high availability
-- Zero infrastructure maintenance
+### 🌟 Option 1: Lovable Cloud (Current Setup - Default)
+- ✅ **YOU ARE CURRENTLY USING THIS**
+- Fully managed Supabase backend
+- Already configured and working
+- **DO NOT run `npm run migrate`** - it will cause errors!
+- Use Lovable's Supabase migration tool via the UI
 
-### Mode 2: Self-Hosted VPS
-🛠️ **Full control** - Deploy on your own server
-- Complete data ownership
-- Custom infrastructure
-- Requires PostgreSQL + Supabase CLI setup
-
----
-
-## 🚀 Automatic Environment Detection
-
-The application **automatically detects** which mode to use based on environment variables in `.env.local`:
-
-- **Lovable Cloud**: Uses `VITE_SUPABASE_URL` (already configured)
-- **Self-Hosted**: Uses `DATABASE_URL` for local PostgreSQL
-
-**No code changes needed** - just update `.env.local` and the app adapts automatically!
+### 🛠️ Option 2: Self-Hosted Local Deployment  
+- For deploying on your own VPS/server
+- Requires manual PostgreSQL setup
+- Uses `npm run migrate` script
+- **Only use if you want to move OFF Lovable Cloud**
 
 ---
 
-# 🏠 Self-Hosted Deployment (Mode 2)
+## 🚀 Which Mode Am I Using?
+
+Check your `.env` or `.env.local` file:
+
+**Lovable Cloud** (current):
+```
+VITE_SUPABASE_URL=https://xxxxx.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=eyJh...
+```
+
+**Self-Hosted**:
+```
+DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+```
+
+---
+
+## 📋 For Current Users (Lovable Cloud)
+
+You're already set up! Your database migrations are handled via:
+1. Lovable UI → Database tools
+2. Automatic deployment when you push changes
+
+**DO NOT:**
+- ❌ Run `npm run migrate` 
+- ❌ Edit `DATABASE_URL` in .env
+- ❌ Use `setup-auth.sql` script
+
+**These will break your Lovable Cloud setup!**
+
+---
+
+# 🏠 Self-Hosted Local Deployment (Advanced)
+
+## ⚠️ WARNING: Only For New Local Deployments
+
+**This section is ONLY for users who want to:**
+- Deploy on their own VPS/server
+- Move completely OFF Lovable Cloud  
+- Have full infrastructure control
+
+**If you're currently using Lovable Cloud, DO NOT follow these steps!**
+
+---
 
 ## Prerequisites
 

@@ -9,15 +9,32 @@ import dotenv from 'dotenv';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Load environment variables
+// Load environment variables from .env.local (if exists) or .env
 dotenv.config({ path: join(__dirname, '..', '.env.local') });
+dotenv.config({ path: join(__dirname, '..', '.env') });
 
-const DATABASE_URL = process.env.DATABASE_URL || process.env.VITE_DATABASE_URL;
+// Check if running on Lovable Cloud (Supabase)
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
+if (SUPABASE_URL && SUPABASE_URL.includes('supabase.co')) {
+  console.error('❌ ERROR: This script is for SELF-HOSTED deployments only!');
+  console.error('');
+  console.error('You are using Lovable Cloud (Supabase).');
+  console.error('For Lovable Cloud, use the Supabase migration tool via the Lovable UI.');
+  console.error('');
+  console.error('This script would conflict with your existing Supabase setup.');
+  process.exit(1);
+}
+
+const DATABASE_URL = process.env.DATABASE_URL;
 
 if (!DATABASE_URL) {
   console.error('❌ DATABASE_URL not found in environment variables');
-  console.error('Please set DATABASE_URL in .env.local file');
-  console.error('Example: DATABASE_URL=postgresql://user:password@localhost:5432/dbname');
+  console.error('');
+  console.error('For SELF-HOSTED deployment:');
+  console.error('1. Copy .env.local.example to .env.local');
+  console.error('2. Comment out VITE_SUPABASE_URL');
+  console.error('3. Set DATABASE_URL=postgresql://user:password@localhost:5432/dbname');
+  console.error('');
   process.exit(1);
 }
 
