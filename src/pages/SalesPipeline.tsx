@@ -153,211 +153,243 @@ export default function SalesPipeline() {
   const avgDealSize = opportunities && opportunities.length > 0 ? totalValue / opportunities.length : 0;
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Sales Pipeline</h1>
-          <p className="text-muted-foreground">Visual pipeline for tracking deals</p>
+    <div className="container mx-auto p-6 space-y-8">
+      {/* Revolutionary Hero Header */}
+      <div className="relative overflow-hidden rounded-3xl p-12 shadow-[var(--shadow-xl)] animate-scale-in" style={{ background: 'var(--gradient-mesh)' }}>
+        <div className="absolute inset-0 animate-shimmer" style={{ backgroundImage: 'linear-gradient(90deg, transparent, hsl(var(--primary-glow) / 0.2), transparent)', backgroundSize: '200% 100%' }} />
+        <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-accent/20 to-transparent rounded-full blur-3xl animate-float" />
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center animate-glow-pulse">
+                <Target className="h-6 w-6 text-white" />
+              </div>
+              <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-foreground/70">Sales Pipeline</h1>
+            </div>
+            <p className="text-muted-foreground text-lg">Visual pipeline for tracking deals through every stage</p>
+          </div>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => setIsDialogOpen(true)} size="lg" className="shadow-[var(--shadow-elegant)] hover:shadow-[var(--shadow-glow)] group">
+                <Plus className="mr-2 h-5 w-5 group-hover:rotate-90 transition-transform" />
+                New Opportunity
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Create Opportunity</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Opportunity Name *</Label>
+                  <Input
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Account</Label>
+                    <Select value={formData.account_id} onValueChange={(value) => setFormData({ ...formData, account_id: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select account" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {accounts?.map((account) => (
+                          <SelectItem key={account.id} value={account.id}>
+                            {account.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Contact</Label>
+                    <Select value={formData.contact_id} onValueChange={(value) => setFormData({ ...formData, contact_id: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select contact" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {contacts?.map((contact) => (
+                          <SelectItem key={contact.id} value={contact.id}>
+                            {contact.first_name} {contact.last_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Stage *</Label>
+                    <Select value={formData.stage_id} onValueChange={(value) => setFormData({ ...formData, stage_id: value })} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select stage" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {stages?.map((stage) => (
+                          <SelectItem key={stage.id} value={stage.id}>
+                            {stage.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Amount</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={formData.amount}
+                      onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Probability (%)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={formData.probability}
+                      onChange={(e) => setFormData({ ...formData, probability: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Expected Close Date</Label>
+                    <Input
+                      type="date"
+                      value={formData.expected_close_date}
+                      onChange={(e) => setFormData({ ...formData, expected_close_date: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Description</Label>
+                  <Textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Next Step</Label>
+                  <Input
+                    value={formData.next_step}
+                    onChange={(e) => setFormData({ ...formData, next_step: e.target.value })}
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit">Create</Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => setIsDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              New Opportunity
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Create Opportunity</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label>Opportunity Name *</Label>
-                <Input
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Account</Label>
-                  <Select value={formData.account_id} onValueChange={(value) => setFormData({ ...formData, account_id: value })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select account" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {accounts?.map((account) => (
-                        <SelectItem key={account.id} value={account.id}>
-                          {account.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Contact</Label>
-                  <Select value={formData.contact_id} onValueChange={(value) => setFormData({ ...formData, contact_id: value })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select contact" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {contacts?.map((contact) => (
-                        <SelectItem key={contact.id} value={contact.id}>
-                          {contact.first_name} {contact.last_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Stage *</Label>
-                  <Select value={formData.stage_id} onValueChange={(value) => setFormData({ ...formData, stage_id: value })} required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select stage" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {stages?.map((stage) => (
-                        <SelectItem key={stage.id} value={stage.id}>
-                          {stage.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Amount</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.amount}
-                    onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Probability (%)</Label>
-                  <Input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={formData.probability}
-                    onChange={(e) => setFormData({ ...formData, probability: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Expected Close Date</Label>
-                  <Input
-                    type="date"
-                    value={formData.expected_close_date}
-                    onChange={(e) => setFormData({ ...formData, expected_close_date: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Description</Label>
-                <Textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={3}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Next Step</Label>
-                <Input
-                  value={formData.next_step}
-                  onChange={(e) => setFormData({ ...formData, next_step: e.target.value })}
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">Create</Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-3">
+      {/* Enhanced Stats */}
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card className="relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+          <CardHeader className="pb-3 relative z-10">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Target className="h-4 w-4" />
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                <Target className="h-4 w-4 text-primary" />
+              </div>
               Total Opportunities
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{opportunities?.length || 0}</div>
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">{opportunities?.length || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">In pipeline</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-3">
+        <Card className="relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-success/10 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+          <CardHeader className="pb-3 relative z-10">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-success/20 to-accent/20 flex items-center justify-center">
+                <DollarSign className="h-4 w-4 text-success" />
+              </div>
               Pipeline Value
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalValue)}</div>
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-success to-accent">{formatCurrency(totalValue)}</div>
+            <p className="text-xs text-muted-foreground mt-1">Total opportunity value</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-3">
+        <Card className="relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-accent/10 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+          <CardHeader className="pb-3 relative z-10">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center">
+                <TrendingUp className="h-4 w-4 text-accent" />
+              </div>
               Avg Deal Size
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(avgDealSize)}</div>
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-accent to-primary">{formatCurrency(avgDealSize)}</div>
+            <p className="text-xs text-muted-foreground mt-1">Average deal value</p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-4">
-        {stages?.map((stage) => {
+      {/* Pipeline Stages */}
+      <div className="flex gap-6 overflow-x-auto pb-6">
+        {stages?.map((stage, index) => {
           const stageOpps = getOpportunitiesByStage(stage.id);
           const stageValue = stageOpps.reduce((sum, opp) => sum + (opp.amount || 0), 0);
 
           return (
-            <Card key={stage.id} className="min-w-[320px] flex-shrink-0">
-              <CardHeader>
-                <CardTitle className="text-lg">{stage.name}</CardTitle>
-                <CardDescription>
-                  {stageOpps.length} deals • {formatCurrency(stageValue)}
+            <Card key={stage.id} className="min-w-[340px] flex-shrink-0 relative overflow-hidden group animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
+              <div className="absolute inset-0 bg-gradient-mesh opacity-5" />
+              <CardHeader className="relative z-10">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${index % 3 === 0 ? 'from-primary to-primary-glow' : index % 3 === 1 ? 'from-accent to-accent' : 'from-success to-success'} animate-glow-pulse`} />
+                  {stage.name}
+                </CardTitle>
+                <CardDescription className="flex items-center justify-between">
+                  <span className="font-semibold">{stageOpps.length} deals</span>
+                  <span className="text-primary font-bold">{formatCurrency(stageValue)}</span>
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[500px] pr-4">
+              <CardContent className="relative z-10">
+                <ScrollArea className="h-[520px] pr-4">
                   <div className="space-y-3">
                     {stageOpps.map((opp: any) => (
-                      <Card key={opp.id} className="p-4 hover:shadow-md transition-shadow cursor-pointer">
-                        <div className="space-y-2">
-                          <div className="font-semibold">{opp.name}</div>
+                      <Card key={opp.id} className="p-4 hover:shadow-[var(--shadow-card)] transition-all duration-500 cursor-pointer border-2 border-transparent hover:border-primary/20 hover:scale-[1.02] group/card">
+                        <div className="space-y-3">
+                          <div className="font-semibold text-base group-hover/card:text-primary transition-colors">{opp.name}</div>
                           {opp.accounts && (
-                            <div className="text-sm text-muted-foreground flex items-center gap-1">
+                            <div className="text-sm text-muted-foreground flex items-center gap-2">
+                              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center text-xs font-bold">
+                                {opp.accounts.name.charAt(0)}
+                              </div>
                               <span>{opp.accounts.name}</span>
                             </div>
                           )}
-                          <div className="flex items-center justify-between">
-                            <span className="text-lg font-bold">{formatCurrency(opp.amount || 0)}</span>
-                            <Badge variant="outline">{opp.pipeline_stages?.probability}%</Badge>
+                          <div className="flex items-center justify-between pt-2 border-t">
+                            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-success to-accent">{formatCurrency(opp.amount || 0)}</span>
+                            <Badge variant="outline" className="bg-gradient-to-r from-primary/10 to-accent/10">{opp.pipeline_stages?.probability}%</Badge>
                           </div>
                           {opp.expected_close_date && (
-                            <div className="text-xs text-muted-foreground">
+                            <div className="text-xs text-muted-foreground pt-1">
                               Close: {new Date(opp.expected_close_date).toLocaleDateString()}
                             </div>
                           )}

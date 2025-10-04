@@ -213,11 +213,12 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary-glow to-accent p-8 shadow-elegant">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,hsl(6_78%_57%_/_0.3),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_100%,hsl(184_91%_30%_/_0.2),transparent_50%)]" />
+    <div className="space-y-6 animate-fade-in">
+      {/* Revolutionary Hero Section */}
+      <div className="relative overflow-hidden rounded-3xl p-12 shadow-[var(--shadow-xl)]" style={{ background: 'var(--gradient-mesh)' }}>
+        <div className="absolute inset-0 animate-shimmer" style={{ backgroundImage: 'linear-gradient(90deg, transparent, hsl(var(--primary-glow) / 0.3), transparent)', backgroundSize: '200% 100%' }} />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-accent/30 to-transparent rounded-full blur-3xl animate-glow-pulse" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-primary/30 to-transparent rounded-full blur-3xl animate-glow-pulse" style={{ animationDelay: '1s' }} />
         
         <div className="relative z-10 flex items-center justify-between">
           <div className="space-y-2">
@@ -229,27 +230,28 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
-            <h1 className="text-4xl font-bold tracking-tight text-white animate-in fade-in-50 duration-500">
+            <h1 className="text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/80 animate-scale-in">
               Welcome Back! 👋
             </h1>
-            <p className="text-white/90 text-lg animate-in fade-in-50 duration-500 delay-100">
+            <p className="text-white/95 text-xl font-medium animate-slide-up backdrop-blur-sm">
               Your social media empire awaits. Let's create something amazing today.
             </p>
           </div>
           <Button 
             onClick={() => navigate('/composer')}
             size="lg"
-            className="bg-white text-primary hover:bg-white/90 font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105 animate-in zoom-in-50 duration-500 delay-200"
+            className="relative bg-white text-primary hover:bg-white/95 font-bold shadow-[var(--shadow-elegant)] hover:shadow-[var(--shadow-glow)] transition-all hover:scale-110 animate-scale-in group overflow-hidden"
           >
-            <MessageSquare className="mr-2 h-5 w-5" />
-            Create Post
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <MessageSquare className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
+            <span className="relative">Create Post</span>
           </Button>
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-100">
+      {/* Enhanced Stats Grid */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
           <StatCard
             title="Total Followers"
             value={companyData?.totalFollowers.toLocaleString() || "0"}
@@ -258,7 +260,7 @@ export default function Dashboard() {
             trend="up"
           />
         </div>
-        <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-200">
+        <div className="animate-slide-up" style={{ animationDelay: '200ms' }}>
           <StatCard
             title="Engagement Rate"
             value={`${companyData?.engagementRate.toFixed(1) || "0"}%`}
@@ -267,7 +269,7 @@ export default function Dashboard() {
             trend="up"
           />
         </div>
-        <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-300">
+        <div className="animate-slide-up" style={{ animationDelay: '300ms' }}>
           <StatCard
             title="Scheduled Posts"
             value={companyData?.scheduledPosts.toString() || "0"}
@@ -276,7 +278,7 @@ export default function Dashboard() {
             trend={companyData?.scheduledPosts ? "up" : "down"}
           />
         </div>
-        <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-[400ms]">
+        <div className="animate-slide-up" style={{ animationDelay: '400ms' }}>
           <StatCard
             title="Total Posts"
             value={companyData?.postCount.toLocaleString() || "0"}
@@ -287,8 +289,8 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 animate-in fade-in-50 duration-700 delay-500">
-        <Card className="col-span-4 border-2 hover:shadow-xl transition-all duration-300 hover:border-primary/20">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7 animate-fade-in">
+        <Card className="col-span-4 relative overflow-hidden group">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-accent animate-pulse" />
@@ -300,8 +302,8 @@ export default function Dashboard() {
               {companyData?.recentActivity.map((item, i) => {
                 const Icon = item.icon;
                 return (
-                  <div key={i} className="flex items-center gap-4 p-3 rounded-lg hover:bg-gradient-to-r hover:from-primary/5 hover:to-accent/5 transition-all duration-300 hover:shadow-md group cursor-pointer">
-                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                  <div key={i} className="flex items-center gap-4 p-4 rounded-xl hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10 transition-all duration-500 hover:shadow-[var(--shadow-card)] group cursor-pointer border border-transparent hover:border-primary/20">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center group-hover:scale-125 group-hover:rotate-6 transition-all duration-500 shadow-inner">
                       <Icon className={`w-5 h-5 ${item.color}`} />
                     </div>
                     <div className="flex-1">
@@ -316,8 +318,8 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <div className="col-span-3 space-y-4">
-          <Card className="border-2 hover:shadow-xl transition-all duration-300 hover:border-accent/20">
+        <div className="col-span-3 space-y-6">
+          <Card className="relative overflow-hidden group">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
@@ -332,9 +334,9 @@ export default function Dashboard() {
                   const Icon = platform.icon;
                   const isConnected = platform.status === "Connected";
                   return (
-                    <div key={i} className="flex items-center justify-between p-3 border rounded-lg hover:border-primary/30 hover:shadow-md transition-all duration-300 group cursor-pointer">
+                    <div key={i} className="flex items-center justify-between p-4 border rounded-xl hover:border-primary/40 hover:shadow-[var(--shadow-card)] transition-all duration-500 group cursor-pointer hover:scale-[1.02]">
                       <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-muted to-muted/70 flex items-center justify-center group-hover:scale-125 group-hover:rotate-12 transition-all duration-500 shadow-inner">
                           <Icon className={`w-4 h-4 ${platform.color}`} />
                         </div>
                         <span className="text-sm font-medium group-hover:text-primary transition-colors">{platform.name}</span>

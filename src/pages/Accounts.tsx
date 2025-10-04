@@ -161,19 +161,28 @@ export default function Accounts() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Accounts</h1>
-          <p className="text-muted-foreground">Manage your customer accounts</p>
-        </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={openCreateDialog}>
-              <Plus className="mr-2 h-4 w-4" />
-              New Account
-            </Button>
-          </DialogTrigger>
+    <div className="container mx-auto p-6 space-y-8">
+      {/* Revolutionary Header */}
+      <div className="relative overflow-hidden rounded-3xl p-12 shadow-[var(--shadow-xl)] animate-scale-in" style={{ background: 'var(--gradient-mesh)' }}>
+        <div className="absolute inset-0 animate-shimmer" style={{ backgroundImage: 'linear-gradient(90deg, transparent, hsl(var(--primary-glow) / 0.2), transparent)', backgroundSize: '200% 100%' }} />
+        <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-accent/20 to-transparent rounded-full blur-3xl animate-float" />
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center animate-glow-pulse">
+                <Building2 className="h-6 w-6 text-white" />
+              </div>
+              <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-foreground/70">Accounts</h1>
+            </div>
+            <p className="text-muted-foreground text-lg">Manage your customer accounts with advanced analytics</p>
+          </div>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={openCreateDialog} size="lg" className="shadow-[var(--shadow-elegant)] hover:shadow-[var(--shadow-glow)] group">
+                <Plus className="mr-2 h-5 w-5 group-hover:rotate-90 transition-transform" />
+                New Account
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingAccount ? "Edit" : "Create"} Account</DialogTitle>
@@ -280,64 +289,80 @@ export default function Accounts() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-3">
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card className="relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+          <CardHeader className="pb-3 relative z-10">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Building2 className="h-4 w-4" />
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                <Building2 className="h-4 w-4 text-primary" />
+              </div>
               Total Accounts
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{accounts?.length || 0}</div>
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">{accounts?.length || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">Active organizations</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-3">
+        <Card className="relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-accent/10 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+          <CardHeader className="pb-3 relative z-10">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-success/20 to-accent/20 flex items-center justify-center">
+                <DollarSign className="h-4 w-4 text-success" />
+              </div>
               Total Revenue
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-success to-accent">
               {formatCurrency(accounts?.reduce((sum, acc) => sum + (acc.annual_revenue || 0), 0) || 0)}
             </div>
+            <p className="text-xs text-muted-foreground mt-1">Annual revenue total</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-3">
+        <Card className="relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+          <CardHeader className="pb-3 relative z-10">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Users2 className="h-4 w-4" />
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary-glow/20 flex items-center justify-center">
+                <Users2 className="h-4 w-4 text-primary" />
+              </div>
               Active Accounts
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{accounts?.filter(a => a.status === "active").length || 0}</div>
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-glow">{accounts?.filter(a => a.status === "active").length || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">Currently active</p>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
+      <Card className="relative overflow-hidden group">
+        <div className="absolute inset-0 bg-gradient-mesh opacity-10" />
+        <CardHeader className="relative z-10">
           <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>All Accounts</CardTitle>
-              <CardDescription>Search and manage your accounts</CardDescription>
+            <div className="space-y-1">
+              <CardTitle className="text-2xl">All Accounts</CardTitle>
+              <CardDescription>Search and manage your customer accounts</CardDescription>
             </div>
-            <Input
-              placeholder="Search accounts..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="max-w-sm"
-            />
+            <div className="relative">
+              <Input
+                placeholder="Search accounts..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="max-w-sm shadow-inner"
+              />
+            </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative z-10">
           {accounts && accounts.length > 0 ? (
             <Table>
               <TableHeader>
@@ -353,7 +378,7 @@ export default function Accounts() {
               </TableHeader>
               <TableBody>
                 {accounts.map((account: any) => (
-                  <TableRow key={account.id}>
+                  <TableRow key={account.id} className="hover:bg-gradient-to-r hover:from-primary/5 hover:to-accent/5 transition-all duration-300">
                     <TableCell>
                       <div className="font-medium">{account.name}</div>
                       {account.website && (
