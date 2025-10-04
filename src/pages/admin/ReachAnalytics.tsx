@@ -245,20 +245,22 @@ export default function ReachAnalytics() {
     }
   };
 
-  const syncTelegramMetrics = async () => {
+  const syncPlatformMetrics = async (platform: string) => {
     try {
-      const { data, error } = await supabase.functions.invoke('sync-telegram-metrics');
+      const { data, error } = await supabase.functions.invoke('sync-social-metrics', {
+        body: { platform }
+      });
+      
       if (error) throw error;
       
       toast({
-        title: "Telegram metrics synced",
-        description: `Subscribers: ${data.metrics.subscribers}, Posts: ${data.metrics.posts}`,
+        title: `${platform.charAt(0).toUpperCase() + platform.slice(1)} metrics synced`,
+        description: `Followers: ${data.metrics.followers}, Posts: ${data.metrics.posts}`,
       });
       
-      // Refresh data after sync
       await fetchAccountData();
     } catch (error: any) {
-      console.error('Error syncing Telegram metrics:', error);
+      console.error(`Error syncing ${platform} metrics:`, error);
       toast({
         title: "Sync failed",
         description: error.message,
@@ -266,6 +268,8 @@ export default function ReachAnalytics() {
       });
     }
   };
+
+  const syncTelegramMetrics = () => syncPlatformMetrics('telegram');
 
   const fetchAccountData = async () => {
     try {
@@ -725,10 +729,9 @@ export default function ReachAnalytics() {
         <TabsContent value="accounts" className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold">Connected Account Metrics</h2>
-            <Button variant="outline" onClick={syncTelegramMetrics}>
-              <TrendingUp className="h-4 w-4 mr-2" />
-              Sync Telegram Metrics
-            </Button>
+            <div className="text-sm text-muted-foreground">
+              Click sync icon on each platform to update metrics
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -741,20 +744,34 @@ export default function ReachAnalytics() {
                       {getPlatformIcon(account.platform)}
                       {account.account_name}
                     </CardTitle>
+                    <Button 
+                      size="sm" 
+                      variant="ghost"
+                      onClick={() => syncPlatformMetrics(account.platform)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <TrendingUp className="h-4 w-4" />
+                    </Button>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground flex items-center gap-1"><TrendingUp className="h-4 w-4" />Followers</span>
+                        <span className="text-sm text-muted-foreground flex items-center gap-1">
+                          <TrendingUp className="h-4 w-4" />Followers
+                        </span>
                         <span className="font-bold">{metrics?.followers_count || 0}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground flex items-center gap-1"><MessageCircle className="h-4 w-4" />Posts</span>
+                        <span className="text-sm text-muted-foreground flex items-center gap-1">
+                          <MessageCircle className="h-4 w-4" />Posts
+                        </span>
                         <span className="font-bold">{metrics?.posts_count || 0}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground flex items-center gap-1"><Heart className="h-4 w-4" />Engagement</span>
-                        <span className="font-bold">{metrics?.engagement_rate || 0}%</span>
+                        <span className="text-sm text-muted-foreground flex items-center gap-1">
+                          <Heart className="h-4 w-4" />Engagement
+                        </span>
+                        <span className="font-bold">{metrics?.engagement_rate?.toFixed(1) || 0}%</span>
                       </div>
                     </div>
                   </CardContent>
