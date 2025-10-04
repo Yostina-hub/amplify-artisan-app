@@ -14,6 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounts: {
+        Row: {
+          account_type: string | null
+          annual_revenue: number | null
+          billing_address: string | null
+          billing_city: string | null
+          billing_country: string | null
+          billing_postal_code: string | null
+          billing_state: string | null
+          company_id: string | null
+          created_at: string
+          created_by: string
+          email: string | null
+          id: string
+          industry: string | null
+          metadata: Json | null
+          name: string
+          number_of_employees: number | null
+          owner_id: string | null
+          parent_account_id: string | null
+          phone: string | null
+          shipping_address: string | null
+          shipping_city: string | null
+          shipping_country: string | null
+          shipping_postal_code: string | null
+          shipping_state: string | null
+          status: string | null
+          tags: string[] | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          account_type?: string | null
+          annual_revenue?: number | null
+          billing_address?: string | null
+          billing_city?: string | null
+          billing_country?: string | null
+          billing_postal_code?: string | null
+          billing_state?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by: string
+          email?: string | null
+          id?: string
+          industry?: string | null
+          metadata?: Json | null
+          name: string
+          number_of_employees?: number | null
+          owner_id?: string | null
+          parent_account_id?: string | null
+          phone?: string | null
+          shipping_address?: string | null
+          shipping_city?: string | null
+          shipping_country?: string | null
+          shipping_postal_code?: string | null
+          shipping_state?: string | null
+          status?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          account_type?: string | null
+          annual_revenue?: number | null
+          billing_address?: string | null
+          billing_city?: string | null
+          billing_country?: string | null
+          billing_postal_code?: string | null
+          billing_state?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string
+          email?: string | null
+          id?: string
+          industry?: string | null
+          metadata?: Json | null
+          name?: string
+          number_of_employees?: number | null
+          owner_id?: string | null
+          parent_account_id?: string | null
+          phone?: string | null
+          shipping_address?: string | null
+          shipping_city?: string | null
+          shipping_country?: string | null
+          shipping_postal_code?: string | null
+          shipping_state?: string | null
+          status?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounts_parent_account_id_fkey"
+            columns: ["parent_account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ad_campaigns: {
         Row: {
           budget: number
@@ -763,6 +871,108 @@ export type Database = {
             columns: ["platform_id"]
             isOneToOne: false
             referencedRelation: "social_platforms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contacts: {
+        Row: {
+          account_id: string | null
+          address: string | null
+          avatar_url: string | null
+          city: string | null
+          company_id: string | null
+          country: string | null
+          created_at: string
+          created_by: string
+          department: string | null
+          email: string | null
+          first_name: string
+          id: string
+          last_name: string
+          lead_source: string | null
+          linkedin_url: string | null
+          metadata: Json | null
+          mobile: string | null
+          phone: string | null
+          postal_code: string | null
+          state: string | null
+          status: string | null
+          tags: string[] | null
+          title: string | null
+          twitter_handle: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          address?: string | null
+          avatar_url?: string | null
+          city?: string | null
+          company_id?: string | null
+          country?: string | null
+          created_at?: string
+          created_by: string
+          department?: string | null
+          email?: string | null
+          first_name: string
+          id?: string
+          last_name: string
+          lead_source?: string | null
+          linkedin_url?: string | null
+          metadata?: Json | null
+          mobile?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          state?: string | null
+          status?: string | null
+          tags?: string[] | null
+          title?: string | null
+          twitter_handle?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          address?: string | null
+          avatar_url?: string | null
+          city?: string | null
+          company_id?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string
+          department?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          lead_source?: string | null
+          linkedin_url?: string | null
+          metadata?: Json | null
+          mobile?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          state?: string | null
+          status?: string | null
+          tags?: string[] | null
+          title?: string | null
+          twitter_handle?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_contacts_account"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
             referencedColumns: ["id"]
           },
         ]

@@ -1,4 +1,4 @@
-import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2, Mail, Link2, Globe, Key, Package, BarChart2, Layers, DollarSign, CreditCard, FileSearch, ChevronDown, Wallet, Layout, Database, Sparkles, Brain, Zap, LineChart, Box, Target } from "lucide-react";
+import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2, Mail, Link2, Globe, Key, Package, BarChart2, Layers, DollarSign, CreditCard, FileSearch, ChevronDown, Wallet, Layout, Database, Sparkles, Brain, Zap, LineChart, Box, Target, UserCircle } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
@@ -40,6 +40,11 @@ const builderItems = [
   { title: "Workflow Builder", url: "/workflow-builder", icon: Zap },
   { title: "Analytics Dashboard", url: "/reporting-dashboard", icon: BarChart3 },
   { title: "CRM Roadmap", url: "/crm-roadmap", icon: Target },
+];
+
+const crmItems = [
+  { title: "Contacts", url: "/contacts", icon: UserCircle },
+  { title: "Accounts", url: "/accounts", icon: Building2 },
 ];
 
 const marketingItems = [
@@ -273,6 +278,45 @@ export function AppSidebar() {
               <SidebarGroupContent>
                 <SidebarMenu>
                   {builderItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink
+                          to={item.url}
+                          className={({ isActive }) =>
+                            isActive
+                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                              : "hover:bg-sidebar-accent/50"
+                          }
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
+
+        {/* CRM Section - Collapsible */}
+        <Collapsible open={true} onOpenChange={() => {}}>
+          <SidebarGroup>
+            {!isCollapsed && (
+              <CollapsibleTrigger className="w-full" asChild>
+                <button className="w-full">
+                  <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
+                    <span className="font-medium">CRM</span>
+                    <ChevronDown className="h-4 w-4 transition-transform duration-200 rotate-180" />
+                  </SidebarGroupLabel>
+                </button>
+              </CollapsibleTrigger>
+            )}
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {crmItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
                         <NavLink
