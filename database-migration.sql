@@ -563,7 +563,7 @@ AS $$
   SELECT EXISTS (
     SELECT 1
     FROM public.subscription_requests
-    WHERE email = (SELECT email FROM public.profiles WHERE id = _user_id)
+    WHERE email = (SELECT email::text FROM public.profiles WHERE id = _user_id)
       AND is_trial = true
       AND trial_ends_at > now()
       AND status = 'approved'
@@ -593,7 +593,7 @@ AS $$
     END as days_remaining,
     sr.trial_converted
   FROM public.subscription_requests sr
-  WHERE sr.email = (SELECT email FROM public.profiles WHERE id = _user_id)
+  WHERE sr.email = (SELECT email::text FROM public.profiles WHERE id = _user_id)
     AND sr.is_trial = true
   ORDER BY sr.created_at DESC
   LIMIT 1
@@ -759,7 +759,7 @@ CREATE POLICY "Anyone can create subscription requests" ON public.subscription_r
 FOR INSERT WITH CHECK (true);
 
 CREATE POLICY "Users can view their own requests" ON public.subscription_requests
-FOR SELECT USING (email = (SELECT email FROM public.profiles WHERE id = auth.uid()));
+FOR SELECT USING (email = (SELECT email::text FROM public.profiles WHERE id = auth.uid()));
 
 CREATE POLICY "Admins can view all requests" ON public.subscription_requests
 FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
@@ -773,7 +773,7 @@ FOR SELECT USING (
   EXISTS (
     SELECT 1 FROM public.subscription_requests sr
     WHERE sr.id = subscription_request_id 
-    AND sr.email = (SELECT email FROM public.profiles WHERE id = auth.uid())
+    AND sr.email = (SELECT email::text FROM public.profiles WHERE id = auth.uid())
   )
 );
 
