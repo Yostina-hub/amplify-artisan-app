@@ -130,6 +130,7 @@ export default function ReachAnalytics() {
     { value: 'linkedin', label: 'LinkedIn', icon: '💼' },
     { value: 'youtube', label: 'YouTube', icon: '📹' },
     { value: 'telegram', label: 'Telegram', icon: '✈️' },
+    { value: 'whatsapp', label: 'WhatsApp', icon: '💬' },
   ];
 
   useEffect(() => {
