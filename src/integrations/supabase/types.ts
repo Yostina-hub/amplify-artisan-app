@@ -1263,8 +1263,10 @@ export type Database = {
           oauth_authorize_url: string | null
           oauth_scopes: string | null
           oauth_token_url: string | null
+          pricing_info: string | null
           requires_api_key: boolean | null
           requires_oauth: boolean | null
+          subscription_required: boolean | null
           updated_at: string | null
         }
         Insert: {
@@ -1279,8 +1281,10 @@ export type Database = {
           oauth_authorize_url?: string | null
           oauth_scopes?: string | null
           oauth_token_url?: string | null
+          pricing_info?: string | null
           requires_api_key?: boolean | null
           requires_oauth?: boolean | null
+          subscription_required?: boolean | null
           updated_at?: string | null
         }
         Update: {
@@ -1295,8 +1299,10 @@ export type Database = {
           oauth_authorize_url?: string | null
           oauth_scopes?: string | null
           oauth_token_url?: string | null
+          pricing_info?: string | null
           requires_api_key?: boolean | null
           requires_oauth?: boolean | null
+          subscription_required?: boolean | null
           updated_at?: string | null
         }
         Relationships: []
