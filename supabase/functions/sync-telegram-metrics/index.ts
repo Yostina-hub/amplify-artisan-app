@@ -162,33 +162,12 @@ Deno.serve(async (req) => {
       ? posts.reduce((sum, p) => sum + (p.engagement_rate || 0), 0) / posts.length
       : 0;
 
-    // Update or insert metrics
-    const { data: existingMetrics } = await supabaseClient
-      .from('social_media_metrics')
-      .select('id')
-      .eq('account_id', accountId)
-      .single();
-
-    const metricsData = {
-      account_id: accountId,
-      followers_count: subscriberCount,
-      posts_count: postsCount || 0,
+    // Metrics synced - social_media_metrics table removed from system
+    console.log('Telegram metrics synced:', {
+      subscribers: subscriberCount,
+      posts: postsCount || 0,
       engagement_rate: avgEngagement,
-      last_synced_at: new Date().toISOString(),
-    };
-
-    if (existingMetrics) {
-      await supabaseClient
-        .from('social_media_metrics')
-        .update(metricsData)
-        .eq('id', existingMetrics.id);
-      console.log('Updated existing metrics');
-    } else {
-      await supabaseClient
-        .from('social_media_metrics')
-        .insert(metricsData);
-      console.log('Created new metrics');
-    }
+    });
 
     return new Response(
       JSON.stringify({

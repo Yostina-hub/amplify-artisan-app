@@ -322,14 +322,15 @@ export default function ReachAnalytics() {
         }
       });
 
-      const [metricsRes, commentsRes] = await Promise.all([
-        supabase.from('social_media_metrics').select('*'),
-        supabase.from('social_media_comments').select('*').order('created_at', { ascending: false }).limit(10),
-      ]);
+      const { data: commentsData } = await supabase
+        .from('social_media_comments')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
 
       setAccounts(Array.from(accountsMap.values()));
-      setAccountMetrics(metricsRes.data || []);
-      setComments(commentsRes.data || []);
+      setAccountMetrics([]);
+      setComments(commentsData || []);
     } catch (error: any) {
       console.error('Error fetching account data:', error);
     }
@@ -376,32 +377,6 @@ export default function ReachAnalytics() {
     };
     const Icon = icons[platform?.toLowerCase?.() || ''];
     return Icon ? <Icon className="h-5 w-5" /> : null;
-  };
-
-  const getMetricsForAccount = (accountId: string) => {
-    const direct = accountMetrics.find(m => m.account_id === accountId);
-    if (direct) return direct;
-
-    // Fallback: derive metrics from posts when no account-level metrics are stored
-    const account = accounts.find(a => a.id === accountId);
-    if (!account) return undefined;
-
-    const postsForPlatform = posts.filter(p => p.platforms.includes(account.platform));
-    const posts_count = postsForPlatform.length;
-    const engagement_rate = posts_count > 0
-      ? postsForPlatform.reduce((sum, p) => sum + (p.engagement_rate || 0), 0) / posts_count
-      : 0;
-
-    const derived: Metric = {
-      id: `derived-${accountId}`,
-      account_id: accountId,
-      followers_count: 0, // Unknown without platform sync
-      posts_count,
-      engagement_rate,
-      last_synced_at: new Date().toISOString(),
-    } as Metric;
-
-    return derived;
   };
 
   const formatWatchTime = (seconds: number) => {
@@ -478,7 +453,12 @@ export default function ReachAnalytics() {
               <CardContent>
                 <div className="space-y-4">
                   {accounts.slice(0, 4).map((account, i) => {
-                    const metrics = getMetricsForAccount(account.id);
+                    const postsForPlatform = posts.filter(p => p.platforms.includes(account.platform));
+                    const posts_count = postsForPlatform.length;
+                    const engagement_rate = posts_count > 0
+                      ? postsForPlatform.reduce((sum, p) => sum + (p.engagement_rate || 0), 0) / posts_count
+                      : 0;
+
                     return (
                       <div key={account.id} className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
@@ -487,17 +467,17 @@ export default function ReachAnalytics() {
                             {account.account_name}
                           </span>
                           <span className="text-muted-foreground">
-                            {metrics?.followers_count.toLocaleString() || 0} followers
+                            {posts_count} posts
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="flex-1 bg-muted rounded-full h-2">
                             <div
                               className="bg-gradient-to-r from-primary to-accent h-2 rounded-full"
-                              style={{ width: `${Math.min((metrics?.engagement_rate || 0) * 10, 100)}%` }}
+                              style={{ width: `${Math.min(engagement_rate * 10, 100)}%` }}
                             />
                           </div>
-                          <span className="text-xs text-success">{metrics?.engagement_rate || 0}%</span>
+                          <span className="text-xs text-success">{engagement_rate.toFixed(1)}%</span>
                         </div>
                       </div>
                     );
@@ -515,31 +495,21 @@ export default function ReachAnalytics() {
         <TabsContent value="growth" className="space-y-4">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Growth Analytics</CardTitle>
-                  <CardDescription>Track follower growth and engagement trends across platforms</CardDescription>
-                </div>
-                {accountMetrics.length === 0 && accounts.length > 0 && (
-                  <Button onClick={() => syncPlatformMetrics(accounts[0].platform)} variant="outline">
-                    <TrendingUp className="h-4 w-4 mr-2" />
-                    Sync Metrics
-                  </Button>
-                )}
-              </div>
+              <CardTitle>Growth Analytics</CardTitle>
+              <CardDescription>Track follower growth and engagement trends across platforms</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
                 <div className="grid gap-4 md:grid-cols-3">
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">Total Followers</CardTitle>
+                      <CardTitle className="text-sm font-medium">Total Posts</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
-                        {accountMetrics.reduce((sum, m) => sum + m.followers_count, 0).toLocaleString()}
+                        {posts.length.toLocaleString()}
                       </div>
-                      <p className="text-xs text-muted-foreground">Across all platforms</p>
+                      <p className="text-xs text-muted-foreground">Content published</p>
                     </CardContent>
                   </Card>
                   <Card>
@@ -548,43 +518,29 @@ export default function ReachAnalytics() {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
-                        {accountMetrics.length > 0 
-                          ? (accountMetrics.reduce((sum, m) => sum + m.engagement_rate, 0) / accountMetrics.length).toFixed(1)
-                          : socialMetrics.avgEngagementRate.toFixed(1)}%
+                        {socialMetrics.avgEngagementRate.toFixed(1)}%
                       </div>
                       <p className="text-xs text-muted-foreground">Overall performance</p>
                     </CardContent>
                   </Card>
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">Total Posts</CardTitle>
+                      <CardTitle className="text-sm font-medium">Total Reach</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
-                        {accountMetrics.length > 0 
-                          ? accountMetrics.reduce((sum, m) => sum + m.posts_count, 0).toLocaleString()
-                          : posts.length.toLocaleString()}
+                        {socialMetrics.totalReach.toLocaleString()}
                       </div>
-                      <p className="text-xs text-muted-foreground">Content published</p>
+                      <p className="text-xs text-muted-foreground">Unique users reached</p>
                     </CardContent>
                   </Card>
                 </div>
-                {accountMetrics.length === 0 && accounts.length > 0 && (
-                  <div className="bg-muted/50 border border-primary/20 rounded-lg p-6 text-center space-y-3">
-                    <TrendingUp className="h-12 w-12 mx-auto text-primary" />
-                    <p className="text-muted-foreground">
-                      Click "Sync Metrics" above or go to the Account Metrics tab to sync your social media platform metrics for detailed growth analytics.
-                    </p>
-                  </div>
-                )}
-                {accountMetrics.length === 0 && accounts.length === 0 && (
-                  <div className="bg-muted/50 border border-primary/20 rounded-lg p-6 text-center space-y-3">
-                    <TrendingUp className="h-12 w-12 mx-auto text-primary" />
-                    <p className="text-muted-foreground">
-                      Connect your social media accounts in Platform Configurations to start tracking growth metrics.
-                    </p>
-                  </div>
-                )}
+                <div className="bg-muted/50 border border-primary/20 rounded-lg p-6 text-center space-y-3">
+                  <TrendingUp className="h-12 w-12 mx-auto text-primary" />
+                  <p className="text-muted-foreground">
+                    Growth metrics are calculated from your published posts across all platforms.
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -757,60 +713,29 @@ export default function ReachAnalytics() {
         {/* Account Metrics Tab */}
         <TabsContent value="accounts" className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold">Connected Account Metrics</h2>
-            <div className="text-sm text-muted-foreground">
-              Click sync icon on each platform to update metrics
-            </div>
+            <h2 className="text-2xl font-semibold">Connected Social Accounts</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {accounts.map((account) => {
-              const metrics = getMetricsForAccount(account.id);
-              return (
-                <Card key={account.id}>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      {getPlatformIcon(account.platform)}
-                      {account.account_name}
-                    </CardTitle>
-                    <Button 
-                      size="sm" 
-                      variant="ghost"
-                      onClick={() => syncPlatformMetrics(account.platform)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <TrendingUp className="h-4 w-4" />
-                    </Button>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground flex items-center gap-1">
-                          <TrendingUp className="h-4 w-4" />Followers
-                        </span>
-                        <span className="font-bold">{metrics?.followers_count || 0}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground flex items-center gap-1">
-                          <MessageCircle className="h-4 w-4" />Posts
-                        </span>
-                        <span className="font-bold">{metrics?.posts_count || 0}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground flex items-center gap-1">
-                          <Heart className="h-4 w-4" />Engagement
-                        </span>
-                        <span className="font-bold">{metrics?.engagement_rate?.toFixed(1) || 0}%</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+            {accounts.map((account) => (
+              <Card key={account.id}>
+                <CardHeader>
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    {getPlatformIcon(account.platform)}
+                    {account.account_name}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Platform: {account.platform}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
             {accounts.length === 0 && (
               <Card className="col-span-full">
                 <CardContent className="py-12 text-center">
-                  <p className="text-muted-foreground">No social media accounts connected yet</p>
+                  <p className="text-muted-foreground">No social media accounts connected yet. Configure platforms in Platform Configurations.</p>
                 </CardContent>
               </Card>
             )}

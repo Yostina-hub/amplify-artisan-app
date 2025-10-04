@@ -1119,54 +1119,6 @@ export type Database = {
         }
         Relationships: []
       }
-      social_media_metrics: {
-        Row: {
-          account_id: string
-          created_at: string | null
-          engagement_rate: number | null
-          followers_count: number | null
-          id: string
-          last_synced_at: string | null
-          location_breakdown: Json | null
-          posts_count: number | null
-        }
-        Insert: {
-          account_id: string
-          created_at?: string | null
-          engagement_rate?: number | null
-          followers_count?: number | null
-          id?: string
-          last_synced_at?: string | null
-          location_breakdown?: Json | null
-          posts_count?: number | null
-        }
-        Update: {
-          account_id?: string
-          created_at?: string | null
-          engagement_rate?: number | null
-          followers_count?: number | null
-          id?: string
-          last_synced_at?: string | null
-          location_breakdown?: Json | null
-          posts_count?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "social_media_metrics_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "social_media_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "social_media_metrics_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "social_media_accounts_safe"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       social_media_posts: {
         Row: {
           clicks: number | null

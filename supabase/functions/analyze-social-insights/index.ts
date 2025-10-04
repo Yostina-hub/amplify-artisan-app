@@ -15,7 +15,6 @@ Deno.serve(async (req) => {
     const { analysisType, platform } = await req.json()
 
     // Build queries with optional platform filter
-    let metricsQuery = supabaseClient.from('social_media_metrics').select('*, social_media_accounts(platform, account_name)').limit(100)
     let influencersQuery = supabaseClient.from('influencers').select('*').limit(50)
     let mentionsQuery = supabaseClient.from('social_media_mentions').select('*').order('mentioned_at', { ascending: false }).limit(100)
     let trendsQuery = supabaseClient.from('trending_topics').select('*').order('detected_at', { ascending: false }).limit(50)
@@ -26,9 +25,8 @@ Deno.serve(async (req) => {
       trendsQuery = trendsQuery.eq('platform', platform)
     }
 
-    // Fetch all relevant data
-    const [metricsRes, influencersRes, mentionsRes, keywordsRes, trendsRes] = await Promise.all([
-      metricsQuery,
+    // Fetch all relevant data (metrics removed - table dropped)
+    const [influencersRes, mentionsRes, keywordsRes, trendsRes] = await Promise.all([
       influencersQuery,
       mentionsQuery,
       supabaseClient.from('tracked_keywords').select('*'),
@@ -37,7 +35,7 @@ Deno.serve(async (req) => {
 
     // Prepare analysis data
     const analysisData = {
-      metrics: metricsRes.data || [],
+      metrics: [],
       influencers: influencersRes.data || [],
       mentions: mentionsRes.data || [],
       keywords: keywordsRes.data || [],

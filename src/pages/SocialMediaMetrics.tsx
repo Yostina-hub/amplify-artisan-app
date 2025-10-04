@@ -49,18 +49,16 @@ export default function SocialMediaMetrics() {
 
   const fetchData = async () => {
     try {
-      const [accountsRes, metricsRes, commentsRes] = await Promise.all([
+      const [accountsRes, commentsRes] = await Promise.all([
         querySocialMediaAccountsSafe().select('*').eq('is_active', true),
-        supabase.from('social_media_metrics').select('*'),
         supabase.from('social_media_comments').select('*').order('created_at', { ascending: false }),
       ]);
 
       if (accountsRes.error) throw accountsRes.error;
-      if (metricsRes.error) throw metricsRes.error;
       if (commentsRes.error) throw commentsRes.error;
 
       setAccounts(accountsRes.data || []);
-      setMetrics(metricsRes.data || []);
+      setMetrics([]);
       setComments(commentsRes.data || []);
     } catch (error: any) {
       toast({

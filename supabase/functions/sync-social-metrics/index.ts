@@ -143,31 +143,13 @@ Deno.serve(async (req) => {
       accountId = newAccount.id;
     }
 
-    // Update or insert metrics
-    const { data: existingMetrics } = await supabaseClient
-      .from('social_media_metrics')
-      .select('id')
-      .eq('account_id', accountId)
-      .single();
-
-    const metricsData = {
-      account_id: accountId,
-      followers_count: metrics.followers,
-      posts_count: postsCount || metrics.posts,
+    // Metrics synced - social_media_metrics table removed from system
+    console.log('Platform metrics synced:', {
+      platform,
+      followers: metrics.followers,
+      posts: postsCount || metrics.posts,
       engagement_rate: avgEngagement,
-      last_synced_at: new Date().toISOString(),
-    };
-
-    if (existingMetrics) {
-      await supabaseClient
-        .from('social_media_metrics')
-        .update(metricsData)
-        .eq('id', existingMetrics.id);
-    } else {
-      await supabaseClient
-        .from('social_media_metrics')
-        .insert(metricsData);
-    }
+    });
 
     return new Response(
       JSON.stringify({
