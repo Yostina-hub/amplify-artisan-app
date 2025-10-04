@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Edit, Trash2, User, Mail, Phone, Building2 } from "lucide-react";
+import { Plus, Edit, Trash2, User, Mail, Phone, Building2, Users, Sparkles } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export default function Contacts() {
@@ -105,7 +105,7 @@ export default function Contacts() {
 
   const deleteContactMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      const { error} = await supabase
         .from("contacts")
         .delete()
         .eq("id", id);
@@ -172,215 +172,260 @@ export default function Contacts() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Contacts</h1>
-          <p className="text-muted-foreground">Manage your customer contacts</p>
+    <div className="container mx-auto p-6 space-y-6 animate-fade-in">
+      {/* Enhanced Header */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-accent/10 via-primary/5 to-background p-10 backdrop-blur-sm border border-accent/10">
+        <div className="absolute inset-0 bg-gradient-mesh opacity-30" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-accent/20 to-primary/20 rounded-full blur-3xl animate-glow-pulse" />
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 backdrop-blur-sm border border-accent/20 animate-scale-in">
+              <Users className="h-4 w-4 text-accent" />
+              <span className="text-sm font-medium text-accent">Relationship Management</span>
+            </div>
+            <h1 className="text-5xl font-bold tracking-tight bg-gradient-to-r from-accent via-primary to-success bg-clip-text text-transparent animate-slide-up">
+              Contacts
+            </h1>
+            <p className="text-muted-foreground text-lg animate-slide-up" style={{ animationDelay: "100ms" }}>
+              Manage your customer relationships and contact database
+            </p>
+          </div>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={openCreateDialog} size="lg" className="shadow-lg hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-r from-accent to-primary animate-glow-pulse">
+                <Plus className="mr-2 h-5 w-5" />
+                New Contact
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto backdrop-blur-xl bg-card/95">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">{editingContact ? "Edit" : "Create"} Contact</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>First Name *</Label>
+                    <Input
+                      value={formData.first_name}
+                      onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Last Name *</Label>
+                    <Input
+                      value={formData.last_name}
+                      onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Email</Label>
+                    <Input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Phone</Label>
+                    <Input
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Mobile</Label>
+                    <Input
+                      value={formData.mobile}
+                      onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Title</Label>
+                    <Input
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Department</Label>
+                    <Input
+                      value={formData.department}
+                      onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Account</Label>
+                    <Select value={formData.account_id} onValueChange={(value) => setFormData({ ...formData, account_id: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select account" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {accounts?.map((account) => (
+                          <SelectItem key={account.id} value={account.id}>
+                            {account.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Lead Source</Label>
+                    <Select value={formData.lead_source} onValueChange={(value) => setFormData({ ...formData, lead_source: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select source" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="website">Website</SelectItem>
+                        <SelectItem value="referral">Referral</SelectItem>
+                        <SelectItem value="social_media">Social Media</SelectItem>
+                        <SelectItem value="event">Event</SelectItem>
+                        <SelectItem value="cold_call">Cold Call</SelectItem>
+                        <SelectItem value="email">Email Campaign</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Status</Label>
+                    <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit">{editingContact ? "Update" : "Create"}</Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={openCreateDialog}>
-              <Plus className="mr-2 h-4 w-4" />
-              New Contact
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{editingContact ? "Edit" : "Create"} Contact</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>First Name *</Label>
-                  <Input
-                    value={formData.first_name}
-                    onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Last Name *</Label>
-                  <Input
-                    value={formData.last_name}
-                    onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Email</Label>
-                  <Input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Phone</Label>
-                  <Input
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Mobile</Label>
-                  <Input
-                    value={formData.mobile}
-                    onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Title</Label>
-                  <Input
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Department</Label>
-                  <Input
-                    value={formData.department}
-                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Account</Label>
-                  <Select value={formData.account_id} onValueChange={(value) => setFormData({ ...formData, account_id: value })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select account" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {accounts?.map((account) => (
-                        <SelectItem key={account.id} value={account.id}>
-                          {account.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Lead Source</Label>
-                  <Select value={formData.lead_source} onValueChange={(value) => setFormData({ ...formData, lead_source: value })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select source" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="website">Website</SelectItem>
-                      <SelectItem value="referral">Referral</SelectItem>
-                      <SelectItem value="social_media">Social Media</SelectItem>
-                      <SelectItem value="event">Event</SelectItem>
-                      <SelectItem value="cold_call">Cold Call</SelectItem>
-                      <SelectItem value="email">Email Campaign</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Status</Label>
-                  <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">{editingContact ? "Update" : "Create"}</Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
+      {/* Enhanced Stats */}
+      <div className="grid gap-6 md:grid-cols-4">
+        <Card className="relative overflow-hidden group animate-slide-up" style={{ animationDelay: "100ms" }}>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-accent/20 to-transparent rounded-full blur-3xl animate-glow-pulse" />
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <User className="h-4 w-4" />
+              <div className="p-2 rounded-lg bg-gradient-to-br from-accent/10 to-primary/5 group-hover:scale-110 transition-transform">
+                <User className="h-4 w-4 text-accent" />
+              </div>
               Total Contacts
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{contacts?.length || 0}</div>
+            <div className="text-4xl font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
+              {contacts?.length || 0}
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">In database</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="relative overflow-hidden group animate-slide-up" style={{ animationDelay: "200ms" }}>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/20 to-transparent rounded-full blur-3xl animate-glow-pulse" style={{ animationDelay: "500ms" }} />
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Mail className="h-4 w-4" />
+              <div className="p-2 rounded-lg bg-gradient-to-br from-primary/10 to-accent/5 group-hover:scale-110 transition-transform">
+                <Mail className="h-4 w-4 text-primary" />
+              </div>
               With Email
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{contacts?.filter(c => c.email).length || 0}</div>
+            <div className="text-4xl font-bold text-primary">
+              {contacts?.filter(c => c.email).length || 0}
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Reachable via email</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="relative overflow-hidden group animate-slide-up" style={{ animationDelay: "300ms" }}>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-success/20 to-transparent rounded-full blur-3xl animate-glow-pulse" style={{ animationDelay: "1s" }} />
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Phone className="h-4 w-4" />
+              <div className="p-2 rounded-lg bg-gradient-to-br from-success/10 to-accent/5 group-hover:scale-110 transition-transform">
+                <Phone className="h-4 w-4 text-success" />
+              </div>
               With Phone
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{contacts?.filter(c => c.phone || c.mobile).length || 0}</div>
+            <div className="text-4xl font-bold text-success">
+              {contacts?.filter(c => c.phone || c.mobile).length || 0}
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Call-ready contacts</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="relative overflow-hidden group animate-slide-up" style={{ animationDelay: "400ms" }}>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-accent/20 via-primary/20 to-success/20 rounded-full blur-3xl animate-glow-pulse" style={{ animationDelay: "1.5s" }} />
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Building2 className="h-4 w-4" />
+              <div className="p-2 rounded-lg bg-gradient-to-br from-accent/10 via-primary/5 to-success/5 group-hover:scale-110 transition-transform">
+                <Building2 className="h-4 w-4 text-accent" />
+              </div>
               With Accounts
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{contacts?.filter(c => c.account_id).length || 0}</div>
+            <div className="text-4xl font-bold bg-gradient-to-r from-accent via-primary to-success bg-clip-text text-transparent">
+              {contacts?.filter(c => c.account_id).length || 0}
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Linked to accounts</p>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
+      {/* Enhanced Table */}
+      <Card className="animate-slide-up" style={{ animationDelay: "500ms" }}>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>All Contacts</CardTitle>
-              <CardDescription>Search and manage your contacts</CardDescription>
+              <CardTitle className="text-2xl flex items-center gap-2">
+                <Sparkles className="h-6 w-6 text-accent" />
+                All Contacts
+              </CardTitle>
+              <CardDescription>Search and manage your contact database</CardDescription>
             </div>
-            <Input
-              placeholder="Search contacts..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="max-w-sm"
-            />
+            <div className="relative">
+              <Input
+                placeholder="Search contacts..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="max-w-sm pl-10 backdrop-blur-sm bg-background/50"
+              />
+              <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            </div>
           </div>
         </CardHeader>
         <CardContent>
           {contacts && contacts.length > 0 ? (
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="hover:bg-muted/50">
                   <TableHead>Name</TableHead>
                   <TableHead>Title</TableHead>
                   <TableHead>Account</TableHead>
@@ -392,11 +437,13 @@ export default function Contacts() {
               </TableHeader>
               <TableBody>
                 {contacts.map((contact: any) => (
-                  <TableRow key={contact.id}>
+                  <TableRow key={contact.id} className="hover:bg-gradient-to-r hover:from-accent/5 hover:to-primary/5 transition-all group">
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarFallback>{getInitials(contact.first_name, contact.last_name)}</AvatarFallback>
+                        <Avatar className="group-hover:scale-110 transition-transform">
+                          <AvatarFallback className="bg-gradient-to-br from-accent to-primary text-white">
+                            {getInitials(contact.first_name, contact.last_name)}
+                          </AvatarFallback>
                         </Avatar>
                         <div>
                           <div className="font-medium">{contact.first_name} {contact.last_name}</div>
@@ -411,19 +458,20 @@ export default function Contacts() {
                     <TableCell>{contact.email || "-"}</TableCell>
                     <TableCell>{contact.phone || contact.mobile || "-"}</TableCell>
                     <TableCell>
-                      <Badge variant={contact.status === "active" ? "default" : "secondary"}>
+                      <Badge variant={contact.status === "active" ? "default" : "secondary"} className="animate-scale-in">
                         {contact.status}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => openEditDialog(contact)}>
+                        <Button variant="ghost" size="icon" onClick={() => openEditDialog(contact)} className="hover:scale-110 transition-transform">
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => deleteContactMutation.mutate(contact.id)}
+                          className="hover:scale-110 transition-transform hover:text-destructive"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -434,9 +482,12 @@ export default function Contacts() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-muted-foreground text-center py-8">
-              No contacts found. Create your first contact!
-            </p>
+            <div className="flex flex-col items-center justify-center py-12">
+              <User className="h-16 w-16 text-muted-foreground/50 mb-4 animate-float" />
+              <p className="text-muted-foreground text-center">
+                No contacts found. Create your first contact!
+              </p>
+            </div>
           )}
         </CardContent>
       </Card>
