@@ -129,6 +129,7 @@ export default function ReachAnalytics() {
     { value: 'tiktok', label: 'TikTok', icon: '🎵' },
     { value: 'linkedin', label: 'LinkedIn', icon: '💼' },
     { value: 'youtube', label: 'YouTube', icon: '📹' },
+    { value: 'telegram', label: 'Telegram', icon: '✈️' },
   ];
 
   useEffect(() => {
