@@ -16,6 +16,8 @@ interface Platform {
   requires_oauth: boolean;
   requires_api_key: boolean;
   is_active: boolean;
+  pricing_info: string | null;
+  subscription_required: boolean;
 }
 
 interface Subscription {
@@ -75,7 +77,7 @@ export default function CompanyPlatformSubscriptions() {
 
       if (platformsError) throw platformsError;
 
-      setPlatforms(platformsData || []);
+      setPlatforms((platformsData as any) || []);
 
       // Fetch company's subscriptions
       const { data: subsData, error: subsError } = await supabase
@@ -328,7 +330,14 @@ export default function CompanyPlatformSubscriptions() {
                   {getStatusBadge(platform.id)}
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="space-y-3">
+                {platform.pricing_info && (
+                  <div className="text-sm text-muted-foreground border-l-2 border-primary pl-3 py-1">
+                    <p className="font-medium mb-1">Pricing:</p>
+                    <p className="whitespace-pre-line">{platform.pricing_info}</p>
+                  </div>
+                )}
+
                 {rejected && subscriptions[platform.id]?.rejection_reason && (
                   <Alert variant="destructive" className="mb-2">
                     <AlertDescription className="text-xs">

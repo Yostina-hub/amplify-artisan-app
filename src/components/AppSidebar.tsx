@@ -1,4 +1,4 @@
-import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2, Mail, Link2, Globe, Key, Package, BarChart2, Layers, DollarSign, CreditCard, FileSearch, ChevronDown } from "lucide-react";
+import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2, Mail, Link2, Globe, Key, Package, BarChart2, Layers, DollarSign, CreditCard, FileSearch, ChevronDown, Wallet } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
@@ -64,6 +64,7 @@ const adminPlatformItems = [
 
 const adminBusinessItems = [
   { title: "Subscription Management", url: "/admin/subscriptions", icon: CreditCard },
+  { title: "Payment Management", url: "/admin/payments", icon: Wallet },
   { title: "Pricing Management", url: "/admin/pricing", icon: DollarSign },
   { title: "Industry Management", url: "/admin/industries", icon: Layers },
   { title: "Landing Page Manager", url: "/admin/landing-page", icon: FileText },

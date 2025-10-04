@@ -6,8 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Save } from "lucide-react";
+import { Plus, Trash2, Save, DollarSign } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 
 interface Platform {
   id: string;
@@ -21,6 +23,8 @@ interface Platform {
   requires_oauth: boolean;
   requires_api_key: boolean;
   is_active: boolean;
+  pricing_info: string | null;
+  subscription_required: boolean;
 }
 
 export default function SocialPlatformManagement() {
@@ -37,6 +41,8 @@ export default function SocialPlatformManagement() {
     requires_oauth: true,
     requires_api_key: false,
     is_active: true,
+    pricing_info: "",
+    subscription_required: false,
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
@@ -53,7 +59,7 @@ export default function SocialPlatformManagement() {
         .order("display_name");
 
       if (error) throw error;
-      setPlatforms(data || []);
+      setPlatforms((data as any) || []);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -156,6 +162,8 @@ export default function SocialPlatformManagement() {
       requires_oauth: true,
       requires_api_key: false,
       is_active: true,
+      pricing_info: "",
+      subscription_required: false,
     });
   };
 
@@ -280,6 +288,19 @@ export default function SocialPlatformManagement() {
                 />
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="pricing_info">Pricing Information</Label>
+                <Textarea
+                  id="pricing_info"
+                  value={editingPlatform.pricing_info || ""}
+                  onChange={(e) =>
+                    setEditingPlatform({ ...editingPlatform, pricing_info: e.target.value })
+                  }
+                  placeholder="Enter pricing details for this platform..."
+                  rows={3}
+                />
+              </div>
+
               <div className="flex items-center space-x-8">
                 <div className="flex items-center space-x-2">
                   <Switch
@@ -312,6 +333,17 @@ export default function SocialPlatformManagement() {
                     }
                   />
                   <Label htmlFor="is_active">Active</Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="subscription_required"
+                    checked={editingPlatform.subscription_required}
+                    onCheckedChange={(checked) =>
+                      setEditingPlatform({ ...editingPlatform, subscription_required: checked })
+                    }
+                  />
+                  <Label htmlFor="subscription_required">Subscription Required</Label>
                 </div>
               </div>
 
@@ -359,21 +391,43 @@ export default function SocialPlatformManagement() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                {platform.oauth_authorize_url && (
-                  <div>
-                    <span className="font-medium">Auth URL:</span>{" "}
-                    <span className="text-muted-foreground truncate block">
-                      {platform.oauth_authorize_url}
-                    </span>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  {platform.oauth_authorize_url && (
+                    <div>
+                      <span className="font-medium">Auth URL:</span>{" "}
+                      <span className="text-muted-foreground truncate block">
+                        {platform.oauth_authorize_url}
+                      </span>
+                    </div>
+                  )}
+                  {platform.api_base_url && (
+                    <div>
+                      <span className="font-medium">API URL:</span>{" "}
+                      <span className="text-muted-foreground truncate block">
+                        {platform.api_base_url}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                
+                {platform.pricing_info && (
+                  <div className="pt-2 border-t">
+                    <div className="flex items-start gap-2">
+                      <DollarSign className="h-4 w-4 text-primary mt-0.5" />
+                      <div>
+                        <span className="font-medium text-sm">Pricing:</span>
+                        <p className="text-sm text-muted-foreground mt-1 whitespace-pre-line">
+                          {platform.pricing_info}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 )}
-                {platform.api_base_url && (
-                  <div>
-                    <span className="font-medium">API URL:</span>{" "}
-                    <span className="text-muted-foreground truncate block">
-                      {platform.api_base_url}
-                    </span>
+
+                {platform.subscription_required && (
+                  <div className="pt-2">
+                    <Badge variant="secondary">Subscription Required</Badge>
                   </div>
                 )}
               </div>
