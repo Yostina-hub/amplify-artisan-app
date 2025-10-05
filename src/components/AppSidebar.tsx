@@ -109,6 +109,8 @@ const adminBusinessItems = [
 ];
 
 const adminConfigItems = [
+  { title: "Branch Management", url: "/admin/branches", icon: GitBranch },
+  { title: "Permission Management", url: "/admin/permissions", icon: Shield },
   { title: "API Integrations", url: "/admin/api-management", icon: Database },
   { title: "Public Content", url: "/admin/public-content", icon: Layout },
   { title: "Email Settings", url: "/admin/email-settings", icon: Mail },
