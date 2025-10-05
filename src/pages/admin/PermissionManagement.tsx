@@ -31,8 +31,17 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Shield, Lock, Users } from "lucide-react";
+import { Shield, Lock, Users, Plus, Trash2, Edit } from "lucide-react";
 
 interface Permission {
   id: string;
@@ -51,12 +60,43 @@ interface RolePermission {
   company_id: string | null;
 }
 
+interface Role {
+  id: string;
+  role_key: string;
+  role_name: string;
+  description: string | null;
+  is_system: boolean;
+  color: string;
+  created_at: string;
+}
+
 export default function PermissionManagement() {
   const { isSuperAdmin } = useAuth();
   const queryClient = useQueryClient();
 
-  const [selectedRole, setSelectedRole] = useState<"admin" | "agent" | "user">("user");
+  const [selectedRole, setSelectedRole] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [isCreateRoleOpen, setIsCreateRoleOpen] = useState(false);
+  const [editingRole, setEditingRole] = useState<Role | null>(null);
+  const [roleFormData, setRoleFormData] = useState({
+    role_key: "",
+    role_name: "",
+    description: "",
+    color: "#6b7280",
+  });
+
+  // Fetch all roles
+  const { data: roles = [], isLoading: loadingRoles } = useQuery({
+    queryKey: ['roles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('roles')
+        .select('*')
+        .order('role_name');
+      if (error) throw error;
+      return data as Role[];
+    },
+  });
 
   // Fetch all permissions
   const { data: permissions = [], isLoading: loadingPermissions } = useQuery({
@@ -84,6 +124,58 @@ export default function PermissionManagement() {
       return data as RolePermission[];
     },
     enabled: !!selectedRole,
+  });
+
+  // Create role mutation
+  const createRole = useMutation({
+    mutationFn: async (data: typeof roleFormData) => {
+      const { error } = await supabase.from('roles').insert([data]);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['roles'] });
+      toast.success("Role created successfully");
+      setIsCreateRoleOpen(false);
+      resetRoleForm();
+    },
+    onError: (error) => {
+      toast.error("Failed to create role: " + error.message);
+    },
+  });
+
+  // Update role mutation
+  const updateRole = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<typeof roleFormData> }) => {
+      const { error } = await supabase
+        .from('roles')
+        .update(data)
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['roles'] });
+      toast.success("Role updated successfully");
+      setEditingRole(null);
+      resetRoleForm();
+    },
+    onError: (error) => {
+      toast.error("Failed to update role: " + error.message);
+    },
+  });
+
+  // Delete role mutation
+  const deleteRole = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('roles').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['roles'] });
+      toast.success("Role deleted successfully");
+    },
+    onError: (error) => {
+      toast.error("Failed to delete role: " + error.message);
+    },
   });
 
   // Toggle permission mutation
@@ -117,6 +209,45 @@ export default function PermissionManagement() {
     },
   });
 
+  const resetRoleForm = () => {
+    setRoleFormData({
+      role_key: "",
+      role_name: "",
+      description: "",
+      color: "#6b7280",
+    });
+  };
+
+  const handleCreateRole = () => {
+    createRole.mutate(roleFormData);
+  };
+
+  const handleUpdateRole = () => {
+    if (editingRole) {
+      updateRole.mutate({ id: editingRole.id, data: roleFormData });
+    }
+  };
+
+  const handleEditRole = (role: Role) => {
+    setEditingRole(role);
+    setRoleFormData({
+      role_key: role.role_key,
+      role_name: role.role_name,
+      description: role.description || "",
+      color: role.color,
+    });
+  };
+
+  const handleDeleteRole = (role: Role) => {
+    if (role.is_system) {
+      toast.error("Cannot delete system roles");
+      return;
+    }
+    if (confirm(`Are you sure you want to delete the role "${role.role_name}"?`)) {
+      deleteRole.mutate(role.id);
+    }
+  };
+
   const handleTogglePermission = (permissionId: string, currentlyEnabled: boolean) => {
     togglePermission.mutate({ permissionId, enabled: currentlyEnabled });
   };
@@ -146,13 +277,9 @@ export default function PermissionManagement() {
     return acc;
   }, {} as Record<string, Permission[]>);
 
-  const getRoleBadgeColor = (role: string) => {
-    const colors = {
-      admin: "bg-red-100 text-red-800",
-      agent: "bg-blue-100 text-blue-800",
-      user: "bg-green-100 text-green-800",
-    };
-    return colors[role as keyof typeof colors] || "bg-gray-100 text-gray-800";
+  const getRoleColor = (roleKey: string) => {
+    const role = roles.find(r => r.role_key === roleKey);
+    return role?.color || "#6b7280";
   };
 
   if (!isSuperAdmin) {
@@ -201,11 +328,204 @@ export default function PermissionManagement() {
         </div>
       </div>
 
-      <Tabs defaultValue="configure" className="space-y-4">
+      <Tabs defaultValue="roles" className="space-y-4">
         <TabsList>
+          <TabsTrigger value="roles">Manage Roles</TabsTrigger>
           <TabsTrigger value="configure">Configure Permissions</TabsTrigger>
           <TabsTrigger value="overview">Permission Overview</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="roles" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>Role Management</CardTitle>
+                  <CardDescription>
+                    Create and manage custom roles for your organization
+                  </CardDescription>
+                </div>
+                <Dialog open={isCreateRoleOpen} onOpenChange={setIsCreateRoleOpen}>
+                  <DialogTrigger asChild>
+                    <Button onClick={() => { resetRoleForm(); setEditingRole(null); }}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Role
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create New Role</DialogTitle>
+                      <DialogDescription>
+                        Define a new role with custom permissions
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="role_key">Role Key *</Label>
+                        <Input
+                          id="role_key"
+                          placeholder="e.g., manager, supervisor"
+                          value={roleFormData.role_key}
+                          onChange={(e) => setRoleFormData({ ...roleFormData, role_key: e.target.value.toLowerCase().replace(/\s+/g, '_') })}
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Unique identifier (lowercase, no spaces)
+                        </p>
+                      </div>
+                      <div>
+                        <Label htmlFor="role_name">Role Name *</Label>
+                        <Input
+                          id="role_name"
+                          placeholder="e.g., Manager, Supervisor"
+                          value={roleFormData.role_name}
+                          onChange={(e) => setRoleFormData({ ...roleFormData, role_name: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="description">Description</Label>
+                        <Input
+                          id="description"
+                          placeholder="Describe this role's purpose"
+                          value={roleFormData.description}
+                          onChange={(e) => setRoleFormData({ ...roleFormData, description: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="color">Color</Label>
+                        <Input
+                          id="color"
+                          type="color"
+                          value={roleFormData.color}
+                          onChange={(e) => setRoleFormData({ ...roleFormData, color: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setIsCreateRoleOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleCreateRole} disabled={!roleFormData.role_key || !roleFormData.role_name}>
+                        Create Role
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Key</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {loadingRoles ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center">
+                        Loading roles...
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    roles.map((role) => (
+                      <TableRow key={role.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: role.color }}
+                            />
+                            <span className="font-medium">{role.role_name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-mono text-xs">{role.role_key}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {role.description || "-"}
+                        </TableCell>
+                        <TableCell>
+                          {role.is_system && (
+                            <Badge variant="secondary">System</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Dialog open={editingRole?.id === role.id} onOpenChange={(open) => !open && setEditingRole(null)}>
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEditRole(role)}
+                                  disabled={role.is_system}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Edit Role</DialogTitle>
+                                  <DialogDescription>
+                                    Update role details
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4">
+                                  <div>
+                                    <Label htmlFor="edit_role_name">Role Name *</Label>
+                                    <Input
+                                      id="edit_role_name"
+                                      value={roleFormData.role_name}
+                                      onChange={(e) => setRoleFormData({ ...roleFormData, role_name: e.target.value })}
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="edit_description">Description</Label>
+                                    <Input
+                                      id="edit_description"
+                                      value={roleFormData.description}
+                                      onChange={(e) => setRoleFormData({ ...roleFormData, description: e.target.value })}
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="edit_color">Color</Label>
+                                    <Input
+                                      id="edit_color"
+                                      type="color"
+                                      value={roleFormData.color}
+                                      onChange={(e) => setRoleFormData({ ...roleFormData, color: e.target.value })}
+                                    />
+                                  </div>
+                                </div>
+                                <DialogFooter>
+                                  <Button variant="outline" onClick={() => setEditingRole(null)}>
+                                    Cancel
+                                  </Button>
+                                  <Button onClick={handleUpdateRole}>
+                                    Update Role
+                                  </Button>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteRole(role)}
+                              disabled={role.is_system}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="configure" className="space-y-4">
           <Card>
@@ -217,14 +537,22 @@ export default function PermissionManagement() {
               <div className="flex gap-4 mt-4">
                 <div className="flex-1">
                   <Label>Select Role</Label>
-                  <Select value={selectedRole} onValueChange={(value) => setSelectedRole(value as "admin" | "agent" | "user")}>
+                  <Select value={selectedRole} onValueChange={setSelectedRole}>
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="Select a role to configure" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="admin">Administrator</SelectItem>
-                      <SelectItem value="agent">Agent</SelectItem>
-                      <SelectItem value="user">User</SelectItem>
+                      {roles.map((role) => (
+                        <SelectItem key={role.id} value={role.role_key}>
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-2 h-2 rounded-full"
+                              style={{ backgroundColor: role.color }}
+                            />
+                            {role.role_name}
+                          </div>
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -239,7 +567,11 @@ export default function PermissionManagement() {
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
-              {loadingPermissions || loadingRolePermissions ? (
+              {!selectedRole ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Please select a role to configure permissions
+                </div>
+              ) : loadingPermissions || loadingRolePermissions ? (
                 <div className="text-center py-8">Loading permissions...</div>
               ) : (
                 Object.entries(filteredCategories).map(([category, perms]) => (

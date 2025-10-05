@@ -4205,7 +4205,7 @@ export type Database = {
           granted_by: string | null
           id: string
           permission_id: string
-          role: Database["public"]["Enums"]["app_role"]
+          role: string
         }
         Insert: {
           company_id?: string | null
@@ -4213,7 +4213,7 @@ export type Database = {
           granted_by?: string | null
           id?: string
           permission_id: string
-          role: Database["public"]["Enums"]["app_role"]
+          role: string
         }
         Update: {
           company_id?: string | null
@@ -4221,7 +4221,7 @@ export type Database = {
           granted_by?: string | null
           id?: string
           permission_id?: string
-          role?: Database["public"]["Enums"]["app_role"]
+          role?: string
         }
         Relationships: [
           {
@@ -4239,6 +4239,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      roles: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_system: boolean | null
+          role_key: string
+          role_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_system?: boolean | null
+          role_key: string
+          role_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_system?: boolean | null
+          role_key?: string
+          role_name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       sales_performance: {
         Row: {
@@ -5823,7 +5859,7 @@ export type Database = {
           company_id: string | null
           created_at: string | null
           id: string
-          role: Database["public"]["Enums"]["app_role"]
+          role: string
           user_id: string
         }
         Insert: {
@@ -5831,7 +5867,7 @@ export type Database = {
           company_id?: string | null
           created_at?: string | null
           id?: string
-          role: Database["public"]["Enums"]["app_role"]
+          role: string
           user_id: string
         }
         Update: {
@@ -5839,7 +5875,7 @@ export type Database = {
           company_id?: string | null
           created_at?: string | null
           id?: string
-          role?: Database["public"]["Enums"]["app_role"]
+          role?: string
           user_id?: string
         }
         Relationships: [
@@ -6100,7 +6136,9 @@ export type Database = {
       }
       get_user_roles: {
         Args: { _user_id: string }
-        Returns: Database["public"]["Enums"]["app_role"][]
+        Returns: {
+          role: string
+        }[]
       }
       get_user_trial_info: {
         Args: { _user_id: string }
@@ -6120,15 +6158,12 @@ export type Database = {
         Returns: boolean
       }
       has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
+        Args: { _role: string; _user_id: string }
         Returns: boolean
       }
     }
     Enums: {
-      app_role: "admin" | "agent" | "user"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -6255,8 +6290,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      app_role: ["admin", "agent", "user"],
-    },
+    Enums: {},
   },
 } as const

@@ -47,10 +47,10 @@ import { PaginationControls } from "@/components/PaginationControls";
 const createUserSchema = z.object({
   email: z.string().trim().email({ message: "Invalid email address" }).max(255),
   fullName: z.string().trim().max(100, { message: "Name must be less than 100 characters" }).optional(),
-  role: z.enum(['user', 'agent', 'admin']).optional()
+  role: z.string().optional()
 });
 
-type UserRole = Database['public']['Enums']['app_role'];
+type UserRole = string;
 
 interface Company {
   id: string;
@@ -76,6 +76,15 @@ interface AuditLog {
   details: any;
 }
 
+interface Role {
+  id: string;
+  role_key: string;
+  role_name: string;
+  description: string | null;
+  is_system: boolean;
+  color: string;
+}
+
 export default function UserManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [users, setUsers] = useState<User[]>([]);
@@ -94,6 +103,7 @@ export default function UserManagement() {
   });
   const [isCreating, setIsCreating] = useState(false);
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [userCompanyId, setUserCompanyId] = useState<string | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
@@ -106,6 +116,7 @@ export default function UserManagement() {
   useEffect(() => {
     checkUserRole();
     fetchCompanies();
+    fetchRoles();
   }, []);
   
   useEffect(() => {
@@ -160,6 +171,20 @@ export default function UserManagement() {
       setCompanies(data || []);
     } catch (error) {
       console.error('Error fetching companies:', error);
+    }
+  };
+
+  const fetchRoles = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('roles')
+        .select('*')
+        .order('role_name');
+
+      if (error) throw error;
+      setRoles(data || []);
+    } catch (error) {
+      console.error('Error fetching roles:', error);
     }
   };
 
@@ -630,9 +655,17 @@ export default function UserManagement() {
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="user">User</SelectItem>
-                  <SelectItem value="agent">Agent</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
+                  {roles.map((role) => (
+                    <SelectItem key={role.id} value={role.role_key}>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-2 h-2 rounded-full"
+                          style={{ backgroundColor: role.color }}
+                        />
+                        {role.role_name}
+                      </div>
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -736,9 +769,17 @@ export default function UserManagement() {
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="user">User</SelectItem>
-                  <SelectItem value="agent">Agent</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
+                  {roles.map((role) => (
+                    <SelectItem key={role.id} value={role.role_key}>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-2 h-2 rounded-full"
+                          style={{ backgroundColor: role.color }}
+                        />
+                        {role.role_name}
+                      </div>
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
