@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Phone, PhoneCall, PhoneOff, Clock, Users, TrendingUp, List, UserCheck, PauseCircle, Hash, Ban } from "lucide-react";
+import { Phone, PhoneCall, PhoneOff, Clock, Users, TrendingUp, List, UserCheck, PauseCircle, Hash, Ban, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHelp } from "@/components/PageHelp";
@@ -143,6 +143,22 @@ export default function CallCenter() {
         <ExtensionAuth onAuthenticate={handleExtensionAuth} />
       ) : (
         <>
+          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg mb-6">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full bg-muted-foreground"></div>
+                <span className="text-2xl font-bold">{agentExtension}</span>
+              </div>
+              <Badge variant="secondary" className="text-sm">
+                {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Agent'}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Status:</span>
+              <Badge variant="outline">Offline</Badge>
+            </div>
+          </div>
+
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -198,34 +214,57 @@ export default function CallCenter() {
           </div>
 
           <Tabs defaultValue="softphone" className="w-full">
-            <TabsList className="grid w-full grid-cols-7">
-              <TabsTrigger value="softphone" className="flex items-center gap-2">
-                <Phone className="h-4 w-4" />
+            <TabsList className="w-full h-auto p-0 bg-transparent border-b justify-start gap-0">
+              <TabsTrigger 
+                value="softphone" 
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 py-3 text-base font-medium"
+              >
                 Soft Phone
               </TabsTrigger>
-              <TabsTrigger value="call-status" className="flex items-center gap-2">
-                <PhoneCall className="h-4 w-4" />
+              <TabsTrigger 
+                value="call-status" 
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 py-3 text-base font-normal text-muted-foreground data-[state=active]:text-foreground"
+              >
                 Call Status
               </TabsTrigger>
-              <TabsTrigger value="call-list" className="flex items-center gap-2">
-                <List className="h-4 w-4" />
+              <TabsTrigger 
+                value="call-list" 
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 py-3 text-base font-normal text-muted-foreground data-[state=active]:text-foreground"
+              >
                 Call List
               </TabsTrigger>
-              <TabsTrigger value="agent-logon" className="flex items-center gap-2">
-                <UserCheck className="h-4 w-4" />
+              <TabsTrigger 
+                value="agent-logon" 
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 py-3 text-base font-normal text-muted-foreground data-[state=active]:text-foreground"
+              >
+                <PauseCircle className="h-4 w-4 mr-2" />
                 Agent Logon
               </TabsTrigger>
-              <TabsTrigger value="pauses" className="flex items-center gap-2">
-                <PauseCircle className="h-4 w-4" />
+              <TabsTrigger 
+                value="pauses" 
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 py-3 text-base font-normal text-muted-foreground data-[state=active]:text-foreground"
+              >
                 Pauses
               </TabsTrigger>
-              <TabsTrigger value="dialout" className="flex items-center gap-2">
-                <Hash className="h-4 w-4" />
+              <TabsTrigger 
+                value="dialout" 
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 py-3 text-base font-normal text-muted-foreground data-[state=active]:text-foreground"
+              >
+                <Phone className="h-4 w-4 mr-2" />
                 Dialout
               </TabsTrigger>
-              <TabsTrigger value="blacklist" className="flex items-center gap-2">
-                <Ban className="h-4 w-4" />
+              <TabsTrigger 
+                value="blacklist" 
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 py-3 text-base font-normal text-muted-foreground data-[state=active]:text-foreground"
+              >
                 Blacklist
+              </TabsTrigger>
+              <TabsTrigger 
+                value="cases" 
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 py-3 text-base font-normal text-muted-foreground data-[state=active]:text-foreground"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Cases
               </TabsTrigger>
             </TabsList>
 
@@ -405,7 +444,34 @@ export default function CallCenter() {
                 </CardContent>
               </Card>
             </TabsContent>
+
+            <TabsContent value="cases">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Cases</CardTitle>
+                  <CardDescription>Manage support cases and tickets</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">Case management coming soon...</p>
+                </CardContent>
+              </Card>
+            </TabsContent>
           </Tabs>
+
+          <div className="grid grid-cols-3 gap-4 p-4 bg-muted/50 rounded-lg mt-6">
+            <div className="flex items-center gap-2">
+              <Hash className="h-5 w-5" />
+              <span className="font-semibold">Dialpad</span>
+            </div>
+            <div className="flex items-center justify-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-muted-foreground"></div>
+              <span className="font-semibold">{agentExtension}</span>
+            </div>
+            <div className="flex items-center justify-end gap-2">
+              <Phone className="h-5 w-5" />
+              <span className="font-semibold">Active Calls (0)</span>
+            </div>
+          </div>
         </>
       )}
 
