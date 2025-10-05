@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { PageHelp } from "@/components/PageHelp";
 import {
   Table,
   TableBody,
@@ -427,6 +428,25 @@ export default function UserManagement() {
 
   return (
     <div className="space-y-6 animate-in fade-in-50 duration-500">
+      <PageHelp
+        title="User Management"
+        description="Create and manage user accounts, assign roles, and control access permissions. Configure hierarchical access based on branches and organizational structure."
+        features={[
+          "Create users with automated welcome emails",
+          "Assign multiple roles per user (Admin, Agent, User)",
+          "Branch-based access control for distributed teams",
+          "Company-scoped permissions for multi-tenant operations",
+          "View user activity and audit logs",
+          "Send password reset emails to users",
+        ]}
+        tips={[
+          "Assign roles carefully - start with minimal permissions",
+          "Use branch assignments to control data visibility",
+          "Review user activity logs for security monitoring",
+          "Company admins can only manage users in their company",
+        ]}
+      />
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">User Management</h1>

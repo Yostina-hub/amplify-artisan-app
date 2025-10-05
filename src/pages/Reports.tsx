@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, TrendingUp, Users, DollarSign, Package, FileText, Target, Calendar } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
+import { PageHelp } from "@/components/PageHelp";
 
 export default function Reports() {
   const [dateRange, setDateRange] = useState("30");
@@ -117,6 +118,25 @@ export default function Reports() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      <PageHelp
+        title="Reports & Analytics"
+        description="Comprehensive business intelligence and reporting across sales, CRM, inventory, and activities. Make data-driven decisions with real-time insights."
+        features={[
+          "Sales performance reports (revenue, invoices, quotes)",
+          "CRM metrics (contacts, leads, conversion rates)",
+          "Inventory status and valuation reports",
+          "Activity completion and productivity tracking",
+          "Customizable date ranges for trend analysis",
+          "Export capabilities for external analysis",
+        ]}
+        tips={[
+          "Review reports regularly to identify trends and opportunities",
+          "Compare different time periods to measure growth",
+          "Track conversion rates to optimize sales processes",
+          "Monitor inventory levels to prevent stockouts",
+        ]}
+      />
+
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Reports & Analytics</h1>

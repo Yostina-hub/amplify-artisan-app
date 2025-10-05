@@ -17,12 +17,13 @@ export default function Help() {
       </div>
 
       <Tabs defaultValue="getting-started" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
+        <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
           <TabsTrigger value="getting-started">Getting Started</TabsTrigger>
+          <TabsTrigger value="crm">CRM</TabsTrigger>
           <TabsTrigger value="features">Features</TabsTrigger>
+          <TabsTrigger value="admin">Administration</TabsTrigger>
           <TabsTrigger value="platforms">Platforms</TabsTrigger>
           <TabsTrigger value="faq">FAQ</TabsTrigger>
-          <TabsTrigger value="troubleshooting">Troubleshooting</TabsTrigger>
         </TabsList>
 
         {/* Getting Started */}
@@ -131,6 +132,129 @@ export default function Help() {
                     <li>4. Publish to platforms</li>
                     <li>5. Track performance</li>
                   </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* CRM Module */}
+        <TabsContent value="crm" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>CRM - Customer Relationship Management</CardTitle>
+              <CardDescription>
+                Comprehensive CRM features to manage your customer relationships, sales pipeline, and business activities
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Contacts */}
+                <div className="space-y-2 p-4 border rounded-lg">
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <Users className="h-4 w-4 text-primary" />
+                    Contact Management
+                  </h4>
+                  <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                    <li>Store complete contact information</li>
+                    <li>Link contacts to accounts</li>
+                    <li>Track lead sources and status</li>
+                    <li>Advanced search and filtering</li>
+                    <li>Branch-based access control</li>
+                  </ul>
+                  <Button asChild variant="outline" size="sm" className="w-full mt-2">
+                    <Link to="/contacts">Manage Contacts <ExternalLink className="h-3 w-3 ml-2" /></Link>
+                  </Button>
+                </div>
+
+                {/* Leads */}
+                <div className="space-y-2 p-4 border rounded-lg">
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-primary" />
+                    Lead Management
+                  </h4>
+                  <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                    <li>Capture and qualify leads</li>
+                    <li>Lead scoring for prioritization</li>
+                    <li>Track lead sources and campaigns</li>
+                    <li>Status progression tracking</li>
+                    <li>Convert leads to customers</li>
+                  </ul>
+                  <Button asChild variant="outline" size="sm" className="w-full mt-2">
+                    <Link to="/leads">Manage Leads <ExternalLink className="h-3 w-3 ml-2" /></Link>
+                  </Button>
+                </div>
+
+                {/* Accounts */}
+                <div className="space-y-2 p-4 border rounded-lg">
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <BarChart className="h-4 w-4 text-primary" />
+                    Account Management
+                  </h4>
+                  <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                    <li>Manage organizational accounts</li>
+                    <li>Track revenue and company size</li>
+                    <li>Account types (Customer, Prospect, Partner)</li>
+                    <li>Link multiple contacts to accounts</li>
+                    <li>Industry categorization</li>
+                  </ul>
+                  <Button asChild variant="outline" size="sm" className="w-full mt-2">
+                    <Link to="/accounts">Manage Accounts <ExternalLink className="h-3 w-3 ml-2" /></Link>
+                  </Button>
+                </div>
+
+                {/* Activities */}
+                <div className="space-y-2 p-4 border rounded-lg">
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <Settings className="h-4 w-4 text-primary" />
+                    Activities & Tasks
+                  </h4>
+                  <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                    <li>Track tasks, calls, meetings, emails</li>
+                    <li>Set priorities and due dates</li>
+                    <li>Monitor completion status</li>
+                    <li>Link to CRM records</li>
+                    <li>Team productivity tracking</li>
+                  </ul>
+                  <Button asChild variant="outline" size="sm" className="w-full mt-2">
+                    <Link to="/activities">View Activities <ExternalLink className="h-3 w-3 ml-2" /></Link>
+                  </Button>
+                </div>
+
+                {/* Sales Pipeline */}
+                <div className="space-y-2 p-4 border rounded-lg">
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <BarChart className="h-4 w-4 text-primary" />
+                    Sales Pipeline
+                  </h4>
+                  <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                    <li>Visual Kanban pipeline view</li>
+                    <li>Customizable pipeline stages</li>
+                    <li>Track opportunity amounts</li>
+                    <li>Win probability forecasting</li>
+                    <li>Pipeline value metrics</li>
+                  </ul>
+                  <Button asChild variant="outline" size="sm" className="w-full mt-2">
+                    <Link to="/sales-pipeline">View Pipeline <ExternalLink className="h-3 w-3 ml-2" /></Link>
+                  </Button>
+                </div>
+
+                {/* Reports */}
+                <div className="space-y-2 p-4 border rounded-lg">
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <BarChart className="h-4 w-4 text-primary" />
+                    Reports & Analytics
+                  </h4>
+                  <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                    <li>Sales performance reports</li>
+                    <li>CRM metrics and KPIs</li>
+                    <li>Inventory status reports</li>
+                    <li>Activity productivity tracking</li>
+                    <li>Custom date range analysis</li>
+                  </ul>
+                  <Button asChild variant="outline" size="sm" className="w-full mt-2">
+                    <Link to="/reports">View Reports <ExternalLink className="h-3 w-3 ml-2" /></Link>
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -315,6 +439,138 @@ export default function Help() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* Administration */}
+        <TabsContent value="admin" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>System Administration</CardTitle>
+              <CardDescription>
+                Organizational management, user permissions, and system configuration
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Branch Management */}
+                <div className="space-y-2 p-4 border rounded-lg">
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <Settings className="h-4 w-4 text-primary" />
+                    Branch Management
+                  </h4>
+                  <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                    <li>Hierarchical organization structure</li>
+                    <li>Multi-level branch support (HQ, Regional, Branch)</li>
+                    <li>Branch-based data access control</li>
+                    <li>Manager assignments per branch</li>
+                    <li>Branch performance tracking</li>
+                  </ul>
+                  <Button asChild variant="outline" size="sm" className="w-full mt-2">
+                    <Link to="/admin/branches">Manage Branches <ExternalLink className="h-3 w-3 ml-2" /></Link>
+                  </Button>
+                  <p className="text-xs text-muted-foreground pt-2">
+                    <Badge variant="secondary" className="mr-2">Admin Only</Badge>
+                    Requires system or company administrator role
+                  </p>
+                </div>
+
+                {/* Permission Management */}
+                <div className="space-y-2 p-4 border rounded-lg">
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-primary" />
+                    Permission Management
+                  </h4>
+                  <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                    <li>Role-based access control (RBAC)</li>
+                    <li>Dynamic permission assignment</li>
+                    <li>Module-specific permissions</li>
+                    <li>Company-scoped permissions</li>
+                    <li>Granular access control</li>
+                  </ul>
+                  <Button asChild variant="outline" size="sm" className="w-full mt-2">
+                    <Link to="/admin/permissions">Manage Permissions <ExternalLink className="h-3 w-3 ml-2" /></Link>
+                  </Button>
+                  <p className="text-xs text-muted-foreground pt-2">
+                    <Badge variant="secondary" className="mr-2">Admin Only</Badge>
+                    Configure role permissions
+                  </p>
+                </div>
+
+                {/* User Management */}
+                <div className="space-y-2 p-4 border rounded-lg">
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <Users className="h-4 w-4 text-primary" />
+                    User Management
+                  </h4>
+                  <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                    <li>Create and manage user accounts</li>
+                    <li>Assign roles and permissions</li>
+                    <li>Branch-based user access</li>
+                    <li>View user activity logs</li>
+                    <li>Password reset management</li>
+                  </ul>
+                  <Button asChild variant="outline" size="sm" className="w-full mt-2">
+                    <Link to="/admin/users">Manage Users <ExternalLink className="h-3 w-3 ml-2" /></Link>
+                  </Button>
+                  <p className="text-xs text-muted-foreground pt-2">
+                    <Badge variant="secondary" className="mr-2">Admin Only</Badge>
+                    User account administration
+                  </p>
+                </div>
+
+                {/* Company Management */}
+                <div className="space-y-2 p-4 border rounded-lg">
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <Settings className="h-4 w-4 text-primary" />
+                    Company Management
+                  </h4>
+                  <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                    <li>Multi-tenant company structure</li>
+                    <li>Company approval workflow</li>
+                    <li>Platform subscription management</li>
+                    <li>Company-level settings</li>
+                    <li>Data isolation between companies</li>
+                  </ul>
+                  <Button asChild variant="outline" size="sm" className="w-full mt-2">
+                    <Link to="/admin/companies">Manage Companies <ExternalLink className="h-3 w-3 ml-2" /></Link>
+                  </Button>
+                  <p className="text-xs text-muted-foreground pt-2">
+                    <Badge variant="secondary" className="mr-2">Super Admin Only</Badge>
+                    System-wide company administration
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Organizational Hierarchy</CardTitle>
+              <CardDescription>Understanding the branch-based access control system</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <h4 className="font-semibold">How Branch Hierarchy Works:</h4>
+                <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
+                  <li><strong>Super Admins</strong> - System-wide access to all companies and branches</li>
+                  <li><strong>Company Admins</strong> - Full access to all branches within their company</li>
+                  <li><strong>Branch Managers</strong> - Access to their branch and all child branches</li>
+                  <li><strong>Branch Users</strong> - Access only to data within their assigned branch</li>
+                </ol>
+                <div className="p-4 bg-muted/50 rounded-lg border mt-4">
+                  <p className="text-sm font-medium mb-2">Example Hierarchy:</p>
+                  <div className="text-sm text-muted-foreground space-y-1 ml-4">
+                    <div>└─ <strong>Headquarters</strong> (Level 1)</div>
+                    <div className="ml-4">├─ <strong>Regional Office - North</strong> (Level 2)</div>
+                    <div className="ml-8">├─ <strong>Branch - NYC</strong> (Level 3)</div>
+                    <div className="ml-8">└─ <strong>Branch - Boston</strong> (Level 3)</div>
+                    <div className="ml-4">└─ <strong>Regional Office - South</strong> (Level 2)</div>
+                    <div className="ml-8">└─ <strong>Branch - Miami</strong> (Level 3)</div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Platform Guides */}

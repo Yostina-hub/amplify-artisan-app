@@ -12,8 +12,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Plus, DollarSign, TrendingUp, Target } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { PageHelp } from "@/components/PageHelp";
+import { useBranches } from "@/hooks/useBranches";
 
 export default function SalesPipeline() {
+  const { accessibleBranches } = useBranches();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -154,6 +157,25 @@ export default function SalesPipeline() {
 
   return (
     <div className="container mx-auto p-6 space-y-8">
+      <PageHelp
+        title="Sales Pipeline"
+        description="Visualize and manage your sales opportunities through customizable pipeline stages. Track deals, forecast revenue, and close more business efficiently."
+        features={[
+          "Visual Kanban-style pipeline with drag-and-drop",
+          "Customizable pipeline stages and probabilities",
+          "Opportunity tracking with amount and close dates",
+          "Pipeline value and conversion metrics",
+          "Link opportunities to accounts and contacts",
+          "Branch-based opportunity visibility",
+        ]}
+        tips={[
+          "Keep opportunities moving through stages to maintain velocity",
+          "Update probability and amounts regularly for accurate forecasting",
+          "Set realistic close dates to prioritize your efforts",
+          "Use next steps field to track required actions for each deal",
+        ]}
+      />
+
       {/* Revolutionary Hero Header */}
       <div className="relative overflow-hidden rounded-3xl p-12 shadow-[var(--shadow-xl)] animate-scale-in" style={{ background: 'var(--gradient-mesh)' }}>
         <div className="absolute inset-0 animate-shimmer" style={{ backgroundImage: 'linear-gradient(90deg, transparent, hsl(var(--primary-glow) / 0.2), transparent)', backgroundSize: '200% 100%' }} />
