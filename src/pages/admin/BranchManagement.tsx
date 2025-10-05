@@ -55,7 +55,7 @@ export default function BranchManagement() {
     name: "",
     code: "",
     branch_type: "branch" as "headquarters" | "regional" | "branch" | "sub_branch",
-    parent_branch_id: "",
+    parent_branch_id: "none",
     address: "",
     phone: "",
     email: "",
@@ -107,9 +107,10 @@ export default function BranchManagement() {
 
       const { error } = await supabase.from('branches').insert({
         ...data,
+        parent_branch_id: data.parent_branch_id === "none" ? null : data.parent_branch_id,
         company_id: userProfile.company_id,
         created_by: user.id,
-        level: data.parent_branch_id ? 2 : 1, // Calculate level based on parent
+        level: data.parent_branch_id === "none" ? 1 : 2, // Calculate level based on parent
       });
 
       if (error) throw error;
@@ -128,9 +129,14 @@ export default function BranchManagement() {
   // Update branch mutation
   const updateBranch = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<typeof formData> }) => {
+      const updateData = {
+        ...data,
+        parent_branch_id: data.parent_branch_id === "none" ? null : data.parent_branch_id,
+      };
+      
       const { error } = await supabase
         .from('branches')
-        .update(data)
+        .update(updateData)
         .eq('id', id);
 
       if (error) throw error;
@@ -171,7 +177,7 @@ export default function BranchManagement() {
       name: "",
       code: "",
       branch_type: "branch",
-      parent_branch_id: "",
+      parent_branch_id: "none",
       address: "",
       phone: "",
       email: "",
@@ -188,7 +194,7 @@ export default function BranchManagement() {
       name: branch.name,
       code: branch.code,
       branch_type: branch.branch_type,
-      parent_branch_id: branch.parent_branch_id || "",
+      parent_branch_id: branch.parent_branch_id || "none",
       address: branch.address || "",
       phone: branch.phone || "",
       email: branch.email || "",
@@ -309,7 +315,7 @@ export default function BranchManagement() {
                       <SelectValue placeholder="None (Top Level)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None (Top Level)</SelectItem>
+                      <SelectItem value="none">None (Top Level)</SelectItem>
                       {branches.map((branch) => (
                         <SelectItem key={branch.id} value={branch.id}>
                           {branch.name} ({branch.code})
@@ -516,7 +522,7 @@ export default function BranchManagement() {
                     <SelectValue placeholder="None (Top Level)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None (Top Level)</SelectItem>
+                    <SelectItem value="none">None (Top Level)</SelectItem>
                     {branches
                       .filter(b => b.id !== selectedBranch?.id)
                       .map((branch) => (
