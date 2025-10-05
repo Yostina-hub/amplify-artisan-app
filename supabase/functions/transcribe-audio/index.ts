@@ -47,39 +47,62 @@ serve(async (req) => {
       throw new Error('No audio data provided');
     }
 
-    console.log('Processing audio transcription, language:', language || 'auto');
+    console.log('Processing audio transcription with Gemini, language:', language || 'auto');
 
-    const binaryAudio = processBase64Chunks(audio);
+    const GOOGLE_GEMINI_API_KEY = Deno.env.get('GOOGLE_GEMINI_API_KEY');
     
-    const formData = new FormData();
-    const blob = new Blob([binaryAudio], { type: 'audio/webm' });
-    formData.append('file', blob, 'audio.webm');
-    formData.append('model', 'whisper-1');
-    
-    // Add language parameter if provided (supports Amharic: 'am')
-    if (language) {
-      formData.append('language', language);
+    if (!GOOGLE_GEMINI_API_KEY) {
+      throw new Error('GOOGLE_GEMINI_API_KEY is not configured');
     }
 
-    const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
-      },
-      body: formData,
-    });
+    const prompt = language === 'am' 
+      ? 'Transcribe this Amharic audio to text. Return only the transcribed text without any additional formatting or explanations.'
+      : 'Transcribe this audio to text. Return only the transcribed text without any additional formatting or explanations.';
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GOOGLE_GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: prompt
+                },
+                {
+                  inline_data: {
+                    mime_type: 'audio/webm',
+                    data: audio
+                  }
+                }
+              ]
+            }
+          ]
+        })
+      }
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI API error:', response.status, errorText);
-      throw new Error(`OpenAI API error: ${errorText}`);
+      console.error('Gemini API error:', response.status, errorText);
+      throw new Error(`Gemini API error: ${errorText}`);
     }
 
     const result = await response.json();
-    console.log('Transcription successful:', result.text);
+    const transcribedText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    if (!transcribedText) {
+      throw new Error('No transcription returned from Gemini');
+    }
+
+    console.log('Transcription successful:', transcribedText);
 
     return new Response(
-      JSON.stringify({ text: result.text }),
+      JSON.stringify({ text: transcribedText }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
