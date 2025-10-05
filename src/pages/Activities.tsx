@@ -13,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Search, CheckCircle2, Clock, AlertCircle, Calendar } from "lucide-react";
 import { format } from "date-fns";
+import { PageHelp } from "@/components/PageHelp";
+import { useBranches } from "@/hooks/useBranches";
 
 type Activity = {
   id: string;
@@ -29,6 +31,7 @@ type Activity = {
 };
 
 export default function Activities() {
+  const { accessibleBranches } = useBranches();
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
@@ -203,6 +206,24 @@ export default function Activities() {
 
   return (
     <div className="container mx-auto p-6 space-y-8">
+      <PageHelp
+        title="Activities & Tasks"
+        description="Manage all your business activities including tasks, calls, meetings, emails, and notes. Track progress, set priorities, and ensure nothing falls through the cracks."
+        features={[
+          "Create and track multiple activity types (tasks, calls, meetings, emails)",
+          "Set priorities and due dates for time-sensitive activities",
+          "Monitor activity status and completion",
+          "Link activities to contacts, leads, and opportunities",
+          "Branch-based activity visibility and assignment",
+        ]}
+        tips={[
+          "Set realistic due dates and priorities to manage workload",
+          "Update activity status regularly to track progress",
+          "Use activity types to categorize and report on team productivity",
+          "Link activities to CRM records for complete interaction history",
+        ]}
+      />
+
       <div className="relative overflow-hidden rounded-3xl p-12 shadow-[var(--shadow-xl)] animate-scale-in" style={{ background: 'var(--gradient-mesh)' }}>
         <div className="absolute inset-0 animate-shimmer" style={{ backgroundImage: 'linear-gradient(90deg, transparent, hsl(var(--primary-glow) / 0.2), transparent)', backgroundSize: '200% 100%' }} />
         <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-accent/20 to-transparent rounded-full blur-3xl animate-float" />

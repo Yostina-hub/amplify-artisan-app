@@ -12,8 +12,11 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Edit, Trash2, User, Mail, Phone, Building2, Users, Sparkles } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { PageHelp } from "@/components/PageHelp";
+import { useBranches } from "@/hooks/useBranches";
 
 export default function Contacts() {
+  const { accessibleBranches } = useBranches();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -173,6 +176,24 @@ export default function Contacts() {
 
   return (
     <div className="container mx-auto p-6 space-y-6 animate-fade-in">
+      <PageHelp
+        title="Contact Management"
+        description="Manage all your customer and prospect contacts in one centralized location. Track communication history, link contacts to accounts, and maintain detailed relationship records."
+        features={[
+          "Create and manage contact records with complete details",
+          "Link contacts to accounts for organizational tracking",
+          "Track contact sources and lead attribution",
+          "Search and filter contacts efficiently",
+          "Branch-based access control for multi-location organizations",
+        ]}
+        tips={[
+          "Keep contact information up-to-date for effective communication",
+          "Use tags and status fields to categorize and segment contacts",
+          "Link contacts to accounts to see organizational relationships",
+          "Track lead sources to understand your best acquisition channels",
+        ]}
+      />
+
       {/* Enhanced Header */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-accent/10 via-primary/5 to-background p-10 backdrop-blur-sm border border-accent/10">
         <div className="absolute inset-0 bg-gradient-mesh opacity-30" />

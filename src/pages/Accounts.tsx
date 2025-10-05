@@ -11,8 +11,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Edit, Trash2, Building2, DollarSign, Users2 } from "lucide-react";
+import { PageHelp } from "@/components/PageHelp";
+import { useBranches } from "@/hooks/useBranches";
 
 export default function Accounts() {
+  const { accessibleBranches } = useBranches();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -162,6 +165,24 @@ export default function Accounts() {
 
   return (
     <div className="container mx-auto p-6 space-y-8">
+      <PageHelp
+        title="Account Management"
+        description="Manage your organizational accounts including customers, prospects, partners, and vendors. Track account relationships, revenue, and organizational hierarchies."
+        features={[
+          "Create and manage company/organization accounts",
+          "Track account types (Customer, Prospect, Partner, Vendor)",
+          "Monitor annual revenue and company size metrics",
+          "Link contacts to their respective accounts",
+          "Branch-based access control for distributed teams",
+        ]}
+        tips={[
+          "Maintain accurate account information for better segmentation",
+          "Use account types to categorize and report on different relationships",
+          "Track revenue and employee count for targeting and analysis",
+          "Link related contacts to accounts for complete relationship view",
+        ]}
+      />
+
       {/* Revolutionary Header */}
       <div className="relative overflow-hidden rounded-3xl p-12 shadow-[var(--shadow-xl)] animate-scale-in" style={{ background: 'var(--gradient-mesh)' }}>
         <div className="absolute inset-0 animate-shimmer" style={{ backgroundImage: 'linear-gradient(90deg, transparent, hsl(var(--primary-glow) / 0.2), transparent)', backgroundSize: '200% 100%' }} />

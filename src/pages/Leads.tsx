@@ -12,8 +12,11 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Plus, Edit, Trash2, UserPlus, TrendingUp, CheckCircle2, Sparkles } from "lucide-react";
+import { PageHelp } from "@/components/PageHelp";
+import { useBranches } from "@/hooks/useBranches";
 
 export default function Leads() {
+  const { accessibleBranches } = useBranches();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingLead, setEditingLead] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -171,6 +174,24 @@ export default function Leads() {
 
   return (
     <div className="container mx-auto p-6 space-y-6 animate-fade-in">
+      <PageHelp
+        title="Lead Management"
+        description="Capture, qualify, and nurture leads through your sales pipeline. Track lead sources, score prospects, and convert qualified leads into customers."
+        features={[
+          "Create and manage leads with comprehensive details",
+          "Score leads based on engagement and qualification criteria",
+          "Track lead sources to identify best acquisition channels",
+          "Qualify leads through status progression",
+          "Convert qualified leads into contacts and opportunities",
+        ]}
+        tips={[
+          "Use lead scoring to prioritize your best prospects",
+          "Update lead status regularly to reflect pipeline progress",
+          "Track lead sources to optimize marketing spend",
+          "Add detailed notes to maintain context across team interactions",
+        ]}
+      />
+
       {/* Header Section with Gradient */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-accent/5 to-background p-8 backdrop-blur-sm border border-primary/10">
         <div className="absolute inset-0 bg-gradient-mesh opacity-30" />
