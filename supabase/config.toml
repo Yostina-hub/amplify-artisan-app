@@ -1,5 +1,8 @@
 project_id = "kdqibmhpebndlmzjhuvf"
 
+[functions.process-voice-query]
+verify_jwt = false
+
 [functions.calculate-reach-score]
 verify_jwt = false
 

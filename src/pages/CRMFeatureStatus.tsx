@@ -299,58 +299,13 @@ export default function CRMFeatureStatus() {
     try {
       console.log('Processing voice query:', transcript);
       
-      const GOOGLE_GEMINI_API_KEY = 'AIzaSyBkxp7YPk00nZfz0SqNsIlpXe3SbDppQ9M'; // Using your Gemini key
-      
-      // Create a comprehensive context about the CRM system
-      const systemContext = `You are an AI business assistant for a CRM system. Here is the current company data:
-      
-Revenue: $2.85M (up 12.5% from last quarter)
-Active Deals: 143 deals worth $8.7M total
-Team: 47 members with 89.2% engagement
-Customer Satisfaction: 96% with NPS of 72
-Social Media: 245K followers, 4.8% avg engagement
-Marketing ROI: 315% average across campaigns
-System Uptime: 99.98%
-Top Performer: Sarah J. (closed 3 deals worth $245K today)
+      const { data, error } = await supabase.functions.invoke('process-voice-query', {
+        body: { transcript }
+      });
 
-Respond naturally and conversationally in the user's language (support Amharic and other languages). Keep responses concise (2-3 sentences max) and helpful.`;
+      if (error) throw error;
 
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GOOGLE_GEMINI_API_KEY}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    text: systemContext
-                  },
-                  {
-                    text: `User query: ${transcript}`
-                  }
-                ]
-              }
-            ],
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 200,
-            }
-          })
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Gemini API error:', response.status, errorText);
-        throw new Error(`Gemini API error: ${errorText}`);
-      }
-
-      const result = await response.json();
-      const aiGeneratedResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
+      const aiGeneratedResponse = data?.response;
       
       if (!aiGeneratedResponse) {
         throw new Error('No response from AI');
