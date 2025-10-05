@@ -277,7 +277,7 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       {/* Hero Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary-glow to-accent p-12 shadow-2xl">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary-glow to-accent p-12 shadow-2xl animate-fade-in">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,hsl(6_78%_57%_/_0.4),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_100%,hsl(184_91%_30%_/_0.3),transparent_50%)]" />
         <div className="absolute top-10 right-10 opacity-20 animate-pulse">
@@ -288,8 +288,8 @@ export default function AdminDashboard() {
         </div>
         
         <div className="relative z-10 flex items-center justify-between">
-          <div className="space-y-4 max-w-2xl">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
+          <div className="space-y-4 max-w-2xl animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}>
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full transition-all hover:bg-white/20 hover:scale-105">
               <Target className="h-4 w-4 text-white" />
               <span className="text-white text-sm font-medium">Master Control Center</span>
             </div>
@@ -300,15 +300,15 @@ export default function AdminDashboard() {
               Command your digital kingdom. Empower companies. Shape the future of social media management.
             </p>
             <div className="flex gap-3">
-              <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
+              <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg transition-all hover:bg-white/20 hover:scale-105 cursor-pointer">
                 <div className="text-white/80 text-xs">Total Companies</div>
                 <div className="text-white text-2xl font-bold">{stats.totalCompanies}</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
+              <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg transition-all hover:bg-white/20 hover:scale-105 cursor-pointer">
                 <div className="text-white/80 text-xs">Active Users</div>
                 <div className="text-white text-2xl font-bold">{stats.totalUsers}</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
+              <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg transition-all hover:bg-white/20 hover:scale-105 cursor-pointer">
                 <div className="text-white/80 text-xs">Total Posts</div>
                 <div className="text-white text-2xl font-bold">{stats.totalPosts}</div>
               </div>
@@ -317,7 +317,8 @@ export default function AdminDashboard() {
           <Button 
             variant="outline"
             onClick={() => setShowGuide(!showGuide)}
-            className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 transition-all duration-300"
+            className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 transition-all duration-300 hover:scale-105 animate-scale-in"
+            style={{ animationDelay: '0.3s', animationFillMode: 'backwards' }}
           >
             <BookOpen className="mr-2 h-4 w-4" />
             {showGuide ? 'Hide' : 'Show'} Guide
@@ -400,35 +401,43 @@ export default function AdminDashboard() {
         </Card>
       )}
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Total Companies"
-          value={stats.totalCompanies.toString()}
-          change={`${stats.pendingCompanies} pending`}
-          icon={Building2}
-          trend="up"
-        />
-        <StatCard
-          title="Approved Companies"
-          value={stats.approvedCompanies.toString()}
-          change={`${stats.rejectedCompanies} rejected`}
-          icon={CheckCircle}
-          trend="up"
-        />
-        <StatCard
-          title="Total Users"
-          value={stats.totalUsers.toString()}
-          change="Across all companies"
-          icon={Users}
-          trend="up"
-        />
-        <StatCard
-          title="Total Posts"
-          value={stats.totalPosts.toString()}
-          change={`${stats.activeTrials} active trials`}
-          icon={FileText}
-          trend="up"
-        />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
+        <div className="animate-scale-in" style={{ animationDelay: '0.3s', animationFillMode: 'backwards' }}>
+          <StatCard
+            title="Total Companies"
+            value={stats.totalCompanies.toString()}
+            change={`${stats.pendingCompanies} pending`}
+            icon={Building2}
+            trend="up"
+          />
+        </div>
+        <div className="animate-scale-in" style={{ animationDelay: '0.4s', animationFillMode: 'backwards' }}>
+          <StatCard
+            title="Approved Companies"
+            value={stats.approvedCompanies.toString()}
+            change={`${stats.rejectedCompanies} rejected`}
+            icon={CheckCircle}
+            trend="up"
+          />
+        </div>
+        <div className="animate-scale-in" style={{ animationDelay: '0.5s', animationFillMode: 'backwards' }}>
+          <StatCard
+            title="Total Users"
+            value={stats.totalUsers.toString()}
+            change="Across all companies"
+            icon={Users}
+            trend="up"
+          />
+        </div>
+        <div className="animate-scale-in" style={{ animationDelay: '0.6s', animationFillMode: 'backwards' }}>
+          <StatCard
+            title="Total Posts"
+            value={stats.totalPosts.toString()}
+            change={`${stats.activeTrials} active trials`}
+            icon={FileText}
+            trend="up"
+          />
+        </div>
       </div>
 
       {/* Global Location Analytics */}

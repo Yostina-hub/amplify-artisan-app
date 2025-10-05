@@ -14,24 +14,27 @@ export function StatCard({ title, value, change, icon: Icon, trend }: StatCardPr
   const TrendIcon = trend === "up" ? TrendingUp : TrendingDown;
   
   return (
-    <Card className="group relative overflow-hidden border-2 hover:border-primary/30 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
+    <Card className="group relative overflow-hidden border-2 hover:border-primary/30 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 cursor-pointer">
       {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       
+      {/* Pulse indicator */}
+      <div className="absolute top-3 right-3 h-2 w-2 rounded-full bg-primary opacity-0 group-hover:opacity-100 animate-pulse" />
+      
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-        <CardTitle className="text-sm font-semibold text-muted-foreground group-hover:text-primary transition-colors">
+        <CardTitle className="text-sm font-semibold text-muted-foreground group-hover:text-primary transition-colors duration-300">
           {title}
         </CardTitle>
-        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-sm">
           <Icon className="h-5 w-5 text-primary group-hover:text-accent transition-colors duration-500" />
         </div>
       </CardHeader>
       <CardContent className="relative z-10">
-        <div className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
+        <div className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text group-hover:scale-105 transition-transform duration-300 origin-left">
           {value}
         </div>
         <div className="flex items-center gap-1.5 mt-2">
-          <TrendIcon className={`h-4 w-4 ${trend === 'up' ? 'text-success' : 'text-destructive'}`} />
+          <TrendIcon className={`h-4 w-4 transition-transform duration-300 group-hover:scale-110 ${trend === 'up' ? 'text-success' : 'text-destructive'}`} />
           <p className={`text-sm font-medium ${trend === 'up' ? 'text-success' : 'text-destructive'}`}>
             {change}
           </p>

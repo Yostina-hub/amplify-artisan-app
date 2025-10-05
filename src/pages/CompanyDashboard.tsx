@@ -241,31 +241,32 @@ export default function CompanyDashboard() {
   return (
     <div className="space-y-6">
       {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary-glow to-accent p-8 shadow-elegant">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary-glow to-accent p-8 shadow-elegant animate-fade-in">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,hsl(6_78%_57%_/_0.3),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_100%,hsl(184_91%_30%_/_0.2),transparent_50%)]" />
         
         <div className="relative z-10 flex items-center justify-between">
-          <div className="space-y-2">
+          <div className="space-y-2 animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}>
             <div className="flex items-center gap-3">
               {companyData && (
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full">
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full transition-all hover:bg-white/20 hover:scale-105">
                   <Building2 className="h-4 w-4 text-white" />
                   <span className="text-white text-sm font-medium">{companyData.name}</span>
                 </div>
               )}
             </div>
-            <h1 className="text-4xl font-bold tracking-tight text-white animate-in fade-in-50 duration-500">
+            <h1 className="text-4xl font-bold tracking-tight text-white">
               Welcome Back! 👋
             </h1>
-            <p className="text-white/90 text-lg animate-in fade-in-50 duration-500 delay-100">
+            <p className="text-white/90 text-lg">
               Your social media empire awaits. Let's create something amazing today.
             </p>
           </div>
           <Button 
             onClick={() => navigate('/composer')}
             size="lg"
-            className="bg-white text-primary hover:bg-white/90 font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105 animate-in zoom-in-50 duration-500 delay-200"
+            className="bg-white text-primary hover:bg-white/90 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 animate-scale-in"
+            style={{ animationDelay: '0.3s', animationFillMode: 'backwards' }}
           >
             <MessageSquare className="mr-2 h-5 w-5" />
             Create Post
@@ -274,39 +275,47 @@ export default function CompanyDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Total Followers"
-          value={companyData?.totalFollowers.toLocaleString() || "0"}
-          change="+20.1%"
-          icon={Users}
-          trend="up"
-        />
-        <StatCard
-          title="Engagement Rate"
-          value={`${companyData?.engagementRate.toFixed(1) || "0"}%`}
-          change="+4.3%"
-          icon={TrendingUp}
-          trend="up"
-        />
-        <StatCard
-          title="Scheduled Posts"
-          value={companyData?.scheduledPosts.toString() || "0"}
-          change={companyData?.scheduledPosts ? "+2" : "0"}
-          icon={Calendar}
-          trend={companyData?.scheduledPosts ? "up" : "down"}
-        />
-        <StatCard
-          title="Total Posts"
-          value={companyData?.postCount.toLocaleString() || "0"}
-          change="+12%"
-          icon={MessageSquare}
-          trend="up"
-        />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
+        <div className="animate-scale-in" style={{ animationDelay: '0.3s', animationFillMode: 'backwards' }}>
+          <StatCard
+            title="Total Followers"
+            value={companyData?.totalFollowers.toLocaleString() || "0"}
+            change="+20.1%"
+            icon={Users}
+            trend="up"
+          />
+        </div>
+        <div className="animate-scale-in" style={{ animationDelay: '0.4s', animationFillMode: 'backwards' }}>
+          <StatCard
+            title="Engagement Rate"
+            value={`${companyData?.engagementRate.toFixed(1) || "0"}%`}
+            change="+4.3%"
+            icon={TrendingUp}
+            trend="up"
+          />
+        </div>
+        <div className="animate-scale-in" style={{ animationDelay: '0.5s', animationFillMode: 'backwards' }}>
+          <StatCard
+            title="Scheduled Posts"
+            value={companyData?.scheduledPosts.toString() || "0"}
+            change={companyData?.scheduledPosts ? "+2" : "0"}
+            icon={Calendar}
+            trend={companyData?.scheduledPosts ? "up" : "down"}
+          />
+        </div>
+        <div className="animate-scale-in" style={{ animationDelay: '0.6s', animationFillMode: 'backwards' }}>
+          <StatCard
+            title="Total Posts"
+            value={companyData?.postCount.toLocaleString() || "0"}
+            change="+12%"
+            icon={MessageSquare}
+            trend="up"
+          />
+        </div>
       </div>
 
       {/* Quick Action - View Detailed Analytics */}
-      <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5">
+      <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5 hover:shadow-xl transition-all duration-300 hover:border-primary/40 animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'backwards' }}>
         <CardContent className="py-6">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
@@ -317,7 +326,7 @@ export default function CompanyDashboard() {
             </div>
             <Button 
               onClick={() => navigate('/admin/reach-analytics')}
-              className="bg-gradient-to-r from-primary to-accent hover:opacity-90"
+              className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all duration-300 hover:scale-105"
             >
               Open Analytics Hub
             </Button>
@@ -330,9 +339,10 @@ export default function CompanyDashboard() {
 
       {/* Location Analytics */}
       {companyData && companyData.locationMetrics.length > 0 && (
-        <Card className="border-2 hover:shadow-xl transition-all duration-300 hover:border-primary/20">
+        <Card className="border-2 hover:shadow-xl transition-all duration-300 hover:border-primary/20 animate-fade-in" style={{ animationDelay: '0.5s', animationFillMode: 'backwards' }}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
               <TrendingUp className="h-5 w-5 text-primary" />
               Geographic Insights
             </CardTitle>
@@ -340,14 +350,14 @@ export default function CompanyDashboard() {
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {companyData.locationMetrics.slice(0, 6).map((location, idx) => (
-                <div key={idx} className="p-4 border rounded-lg hover:shadow-md transition-all">
+                <div key={idx} className="p-4 border rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105 hover:border-primary/40 cursor-pointer group">
                   <div className="flex items-start justify-between mb-2">
                     <div>
-                      <p className="font-semibold text-lg">{location.country}</p>
+                      <p className="font-semibold text-lg group-hover:text-primary transition-colors">{location.country}</p>
                       <p className="text-xs text-muted-foreground">{location.continent}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-primary">{location.engagement}</p>
+                      <p className="text-2xl font-bold text-primary group-hover:scale-110 transition-transform">{location.engagement}</p>
                       <p className="text-xs text-muted-foreground">interactions</p>
                     </div>
                   </div>
@@ -372,7 +382,7 @@ export default function CompanyDashboard() {
         </Card>
       )}
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 animate-fade-in" style={{ animationDelay: '0.6s', animationFillMode: 'backwards' }}>
         <Card className="col-span-4 border-2 hover:shadow-xl transition-all duration-300 hover:border-primary/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -385,12 +395,12 @@ export default function CompanyDashboard() {
               {companyData?.recentActivity.map((item, i) => {
                 const Icon = item.icon;
                 return (
-                  <div key={i} className="flex items-center gap-4 p-3 rounded-lg hover:bg-gradient-to-r hover:from-primary/5 hover:to-accent/5 transition-all duration-300 hover:shadow-md group cursor-pointer">
-                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                  <div key={i} className="flex items-center gap-4 p-3 rounded-lg hover:bg-gradient-to-r hover:from-primary/5 hover:to-accent/5 transition-all duration-300 hover:shadow-lg group cursor-pointer hover:scale-[1.02]">
+                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
                       <Icon className={`w-5 h-5 ${item.color}`} />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium">{item.platform}</p>
+                      <p className="text-sm font-medium group-hover:text-primary transition-colors">{item.platform}</p>
                       <p className="text-xs text-muted-foreground">{item.action}</p>
                     </div>
                     <p className="text-xs text-muted-foreground">{item.time}</p>
