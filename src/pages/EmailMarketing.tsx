@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { PageHelp } from "@/components/PageHelp";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -355,6 +356,25 @@ export default function EmailMarketing() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      <PageHelp
+        title="Marketing Campaigns"
+        description="Create and manage email and call campaigns to reach your customers. Track campaign performance with detailed analytics."
+        features={[
+          "Design email campaigns with custom templates",
+          "Schedule and manage call campaigns",
+          "Track email open rates and click-through rates",
+          "Monitor call campaign performance and outcomes",
+          "Record call logs with engagement scores",
+          "Analyze campaign effectiveness with real-time metrics"
+        ]}
+        tips={[
+          "Test email templates before sending large campaigns",
+          "Schedule campaigns for optimal sending times",
+          "Use call scripts to maintain consistent messaging",
+          "Review analytics regularly to optimize campaign strategies",
+          "Follow up on leads generated from campaigns promptly"
+        ]}
+      />
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Marketing Campaigns</h1>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { PageHelp } from "@/components/PageHelp";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -219,6 +220,24 @@ export default function Products() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      <PageHelp
+        title="Products & Services"
+        description="Manage your product catalog and service offerings. Track inventory levels, pricing, and product details in one centralized location."
+        features={[
+          "Create and categorize products and services",
+          "Set unit prices and cost prices for margin tracking",
+          "Track inventory levels and set reorder points",
+          "Manage product codes, SKUs, and barcodes",
+          "Monitor low stock alerts",
+          "Calculate total inventory value"
+        ]}
+        tips={[
+          "Set reorder levels to receive alerts when stock is low",
+          "Keep cost prices updated for accurate margin calculations",
+          "Use descriptive product names and codes for easy searching",
+          "Regularly review slow-moving inventory to optimize stock"
+        ]}
+      />
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Products & Services</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { PageHelp } from "@/components/PageHelp";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -185,6 +186,24 @@ export default function Invoices() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      <PageHelp
+        title="Invoices & Payments"
+        description="Manage invoices, track payments, and monitor outstanding balances. Keep your accounts receivable organized and up-to-date."
+        features={[
+          "Create and send invoices to customers",
+          "Record payments against invoices",
+          "Track payment status and due dates",
+          "Monitor overdue invoices",
+          "Support multiple payment methods",
+          "Calculate outstanding balances automatically"
+        ]}
+        tips={[
+          "Set up automated payment reminders for overdue invoices",
+          "Record partial payments to maintain accurate balance tracking",
+          "Use reference numbers to match payments with bank statements",
+          "Review aging reports regularly to follow up on overdue accounts"
+        ]}
+      />
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Invoices & Payments</h1>
         <Button onClick={() => setDialogOpen(true)}>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { PageHelp } from "@/components/PageHelp";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -272,6 +273,24 @@ export default function Quotes() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      <PageHelp
+        title="Quotes & Proposals"
+        description="Create and manage professional quotes and proposals for your customers. Track quotes through their lifecycle from draft to acceptance."
+        features={[
+          "Create detailed quotes with multiple line items",
+          "Link products to quote items for quick pricing",
+          "Apply discounts and taxes at line item level",
+          "Track quote status (Draft, Sent, Accepted, Rejected)",
+          "Set validity periods for quotes",
+          "Add terms and conditions and internal notes"
+        ]}
+        tips={[
+          "Use product templates to speed up quote creation",
+          "Set appropriate validity dates to encourage timely decisions",
+          "Add clear terms and conditions to avoid misunderstandings",
+          "Review quote analytics to improve acceptance rates"
+        ]}
+      />
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Quotes & Proposals</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
