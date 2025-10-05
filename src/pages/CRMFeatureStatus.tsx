@@ -170,14 +170,14 @@ export default function CRMFeatureStatus() {
 
   const currentReport = systemReports[currentReportIndex];
 
-  // Text-to-Speech using OpenAI
+  // Text-to-Speech using ElevenLabs
   const speakResponse = async (text: string) => {
     try {
       setIsSpeaking(true);
       console.log('Generating speech for:', text);
       
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
-        body: { text, voice: 'alloy' }
+        body: { text, voice: '9BWtsMINqrJLrRacOk9x' } // Aria voice
       });
 
       if (error) throw error;
