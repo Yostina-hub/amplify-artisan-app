@@ -366,7 +366,10 @@ export default function PermissionManagement() {
                           id="role_key"
                           placeholder="e.g., manager, supervisor"
                           value={roleFormData.role_key}
-                          onChange={(e) => setRoleFormData({ ...roleFormData, role_key: e.target.value.toLowerCase().replace(/\s+/g, '_') })}
+                          onChange={(e) => {
+                            const value = e.target.value.toLowerCase().replace(/\s+/g, '_');
+                            setRoleFormData({ ...roleFormData, role_key: value });
+                          }}
                         />
                         <p className="text-xs text-muted-foreground mt-1">
                           Unique identifier (lowercase, no spaces)
