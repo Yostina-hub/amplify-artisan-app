@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -14,13 +14,58 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Phone, PhoneCall, FileText, TrendingUp, Clock, Users, PlayCircle, Calendar, Search } from "lucide-react";
 import { PageHelp } from "@/components/PageHelp";
+import Softphone from "@/components/call-center/Softphone";
+import SipSettings from "@/components/call-center/SipSettings";
 
 export default function CallCenter() {
   const [search, setSearch] = useState("");
   const [newLogOpen, setNewLogOpen] = useState(false);
   const [newScriptOpen, setNewScriptOpen] = useState(false);
   const [newCampaignOpen, setNewCampaignOpen] = useState(false);
+  const [sipSettingsOpen, setSipSettingsOpen] = useState(false);
+  const [sipConfig, setSipConfig] = useState<any>(null);
+  const [currentCallNumber, setCurrentCallNumber] = useState<string>("");
   const queryClient = useQueryClient();
+
+  // Load SIP config from localStorage
+  useEffect(() => {
+    const savedConfig = localStorage.getItem("sip-config");
+    if (savedConfig) {
+      setSipConfig(JSON.parse(savedConfig));
+    }
+  }, []);
+
+  const handleCallStart = (phoneNumber: string) => {
+    setCurrentCallNumber(phoneNumber);
+  };
+
+  const handleCallEnd = async (duration: number) => {
+    if (currentCallNumber) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("company_id")
+          .eq("id", user?.id)
+          .single();
+
+        await supabase.from("call_logs").insert({
+          phone_number: currentCallNumber,
+          contact_name: currentCallNumber,
+          call_status: "completed",
+          call_duration_seconds: duration,
+          call_started_at: new Date(Date.now() - duration * 1000).toISOString(),
+          company_id: profile?.company_id,
+          agent_id: user?.id,
+        });
+
+        queryClient.invalidateQueries({ queryKey: ["call-logs"] });
+        setCurrentCallNumber("");
+      } catch (error) {
+        console.error("Error logging call:", error);
+      }
+    }
+  };
 
   // Fetch call logs
   const { data: callLogs = [] } = useQuery({
@@ -170,25 +215,42 @@ export default function CallCenter() {
   return (
       <div className="container mx-auto p-6 space-y-6">
         <PageHelp
-          title="Call Center"
-          description="Manage all call center operations including call logging, campaign management, and script creation. Track call outcomes and analyze performance metrics."
+          title="Call Center with Integrated Softphone"
+          description="Complete call center solution with built-in softphone for making/receiving calls, managing campaigns, and tracking performance. Connect via SIP or FreePBX."
           features={[
-            "Log and track all incoming and outgoing calls",
-            "Create and manage call campaigns",
-            "Design reusable call scripts",
+            "Integrated WebRTC softphone for voice calls",
+            "SIP and FreePBX server support",
+            "Make and receive calls directly from browser",
+            "Real-time call controls (mute, hold, transfer)",
+            "Automatic call logging and tracking",
+            "Call campaigns and script management",
             "Monitor call durations and outcomes",
-            "Track agent performance metrics",
-            "Schedule and organize call campaigns"
+            "Track agent performance metrics"
           ]}
           tips={[
-            "Use call scripts to maintain consistent messaging",
-            "Log call details immediately for accuracy",
-            "Track call outcomes to measure campaign effectiveness",
-            "Review call statistics regularly to optimize strategies",
-            "Set up call campaigns with clear objectives",
-            "Monitor agent engagement scores for quality assurance"
+            "Configure SIP settings before making calls",
+            "Use FreePBX integration for seamless PBX connection",
+            "Allow microphone permissions for voice calls",
+            "Calls are automatically logged to call history",
+            "Use call scripts during active calls",
+            "Monitor connection status in softphone header",
+            "Use dialpad during calls for IVR navigation"
           ]}
         />
+        
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Softphone Section */}
+          <div className="lg:col-span-1">
+            <Softphone 
+              sipConfig={sipConfig}
+              onCallStart={handleCallStart}
+              onCallEnd={handleCallEnd}
+              onOpenSettings={() => setSipSettingsOpen(true)}
+            />
+          </div>
+
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold">Call Center</h1>
@@ -606,6 +668,16 @@ export default function CallCenter() {
             </div>
           </TabsContent>
         </Tabs>
+          </div>
+        </div>
+
+        {/* SIP Settings Dialog */}
+        <SipSettings
+          open={sipSettingsOpen}
+          onOpenChange={setSipSettingsOpen}
+          onSave={setSipConfig}
+          initialConfig={sipConfig}
+        />
       </div>
-    );
+  );
 }
