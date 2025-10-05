@@ -19,12 +19,51 @@ export default function CallCenter() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [agentExtension, setAgentExtension] = useState<string>("");
 
+  // Fetch company integration config
+  const { data: companyIntegration } = useQuery({
+    queryKey: ["company-integration"],
+    queryFn: async () => {
+      if (!user) return null;
+      
+      const { data: userRole } = await supabase
+        .from("user_roles")
+        .select("company_id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!userRole?.company_id) return null;
+
+      const { data, error } = await supabase
+        .from("call_center_integrations")
+        .select("*")
+        .eq("company_id", userRole.company_id)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
   useEffect(() => {
-    const savedConfig = localStorage.getItem("sip-config");
-    if (savedConfig) {
-      setSipConfig(JSON.parse(savedConfig));
+    // Priority: Company integration > localStorage
+    if (companyIntegration?.configuration) {
+      const configuration = companyIntegration.configuration as Record<string, any>;
+      const config = {
+        sipServer: configuration.sip_server || "",
+        sipUser: agentExtension || companyIntegration.account_sid || "",
+        sipPassword: companyIntegration.api_key_encrypted || "",
+        sipDomain: configuration.sip_domain || "",
+      };
+      setSipConfig(config);
+    } else {
+      const savedConfig = localStorage.getItem("sip-config");
+      if (savedConfig) {
+        setSipConfig(JSON.parse(savedConfig));
+      }
     }
-  }, []);
+  }, [companyIntegration, agentExtension]);
 
   const { data: callStats } = useQuery({
     queryKey: ["call-stats"],
