@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Layout } from "@/components/Layout";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -287,7 +287,6 @@ export default function ProjectManagement() {
   };
 
   return (
-    <Layout>
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
@@ -1054,6 +1053,5 @@ export default function ProjectManagement() {
           </div>
         )}
       </div>
-    </Layout>
-  );
+    );
 }
