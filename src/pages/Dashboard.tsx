@@ -3,6 +3,7 @@ import { StatCard } from "@/components/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, TrendingUp, Calendar, MessageSquare, Twitter, Instagram, Linkedin, Facebook, Youtube, MessageCircle, Pin, Camera, Send, Phone, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageHelp } from "@/components/PageHelp";
 import { useNavigate } from "react-router-dom";
 import { ServiceSection } from "@/features/dashboard/ServiceSection";
 import { AIDrawer } from "@/features/dashboard/AIDrawer";
@@ -214,6 +215,25 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      <PageHelp
+        title="Dashboard"
+        description="Your central command center for managing all aspects of your business. Monitor key metrics, track performance, and access quick actions for common tasks."
+        features={[
+          "Real-time statistics and KPIs across all modules",
+          "Quick access to frequently used services",
+          "Company-wide activity feed and updates",
+          "Connected social media platforms overview",
+          "AI-powered insights and recommendations",
+          "Personalized content and advertising"
+        ]}
+        tips={[
+          "Use the Create Post button for quick social media publishing",
+          "Monitor your trial period and upgrade when ready",
+          "Check the activity feed regularly for team updates",
+          "Explore AI-powered features to automate workflows",
+          "Click on service cards to access detailed functionality"
+        ]}
+      />
       {/* Revolutionary Hero Section */}
       <div className="relative overflow-hidden rounded-3xl p-12 shadow-[var(--shadow-xl)]" style={{ background: 'var(--gradient-mesh)' }}>
         <div className="absolute inset-0 animate-shimmer" style={{ backgroundImage: 'linear-gradient(90deg, transparent, hsl(var(--primary-glow) / 0.3), transparent)', backgroundSize: '200% 100%' }} />

@@ -10,6 +10,7 @@ import * as Icons from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
 import { querySocialMediaAccountsSafe } from "@/lib/safeQuery";
+import { PageHelp } from "@/components/PageHelp";
 
 type SocialAccount = {
   id: string;
@@ -142,6 +143,25 @@ export default function Settings() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in-50 duration-500">
+      <PageHelp
+        title="Settings"
+        description="Manage your account preferences, security settings, and connected social media platforms. Customize your experience and maintain your digital presence."
+        features={[
+          "Update personal profile information",
+          "Change account password securely",
+          "Manage connected social media accounts",
+          "Configure platform-specific settings",
+          "Enable/disable connected accounts",
+          "Set notification preferences"
+        ]}
+        tips={[
+          "Use strong, unique passwords for better security",
+          "Regularly review connected social media accounts",
+          "Keep your profile information up to date",
+          "Disconnect unused platforms to maintain security",
+          "Test platform connections after configuration changes"
+        ]}
+      />
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
         <p className="text-muted-foreground mt-1">

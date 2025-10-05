@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Phone, PhoneCall, FileText, TrendingUp, Clock, Users, PlayCircle, Calendar, Search } from "lucide-react";
+import { PageHelp } from "@/components/PageHelp";
 
 export default function CallCenter() {
   const [search, setSearch] = useState("");
@@ -168,6 +169,26 @@ export default function CallCenter() {
 
   return (
       <div className="container mx-auto p-6 space-y-6">
+        <PageHelp
+          title="Call Center"
+          description="Manage all call center operations including call logging, campaign management, and script creation. Track call outcomes and analyze performance metrics."
+          features={[
+            "Log and track all incoming and outgoing calls",
+            "Create and manage call campaigns",
+            "Design reusable call scripts",
+            "Monitor call durations and outcomes",
+            "Track agent performance metrics",
+            "Schedule and organize call campaigns"
+          ]}
+          tips={[
+            "Use call scripts to maintain consistent messaging",
+            "Log call details immediately for accuracy",
+            "Track call outcomes to measure campaign effectiveness",
+            "Review call statistics regularly to optimize strategies",
+            "Set up call campaigns with clear objectives",
+            "Monitor agent engagement scores for quality assurance"
+          ]}
+        />
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold">Call Center</h1>

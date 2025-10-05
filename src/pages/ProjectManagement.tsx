@@ -20,6 +20,7 @@ import {
   List, GanttChart, PlayCircle, PauseCircle, Timer, User, ChevronRight
 } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { PageHelp } from "@/components/PageHelp";
 
 export default function ProjectManagement() {
   const [newProjectOpen, setNewProjectOpen] = useState(false);
@@ -288,6 +289,28 @@ export default function ProjectManagement() {
 
   return (
       <div className="container mx-auto p-6 space-y-6">
+        <PageHelp
+          title="Project Management"
+          description="Manage projects from planning to completion with comprehensive task tracking, time logging, and team collaboration. Visualize progress with multiple view modes."
+          features={[
+            "Create and track projects with milestones and budgets",
+            "Organize tasks with Kanban board, list, and timeline views",
+            "Assign tasks to team members with priorities",
+            "Track time spent on tasks and projects",
+            "Monitor project health and risk status",
+            "Generate analytics and performance reports",
+            "Set dependencies between tasks",
+            "Track budget and resource allocation"
+          ]}
+          tips={[
+            "Use milestones to break large projects into manageable phases",
+            "Update task progress regularly for accurate project health",
+            "Set realistic deadlines and communicate changes promptly",
+            "Use time tracking to improve future project estimates",
+            "Review project analytics weekly to identify bottlenecks",
+            "Assign clear owners to prevent task ambiguity"
+          ]}
+        />
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>

@@ -1,9 +1,29 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageHelp } from "@/components/PageHelp";
 
 export default function Analytics() {
   return (
     <div className="space-y-6 animate-in fade-in-50 duration-500">
+      <PageHelp
+        title="Analytics"
+        description="Track performance metrics across all your platforms. Analyze engagement, growth trends, and content performance to optimize your social media strategy."
+        features={[
+          "Top performing posts across all platforms",
+          "Platform-specific performance metrics",
+          "Follower growth and engagement rates",
+          "Engagement metrics and trends",
+          "Comparative platform analysis",
+          "Content performance insights"
+        ]}
+        tips={[
+          "Review top performing posts to identify successful content patterns",
+          "Monitor platform growth to focus efforts on high-performing channels",
+          "Track engagement metrics to optimize posting times",
+          "Compare platform performance to allocate resources effectively",
+          "Use analytics insights to inform your content strategy"
+        ]}
+      />
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
         <p className="text-muted-foreground mt-1">

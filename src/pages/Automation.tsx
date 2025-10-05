@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Zap, Plus, Play, Pause, Trash2, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { PageHelp } from '@/components/PageHelp';
 
 export default function Automation() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -100,6 +101,25 @@ export default function Automation() {
   return (
     <Layout>
       <div className="container mx-auto p-6 space-y-6">
+        <PageHelp
+          title="Smart Automation"
+          description="Automate repetitive tasks and workflows with intelligent triggers and actions. Set up conditional logic to streamline your business processes and save time."
+          features={[
+            "Create automated workflows with custom triggers",
+            "Define conditions and actions for each workflow",
+            "Schedule recurring automation tasks",
+            "Monitor workflow execution and success rates",
+            "Enable/disable workflows on demand",
+            "Track execution history and logs"
+          ]}
+          tips={[
+            "Start with simple workflows and gradually add complexity",
+            "Test workflows with inactive status before enabling",
+            "Use descriptive names for easy identification",
+            "Monitor execution success rates regularly",
+            "Review execution logs to optimize workflow performance"
+          ]}
+        />
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
