@@ -44,7 +44,67 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('OpenAI TTS error:', response.status, errorText);
-      throw new Error(`Failed to generate speech: ${errorText}`);
+
+      const shouldFallback =
+        response.status === 402 ||
+        response.status === 429 ||
+        errorText.toLowerCase().includes('insufficient_quota') ||
+        errorText.toLowerCase().includes('payment required');
+
+      const elevenKey = Deno.env.get('ELEVENLABS_API_KEY');
+
+      if (shouldFallback && elevenKey) {
+        const voiceId = voice && /^[a-zA-Z0-9]+$/.test(voice) && voice.length > 10 ? voice : '9BWtsMINqrJLrRacOk9x';
+        console.log('Falling back to ElevenLabs TTS with voice:', voiceId);
+
+        const elResp = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+          method: 'POST',
+          headers: {
+            'xi-api-key': elevenKey,
+            'Content-Type': 'application/json',
+            'Accept': 'audio/mpeg',
+          },
+          body: JSON.stringify({
+            text,
+            model_id: 'eleven_multilingual_v2',
+            voice_settings: {
+              stability: 0.5,
+              similarity_boost: 0.75,
+            },
+          }),
+        });
+
+        if (!elResp.ok) {
+          const elErr = await elResp.text();
+          console.error('ElevenLabs fallback error:', elResp.status, elErr);
+          return new Response(
+            JSON.stringify({ error: `OpenAI quota exceeded and ElevenLabs failed: ${elErr}` }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+          );
+        }
+
+        const fbArrayBuffer = await elResp.arrayBuffer();
+        const fbBytes = new Uint8Array(fbArrayBuffer);
+        let fbBinary = '';
+        const fbChunkSize = 0x8000; // 32KB
+        for (let i = 0; i < fbBytes.length; i += fbChunkSize) {
+          const chunk = fbBytes.subarray(i, i + fbChunkSize);
+          fbBinary += String.fromCharCode(...chunk);
+        }
+        const fbBase64Audio = btoa(fbBinary);
+
+        return new Response(JSON.stringify({ audioContent: fbBase64Audio }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const errStatus = response.status === 402 || errorText.toLowerCase().includes('payment required')
+        ? 402
+        : (response.status === 429 ? 429 : 400);
+      return new Response(
+        JSON.stringify({ error: `Failed to generate speech: ${errorText}` }),
+        { status: errStatus, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      );
     }
 
     const arrayBuffer = await response.arrayBuffer();
