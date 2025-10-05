@@ -5,6 +5,7 @@ import { Brain, TrendingUp, Users, DollarSign, Target, Zap, Activity, ArrowUp, A
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface QueryData {
   type: string;
@@ -19,8 +20,8 @@ export default function CRMFeatureStatus() {
   const [voiceTranscript, setVoiceTranscript] = useState("");
   const [aiResponse, setAiResponse] = useState("");
   const [currentReportIndex, setCurrentReportIndex] = useState(0);
-  const recognitionRef = useRef<any>(null);
-  const speechSynthRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [queryData, setQueryData] = useState<QueryData | null>(null);
   const [realtimeMetrics, setRealtimeMetrics] = useState({
@@ -169,34 +170,10 @@ export default function CRMFeatureStatus() {
 
   const currentReport = systemReports[currentReportIndex];
 
-  // Initialize Web Speech API
-  useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
-
-      recognitionRef.current.onresult = (event: any) => {
-        const transcript = Array.from(event.results)
-          .map((result: any) => result[0])
-          .map((result: any) => result.transcript)
-          .join('');
-        
-        setVoiceTranscript(transcript);
-        
-        // Comprehensive AI response system
-        let response = "";
-        let dataVisualization: QueryData | null = null;
-        
-        const query = transcript.toLowerCase();
-        
-        // Social Media queries
-        if (query.includes('social') || query.includes('post') || query.includes('engagement') || query.includes('followers')) {
-          response = "Social media performance is strong across all platforms. We have 245K total followers with an average engagement rate of 4.8%. Top performing platform is Instagram with 12.3K likes on recent posts. LinkedIn posts have 89% professional engagement. We've scheduled 47 posts for this week with AI-optimized content.";
-          dataVisualization = {
-            type: 'social',
-            data: [
+  const processVoiceQuery = async (transcript: string) => {
+    const query = transcript.toLowerCase();
+    let response = "";
+    let dataVisualization: QueryData | null = null;
               { platform: 'Instagram', followers: '89.2K', engagement: '5.2%', posts: 23 },
               { platform: 'LinkedIn', followers: '67.8K', engagement: '4.9%', posts: 18 },
               { platform: 'Twitter', followers: '54.3K', engagement: '4.1%', posts: 31 },
