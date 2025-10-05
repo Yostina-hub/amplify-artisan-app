@@ -9,23 +9,41 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Box, Edit, Trash2, Database, Settings, GripVertical } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
+import { Loader2, Plus, Box, Edit, Trash2, Database, Settings, Sparkles } from "lucide-react";
 import { FieldEditor } from "@/components/FieldEditor";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { DraggableField } from "@/components/module-builder/DraggableField";
+import { ComponentTypeSelector } from "@/components/module-builder/ComponentTypeSelector";
+import { PermissionAssigner } from "@/components/module-builder/PermissionAssigner";
+import { BranchAccessControl } from "@/components/module-builder/BranchAccessControl";
+import { PageHelp } from "@/components/PageHelp";
 
 const ICON_OPTIONS = [
   'Box', 'Database', 'Folder', 'FileText', 'Users', 'ShoppingCart', 
-  'Calendar', 'Mail', 'Phone', 'MapPin', 'Briefcase', 'Package'
+  'Calendar', 'Mail', 'Phone', 'MapPin', 'Briefcase', 'Package',
+  'BarChart', 'PieChart', 'TrendingUp', 'Activity', 'Grid', 'List'
 ];
 
 export default function ModuleBuilder() {
-  const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isCreating, setIsCreating] = useState(false);
   const [selectedModule, setSelectedModule] = useState<any>(null);
   const [editingModule, setEditingModule] = useState<any>(null);
   const [editingField, setEditingField] = useState<any>(null);
   const [isFieldEditorOpen, setIsFieldEditorOpen] = useState(false);
+  const [selectedComponentTypes, setSelectedComponentTypes] = useState<string[]>(['form', 'table']);
+  const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Form state for new module
   const [newModule, setNewModule] = useState({
@@ -87,6 +105,10 @@ export default function ModuleBuilder() {
           ...moduleData,
           company_id: profile.company_id,
           created_by: user.id,
+          metadata: {
+            component_types: selectedComponentTypes,
+            branch_access: selectedBranches,
+          },
         })
         .select()
         .single();
@@ -98,17 +120,12 @@ export default function ModuleBuilder() {
       queryClient.invalidateQueries({ queryKey: ['custom-modules'] });
       setIsCreating(false);
       setNewModule({ name: '', display_name: '', description: '', icon_name: 'Box' });
-      toast({
-        title: "Module created",
-        description: "Your custom module has been created successfully.",
-      });
+      setSelectedComponentTypes(['form', 'table']);
+      setSelectedBranches([]);
+      toast.success("Module created successfully with all components!");
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create module",
-        variant: "destructive",
-      });
+      toast.error(error instanceof Error ? error.message : "Failed to create module");
     },
   });
 
@@ -125,17 +142,10 @@ export default function ModuleBuilder() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['custom-modules'] });
       setEditingModule(null);
-      toast({
-        title: "Module updated",
-        description: "Your module has been updated successfully.",
-      });
+      toast.success("Module updated successfully");
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update module",
-        variant: "destructive",
-      });
+      toast.error(error instanceof Error ? error.message : "Failed to update module");
     },
   });
 
@@ -151,17 +161,7 @@ export default function ModuleBuilder() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['custom-module-fields'] });
-      toast({
-        title: "Field deleted",
-        description: "The field has been deleted successfully.",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete field",
-        variant: "destructive",
-      });
+      toast.success("Field deleted successfully");
     },
   });
 
@@ -178,31 +178,51 @@ export default function ModuleBuilder() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['custom-modules'] });
       if (selectedModule) setSelectedModule(null);
-      toast({
-        title: "Module deleted",
-        description: "The module has been deleted successfully.",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete module",
-        variant: "destructive",
-      });
+      toast.success("Module deleted successfully");
     },
   });
 
+  // Update field order mutation
+  const updateFieldOrderMutation = useMutation({
+    mutationFn: async (updatedFields: any[]) => {
+      const updates = updatedFields.map((field, index) => ({
+        id: field.id,
+        field_order: index,
+      }));
+
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('custom_module_fields')
+          .update({ field_order: update.field_order })
+          .eq('id', update.id);
+
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['custom-module-fields'] });
+      toast.success("Field order updated");
+    },
+  });
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id && fields) {
+      const oldIndex = fields.findIndex((f) => f.id === active.id);
+      const newIndex = fields.findIndex((f) => f.id === over.id);
+
+      const reorderedFields = arrayMove(fields, oldIndex, newIndex);
+      updateFieldOrderMutation.mutate(reorderedFields);
+    }
+  };
+
   const handleCreateModule = () => {
-    if (!newModule.name || !newModule.display_name) {
-      toast({
-        title: "Validation error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
+    if (!newModule.display_name) {
+      toast.error("Please fill in all required fields");
       return;
     }
 
-    // Convert display name to snake_case for name if not provided
     const moduleName = newModule.name || newModule.display_name.toLowerCase().replace(/\s+/g, '_');
     
     createModuleMutation.mutate({
@@ -220,37 +240,82 @@ export default function ModuleBuilder() {
         display_name: editingModule.display_name,
         description: editingModule.description,
         icon_name: editingModule.icon_name,
+        metadata: {
+          ...editingModule.metadata,
+          component_types: selectedComponentTypes,
+          branch_access: selectedBranches,
+        },
       },
     });
   };
 
+  const toggleComponentType = (type: string) => {
+    setSelectedComponentTypes(prev =>
+      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+    );
+  };
+
+  const toggleBranch = (branchId: string) => {
+    setSelectedBranches(prev =>
+      prev.includes(branchId) ? prev.filter(id => id !== branchId) : [...prev, branchId]
+    );
+  };
+
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Database className="h-8 w-8 text-primary" />
-              Module Builder
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Create custom entities and define their structure
-            </p>
-          </div>
-          <Dialog open={isCreating} onOpenChange={setIsCreating}>
-            <DialogTrigger asChild>
-              <Button size="lg">
-                <Plus className="mr-2 h-4 w-4" />
-                Create Module
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New Module</DialogTitle>
-                <DialogDescription>
-                  Define a new custom entity for your application
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
+    <div className="container mx-auto p-6 max-w-7xl space-y-6">
+      <PageHelp
+        title="Advanced Module Builder"
+        description="Create custom modules with drag-and-drop field management, visual components, permission control, and branch-level access."
+        features={[
+          "Drag-and-drop field reordering for intuitive organization",
+          "Multiple view types: Forms, Tables, Lists, Grids, Charts",
+          "Permission-based access control per module",
+          "Branch-level visibility and data isolation",
+          "Auto-generated CRUD operations and APIs",
+          "Real-time data management with pagination",
+        ]}
+        tips={[
+          "Start with simple modules and add complexity as needed",
+          "Use drag-and-drop to reorder fields for better UX",
+          "Assign permissions carefully to ensure data security",
+          "Branch access controls help segment data by location",
+          "Charts and graphs work best with numeric fields",
+        ]}
+      />
+
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Database className="h-8 w-8 text-primary" />
+            Module Builder
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Create custom entities with visual components and access control
+          </p>
+        </div>
+        <Dialog open={isCreating} onOpenChange={setIsCreating}>
+          <DialogTrigger asChild>
+            <Button size="lg" className="gap-2">
+              <Sparkles className="h-4 w-4" />
+              Create Module
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Create New Module</DialogTitle>
+              <DialogDescription>
+                Define a new custom entity with components and access control
+              </DialogDescription>
+            </DialogHeader>
+            <Tabs defaultValue="basic" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="basic">Basic Info</TabsTrigger>
+                <TabsTrigger value="components">Components</TabsTrigger>
+                <TabsTrigger value="branches">Branches</TabsTrigger>
+                <TabsTrigger value="permissions">Permissions</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="basic" className="space-y-4 py-4">
                 <div className="space-y-2">
                   <Label htmlFor="display_name">Display Name *</Label>
                   <Input
@@ -261,10 +326,10 @@ export default function ModuleBuilder() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="name">Technical Name *</Label>
+                  <Label htmlFor="name">Technical Name</Label>
                   <Input
                     id="name"
-                    placeholder="e.g., customer, product, order"
+                    placeholder="Auto-generated from display name"
                     value={newModule.name}
                     onChange={(e) => setNewModule({ ...newModule, name: e.target.value })}
                   />
@@ -300,286 +365,267 @@ export default function ModuleBuilder() {
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCreating(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleCreateModule}
-                  disabled={createModuleMutation.isPending}
-                >
-                  {createModuleMutation.isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : null}
-                  Create Module
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
+              </TabsContent>
 
-        {isLoading ? (
-          <div className="flex items-center justify-center p-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Modules List */}
-            <div className="lg:col-span-1">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Your Modules</CardTitle>
-                  <CardDescription>
-                    {modules?.length || 0} custom modules
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {modules && modules.length > 0 ? (
-                    modules.map((module) => (
-                      <div
-                        key={module.id}
-                        className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                          selectedModule?.id === module.id
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border hover:bg-accent'
-                        }`}
-                        onClick={() => setSelectedModule(module)}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-2">
-                            <Box className="h-4 w-4 text-primary" />
-                            <div>
-                              <p className="font-medium">{module.display_name}</p>
-                              <p className="text-xs text-muted-foreground">{module.name}</p>
-                            </div>
-                          </div>
-                          <Badge variant={module.is_active ? "default" : "secondary"}>
-                            {module.is_active ? "Active" : "Inactive"}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Box className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                      <p>No modules yet</p>
-                      <p className="text-sm">Create your first module to get started</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+              <TabsContent value="components" className="py-4">
+                <ComponentTypeSelector
+                  selectedTypes={selectedComponentTypes}
+                  onToggleType={toggleComponentType}
+                />
+              </TabsContent>
 
-            {/* Module Details */}
-            <div className="lg:col-span-2">
-              {selectedModule ? (
+              <TabsContent value="branches" className="py-4">
+                <BranchAccessControl
+                  moduleId=""
+                  selectedBranches={selectedBranches}
+                  onToggleBranch={toggleBranch}
+                />
+              </TabsContent>
+
+              <TabsContent value="permissions" className="py-4">
                 <Card>
                   <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="flex items-center gap-2">
-                          <Box className="h-5 w-5" />
-                          {selectedModule.display_name}
-                        </CardTitle>
-                        <CardDescription className="mt-2">
-                          {selectedModule.description || 'No description provided'}
-                        </CardDescription>
-                      </div>
-                      <div className="flex gap-2">
-                        <Dialog open={!!editingModule} onOpenChange={(open) => !open && setEditingModule(null)}>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setEditingModule(selectedModule)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Edit Module</DialogTitle>
-                              <DialogDescription>
-                                Update module information
-                              </DialogDescription>
-                            </DialogHeader>
-                            {editingModule && (
-                              <div className="space-y-4 py-4">
-                                <div className="space-y-2">
-                                  <Label>Display Name</Label>
-                                  <Input
-                                    value={editingModule.display_name}
-                                    onChange={(e) => setEditingModule({ ...editingModule, display_name: e.target.value })}
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label>Description</Label>
-                                  <Textarea
-                                    value={editingModule.description || ''}
-                                    onChange={(e) => setEditingModule({ ...editingModule, description: e.target.value })}
-                                    rows={3}
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label>Icon</Label>
-                                  <Select
-                                    value={editingModule.icon_name}
-                                    onValueChange={(value) => setEditingModule({ ...editingModule, icon_name: value })}
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {ICON_OPTIONS.map((icon) => (
-                                        <SelectItem key={icon} value={icon}>
-                                          {icon}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                              </div>
-                            )}
-                            <DialogFooter>
-                              <Button variant="outline" onClick={() => setEditingModule(null)}>
-                                Cancel
-                              </Button>
-                              <Button
-                                onClick={handleUpdateModule}
-                                disabled={updateModuleMutation.isPending}
-                              >
-                                {updateModuleMutation.isPending && (
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                )}
-                                Update Module
-                              </Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (confirm('Are you sure you want to delete this module? This action cannot be undone.')) {
-                              deleteModuleMutation.mutate(selectedModule.id);
-                            }
-                          }}
-                          disabled={deleteModuleMutation.isPending}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </div>
+                    <CardTitle>Permission Setup</CardTitle>
+                    <CardDescription>
+                      Permissions will be automatically created after the module is created.
+                      You can then assign them to roles.
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold">Fields</h3>
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        The following permissions will be created:
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="outline">View</Badge>
+                        <Badge variant="outline">Create</Badge>
+                        <Badge variant="outline">Edit</Badge>
+                        <Badge variant="outline">Delete</Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsCreating(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateModule}
+                disabled={createModuleMutation.isPending}
+              >
+                {createModuleMutation.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                Create Module
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {isLoading ? (
+        <div className="flex items-center justify-center p-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Modules List */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Your Modules</CardTitle>
+                <CardDescription>
+                  {modules?.length || 0} custom modules
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {modules && modules.length > 0 ? (
+                  modules.map((module) => (
+                    <div
+                      key={module.id}
+                      className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                        selectedModule?.id === module.id
+                          ? 'border-primary bg-primary/5 shadow-sm'
+                          : 'border-border hover:bg-accent hover:shadow-sm'
+                      }`}
+                      onClick={() => setSelectedModule(module)}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-2">
+                          <Box className="h-4 w-4 text-primary" />
+                          <div>
+                            <p className="font-medium">{module.display_name}</p>
+                            <p className="text-xs text-muted-foreground">{module.name}</p>
+                          </div>
+                        </div>
+                        <Badge variant={module.is_active ? "default" : "secondary"}>
+                          {module.is_active ? "Active" : "Inactive"}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Box className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                    <p>No modules yet</p>
+                    <p className="text-sm">Create your first module to get started</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Module Details */}
+          <div className="lg:col-span-2">
+            {selectedModule ? (
+              <Tabs defaultValue="fields" className="space-y-4">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="fields">Fields</TabsTrigger>
+                  <TabsTrigger value="permissions">Permissions</TabsTrigger>
+                  <TabsTrigger value="settings">Settings</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="fields">
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <CardTitle className="flex items-center gap-2">
+                            <Box className="h-5 w-5" />
+                            {selectedModule.display_name} Fields
+                          </CardTitle>
+                          <CardDescription className="mt-2">
+                            Drag and drop to reorder fields
+                          </CardDescription>
+                        </div>
                         <Button
-                          size="sm"
                           onClick={() => {
                             setEditingField(null);
                             setIsFieldEditorOpen(true);
                           }}
                         >
-                          <Plus className="mr-2 h-4 w-4" />
+                          <Plus className="h-4 w-4 mr-2" />
                           Add Field
                         </Button>
                       </div>
-
+                    </CardHeader>
+                    <CardContent>
                       {fields && fields.length > 0 ? (
-                        <div className="space-y-2">
-                          {fields.map((field) => (
-                            <div
-                              key={field.id}
-                              className="flex items-center justify-between p-3 rounded border hover:bg-accent/50 transition-colors group"
-                            >
-                              <div className="flex items-center gap-3 flex-1">
-                                <GripVertical className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <p className="font-medium">{field.display_name}</p>
-                                    {field.is_required && (
-                                      <Badge variant="destructive" className="text-xs">Required</Badge>
-                                    )}
-                                    {field.is_unique && (
-                                      <Badge variant="secondary" className="text-xs">Unique</Badge>
-                                    )}
-                                  </div>
-                                  <p className="text-sm text-muted-foreground">
-                                    {field.field_type}
-                                    {field.help_text && ` • ${field.help_text.substring(0, 50)}${field.help_text.length > 50 ? '...' : ''}`}
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline">{field.field_type}</Badge>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
+                        <DndContext
+                          sensors={sensors}
+                          collisionDetection={closestCenter}
+                          onDragEnd={handleDragEnd}
+                        >
+                          <SortableContext
+                            items={fields.map(f => f.id)}
+                            strategy={verticalListSortingStrategy}
+                          >
+                            <div className="space-y-2">
+                              {fields.map((field) => (
+                                <DraggableField
+                                  key={field.id}
+                                  field={field}
+                                  onEdit={() => {
                                     setEditingField(field);
                                     setIsFieldEditorOpen(true);
                                   }}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    if (confirm('Are you sure you want to delete this field?')) {
-                                      deleteFieldMutation.mutate(field.id);
-                                    }
-                                  }}
-                                  disabled={deleteFieldMutation.isPending}
-                                >
-                                  <Trash2 className="h-4 w-4 text-destructive" />
-                                </Button>
-                              </div>
+                                  onDelete={() => deleteFieldMutation.mutate(field.id)}
+                                />
+                              ))}
                             </div>
-                          ))}
-                        </div>
+                          </SortableContext>
+                        </DndContext>
                       ) : (
-                        <div className="text-center py-8 border-2 border-dashed rounded-lg">
-                          <Settings className="h-12 w-12 mx-auto mb-2 text-muted-foreground opacity-50" />
-                          <p className="text-muted-foreground">No fields defined yet</p>
-                          <p className="text-sm text-muted-foreground">Add fields to define your module structure</p>
+                        <div className="text-center py-8 text-muted-foreground">
+                          <Settings className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                          <p>No fields yet</p>
+                          <p className="text-sm">Add fields to define your module structure</p>
                         </div>
                       )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center py-16">
-                    <Database className="h-16 w-16 text-muted-foreground opacity-50 mb-4" />
-                    <p className="text-lg font-medium text-muted-foreground">
-                      Select a module to view details
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Or create a new module to get started
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </div>
-        )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
 
-        {/* Field Editor Dialog */}
-        {selectedModule && (
-          <FieldEditor
-            moduleId={selectedModule.id}
-            field={editingField}
-            open={isFieldEditorOpen}
-            onClose={() => {
-              setIsFieldEditorOpen(false);
-              setEditingField(null);
-            }}
-          />
-        )}
-      </div>
+                <TabsContent value="permissions">
+                  <PermissionAssigner
+                    moduleId={selectedModule.id}
+                    moduleName={selectedModule.name}
+                  />
+                </TabsContent>
+
+                <TabsContent value="settings">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Module Settings</CardTitle>
+                      <CardDescription>
+                        Configure module behavior and components
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div>
+                        <h3 className="text-sm font-medium mb-3">Component Types</h3>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedModule.metadata?.component_types?.map((type: string) => (
+                            <Badge key={type} variant="secondary">
+                              {type}
+                            </Badge>
+                          )) || <p className="text-sm text-muted-foreground">No component types configured</p>}
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setEditingModule(selectedModule);
+                            setSelectedComponentTypes(selectedModule.metadata?.component_types || []);
+                            setSelectedBranches(selectedModule.metadata?.branch_access || []);
+                          }}
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Module
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={() => {
+                            if (confirm(`Delete module "${selectedModule.display_name}"?`)) {
+                              deleteModuleMutation.mutate(selectedModule.id);
+                            }
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete Module
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            ) : (
+              <Card>
+                <CardContent className="py-12 text-center text-muted-foreground">
+                  <Database className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                  <p>Select a module to view and edit its fields</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Field Editor Dialog */}
+      <FieldEditor
+        moduleId={selectedModule?.id || ''}
+        field={editingField}
+        open={isFieldEditorOpen}
+        onClose={() => {
+          setIsFieldEditorOpen(false);
+          setEditingField(null);
+          queryClient.invalidateQueries({ queryKey: ['custom-module-fields'] });
+        }}
+      />
+    </div>
   );
 }
