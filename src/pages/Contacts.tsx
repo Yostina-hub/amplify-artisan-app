@@ -35,12 +35,21 @@ export default function Contacts() {
   const queryClient = useQueryClient();
 
   const { data: contacts } = useQuery({
-    queryKey: ["contacts", searchQuery],
+    queryKey: ["contacts", searchQuery, accessibleBranches],
     queryFn: async () => {
+      const { data: profile } = await supabase.from("profiles").select("branch_id").single();
+      
       let query = supabase
         .from("contacts")
         .select("*, accounts(name)")
         .order("created_at", { ascending: false });
+
+      // Apply branch filtering if user has branch restrictions
+      if (accessibleBranches.length > 0 && profile?.branch_id) {
+        const branchIds = accessibleBranches.map(b => b.id);
+        // Filter by branches accessible to the user
+        query = query.in('company_id', [profile.branch_id]);
+      }
 
       if (searchQuery) {
         query = query.or(`first_name.ilike.%${searchQuery}%,last_name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`);
@@ -50,6 +59,7 @@ export default function Contacts() {
       if (error) throw error;
       return data;
     },
+    enabled: accessibleBranches !== undefined,
   });
 
   const { data: accounts } = useQuery({
@@ -67,6 +77,32 @@ export default function Contacts() {
 
   const createContactMutation = useMutation({
     mutationFn: async (data: any) => {
+      // Check for duplicate email
+      if (data.email) {
+        const { data: existingContact } = await supabase
+          .from("contacts")
+          .select("id, first_name, last_name, email")
+          .eq("email", data.email)
+          .maybeSingle();
+        
+        if (existingContact) {
+          throw new Error(`Contact with email ${data.email} already exists: ${existingContact.first_name} ${existingContact.last_name}`);
+        }
+      }
+
+      // Validate account exists if provided
+      if (data.account_id) {
+        const { data: account } = await supabase
+          .from("accounts")
+          .select("id")
+          .eq("id", data.account_id)
+          .maybeSingle();
+        
+        if (!account) {
+          throw new Error("Selected account does not exist");
+        }
+      }
+
       const { data: profile } = await supabase.from("profiles").select("company_id").single();
       const { data: user } = await supabase.auth.getUser();
       const { error } = await supabase.from("contacts").insert({

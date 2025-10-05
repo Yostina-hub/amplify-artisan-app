@@ -33,12 +33,20 @@ export default function Accounts() {
   const queryClient = useQueryClient();
 
   const { data: accounts } = useQuery({
-    queryKey: ["accounts", searchQuery],
+    queryKey: ["accounts", searchQuery, accessibleBranches],
     queryFn: async () => {
+      const { data: profile } = await supabase.from("profiles").select("branch_id").single();
+      
       let query = supabase
         .from("accounts")
         .select("*")
         .order("created_at", { ascending: false });
+
+      // Apply branch filtering if user has branch restrictions
+      if (accessibleBranches.length > 0 && profile?.branch_id) {
+        const branchIds = accessibleBranches.map(b => b.id);
+        query = query.in('company_id', [profile.branch_id]);
+      }
 
       if (searchQuery) {
         query = query.ilike("name", `%${searchQuery}%`);
@@ -48,10 +56,35 @@ export default function Accounts() {
       if (error) throw error;
       return data;
     },
+    enabled: accessibleBranches !== undefined,
   });
 
   const createAccountMutation = useMutation({
     mutationFn: async (data: any) => {
+      // Check for duplicate account by name
+      const { data: existingAccount } = await supabase
+        .from("accounts")
+        .select("id, name, email")
+        .ilike("name", data.name)
+        .maybeSingle();
+      
+      if (existingAccount) {
+        throw new Error(`Account with similar name already exists: ${existingAccount.name}`);
+      }
+
+      // Check for duplicate email if provided
+      if (data.email) {
+        const { data: existingEmailAccount } = await supabase
+          .from("accounts")
+          .select("id, name, email")
+          .eq("email", data.email)
+          .maybeSingle();
+        
+        if (existingEmailAccount) {
+          throw new Error(`Account with email ${data.email} already exists: ${existingEmailAccount.name}`);
+        }
+      }
+
       const { data: profile } = await supabase.from("profiles").select("company_id").single();
       const { data: user } = await supabase.auth.getUser();
       const { error } = await supabase.from("accounts").insert({

@@ -68,12 +68,20 @@ export default function Activities() {
   });
 
   const { data: activities = [], isLoading } = useQuery({
-    queryKey: ["activities", searchQuery],
+    queryKey: ["activities", searchQuery, accessibleBranches],
     queryFn: async () => {
+      const { data: profile } = await supabase.from("profiles").select("branch_id").single();
+      
       let query = supabase
         .from("activities")
         .select("*")
         .order("created_at", { ascending: false });
+
+      // Apply branch filtering if user has branch restrictions
+      if (accessibleBranches.length > 0 && profile?.branch_id) {
+        const branchIds = accessibleBranches.map(b => b.id);
+        query = query.in('company_id', [profile.branch_id]);
+      }
 
       if (searchQuery) {
         query = query.ilike("subject", `%${searchQuery}%`);
@@ -83,6 +91,7 @@ export default function Activities() {
       if (error) throw error;
       return data as Activity[];
     },
+    enabled: accessibleBranches !== undefined,
   });
 
   const createMutation = useMutation({

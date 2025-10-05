@@ -35,13 +35,21 @@ export default function Leads() {
   const queryClient = useQueryClient();
 
   const { data: leads } = useQuery({
-    queryKey: ["leads", searchQuery],
+    queryKey: ["leads", searchQuery, accessibleBranches],
     queryFn: async () => {
+      const { data: profile } = await supabase.from("profiles").select("branch_id").single();
+      
       let query = supabase
         .from("leads")
         .select("*")
         .eq("converted", false)
         .order("created_at", { ascending: false });
+
+      // Apply branch filtering if user has branch restrictions
+      if (accessibleBranches.length > 0 && profile?.branch_id) {
+        const branchIds = accessibleBranches.map(b => b.id);
+        query = query.in('company_id', [profile.branch_id]);
+      }
 
       if (searchQuery) {
         query = query.or(`first_name.ilike.%${searchQuery}%,last_name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%,company.ilike.%${searchQuery}%`);
@@ -51,10 +59,36 @@ export default function Leads() {
       if (error) throw error;
       return data;
     },
+    enabled: accessibleBranches !== undefined,
   });
 
   const createLeadMutation = useMutation({
     mutationFn: async (data: any) => {
+      // Check if lead with same email already exists
+      if (data.email) {
+        const { data: existingLead } = await supabase
+          .from("leads")
+          .select("id, first_name, last_name, email, converted")
+          .eq("email", data.email)
+          .eq("converted", false)
+          .maybeSingle();
+        
+        if (existingLead) {
+          throw new Error(`Active lead with email ${data.email} already exists: ${existingLead.first_name} ${existingLead.last_name}`);
+        }
+
+        // Check if contact with this email exists
+        const { data: existingContact } = await supabase
+          .from("contacts")
+          .select("id, first_name, last_name, email")
+          .eq("email", data.email)
+          .maybeSingle();
+        
+        if (existingContact) {
+          throw new Error(`This email already exists as a contact: ${existingContact.first_name} ${existingContact.last_name}. Consider linking to existing contact instead.`);
+        }
+      }
+
       const { data: profile } = await supabase.from("profiles").select("company_id").single();
       const { data: user } = await supabase.auth.getUser();
       const { error } = await supabase.from("leads").insert({
