@@ -170,20 +170,140 @@ export default function CRMFeatureStatus() {
 
   const currentReport = systemReports[currentReportIndex];
 
-  const processVoiceQuery = async (transcript: string) => {
-    const query = transcript.toLowerCase();
-    let response = "";
-    let dataVisualization: QueryData | null = null;
-              { platform: 'Instagram', followers: '89.2K', engagement: '5.2%', posts: 23 },
-              { platform: 'LinkedIn', followers: '67.8K', engagement: '4.9%', posts: 18 },
-              { platform: 'Twitter', followers: '54.3K', engagement: '4.1%', posts: 31 },
-              { platform: 'Facebook', followers: '33.7K', engagement: '4.5%', posts: 15 }
-            ],
-            visualization: 'platforms'
-          };
+  // Text-to-Speech using OpenAI
+  const speakResponse = async (text: string) => {
+    try {
+      setIsSpeaking(true);
+      console.log('Generating speech for:', text);
+      
+      const { data, error } = await supabase.functions.invoke('text-to-speech', {
+        body: { text, voice: 'alloy' }
+      });
+
+      if (error) throw error;
+
+      if (data?.audioContent) {
+        const audioBlob = new Blob(
+          [Uint8Array.from(atob(data.audioContent), c => c.charCodeAt(0))],
+          { type: 'audio/mpeg' }
+        );
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        
+        audio.onended = () => {
+          setIsSpeaking(false);
+          URL.revokeObjectURL(audioUrl);
+        };
+        
+        audio.onerror = () => setIsSpeaking(false);
+        
+        await audio.play();
+      }
+    } catch (error) {
+      console.error('Speech error:', error);
+      setIsSpeaking(false);
+      toast({
+        title: "Speech Error",
+        description: "Could not generate speech",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Voice Recognition using OpenAI Whisper
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
         }
-        // Revenue & Financial queries
-        else if (query.includes('revenue') || query.includes('income') || query.includes('profit') || query.includes('financial')) {
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        await transcribeAudio(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      
+      // Stop recording after 5 seconds
+      setTimeout(() => {
+        if (mediaRecorder.state === 'recording') {
+          mediaRecorder.stop();
+        }
+      }, 5000);
+      
+    } catch (error) {
+      console.error('Recording error:', error);
+      toast({
+        title: "Microphone Error",
+        description: "Could not access microphone",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const transcribeAudio = async (audioBlob: Blob) => {
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(audioBlob);
+      
+      reader.onloadend = async () => {
+        const base64Audio = (reader.result as string).split(',')[1];
+        
+        console.log('Transcribing audio...');
+        const { data, error } = await supabase.functions.invoke('transcribe-audio', {
+          body: { audio: base64Audio, language: 'am' }
+        });
+
+        if (error) throw error;
+
+        if (data?.text) {
+          const transcript = data.text;
+          setVoiceTranscript(transcript);
+          console.log('Transcription:', transcript);
+          
+          await processVoiceQuery(transcript);
+        }
+      };
+    } catch (error) {
+      console.error('Transcription error:', error);
+      toast({
+        title: "Transcription Error",
+        description: "Could not transcribe audio",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const processVoiceQuery = async (transcript: string) => {
+    try {
+      const query = transcript.toLowerCase();
+      let response = "";
+      let dataVisualization: QueryData | null = null;
+      
+      // Social Media queries
+      if (query.includes('social') || query.includes('post') || query.includes('engagement') || query.includes('followers')) {
+      response = "Social media performance is strong across all platforms. We have 245K total followers with an average engagement rate of 4.8%. Top performing platform is Instagram with 12.3K likes on recent posts.";
+      dataVisualization = {
+        type: 'social',
+        data: [
+          { platform: 'Instagram', followers: '89.2K', engagement: '5.2%', posts: 23 },
+          { platform: 'LinkedIn', followers: '67.8K', engagement: '4.9%', posts: 18 },
+          { platform: 'Twitter', followers: '54.3K', engagement: '4.1%', posts: 31 },
+          { platform: 'Facebook', followers: '33.7K', engagement: '4.5%', posts: 15 }
+        ],
+        visualization: 'platforms'
+      };
+    }
+    // Revenue & Financial queries
+    else if (query.includes('revenue') || query.includes('income') || query.includes('profit') || query.includes('financial')) {
           response = "Current revenue stands at $2.85M with a 12.5% increase from last quarter. Monthly recurring revenue is $487K. Top revenue sources are Enterprise Sales at $1.2M (42%), Mid-Market at $890K (31%), and SMB at $520K (18%). Profit margin is 34% with Q4 forecast showing 23% growth potential.";
           dataVisualization = {
             type: 'revenue',
@@ -338,110 +458,41 @@ export default function CRMFeatureStatus() {
             visualization: 'executive-summary'
           };
         }
-        else if (response === "" && transcript.length > 10) {
+        else if (response === "" && query.length > 10) {
           response = "I'm your comprehensive AI business assistant. I can provide detailed insights about revenue, deals, team performance, customer satisfaction, social media metrics, marketing ROI, system operations, risk alerts, inventory, and all company analytics. What specific area would you like to explore?";
         }
         
         if (response) {
           setAiResponse(response);
           setQueryData(dataVisualization);
-          speakResponse(response);
+          await speakResponse(response);
         }
-      };
-
-      recognitionRef.current.onerror = (event: any) => {
-        console.error('Speech recognition error:', event.error);
-        setIsListening(false);
-        toast({
-          title: "Voice Error",
-          description: "Could not access microphone. Please check permissions.",
-          variant: "destructive"
-        });
-      };
-
-      recognitionRef.current.onend = () => {
-        if (isListening) {
-          recognitionRef.current.start();
-        }
-      };
+    } catch (error) {
+      console.error('Query processing error:', error);
     }
-  }, [isListening, toast, currentReportIndex]);
-
-  // Text-to-Speech function
-  const speakResponse = (text: string) => {
-    // Cancel any ongoing speech
-    if (window.speechSynthesis.speaking) {
-      window.speechSynthesis.cancel();
-    }
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
-    utterance.volume = 1.0;
-    
-    // Try to use a professional-sounding voice
-    const voices = window.speechSynthesis.getVoices();
-    const preferredVoice = voices.find(voice => 
-      voice.name.includes('Google') || 
-      voice.name.includes('Microsoft') ||
-      voice.name.includes('Samantha') ||
-      voice.name.includes('Alex')
-    );
-    
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
-    }
-
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-
-    speechSynthRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
   };
 
-  // Load voices (some browsers need this)
-  useEffect(() => {
-    if (window.speechSynthesis) {
-      window.speechSynthesis.getVoices();
-      window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.getVoices();
-      };
-    }
-  }, []);
-
-  const toggleVoice = () => {
-    if (!recognitionRef.current) {
-      toast({
-        title: "Not Supported",
-        description: "Voice recognition is not supported in this browser.",
-        variant: "destructive"
-      });
-      return;
-    }
-
+  const toggleVoice = async () => {
     if (!isListening) {
-      recognitionRef.current.start();
       setIsListening(true);
       setVoiceTranscript("");
       setAiResponse("");
       
-      // Speak welcome message
-      const welcomeMessage = "Hello, I'm your AI executive assistant. How can I help you today?";
+      const welcomeMessage = "Hello, I'm your AI executive assistant. I support Amharic and many other languages. How can I help you today?";
       setAiResponse(welcomeMessage);
-      speakResponse(welcomeMessage);
+      await speakResponse(welcomeMessage);
       
       toast({
         title: "AI Assistant Active",
-        description: "Listening and ready to respond with voice",
+        description: "Speak in Amharic or any language",
       });
-    } else {
-      recognitionRef.current.stop();
-      setIsListening(false);
       
-      // Stop any ongoing speech
-      if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.cancel();
+      // Start recording
+      await startRecording();
+    } else {
+      setIsListening(false);
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+        mediaRecorderRef.current.stop();
       }
       setIsSpeaking(false);
     }
