@@ -1,4 +1,4 @@
-import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2, Mail, Link2, Globe, Key, Package, BarChart2, Layers, DollarSign, CreditCard, FileSearch, ChevronDown, Wallet, Layout, Database, Sparkles, Brain, Zap, LineChart, Box, Target, UserCircle, UserPlus, GitBranch, CheckSquare, ShoppingCart, FileSpreadsheet, Receipt, Banknote, Headphones, Phone, FolderKanban, FileCheck } from "lucide-react";
+import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2, Mail, Link2, Globe, Key, Package, BarChart2, Layers, DollarSign, CreditCard, FileSearch, ChevronDown, Wallet, Layout, Database, Sparkles, Brain, Zap, LineChart, Box, Target, UserCircle, UserPlus, GitBranch, CheckSquare, ShoppingCart, FileSpreadsheet, Receipt, Banknote, Headphones, Phone, FolderKanban, FileCheck, Volume2 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
@@ -84,6 +84,7 @@ const companyAdminItems = [
   { title: "Platform Subscriptions", url: "/company/platform-subscriptions", icon: Package },
   { title: "Platform API Settings", url: "/company/platform-settings", icon: Key },
   { title: "API Integrations", url: "/company/api-management", icon: Database },
+  { title: "TTS/STT Settings", url: "/tts-settings", icon: Volume2 },
   { title: "Audit Log", url: "/company/audit-log", icon: FileSearch },
 ];
 
@@ -112,6 +113,7 @@ const adminConfigItems = [
   { title: "Public Content", url: "/admin/public-content", icon: Layout },
   { title: "Email Settings", url: "/admin/email-settings", icon: Mail },
   { title: "Social Auth Settings", url: "/admin/social-auth", icon: Key },
+  { title: "TTS/STT Settings", url: "/tts-settings", icon: Volume2 },
   { title: "Trial Settings", url: "/admin/trial-settings", icon: Settings },
   { title: "System Settings", url: "/admin/settings", icon: Cog },
 ];

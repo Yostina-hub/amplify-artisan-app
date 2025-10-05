@@ -81,6 +81,7 @@ import CustomerSupport from "./pages/CustomerSupport";
 import CallCenter from "./pages/CallCenter";
 import ProjectManagement from "./pages/ProjectManagement";
 import ContractManagement from "./pages/ContractManagement";
+import TTSSettings from "./pages/TTSSettings";
 
 const queryClient = new QueryClient();
 
@@ -136,6 +137,7 @@ const App = () => (
             <Route path="/company/platform-subscriptions" element={<ProtectedRoute><Layout><CompanyPlatformSubscriptions /></Layout></ProtectedRoute>} />
             <Route path="/company/platform-settings" element={<ProtectedRoute><Layout><CompanyPlatformSettings /></Layout></ProtectedRoute>} />
             <Route path="/company/api-management" element={<ProtectedRoute><Layout><CompanyAPIManagement /></Layout></ProtectedRoute>} />
+            <Route path="/tts-settings" element={<ProtectedRoute><Layout><TTSSettings /></Layout></ProtectedRoute>} />
             
             {/* AI Features */}
             <Route path="/ai-studio" element={<ProtectedRoute><Layout><AIStudio /></Layout></ProtectedRoute>} />

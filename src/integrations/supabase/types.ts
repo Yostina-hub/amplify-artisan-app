@@ -1355,6 +1355,44 @@ export type Database = {
           },
         ]
       }
+      company_tts_settings: {
+        Row: {
+          company_id: string
+          created_at: string
+          elevenlabs_api_key: string | null
+          id: string
+          openai_api_key: string | null
+          updated_at: string
+          use_custom_keys: boolean | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          elevenlabs_api_key?: string | null
+          id?: string
+          openai_api_key?: string | null
+          updated_at?: string
+          use_custom_keys?: boolean | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          elevenlabs_api_key?: string | null
+          id?: string
+          openai_api_key?: string | null
+          updated_at?: string
+          use_custom_keys?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_tts_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contacts: {
         Row: {
           account_id: string | null

@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { text, voice } = await req.json();
+    const { text, voice, company_id } = await req.json();
 
     if (!text) {
       throw new Error('Text is required');
@@ -21,8 +22,36 @@ serve(async (req) => {
     console.log('Generating speech for text:', text.substring(0, 50), '...');
     console.log('Using voice:', voice || 'alloy');
 
-    const apiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!apiKey) {
+    // Initialize API keys with system defaults
+    let openaiKey = Deno.env.get('OPENAI_API_KEY');
+    let elevenlabsKey = Deno.env.get('ELEVENLABS_API_KEY');
+
+    // Check for company-specific API keys if company_id is provided
+    if (company_id) {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      const { data: companySettings } = await supabase
+        .from('company_tts_settings')
+        .select('*')
+        .eq('company_id', company_id)
+        .single();
+
+      // Use company keys if they opted for custom keys
+      if (companySettings?.use_custom_keys) {
+        if (companySettings.openai_api_key) {
+          openaiKey = companySettings.openai_api_key;
+          console.log('Using company OpenAI key');
+        }
+        if (companySettings.elevenlabs_api_key) {
+          elevenlabsKey = companySettings.elevenlabs_api_key;
+          console.log('Using company ElevenLabs key');
+        }
+      }
+    }
+
+    if (!openaiKey) {
       throw new Error('OPENAI_API_KEY is not configured');
     }
 
@@ -30,7 +59,7 @@ serve(async (req) => {
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        'Authorization': `Bearer ${openaiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -51,16 +80,14 @@ serve(async (req) => {
         errorText.toLowerCase().includes('insufficient_quota') ||
         errorText.toLowerCase().includes('payment required');
 
-      const elevenKey = Deno.env.get('ELEVENLABS_API_KEY');
-
-      if (shouldFallback && elevenKey) {
+      if (shouldFallback && elevenlabsKey) {
         const voiceId = voice && /^[a-zA-Z0-9]+$/.test(voice) && voice.length > 10 ? voice : '9BWtsMINqrJLrRacOk9x';
         console.log('Falling back to ElevenLabs TTS with voice:', voiceId);
 
         const elResp = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
           method: 'POST',
           headers: {
-            'xi-api-key': elevenKey,
+            'xi-api-key': elevenlabsKey,
             'Content-Type': 'application/json',
             'Accept': 'audio/mpeg',
           },

@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Brain, TrendingUp, Users, DollarSign, Target, Zap, Activity, ArrowUp, ArrowDown, Mic, MessageSquare, Clock, Award, AlertCircle, CheckCircle2, Phone, Mail, Calendar, FileText, BarChart3, Database, ShieldAlert, Megaphone, Package, Receipt, UserCheck, Workflow, LineChart, PieChart, TrendingDown, Share2, ThumbsUp, Eye, Hash, Settings } from "lucide-react";
+import { Brain, TrendingUp, Users, DollarSign, Target, Zap, Activity, ArrowUp, ArrowDown, Mic, MessageSquare, Clock, Award, AlertCircle, CheckCircle2, Phone, Mail, Calendar, FileText, BarChart3, Database, ShieldAlert, Megaphone, Package, Receipt, UserCheck, Workflow, LineChart, PieChart, TrendingDown, Share2, ThumbsUp, Eye, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { TTSSettings } from "@/components/TTSSettings";
 
 interface QueryData {
   type: string;
@@ -471,30 +469,11 @@ export default function CRMFeatureStatus() {
               </div>
 
               <div className="flex items-center gap-3">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="bg-gradient-to-r from-slate-500/20 to-slate-600/20 hover:from-slate-500/30 hover:to-slate-600/30 border-white/20"
-                    >
-                      <Settings className="mr-2 h-5 w-5" />
-                      TTS Settings
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle>Text-to-Speech Settings</DialogTitle>
-                    </DialogHeader>
-                    <TTSSettings />
-                  </DialogContent>
-                </Dialog>
-
                 <Button
                   onClick={toggleVoice}
                   size="lg"
                   className={`relative overflow-hidden transition-all duration-500 ${
-                    isListening 
+                    isListening
                       ? 'bg-gradient-to-r from-red-500 to-pink-600 shadow-[0_0_30px_rgba(239,68,68,0.6)] scale-110' 
                       : 'bg-gradient-to-r from-purple-500 to-blue-600 hover:shadow-[0_0_30px_rgba(147,51,234,0.6)]'
                   }`}
