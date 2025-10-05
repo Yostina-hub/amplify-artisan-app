@@ -1,10 +1,9 @@
-import { ReactNode } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { LogOut, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Outlet } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,11 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 
-interface LayoutProps {
-  children: ReactNode;
-}
-
-export function Layout({ children }: LayoutProps) {
+export function Layout() {
   const { user, signOut, roles } = useAuth();
   const navigate = useNavigate();
 
@@ -66,7 +61,7 @@ export function Layout({ children }: LayoutProps) {
             </DropdownMenu>
           </header>
           <main className="flex-1 p-6 bg-gradient-to-br from-background via-background to-muted/20">
-            {children}
+            <Outlet />
           </main>
           <footer className="border-t border-border py-4 px-6 bg-card/50 backdrop-blur-sm">
             <div className="flex items-center justify-center gap-2">

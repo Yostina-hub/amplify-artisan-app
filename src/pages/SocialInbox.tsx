@@ -9,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Inbox, MessageCircle, Send, RefreshCw, Search, Filter } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Layout } from '@/components/Layout';
 
 export default function SocialInbox() {
   const { toast } = useToast();
@@ -89,8 +88,7 @@ export default function SocialInbox() {
   };
 
   return (
-    <Layout>
-      <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -271,9 +269,8 @@ export default function SocialInbox() {
                 </div>
               </CardContent>
             )}
-          </Card>
-        </div>
+        </Card>
       </div>
-    </Layout>
+    </div>
   );
 }

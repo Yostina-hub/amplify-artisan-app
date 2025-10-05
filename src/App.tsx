@@ -95,88 +95,99 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* Public routes without layout */}
             <Route path="/" element={<Index />} />
-          <Route path="/terms-of-service" element={<TermsOfService />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/industry/:slug" element={<Industry />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/company-application" element={<CompanyApplication />} />
-            <Route path="/pending-approval" element={<ProtectedRoute allowUnapproved><Layout><PendingApproval /></Layout></ProtectedRoute>} />
-            <Route path="/force-password" element={<ProtectedRoute allowUnapproved><Layout><ForcePasswordChange /></Layout></ProtectedRoute>} />
-            <Route path="/dashboard" element={<ProtectedRoute><Layout><DashboardRedirect /></Layout></ProtectedRoute>} />
-            <Route path="/company-dashboard" element={<ProtectedRoute><Layout><CompanyDashboard /></Layout></ProtectedRoute>} />
-            <Route path="/user-dashboard" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
-            <Route path="/composer" element={<ProtectedRoute><Layout><Composer /></Layout></ProtectedRoute>} />
-            <Route path="/calendar" element={<ProtectedRoute><Layout><CalendarView /></Layout></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute><Layout><Settings /></Layout></ProtectedRoute>} />
-            <Route path="/help" element={<ProtectedRoute><Layout><Help /></Layout></ProtectedRoute>} />
-            <Route path="/ad-campaigns" element={<ProtectedRoute><Layout><AdCampaigns /></Layout></ProtectedRoute>} />
-            <Route path="/influencer-marketing" element={<ProtectedRoute><Layout><InfluencerMarketing /></Layout></ProtectedRoute>} />
-            <Route path="/brand-monitoring" element={<ProtectedRoute><Layout><BrandMonitoring /></Layout></ProtectedRoute>} />
-            <Route path="/social-listening" element={<ProtectedRoute><Layout><SocialListening /></Layout></ProtectedRoute>} />
-            <Route path="/agents" element={<ProtectedRoute requiredRole="agent"><Layout><Agents /></Layout></ProtectedRoute>} />
-            <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><Layout><AdminDashboard /></Layout></ProtectedRoute>} />
-            <Route path="/admin/companies" element={<ProtectedRoute requiredRole="admin"><Layout><CompanyManagement /></Layout></ProtectedRoute>} />
-            <Route path="/admin/users" element={<ProtectedRoute requiredRole="admin"><Layout><UserManagement /></Layout></ProtectedRoute>} />
-            <Route path="/admin/moderation" element={<ProtectedRoute requiredRole="admin"><Layout><ContentModeration /></Layout></ProtectedRoute>} />
-            <Route path="/admin/settings" element={<ProtectedRoute requiredRole="admin"><Layout><SystemSettings /></Layout></ProtectedRoute>} />
-            <Route path="/admin/email-settings" element={<ProtectedRoute requiredRole="admin"><Layout><EmailSettings /></Layout></ProtectedRoute>} />
-            <Route path="/admin/social-platforms" element={<ProtectedRoute requiredRole="admin"><Layout><SocialPlatformManagement /></Layout></ProtectedRoute>} />
-            <Route path="/admin/platform-subscriptions" element={<ProtectedRoute requiredRole="admin"><Layout><AdminCompanyPlatformSubscriptions /></Layout></ProtectedRoute>} />
-            <Route path="/admin/reach-analytics" element={<ProtectedRoute requiredRole="admin"><Layout><ReachAnalytics /></Layout></ProtectedRoute>} />
-            <Route path="/admin/landing-page" element={<ProtectedRoute requiredRole="admin"><Layout><LandingPageManager /></Layout></ProtectedRoute>} />
-            <Route path="/admin/industries" element={<ProtectedRoute requiredRole="admin"><Layout><IndustryManagement /></Layout></ProtectedRoute>} />
-            <Route path="/admin/pricing" element={<ProtectedRoute requiredRole="admin"><Layout><PricingManagement /></Layout></ProtectedRoute>} />
-            <Route path="/admin/subscriptions" element={<ProtectedRoute requiredRole="admin"><Layout><SubscriptionManagement /></Layout></ProtectedRoute>} />
-            <Route path="/admin/payments" element={<ProtectedRoute requiredRole="admin"><Layout><PaymentManagement /></Layout></ProtectedRoute>} />
-            <Route path="/admin/trial-settings" element={<ProtectedRoute requiredRole="admin"><Layout><TrialSettings /></Layout></ProtectedRoute>} />
-            <Route path="/admin/audit-log" element={<ProtectedRoute requiredRole="admin"><Layout><AuditLog /></Layout></ProtectedRoute>} />
-            <Route path="/admin/social-auth" element={<ProtectedRoute requiredRole="admin"><Layout><SocialAuthSettings /></Layout></ProtectedRoute>} />
-            <Route path="/admin/public-content" element={<ProtectedRoute requiredRole="admin"><Layout><PublicContentManager /></Layout></ProtectedRoute>} />
-            <Route path="/admin/api-management" element={<ProtectedRoute requiredRole="admin"><Layout><APIManagement /></Layout></ProtectedRoute>} />
-            <Route path="/admin/branches" element={<ProtectedRoute requiredRole="admin"><Layout><BranchManagement /></Layout></ProtectedRoute>} />
-            <Route path="/admin/permissions" element={<ProtectedRoute requiredRole="admin"><Layout><PermissionManagement /></Layout></ProtectedRoute>} />
-            <Route path="/company/email-settings" element={<ProtectedRoute><Layout><CompanyEmailSettings /></Layout></ProtectedRoute>} />
-            <Route path="/company/audit-log" element={<ProtectedRoute><Layout><CompanyAuditLog /></Layout></ProtectedRoute>} />
-            <Route path="/company/platform-subscriptions" element={<ProtectedRoute><Layout><CompanyPlatformSubscriptions /></Layout></ProtectedRoute>} />
-            <Route path="/company/platform-settings" element={<ProtectedRoute><Layout><CompanyPlatformSettings /></Layout></ProtectedRoute>} />
-            <Route path="/company/api-management" element={<ProtectedRoute><Layout><CompanyAPIManagement /></Layout></ProtectedRoute>} />
-            <Route path="/tts-settings" element={<ProtectedRoute><Layout><TTSSettings /></Layout></ProtectedRoute>} />
-            
-            {/* AI Features */}
-            <Route path="/ai-studio" element={<ProtectedRoute><Layout><AIStudio /></Layout></ProtectedRoute>} />
-            <Route path="/social-inbox" element={<ProtectedRoute><Layout><SocialInbox /></Layout></ProtectedRoute>} />
-          <Route path="/social-intelligence" element={<ProtectedRoute><Layout><SocialIntelligence /></Layout></ProtectedRoute>} />
-          <Route path="/automation" element={<ProtectedRoute><Layout><Automation /></Layout></ProtectedRoute>} />
-          <Route path="/ai-analytics" element={<ProtectedRoute><Layout><AIAnalytics /></Layout></ProtectedRoute>} />
-          <Route path="/social-media-credentials" element={<ProtectedRoute><Layout><SocialMediaCredentials /></Layout></ProtectedRoute>} />
-          
-          {/* Enterprise Builder */}
-          <Route path="/module-builder" element={<ProtectedRoute><Layout><ModuleBuilder /></Layout></ProtectedRoute>} />
-          <Route path="/form-builder" element={<ProtectedRoute><Layout><FormBuilder /></Layout></ProtectedRoute>} />
-          <Route path="/workflow-builder" element={<ProtectedRoute><Layout><WorkflowBuilder /></Layout></ProtectedRoute>} />
-          <Route path="/reporting-dashboard" element={<ProtectedRoute><Layout><ReportingDashboard /></Layout></ProtectedRoute>} />
-          <Route path="/crm-roadmap" element={<ProtectedRoute><Layout><CRMFeatureStatus /></Layout></ProtectedRoute>} />
-          <Route path="/contacts" element={<ProtectedRoute><Layout><Contacts /></Layout></ProtectedRoute>} />
-          <Route path="/accounts" element={<ProtectedRoute><Layout><Accounts /></Layout></ProtectedRoute>} />
-          <Route path="/leads" element={<ProtectedRoute><Layout><Leads /></Layout></ProtectedRoute>} />
-          <Route path="/pipeline" element={<ProtectedRoute><Layout><SalesPipeline /></Layout></ProtectedRoute>} />
-          <Route path="/activities" element={<ProtectedRoute><Layout><Activities /></Layout></ProtectedRoute>} />
-          <Route path="/products" element={<ProtectedRoute><Layout><Products /></Layout></ProtectedRoute>} />
-          <Route path="/quotes" element={<ProtectedRoute><Layout><Quotes /></Layout></ProtectedRoute>} />
-          <Route path="/invoices" element={<ProtectedRoute><Layout><Invoices /></Layout></ProtectedRoute>} />
-          <Route path="/reports" element={<ProtectedRoute><Layout><Reports /></Layout></ProtectedRoute>} />
-          <Route path="/email-marketing" element={<ProtectedRoute><Layout><EmailMarketing /></Layout></ProtectedRoute>} />
-          <Route path="/documents" element={<ProtectedRoute><Layout><Documents /></Layout></ProtectedRoute>} />
-          <Route path="/payments" element={<ProtectedRoute><Layout><Payments /></Layout></ProtectedRoute>} />
-          <Route path="/territory-management" element={<ProtectedRoute><Layout><TerritoryManagement /></Layout></ProtectedRoute>} />
-          <Route path="/customer-support" element={<ProtectedRoute><Layout><CustomerSupport /></Layout></ProtectedRoute>} />
-          <Route path="/call-center" element={<ProtectedRoute><Layout><CallCenter /></Layout></ProtectedRoute>} />
-          <Route path="/project-management" element={<ProtectedRoute><Layout><ProjectManagement /></Layout></ProtectedRoute>} />
-          <Route path="/contract-management" element={<ProtectedRoute><Layout><ContractManagement /></Layout></ProtectedRoute>} />
-            
-            <Route path="/social-accounts" element={<ProtectedRoute><Layout><SocialMediaCredentials /></Layout></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
+            
+            {/* Protected routes with shared layout */}
+            <Route element={<Layout />}>
+              <Route path="/pending-approval" element={<ProtectedRoute allowUnapproved><PendingApproval /></ProtectedRoute>} />
+              <Route path="/force-password" element={<ProtectedRoute allowUnapproved><ForcePasswordChange /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><DashboardRedirect /></ProtectedRoute>} />
+              <Route path="/company-dashboard" element={<ProtectedRoute><CompanyDashboard /></ProtectedRoute>} />
+              <Route path="/user-dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/composer" element={<ProtectedRoute><Composer /></ProtectedRoute>} />
+              <Route path="/calendar" element={<ProtectedRoute><CalendarView /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
+              <Route path="/ad-campaigns" element={<ProtectedRoute><AdCampaigns /></ProtectedRoute>} />
+              <Route path="/influencer-marketing" element={<ProtectedRoute><InfluencerMarketing /></ProtectedRoute>} />
+              <Route path="/brand-monitoring" element={<ProtectedRoute><BrandMonitoring /></ProtectedRoute>} />
+              <Route path="/social-listening" element={<ProtectedRoute><SocialListening /></ProtectedRoute>} />
+              <Route path="/agents" element={<ProtectedRoute requiredRole="agent"><Agents /></ProtectedRoute>} />
+              
+              {/* Admin routes */}
+              <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
+              <Route path="/admin/companies" element={<ProtectedRoute requiredRole="admin"><CompanyManagement /></ProtectedRoute>} />
+              <Route path="/admin/users" element={<ProtectedRoute requiredRole="admin"><UserManagement /></ProtectedRoute>} />
+              <Route path="/admin/moderation" element={<ProtectedRoute requiredRole="admin"><ContentModeration /></ProtectedRoute>} />
+              <Route path="/admin/settings" element={<ProtectedRoute requiredRole="admin"><SystemSettings /></ProtectedRoute>} />
+              <Route path="/admin/email-settings" element={<ProtectedRoute requiredRole="admin"><EmailSettings /></ProtectedRoute>} />
+              <Route path="/admin/social-platforms" element={<ProtectedRoute requiredRole="admin"><SocialPlatformManagement /></ProtectedRoute>} />
+              <Route path="/admin/platform-subscriptions" element={<ProtectedRoute requiredRole="admin"><AdminCompanyPlatformSubscriptions /></ProtectedRoute>} />
+              <Route path="/admin/reach-analytics" element={<ProtectedRoute requiredRole="admin"><ReachAnalytics /></ProtectedRoute>} />
+              <Route path="/admin/landing-page" element={<ProtectedRoute requiredRole="admin"><LandingPageManager /></ProtectedRoute>} />
+              <Route path="/admin/industries" element={<ProtectedRoute requiredRole="admin"><IndustryManagement /></ProtectedRoute>} />
+              <Route path="/admin/pricing" element={<ProtectedRoute requiredRole="admin"><PricingManagement /></ProtectedRoute>} />
+              <Route path="/admin/subscriptions" element={<ProtectedRoute requiredRole="admin"><SubscriptionManagement /></ProtectedRoute>} />
+              <Route path="/admin/payments" element={<ProtectedRoute requiredRole="admin"><PaymentManagement /></ProtectedRoute>} />
+              <Route path="/admin/trial-settings" element={<ProtectedRoute requiredRole="admin"><TrialSettings /></ProtectedRoute>} />
+              <Route path="/admin/audit-log" element={<ProtectedRoute requiredRole="admin"><AuditLog /></ProtectedRoute>} />
+              <Route path="/admin/social-auth" element={<ProtectedRoute requiredRole="admin"><SocialAuthSettings /></ProtectedRoute>} />
+              <Route path="/admin/public-content" element={<ProtectedRoute requiredRole="admin"><PublicContentManager /></ProtectedRoute>} />
+              <Route path="/admin/api-management" element={<ProtectedRoute requiredRole="admin"><APIManagement /></ProtectedRoute>} />
+              <Route path="/admin/branches" element={<ProtectedRoute requiredRole="admin"><BranchManagement /></ProtectedRoute>} />
+              <Route path="/admin/permissions" element={<ProtectedRoute requiredRole="admin"><PermissionManagement /></ProtectedRoute>} />
+              
+              {/* Company routes */}
+              <Route path="/company/email-settings" element={<ProtectedRoute><CompanyEmailSettings /></ProtectedRoute>} />
+              <Route path="/company/audit-log" element={<ProtectedRoute><CompanyAuditLog /></ProtectedRoute>} />
+              <Route path="/company/platform-subscriptions" element={<ProtectedRoute><CompanyPlatformSubscriptions /></ProtectedRoute>} />
+              <Route path="/company/platform-settings" element={<ProtectedRoute><CompanyPlatformSettings /></ProtectedRoute>} />
+              <Route path="/company/api-management" element={<ProtectedRoute><CompanyAPIManagement /></ProtectedRoute>} />
+              <Route path="/tts-settings" element={<ProtectedRoute><TTSSettings /></ProtectedRoute>} />
+              
+              {/* AI Features */}
+              <Route path="/ai-studio" element={<ProtectedRoute><AIStudio /></ProtectedRoute>} />
+              <Route path="/social-inbox" element={<ProtectedRoute><SocialInbox /></ProtectedRoute>} />
+              <Route path="/social-intelligence" element={<ProtectedRoute><SocialIntelligence /></ProtectedRoute>} />
+              <Route path="/automation" element={<ProtectedRoute><Automation /></ProtectedRoute>} />
+              <Route path="/ai-analytics" element={<ProtectedRoute><AIAnalytics /></ProtectedRoute>} />
+              <Route path="/social-media-credentials" element={<ProtectedRoute><SocialMediaCredentials /></ProtectedRoute>} />
+              
+              {/* Enterprise Builder */}
+              <Route path="/module-builder" element={<ProtectedRoute><ModuleBuilder /></ProtectedRoute>} />
+              <Route path="/form-builder" element={<ProtectedRoute><FormBuilder /></ProtectedRoute>} />
+              <Route path="/workflow-builder" element={<ProtectedRoute><WorkflowBuilder /></ProtectedRoute>} />
+              <Route path="/reporting-dashboard" element={<ProtectedRoute><ReportingDashboard /></ProtectedRoute>} />
+              <Route path="/crm-roadmap" element={<ProtectedRoute><CRMFeatureStatus /></ProtectedRoute>} />
+              
+              {/* CRM */}
+              <Route path="/contacts" element={<ProtectedRoute><Contacts /></ProtectedRoute>} />
+              <Route path="/accounts" element={<ProtectedRoute><Accounts /></ProtectedRoute>} />
+              <Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
+              <Route path="/pipeline" element={<ProtectedRoute><SalesPipeline /></ProtectedRoute>} />
+              <Route path="/activities" element={<ProtectedRoute><Activities /></ProtectedRoute>} />
+              <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
+              <Route path="/quotes" element={<ProtectedRoute><Quotes /></ProtectedRoute>} />
+              <Route path="/invoices" element={<ProtectedRoute><Invoices /></ProtectedRoute>} />
+              <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+              <Route path="/email-marketing" element={<ProtectedRoute><EmailMarketing /></ProtectedRoute>} />
+              <Route path="/documents" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
+              <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
+              <Route path="/territory-management" element={<ProtectedRoute><TerritoryManagement /></ProtectedRoute>} />
+              <Route path="/customer-support" element={<ProtectedRoute><CustomerSupport /></ProtectedRoute>} />
+              <Route path="/call-center" element={<ProtectedRoute><CallCenter /></ProtectedRoute>} />
+              <Route path="/project-management" element={<ProtectedRoute><ProjectManagement /></ProtectedRoute>} />
+              <Route path="/contract-management" element={<ProtectedRoute><ContractManagement /></ProtectedRoute>} />
+              
+              <Route path="/social-accounts" element={<ProtectedRoute><SocialMediaCredentials /></ProtectedRoute>} />
+            </Route>
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

@@ -9,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, Image as ImageIcon, Copy, Check, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Layout } from '@/components/Layout';
 
 export default function AIStudio() {
   const { toast } = useToast();
@@ -117,8 +116,7 @@ export default function AIStudio() {
   });
 
   return (
-    <Layout>
-      <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -320,9 +318,8 @@ export default function AIStudio() {
                 </TabsContent>
               </Tabs>
             </CardContent>
-          </Card>
-        </div>
+        </Card>
       </div>
-    </Layout>
+    </div>
   );
 }

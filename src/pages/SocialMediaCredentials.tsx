@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, CheckCircle, XCircle, Link2, Unlink } from "lucide-react";
-import { Layout } from "@/components/Layout";
 
 const PLATFORMS = [
   { id: 'facebook', name: 'Facebook', color: 'bg-blue-500' },
@@ -74,8 +73,7 @@ export default function SocialMediaCredentials() {
   };
 
   return (
-    <Layout>
-      <div className="container mx-auto p-6 max-w-6xl">
+    <div className="container mx-auto p-6 max-w-6xl">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Social Media Credentials</h1>
           <p className="text-muted-foreground mt-2">
@@ -181,8 +179,7 @@ export default function SocialMediaCredentials() {
             <p>• <strong>TikTok:</strong> Register at developers.tiktok.com</p>
             <p>• <strong>Telegram:</strong> Create a bot using @BotFather</p>
           </CardContent>
-        </Card>
-      </div>
-    </Layout>
+      </Card>
+    </div>
   );
 }

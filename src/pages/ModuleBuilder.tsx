@@ -11,7 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Box, Edit, Trash2, Database, Settings, GripVertical } from "lucide-react";
-import { Layout } from "@/components/Layout";
 import { FieldEditor } from "@/components/FieldEditor";
 
 const ICON_OPTIONS = [
@@ -226,8 +225,7 @@ export default function ModuleBuilder() {
   };
 
   return (
-    <Layout>
-      <div className="container mx-auto p-6 max-w-7xl">
+    <div className="container mx-auto p-6 max-w-7xl">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -583,6 +581,5 @@ export default function ModuleBuilder() {
           />
         )}
       </div>
-    </Layout>
   );
 }

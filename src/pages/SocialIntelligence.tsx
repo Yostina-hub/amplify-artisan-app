@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Brain, TrendingUp, TrendingDown, Minus, Smile, Frown, Meh } from 'lucide-react';
-import { Layout } from '@/components/Layout';
 
 export default function SocialIntelligence() {
   // Fetch sentiment data
@@ -62,8 +61,7 @@ export default function SocialIntelligence() {
   };
 
   return (
-    <Layout>
-      <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -237,8 +235,7 @@ export default function SocialIntelligence() {
               ))}
             </Tabs>
           </CardContent>
-        </Card>
-      </div>
-    </Layout>
+      </Card>
+    </div>
   );
 }

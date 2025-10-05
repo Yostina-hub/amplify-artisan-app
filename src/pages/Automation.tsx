@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -99,8 +98,7 @@ export default function Automation() {
   });
 
   return (
-    <Layout>
-      <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
         <PageHelp
           title="Smart Automation"
           description="Automate repetitive tasks and workflows with intelligent triggers and actions. Set up conditional logic to streamline your business processes and save time."
@@ -300,9 +298,8 @@ export default function Automation() {
               <div className="text-center py-8 text-muted-foreground">No executions yet</div>
             )}
           </CardContent>
-        </Card>
-      </div>
-    </Layout>
+      </Card>
+    </div>
   );
 }
 
