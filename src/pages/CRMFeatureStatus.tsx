@@ -177,7 +177,7 @@ export default function CRMFeatureStatus() {
       console.log('Generating speech for:', text);
       
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
-        body: { text, voice: '9BWtsMINqrJLrRacOk9x' } // Aria voice
+        body: { text, voice: 'alloy' } // OpenAI voice
       });
 
       if (error) throw error;
