@@ -51,49 +51,27 @@ Deno.serve(async (req) => {
     const recentAdIds = recentImpressions?.map(i => i.ad_campaign_id) || []
 
     // Use AI to recommend ads based on user profile
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')
+    const GOOGLE_GEMINI_API_KEY = Deno.env.get('GOOGLE_GEMINI_API_KEY')
     
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GOOGLE_GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an ad recommendation system. Rank ads based on user interests and reach score. Return top ad IDs in order of relevance.'
-          },
-          {
-            role: 'user',
-            content: `User profile: ${JSON.stringify(reachScore || {})}. Available campaigns: ${JSON.stringify(campaigns?.map(c => ({ id: c.id, name: c.name, target_audience: c.target_audience })))}. Recently shown: ${JSON.stringify(recentAdIds)}. Recommend ${limit} ads.`
-          }
-        ],
-        tools: [
-          {
-            type: 'function',
-            function: {
-              name: 'recommend_ads',
-              description: 'Return recommended ad campaign IDs in order of relevance',
-              parameters: {
-                type: 'object',
-                properties: {
-                  recommended_ids: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'Array of ad campaign IDs'
-                  },
-                  reasoning: { type: 'string' }
-                },
-                required: ['recommended_ids'],
-                additionalProperties: false
-              }
-            }
-          }
-        ],
-        tool_choice: { type: 'function', function: { name: 'recommend_ads' } }
+        contents: [{
+          parts: [{
+            text: `You are an ad recommendation system. Rank ads based on user interests and reach score. Return top ad IDs in order of relevance as JSON: {"recommended_ids": ["id1", "id2"], "reasoning": "explanation"}
+
+User profile: ${JSON.stringify(reachScore || {})}
+Available campaigns: ${JSON.stringify(campaigns?.map(c => ({ id: c.id, name: c.name, target_audience: c.target_audience })))}
+Recently shown: ${JSON.stringify(recentAdIds)}
+Recommend ${limit} ads.`
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.5,
+        }
       })
     })
 
@@ -102,8 +80,16 @@ Deno.serve(async (req) => {
     }
 
     const aiData = await aiResponse.json()
-    const toolCall = aiData.choices[0]?.message?.tool_calls?.[0]
-    const result = JSON.parse(toolCall?.function?.arguments || '{}')
+    const resultText = aiData.candidates[0].content.parts[0].text
+    
+    // Parse JSON from response
+    let result
+    try {
+      const jsonMatch = resultText.match(/```json\n?([\s\S]*?)\n?```/) || resultText.match(/\{[\s\S]*\}/)
+      result = JSON.parse(jsonMatch ? jsonMatch[1] || jsonMatch[0] : resultText)
+    } catch {
+      result = { recommended_ids: [], reasoning: 'Failed to parse response' }
+    }
 
     // Get full campaign data for recommended IDs
     const recommendedCampaigns = campaigns?.filter(c => 

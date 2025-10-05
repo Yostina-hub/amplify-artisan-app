@@ -43,47 +43,25 @@ Deno.serve(async (req) => {
       recentPages: engagementData?.map(e => e.page_visited).slice(0, 10) || []
     }
 
-    // Call Lovable AI to analyze user behavior
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')
+    // Call Gemini API to analyze user behavior
+    const GOOGLE_GEMINI_API_KEY = Deno.env.get('GOOGLE_GEMINI_API_KEY')
     
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GOOGLE_GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert at analyzing user engagement patterns and calculating reach scores. Analyze the data and return a JSON with: reach_score (0-100), engagement_level (low/medium/high), and interests (array of strings).'
-          },
-          {
-            role: 'user',
-            content: `Analyze this user engagement data: ${JSON.stringify(analysisData)}`
-          }
-        ],
-        tools: [
-          {
-            type: 'function',
-            function: {
-              name: 'calculate_reach_score',
-              description: 'Calculate user reach score and engagement level',
-              parameters: {
-                type: 'object',
-                properties: {
-                  reach_score: { type: 'number', minimum: 0, maximum: 100 },
-                  engagement_level: { type: 'string', enum: ['low', 'medium', 'high'] },
-                  interests: { type: 'array', items: { type: 'string' } }
-                },
-                required: ['reach_score', 'engagement_level', 'interests'],
-                additionalProperties: false
-              }
-            }
-          }
-        ],
-        tool_choice: { type: 'function', function: { name: 'calculate_reach_score' } }
+        contents: [{
+          parts: [{
+            text: `You are an expert at analyzing user engagement patterns and calculating reach scores. Analyze the data and return a JSON with: reach_score (0-100), engagement_level (low/medium/high), and interests (array of strings).
+
+Analyze this user engagement data: ${JSON.stringify(analysisData)}`
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.5,
+        }
       })
     })
 
@@ -94,8 +72,20 @@ Deno.serve(async (req) => {
     }
 
     const aiData = await aiResponse.json()
-    const toolCall = aiData.choices[0]?.message?.tool_calls?.[0]
-    const result = JSON.parse(toolCall?.function?.arguments || '{}')
+    const resultText = aiData.candidates[0].content.parts[0].text
+    
+    // Parse JSON from response
+    let result
+    try {
+      const jsonMatch = resultText.match(/```json\n?([\s\S]*?)\n?```/) || resultText.match(/\{[\s\S]*\}/)
+      result = JSON.parse(jsonMatch ? jsonMatch[1] || jsonMatch[0] : resultText)
+    } catch {
+      result = {
+        reach_score: 50,
+        engagement_level: 'medium',
+        interests: []
+      }
+    }
 
     // Update or insert reach score
     const { error: upsertError } = await supabaseClient

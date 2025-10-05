@@ -19,7 +19,7 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY')!;
+    const geminiApiKey = Deno.env.get('GOOGLE_GEMINI_API_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const payload: RecommendationRequest = await req.json();
@@ -78,22 +78,17 @@ serve(async (req) => {
     }
 
     // Use AI to score and rank posts
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          {
-            role: 'system',
-            content: `You are an AI recommendation engine for social media content. Score posts based on user preferences and engagement patterns.`
-          },
-          {
-            role: 'user',
-            content: `Score these posts for this user based on their preferences:
+        contents: [{
+          parts: [{
+            text: `You are an AI recommendation engine for social media content. Score posts based on user preferences and engagement patterns.
+
+Score these posts for this user based on their preferences:
 
 User Preferences:
 ${JSON.stringify({
@@ -118,8 +113,11 @@ Return JSON array with top ${limit} recommendations:
     "confidence": 0-100
   }
 ]`
-          }
-        ]
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.5,
+        }
       })
     });
 
@@ -134,7 +132,16 @@ Return JSON array with top ${limit} recommendations:
     }
 
     const aiData = await aiResponse.json();
-    const recommendations = JSON.parse(aiData.choices[0].message.content);
+    const recommendationsText = aiData.candidates[0].content.parts[0].text;
+    
+    // Parse JSON from response
+    let recommendations;
+    try {
+      const jsonMatch = recommendationsText.match(/```json\n?([\s\S]*?)\n?```/) || recommendationsText.match(/\[[\s\S]*\]/);
+      recommendations = JSON.parse(jsonMatch ? jsonMatch[1] || jsonMatch[0] : recommendationsText);
+    } catch {
+      recommendations = [];
+    }
 
     // Store recommendations
     const expiresAt = new Date();

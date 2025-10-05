@@ -14,7 +14,7 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY')!;
+    const geminiApiKey = Deno.env.get('GOOGLE_GEMINI_API_KEY')!;
     
     const supabase = createClient(supabaseUrl, supabaseKey);
     
@@ -65,19 +65,20 @@ Respond ONLY with valid JSON in this exact format:
   "keywords": ["keyword1", "keyword2"]
 }`;
 
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Analyze this text: ${content}` }
-        ],
-        temperature: 0.3,
+        contents: [{
+          parts: [{
+            text: `${systemPrompt}\n\nAnalyze this text: ${content}`
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.3,
+        }
       }),
     });
 
@@ -88,7 +89,7 @@ Respond ONLY with valid JSON in this exact format:
     }
 
     const aiData = await aiResponse.json();
-    const analysisText = aiData.choices[0].message.content;
+    const analysisText = aiData.candidates[0].content.parts[0].text;
     
     // Parse JSON from AI response
     let analysis;

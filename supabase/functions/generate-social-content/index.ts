@@ -14,7 +14,7 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY')!;
+    const geminiApiKey = Deno.env.get('GOOGLE_GEMINI_API_KEY')!;
     
     const supabase = createClient(supabaseUrl, supabaseKey);
     
@@ -53,19 +53,20 @@ Tone: ${tone || 'professional'}
 Language: ${language}
 Include relevant hashtags and emojis where appropriate.`;
 
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.8,
+        contents: [{
+          parts: [{
+            text: `${systemPrompt}\n\n${prompt}`
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.8,
+        }
       }),
     });
 
@@ -76,38 +77,20 @@ Include relevant hashtags and emojis where appropriate.`;
     }
 
     const aiData = await aiResponse.json();
-    const generatedText = aiData.choices[0].message.content;
+    const generatedText = aiData.candidates[0].content.parts[0].text;
 
     // Extract hashtags from generated content
     const hashtagRegex = /#(\w+)/g;
     const hashtags = [...generatedText.matchAll(hashtagRegex)].map(match => match[1]);
 
     // Generate images if requested
-    let generatedImages = [];
+    let generatedImages: string[] = [];
     if (generateImages) {
       const imagePrompt = `Create a professional social media image for: ${prompt.substring(0, 200)}`;
       
-      const imageResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${lovableApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'google/gemini-2.5-flash-image-preview',
-          messages: [
-            { role: 'user', content: imagePrompt }
-          ],
-          modalities: ['image', 'text']
-        }),
-      });
-
-      if (imageResponse.ok) {
-        const imageData = await imageResponse.json();
-        if (imageData.choices?.[0]?.message?.images) {
-          generatedImages = imageData.choices[0].message.images.map((img: any) => img.image_url.url);
-        }
-      }
+      // Note: Image generation with Gemini requires Imagen model which needs separate setup
+      // Skipping image generation for now
+      console.log('Image generation not yet implemented with direct Gemini API');
     }
 
     // Save to database

@@ -19,7 +19,7 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY')!;
+    const geminiApiKey = Deno.env.get('GOOGLE_GEMINI_API_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const payload: AnalysisRequest = await req.json();
@@ -63,23 +63,17 @@ serve(async (req) => {
     };
 
     // Use AI to analyze patterns
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          {
-            role: 'system',
-            content: `You are an AI engagement analyst specializing in user behavior patterns similar to TikTok's algorithm. 
-Analyze user engagement data and provide actionable insights for content recommendations and optimal engagement times.`
-          },
-          {
-            role: 'user',
-            content: `Analyze this user's engagement patterns and provide recommendations:
+        contents: [{
+          parts: [{
+            text: `You are an AI engagement analyst specializing in user behavior patterns similar to TikTok's algorithm. Analyze user engagement data and provide actionable insights for content recommendations and optimal engagement times.
+
+Analyze this user's engagement patterns and provide recommendations:
 
 Engagement Summary:
 ${JSON.stringify(engagementSummary, null, 2)}
@@ -91,8 +85,11 @@ Provide your analysis in JSON format with these keys:
 - engagement_score: number 0-100 indicating overall engagement level
 - recommendations: array of actionable recommendations
 - content_strategy: string describing optimal content strategy for this user`
-          }
-        ]
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.5,
+        }
       })
     });
 
@@ -107,7 +104,23 @@ Provide your analysis in JSON format with these keys:
     }
 
     const aiData = await aiResponse.json();
-    const analysis = JSON.parse(aiData.choices[0].message.content);
+    const analysisText = aiData.candidates[0].content.parts[0].text;
+    
+    // Parse JSON from response
+    let analysis;
+    try {
+      const jsonMatch = analysisText.match(/```json\n?([\s\S]*?)\n?```/) || analysisText.match(/\{[\s\S]*\}/);
+      analysis = JSON.parse(jsonMatch ? jsonMatch[1] || jsonMatch[0] : analysisText);
+    } catch {
+      analysis = {
+        preferred_content_types: [],
+        preferred_topics: [],
+        optimal_engagement_times: [],
+        engagement_score: 50,
+        recommendations: [],
+        content_strategy: 'Standard content strategy'
+      };
+    }
 
     // Store or update user preferences
     const { error: upsertError } = await supabase

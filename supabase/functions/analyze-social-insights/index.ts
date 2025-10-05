@@ -43,60 +43,22 @@ Deno.serve(async (req) => {
       analysisType: analysisType || 'comprehensive'
     }
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')
+    const GOOGLE_GEMINI_API_KEY = Deno.env.get('GOOGLE_GEMINI_API_KEY')
     
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GOOGLE_GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          {
-            role: 'system',
-            content: `You are an expert social media analyst${platform && platform !== 'all' ? ` specializing in ${platform}` : ''}. Analyze the provided data and return structured insights as JSON with: overview (string), top_performers (array of {name, metric, value}), recommendations (array of strings), sentiment_summary (string), growth_opportunities (array of strings), risk_alerts (array of strings), platform_specific_tips (array of strings).`
-          },
-          {
-            role: 'user',
-            content: `Analyze this ${platform && platform !== 'all' ? platform : 'cross-platform'} social media data comprehensively:\n\nMetrics: ${JSON.stringify(analysisData.metrics.slice(0, 20))}\n\nInfluencers: ${JSON.stringify(analysisData.influencers.slice(0, 15))}\n\nMentions: ${JSON.stringify(analysisData.mentions.slice(0, 30))}\n\nKeywords: ${JSON.stringify(analysisData.keywords)}\n\nTrends: ${JSON.stringify(analysisData.trends.slice(0, 20))}\n\nProvide ${platform && platform !== 'all' ? platform + '-specific' : 'platform-specific'} insights and actionable recommendations.`
-          }
-        ],
-        tools: [
-          {
-            type: 'function',
-            function: {
-              name: 'provide_social_insights',
-              description: 'Provide comprehensive social media analysis insights',
-              parameters: {
-                type: 'object',
-                properties: {
-                  overview: { type: 'string' },
-                  top_performers: {
-                    type: 'array',
-                    items: {
-                      type: 'object',
-                      properties: {
-                        name: { type: 'string' },
-                        metric: { type: 'string' },
-                        value: { type: 'string' }
-                      }
-                    }
-                  },
-                  recommendations: { type: 'array', items: { type: 'string' } },
-                  sentiment_summary: { type: 'string' },
-                  growth_opportunities: { type: 'array', items: { type: 'string' } },
-                  risk_alerts: { type: 'array', items: { type: 'string' } },
-                  platform_specific_tips: { type: 'array', items: { type: 'string' } }
-                },
-                required: ['overview', 'top_performers', 'recommendations', 'sentiment_summary', 'growth_opportunities', 'risk_alerts', 'platform_specific_tips'],
-                additionalProperties: false
-              }
-            }
-          }
-        ],
-        tool_choice: { type: 'function', function: { name: 'provide_social_insights' } }
+        contents: [{
+          parts: [{
+            text: `You are an expert social media analyst${platform && platform !== 'all' ? ` specializing in ${platform}` : ''}. Analyze the provided data and return structured insights as JSON with: overview (string), top_performers (array of {name, metric, value}), recommendations (array of strings), sentiment_summary (string), growth_opportunities (array of strings), risk_alerts (array of strings), platform_specific_tips (array of strings).\n\nAnalyze this ${platform && platform !== 'all' ? platform : 'cross-platform'} social media data comprehensively:\n\nMetrics: ${JSON.stringify(analysisData.metrics.slice(0, 20))}\n\nInfluencers: ${JSON.stringify(analysisData.influencers.slice(0, 15))}\n\nMentions: ${JSON.stringify(analysisData.mentions.slice(0, 30))}\n\nKeywords: ${JSON.stringify(analysisData.keywords)}\n\nTrends: ${JSON.stringify(analysisData.trends.slice(0, 20))}\n\nProvide ${platform && platform !== 'all' ? platform + '-specific' : 'platform-specific'} insights and actionable recommendations.`
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+        }
       })
     })
 
@@ -107,8 +69,25 @@ Deno.serve(async (req) => {
     }
 
     const aiData = await aiResponse.json()
-    const toolCall = aiData.choices[0]?.message?.tool_calls?.[0]
-    const insights = JSON.parse(toolCall?.function?.arguments || '{}')
+    const insightsText = aiData.candidates[0].content.parts[0].text
+    
+    // Parse JSON from response
+    let insights
+    try {
+      const jsonMatch = insightsText.match(/```json\n?([\s\S]*?)\n?```/) || insightsText.match(/\{[\s\S]*\}/)
+      insights = JSON.parse(jsonMatch ? jsonMatch[1] || jsonMatch[0] : insightsText)
+    } catch {
+      // Fallback structure
+      insights = {
+        overview: 'Analysis completed',
+        top_performers: [],
+        recommendations: [],
+        sentiment_summary: 'Neutral',
+        growth_opportunities: [],
+        risk_alerts: [],
+        platform_specific_tips: []
+      }
+    }
 
     return new Response(
       JSON.stringify({ success: true, insights }),
