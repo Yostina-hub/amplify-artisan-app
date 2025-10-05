@@ -199,12 +199,14 @@ export default function CRMFeatureStatus() {
         
         await audio.play();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Speech error:', error);
       setIsSpeaking(false);
+      const msg = typeof error?.message === 'string' ? error.message : String(error);
+      const isQuota = msg.toLowerCase().includes('quota');
       toast({
         title: "Speech Error",
-        description: "Could not generate speech",
+        description: isQuota ? "Speech service quota exceeded. Please add credits or switch provider (e.g., ElevenLabs)." : "Could not generate speech",
         variant: "destructive"
       });
     }
@@ -255,21 +257,32 @@ export default function CRMFeatureStatus() {
       reader.readAsDataURL(audioBlob);
       
       reader.onloadend = async () => {
-        const base64Audio = (reader.result as string).split(',')[1];
-        
-        console.log('Transcribing audio...');
-        const { data, error } = await supabase.functions.invoke('transcribe-audio', {
-          body: { audio: base64Audio, language: 'am' }
-        });
-
-        if (error) throw error;
-
-        if (data?.text) {
-          const transcript = data.text;
-          setVoiceTranscript(transcript);
-          console.log('Transcription:', transcript);
+        try {
+          const base64Audio = (reader.result as string).split(',')[1];
           
-          await processVoiceQuery(transcript);
+          console.log('Transcribing audio...');
+          const { data, error } = await supabase.functions.invoke('transcribe-audio', {
+            body: { audio: base64Audio, language: 'am' }
+          });
+
+          if (error) throw error;
+
+          if (data?.text) {
+            const transcript = data.text;
+            setVoiceTranscript(transcript);
+            console.log('Transcription:', transcript);
+            
+            await processVoiceQuery(transcript);
+          }
+        } catch (err: any) {
+          console.error('Transcription invoke error:', err);
+          const msg = typeof err?.message === 'string' ? err.message : String(err);
+          const isQuota = msg.toLowerCase().includes('quota');
+          toast({
+            title: 'Transcription Error',
+            description: isQuota ? 'Speech service quota exceeded. Please add credits or switch provider.' : 'Could not transcribe audio',
+            variant: 'destructive'
+          });
         }
       };
     } catch (error) {
