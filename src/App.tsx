@@ -84,6 +84,7 @@ import ContractManagement from "./pages/ContractManagement";
 import TTSSettings from "./pages/TTSSettings";
 import BranchManagement from "./pages/admin/BranchManagement";
 import PermissionManagement from "./pages/admin/PermissionManagement";
+import CallCenterIntegrations from "./pages/admin/CallCenterIntegrations";
 
 const queryClient = new QueryClient();
 
@@ -143,6 +144,7 @@ const App = () => (
               <Route path="/admin/api-management" element={<ProtectedRoute requiredRole="admin"><APIManagement /></ProtectedRoute>} />
               <Route path="/admin/branches" element={<ProtectedRoute requiredRole="admin"><BranchManagement /></ProtectedRoute>} />
               <Route path="/admin/permissions" element={<ProtectedRoute requiredRole="admin"><PermissionManagement /></ProtectedRoute>} />
+              <Route path="/admin/call-center-integrations" element={<ProtectedRoute requiredRole="admin"><CallCenterIntegrations /></ProtectedRoute>} />
               
               {/* Company routes */}
               <Route path="/company/email-settings" element={<ProtectedRoute><CompanyEmailSettings /></ProtectedRoute>} />
@@ -150,6 +152,7 @@ const App = () => (
               <Route path="/company/platform-subscriptions" element={<ProtectedRoute><CompanyPlatformSubscriptions /></ProtectedRoute>} />
               <Route path="/company/platform-settings" element={<ProtectedRoute><CompanyPlatformSettings /></ProtectedRoute>} />
               <Route path="/company/api-management" element={<ProtectedRoute><CompanyAPIManagement /></ProtectedRoute>} />
+              <Route path="/company/call-center-integrations" element={<ProtectedRoute><CallCenterIntegrations /></ProtectedRoute>} />
               <Route path="/tts-settings" element={<ProtectedRoute><TTSSettings /></ProtectedRoute>} />
               
               {/* AI Features */}

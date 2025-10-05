@@ -84,6 +84,7 @@ const companyAdminItems = [
   { title: "Platform Subscriptions", url: "/company/platform-subscriptions", icon: Package },
   { title: "Platform API Settings", url: "/company/platform-settings", icon: Key },
   { title: "API Integrations", url: "/company/api-management", icon: Database },
+  { title: "Call Center Integrations", url: "/company/call-center-integrations", icon: Phone },
   { title: "TTS/STT Settings", url: "/tts-settings", icon: Volume2 },
   { title: "Audit Log", url: "/company/audit-log", icon: FileSearch },
 ];
@@ -112,6 +113,7 @@ const adminConfigItems = [
   { title: "Branch Management", url: "/admin/branches", icon: GitBranch },
   { title: "Permission Management", url: "/admin/permissions", icon: Shield },
   { title: "API Integrations", url: "/admin/api-management", icon: Database },
+  { title: "Call Center Integrations", url: "/admin/call-center-integrations", icon: Phone },
   { title: "Public Content", url: "/admin/public-content", icon: Layout },
   { title: "Email Settings", url: "/admin/email-settings", icon: Mail },
   { title: "Social Auth Settings", url: "/admin/social-auth", icon: Key },
