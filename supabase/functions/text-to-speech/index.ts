@@ -19,26 +19,35 @@ serve(async (req) => {
     }
 
     console.log('Generating speech for text:', text.substring(0, 50), '...');
-    console.log('Using voice:', voice || 'alloy');
+    console.log('Using voice:', voice || 'Aria');
 
-    const response = await fetch('https://api.openai.com/v1/audio/speech', {
+    const apiKey = Deno.env.get('ELEVENLABS_API_KEY');
+    if (!apiKey) {
+      throw new Error('ELEVENLABS_API_KEY is not configured');
+    }
+
+    // Use ElevenLabs API
+    const voiceId = voice || '9BWtsMINqrJLrRacOk9x'; // Default to Aria
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+        'xi-api-key': apiKey,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'tts-1',
-        input: text,
-        voice: voice || 'alloy',
-        response_format: 'mp3',
+        text: text,
+        model_id: 'eleven_multilingual_v2',
+        voice_settings: {
+          stability: 0.5,
+          similarity_boost: 0.75,
+        },
       }),
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      console.error('OpenAI TTS error:', error);
-      throw new Error(error.error?.message || 'Failed to generate speech');
+      const errorText = await response.text();
+      console.error('ElevenLabs TTS error:', response.status, errorText);
+      throw new Error(`Failed to generate speech: ${errorText}`);
     }
 
     const arrayBuffer = await response.arrayBuffer();
