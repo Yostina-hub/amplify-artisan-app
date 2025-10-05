@@ -41,13 +41,13 @@ export function Layout({ children }: LayoutProps) {
                   <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                     <User className="h-4 w-4 text-white" />
                   </div>
-                  <span className="hidden md:inline font-medium">{user?.email}</span>
+                  <span className="hidden md:inline font-medium max-w-[200px] truncate">{user?.email}</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">{user?.email}</p>
+                    <p className="text-sm font-medium truncate">{user?.email}</p>
                     <div className="flex gap-1 flex-wrap">
                       {roles.map((role) => (
                         <Badge key={role} variant="secondary" className="text-xs">
