@@ -20,6 +20,7 @@ import { ComponentTypeSelector } from "@/components/module-builder/ComponentType
 import { PermissionAssigner } from "@/components/module-builder/PermissionAssigner";
 import { BranchAccessControl } from "@/components/module-builder/BranchAccessControl";
 import { PageHelp } from "@/components/PageHelp";
+import { ColorPickerInput } from "@/components/ColorPickerInput";
 
 const ICON_OPTIONS = [
   'Box', 'Database', 'Folder', 'FileText', 'Users', 'ShoppingCart', 
@@ -51,6 +52,7 @@ export default function ModuleBuilder() {
     display_name: '',
     description: '',
     icon_name: 'Box',
+    color: '#3b82f6',
   });
 
   // Fetch modules
@@ -119,7 +121,7 @@ export default function ModuleBuilder() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['custom-modules'] });
       setIsCreating(false);
-      setNewModule({ name: '', display_name: '', description: '', icon_name: 'Box' });
+      setNewModule({ name: '', display_name: '', description: '', icon_name: 'Box', color: '#3b82f6' });
       setSelectedComponentTypes(['form', 'table']);
       setSelectedBranches([]);
       toast.success("Module created successfully with all components!");
@@ -347,23 +349,30 @@ export default function ModuleBuilder() {
                     rows={3}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="icon">Icon</Label>
-                  <Select
-                    value={newModule.icon_name}
-                    onValueChange={(value) => setNewModule({ ...newModule, icon_name: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ICON_OPTIONS.map((icon) => (
-                        <SelectItem key={icon} value={icon}>
-                          {icon}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="icon">Icon</Label>
+                    <Select
+                      value={newModule.icon_name}
+                      onValueChange={(value) => setNewModule({ ...newModule, icon_name: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ICON_OPTIONS.map((icon) => (
+                          <SelectItem key={icon} value={icon}>
+                            {icon}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <ColorPickerInput
+                    label="Module Color"
+                    value={newModule.color}
+                    onChange={(color) => setNewModule({ ...newModule, color })}
+                  />
                 </div>
               </TabsContent>
 
