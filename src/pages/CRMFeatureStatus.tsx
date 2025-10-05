@@ -170,14 +170,30 @@ export default function CRMFeatureStatus() {
 
   const currentReport = systemReports[currentReportIndex];
 
-  // Text-to-Speech using ElevenLabs
+  // Text-to-Speech via backend with client fallback
   const speakResponse = async (text: string) => {
+    // Browser TTS fallback
+    const speakWithWebAPI = () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        // Simple language hint: Amharic block detection
+        const isAmharic = /[\u1200-\u137F]/.test(text);
+        utterance.lang = isAmharic ? 'am-ET' : 'en-US';
+        utterance.onend = () => setIsSpeaking(false);
+        utterance.onerror = () => setIsSpeaking(false);
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utterance);
+        return true;
+      }
+      return false;
+    };
+
     try {
       setIsSpeaking(true);
       console.log('Generating speech for:', text);
       
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
-        body: { text, voice: 'alloy' } // OpenAI voice
+        body: { text, voice: 'alloy' } // OpenAI voice (backend falls back to ElevenLabs if needed)
       });
 
       if (error) throw error;
@@ -198,17 +214,29 @@ export default function CRMFeatureStatus() {
         audio.onerror = () => setIsSpeaking(false);
         
         await audio.play();
+      } else {
+        // No audio returned – try client fallback
+        const usedFallback = speakWithWebAPI();
+        if (!usedFallback) {
+          setIsSpeaking(false);
+          toast({ title: 'Speech Error', description: 'No audio returned', variant: 'destructive' });
+        }
       }
     } catch (error: any) {
       console.error('Speech error:', error);
-      setIsSpeaking(false);
       const msg = typeof error?.message === 'string' ? error.message : String(error);
-      const isQuota = msg.toLowerCase().includes('quota');
-      toast({
-        title: "Speech Error",
-        description: isQuota ? "Speech service quota exceeded. Please add credits or switch provider (e.g., ElevenLabs)." : "Could not generate speech",
-        variant: "destructive"
-      });
+      const isQuota = msg.toLowerCase().includes('quota') || msg.toLowerCase().includes('payment required');
+      const usedFallback = speakWithWebAPI();
+      if (!usedFallback) {
+        setIsSpeaking(false);
+        toast({
+          title: 'Speech Error',
+          description: isQuota ? 'Speech service quota exceeded. Please add credits or switch provider (e.g., ElevenLabs).' : 'Could not generate speech',
+          variant: 'destructive'
+        });
+      } else {
+        toast({ title: 'Using device voice', description: 'Cloud TTS unavailable; using browser voice temporarily.' });
+      }
     }
   };
 
