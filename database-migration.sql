@@ -1263,23 +1263,20 @@ CREATE POLICY "Agents can manage all contracts" ON public.influencer_contracts
 FOR ALL USING (public.has_role(auth.uid(), 'agent'));
 
 -- ============================================
--- 9. GRANT PERMISSIONS
+-- 9. GRANT PERMISSIONS (Self-Hosted)
 -- ============================================
 
 -- Grant usage on schema
-GRANT USAGE ON SCHEMA public TO postgres, anon, authenticated, service_role;
+GRANT USAGE ON SCHEMA public TO postgres;
 
--- Grant permissions on all tables
-GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, service_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO authenticated;
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO anon;
+-- Grant all permissions on all tables to postgres
+GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres;
 
 -- Grant permissions on all sequences
-GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres, service_role;
-GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO authenticated;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres;
 
 -- Grant execute on functions
-GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO postgres, anon, authenticated, service_role;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO postgres;
 
 -- ============================================
 -- DONE! SECURITY ENABLED
