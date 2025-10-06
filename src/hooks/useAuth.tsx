@@ -1,14 +1,21 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { apiClient } from '@/lib/api-client';
+import { supabase } from '@/integrations/supabase/client';
 
 type UserRole = 'admin' | 'agent' | 'user';
 
+interface User {
+  id: string;
+  email: string;
+  full_name?: string;
+  company_id?: string;
+  branch_id?: string;
+}
+
 interface AuthContextType {
   user: User | null;
-  session: Session | null;
+  session: { access_token: string } | null;
   loading: boolean;
   roles: UserRole[];
   rolesDetailed: { role: UserRole; company_id: string | null }[];
@@ -24,7 +31,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<{ access_token: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [roles, setRoles] = useState<UserRole[]>([]);
   const [rolesDetailed, setRolesDetailed] = useState<{ role: UserRole; company_id: string | null }[]>([]);
@@ -33,131 +40,133 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Fetch roles when user changes (defer to avoid deadlocks)
-        if (session?.user) {
-          setTimeout(() => {
-            fetchUserRoles(session.user!.id);
-          }, 0);
-        } else {
-          setRoles([]);
-          setLoading(false);
-        }
-      }
-    );
-
-    // Check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        await fetchUserRoles(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    const token = apiClient.getToken();
+    if (token) {
+      loadCurrentUser();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
-const fetchUserRoles = async (userId: string) => {
-  setLoading(true);
-  const { data, error } = await supabase
-    .from('user_roles')
-    .select('role, company_id')
-    .eq('user_id', userId);
-  
-  if (error) {
-    console.error('Error fetching roles:', error);
+  const loadCurrentUser = async () => {
+    setLoading(true);
+    const response = await apiClient.getCurrentUser();
+
+    if (response.data) {
+      setUser(response.data);
+      setSession({ access_token: apiClient.getToken()! });
+      await fetchUserRoles(response.data.id);
+    } else {
+      apiClient.setToken(null);
+      setUser(null);
+      setSession(null);
+      setLoading(false);
+    }
+  };
+
+  const fetchUserRoles = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('role, company_id')
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Error fetching roles:', error);
+      setRoles([]);
+      setRolesDetailed([]);
+      setIsSuperAdmin(false);
+      setIsCompanyAdmin(false);
+      setLoading(false);
+      return;
+    }
+
+    const detailed = (data || []).map(r => ({ role: r.role as UserRole, company_id: (r as any).company_id ?? null }));
+    const userRoles = detailed.map(r => r.role);
+    const superAdmin = detailed.some(r => r.role === 'admin' && (r.company_id === null || r.company_id === undefined));
+    const companyAdmin = detailed.some(r => r.role === 'admin' && r.company_id);
+
+    setRoles(userRoles);
+    setRolesDetailed(detailed);
+    setIsSuperAdmin(superAdmin);
+    setIsCompanyAdmin(companyAdmin);
+    setLoading(false);
+  };
+
+  const hasRole = (role: UserRole) => {
+    if (role === 'admin') {
+      return rolesDetailed.some(r => r.role === 'admin' && (r.company_id === null || r.company_id === undefined));
+    }
+    return roles.includes(role);
+  };
+
+  const signUp = async (email: string, password: string, fullName: string) => {
+    const response = await apiClient.register(email, password, fullName);
+
+    if (response.error) {
+      throw new Error(response.error);
+    }
+
+    if (response.data) {
+      apiClient.setToken(response.data.access_token);
+      await loadCurrentUser();
+
+      toast({
+        title: "Account created!",
+        description: "You can now use your credentials.",
+      });
+    }
+  };
+
+  const signIn = async (email: string, password: string) => {
+    const response = await apiClient.login(email, password);
+
+    if (response.error) {
+      throw new Error(response.error);
+    }
+
+    if (response.data) {
+      apiClient.setToken(response.data.access_token);
+      await loadCurrentUser();
+
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully signed in.",
+      });
+    }
+  };
+
+  const signOut = async () => {
+    await apiClient.logout();
+    setUser(null);
+    setSession(null);
     setRoles([]);
     setRolesDetailed([]);
     setIsSuperAdmin(false);
     setIsCompanyAdmin(false);
-    setLoading(false);
-    return;
-  }
-  
-  const detailed = (data || []).map(r => ({ role: r.role as UserRole, company_id: (r as any).company_id ?? null }));
-  const userRoles = detailed.map(r => r.role);
-  const superAdmin = detailed.some(r => r.role === 'admin' && (r.company_id === null || r.company_id === undefined));
-  const companyAdmin = detailed.some(r => r.role === 'admin' && r.company_id);
 
-  console.log('User roles loaded:', userRoles);
-  setRoles(userRoles);
-  setRolesDetailed(detailed);
-  setIsSuperAdmin(superAdmin);
-  setIsCompanyAdmin(companyAdmin);
-  setLoading(false);
-};
-
-const hasRole = (role: UserRole) => {
-  if (role === 'admin') {
-    return rolesDetailed.some(r => r.role === 'admin' && (r.company_id === null || r.company_id === undefined));
-  }
-  return roles.includes(role);
-};
-
-  const signUp = async (email: string, password: string, fullName: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          full_name: fullName,
-        }
-      }
-    });
-
-    if (error) throw error;
-    
     toast({
-      title: "Account created!",
-      description: "You can now sign in with your credentials.",
+      title: "Signed out",
+      description: "You have been successfully signed out.",
     });
   };
 
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) throw error;
-    
-    toast({
-      title: "Welcome back!",
-      description: "You have successfully signed in.",
-    });
-  };
-
-const signOut = async () => {
-  const { error } = await supabase.auth.signOut();
-  if (error) throw error;
-  
-  setRoles([]);
-  setRolesDetailed([]);
-  setIsSuperAdmin(false);
-  setIsCompanyAdmin(false);
-  toast({
-    title: "Signed out",
-    description: "You have been successfully signed out.",
-  });
-};
-
-return (
-  <AuthContext.Provider value={{ user, session, loading, roles, rolesDetailed, isSuperAdmin, isCompanyAdmin, hasRole, signUp, signIn, signOut }}>
-    {children}
-  </AuthContext.Provider>
-);
+  return (
+    <AuthContext.Provider value={{
+      user,
+      session,
+      loading,
+      roles,
+      rolesDetailed,
+      isSuperAdmin,
+      isCompanyAdmin,
+      hasRole,
+      signUp,
+      signIn,
+      signOut
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {
