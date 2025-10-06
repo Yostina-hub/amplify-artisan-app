@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Edit, Trash2, User, Mail, Phone, Building2, Users, Sparkles } from "lucide-react";
+import { Plus, Edit, Trash2, User, Mail, Phone, Building2, Users, Sparkles, Download, Upload } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { PageHelp } from "@/components/PageHelp";
 import { useBranches } from "@/hooks/useBranches";
@@ -210,6 +210,109 @@ export default function Contacts() {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
+  const exportToCSV = () => {
+    if (!contacts || contacts.length === 0) {
+      toast.error("No contacts to export");
+      return;
+    }
+
+    const headers = ["First Name", "Last Name", "Email", "Phone", "Mobile", "Title", "Department", "Account", "Lead Source", "Status"];
+    const csvData = contacts.map(contact => [
+      contact.first_name,
+      contact.last_name,
+      contact.email || "",
+      contact.phone || "",
+      contact.mobile || "",
+      contact.title || "",
+      contact.department || "",
+      contact.accounts?.name || "",
+      contact.lead_source || "",
+      contact.status
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...csvData.map(row => row.map(cell => `"${cell}"`).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `contacts_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Contacts exported successfully");
+  };
+
+  const handleImportCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const text = e.target?.result as string;
+        const lines = text.split("\n").filter(line => line.trim());
+        
+        if (lines.length < 2) {
+          toast.error("CSV file is empty or invalid");
+          return;
+        }
+
+        const headers = lines[0].split(",").map(h => h.trim().replace(/"/g, ""));
+        const data = lines.slice(1).map(line => {
+          const values = line.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g)?.map(v => v.trim().replace(/^"|"$/g, "")) || [];
+          return {
+            first_name: values[0] || "",
+            last_name: values[1] || "",
+            email: values[2] || "",
+            phone: values[3] || "",
+            mobile: values[4] || "",
+            title: values[5] || "",
+            department: values[6] || "",
+            lead_source: values[8] || "",
+            status: values[9] || "active",
+          };
+        });
+
+        const { data: profile } = await supabase.from("profiles").select("company_id").single();
+        const { data: user } = await supabase.auth.getUser();
+        
+        let successCount = 0;
+        let errorCount = 0;
+
+        for (const contact of data) {
+          if (!contact.first_name || !contact.last_name) {
+            errorCount++;
+            continue;
+          }
+
+          const { error } = await supabase.from("contacts").insert({
+            ...contact,
+            company_id: profile?.company_id,
+            created_by: user.user?.id,
+          });
+
+          if (error) {
+            errorCount++;
+          } else {
+            successCount++;
+          }
+        }
+
+        queryClient.invalidateQueries({ queryKey: ["contacts"] });
+        toast.success(`Imported ${successCount} contacts${errorCount > 0 ? `, ${errorCount} failed` : ""}`);
+      } catch (error) {
+        toast.error("Failed to import CSV file");
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = "";
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6 animate-fade-in">
       <PageHelp
@@ -247,14 +350,26 @@ export default function Contacts() {
               Manage your customer relationships and contact database
             </p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={openCreateDialog} size="lg" className="shadow-lg hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-r from-accent to-primary animate-glow-pulse">
-                <Plus className="mr-2 h-5 w-5" />
-                New Contact
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto backdrop-blur-xl bg-card/95">
+          <div className="flex gap-3">
+            <Button onClick={exportToCSV} size="lg" variant="outline" className="shadow-lg hover:shadow-xl transition-all hover:scale-105">
+              <Download className="mr-2 h-5 w-5" />
+              Export CSV
+            </Button>
+            <Button asChild size="lg" variant="outline" className="shadow-lg hover:shadow-xl transition-all hover:scale-105">
+              <label className="cursor-pointer flex items-center">
+                <Upload className="mr-2 h-5 w-5" />
+                Import CSV
+                <input type="file" accept=".csv" onChange={handleImportCSV} className="hidden" />
+              </label>
+            </Button>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={openCreateDialog} size="lg" className="shadow-lg hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-r from-accent to-primary animate-glow-pulse">
+                  <Plus className="mr-2 h-5 w-5" />
+                  New Contact
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto backdrop-blur-xl bg-card/95">
               <DialogHeader>
                 <DialogTitle className="text-2xl">{editingContact ? "Edit" : "Create"} Contact</DialogTitle>
               </DialogHeader>
@@ -380,6 +495,7 @@ export default function Contacts() {
           </Dialog>
         </div>
       </div>
+    </div>
 
       {/* Enhanced Stats */}
       <div className="grid gap-6 md:grid-cols-4">

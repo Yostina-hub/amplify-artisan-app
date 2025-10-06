@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Plus, Edit, Trash2, UserPlus, TrendingUp, CheckCircle2, Sparkles } from "lucide-react";
+import { Plus, Edit, Trash2, UserPlus, TrendingUp, CheckCircle2, Sparkles, Download, Upload } from "lucide-react";
 import { PageHelp } from "@/components/PageHelp";
 import { useBranches } from "@/hooks/useBranches";
 
@@ -206,6 +206,110 @@ export default function Leads() {
     return colors[status] || "default";
   };
 
+  const exportToCSV = () => {
+    if (!leads || leads.length === 0) {
+      toast.error("No leads to export");
+      return;
+    }
+
+    const headers = ["First Name", "Last Name", "Email", "Phone", "Company", "Title", "Lead Source", "Status", "Score", "Description"];
+    const csvData = leads.map(lead => [
+      lead.first_name,
+      lead.last_name,
+      lead.email || "",
+      lead.phone || "",
+      lead.company || "",
+      lead.title || "",
+      lead.lead_source || "",
+      lead.lead_status,
+      lead.lead_score || 0,
+      lead.description || ""
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...csvData.map(row => row.map(cell => `"${cell}"`).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `leads_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Leads exported successfully");
+  };
+
+  const handleImportCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const text = e.target?.result as string;
+        const lines = text.split("\n").filter(line => line.trim());
+        
+        if (lines.length < 2) {
+          toast.error("CSV file is empty or invalid");
+          return;
+        }
+
+        const headers = lines[0].split(",").map(h => h.trim().replace(/"/g, ""));
+        const data = lines.slice(1).map(line => {
+          const values = line.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g)?.map(v => v.trim().replace(/^"|"$/g, "")) || [];
+          return {
+            first_name: values[0] || "",
+            last_name: values[1] || "",
+            email: values[2] || "",
+            phone: values[3] || "",
+            company: values[4] || "",
+            title: values[5] || "",
+            lead_source: values[6] || "",
+            lead_status: values[7] || "new",
+            lead_score: parseInt(values[8]) || 0,
+            description: values[9] || "",
+          };
+        });
+
+        const { data: profile } = await supabase.from("profiles").select("company_id").single();
+        const { data: user } = await supabase.auth.getUser();
+        
+        let successCount = 0;
+        let errorCount = 0;
+
+        for (const lead of data) {
+          if (!lead.first_name || !lead.last_name) {
+            errorCount++;
+            continue;
+          }
+
+          const { error } = await supabase.from("leads").insert({
+            ...lead,
+            company_id: profile?.company_id,
+            created_by: user.user?.id,
+          });
+
+          if (error) {
+            errorCount++;
+          } else {
+            successCount++;
+          }
+        }
+
+        queryClient.invalidateQueries({ queryKey: ["leads"] });
+        toast.success(`Imported ${successCount} leads${errorCount > 0 ? `, ${errorCount} failed` : ""}`);
+      } catch (error) {
+        toast.error("Failed to import CSV file");
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = "";
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6 animate-fade-in">
       <PageHelp
@@ -238,14 +342,26 @@ export default function Leads() {
               Manage and qualify your leads with intelligent tracking
             </p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={openCreateDialog} size="lg" className="shadow-lg hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-r from-primary to-accent animate-glow-pulse">
-                <Plus className="mr-2 h-5 w-5" />
-                New Lead
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto backdrop-blur-xl bg-card/95">
+          <div className="flex gap-3">
+            <Button onClick={exportToCSV} size="lg" variant="outline" className="shadow-lg hover:shadow-xl transition-all hover:scale-105">
+              <Download className="mr-2 h-5 w-5" />
+              Export CSV
+            </Button>
+            <Button asChild size="lg" variant="outline" className="shadow-lg hover:shadow-xl transition-all hover:scale-105">
+              <label className="cursor-pointer flex items-center">
+                <Upload className="mr-2 h-5 w-5" />
+                Import CSV
+                <input type="file" accept=".csv" onChange={handleImportCSV} className="hidden" />
+              </label>
+            </Button>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={openCreateDialog} size="lg" className="shadow-lg hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-r from-primary to-accent animate-glow-pulse">
+                  <Plus className="mr-2 h-5 w-5" />
+                  New Lead
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto backdrop-blur-xl bg-card/95">
               <DialogHeader>
                 <DialogTitle className="text-2xl">{editingLead ? "Edit" : "Create"} Lead</DialogTitle>
               </DialogHeader>
@@ -367,6 +483,7 @@ export default function Leads() {
           </Dialog>
         </div>
       </div>
+    </div>
 
       {/* Stats Grid with Glassmorphic Cards */}
       <div className="grid gap-4 md:grid-cols-4">
