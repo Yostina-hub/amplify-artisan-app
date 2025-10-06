@@ -10,6 +10,25 @@ import { CompaniesModule } from './companies/companies.module';
 import { BranchesModule } from './branches/branches.module';
 import { LeadsModule } from './leads/leads.module';
 import { ContactsModule } from './contacts/contacts.module';
+import { AccountsModule } from './accounts/accounts.module';
+import { ProductsModule } from './products/products.module';
+import { InvoicesModule } from './invoices/invoices.module';
+import { QuotesModule } from './quotes/quotes.module';
+import { DealsModule } from './deals/deals.module';
+import { ProjectsModule } from './projects/projects.module';
+import { ContractsModule } from './contracts/contracts.module';
+import { DocumentsModule } from './documents/documents.module';
+import { FormsModule } from './forms/forms.module';
+import { TicketsModule } from './tickets/tickets.module';
+import { CallReportsModule } from './call-reports/call-reports.module';
+import { CampaignsModule } from './campaigns/campaigns.module';
+import { InfluencersModule } from './influencers/influencers.module';
+import { BrandMentionsModule } from './brand-mentions/brand-mentions.module';
+import { SocialMessagesModule } from './social-messages/social-messages.module';
+import { TerritoriesModule } from './territories/territories.module';
+import { AgentsModule } from './agents/agents.module';
+import { ReportsModule } from './reports/reports.module';
+import { WorkflowsModule } from './workflows/workflows.module';
 import { SocialModule } from './social/social.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { PaymentsModule } from './payments/payments.module';
@@ -43,6 +62,25 @@ import { ActivitiesModule } from './activities/activities.module';
     BranchesModule,
     LeadsModule,
     ContactsModule,
+    AccountsModule,
+    ProductsModule,
+    InvoicesModule,
+    QuotesModule,
+    DealsModule,
+    ProjectsModule,
+    ContractsModule,
+    DocumentsModule,
+    FormsModule,
+    TicketsModule,
+    CallReportsModule,
+    CampaignsModule,
+    InfluencersModule,
+    BrandMentionsModule,
+    SocialMessagesModule,
+    TerritoriesModule,
+    AgentsModule,
+    ReportsModule,
+    WorkflowsModule,
     SocialModule,
     AnalyticsModule,
     PaymentsModule,
