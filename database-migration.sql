@@ -1001,7 +1001,7 @@ CREATE POLICY "Users can insert comments on their accounts" ON public.social_med
 FOR INSERT WITH CHECK (
   EXISTS (
     SELECT 1 FROM public.social_media_accounts
-    WHERE id = account_id AND user_id::text = auth.uid()::text
+    WHERE id = account_id AND user_id = auth.uid()
   )
 );
 
@@ -1009,7 +1009,7 @@ CREATE POLICY "Users can update their account comments" ON public.social_media_c
 FOR UPDATE USING (
   EXISTS (
     SELECT 1 FROM public.social_media_accounts
-    WHERE id = account_id AND user_id::text = auth.uid()::text
+    WHERE id = account_id AND user_id = auth.uid()
   )
 );
 
@@ -1017,7 +1017,7 @@ CREATE POLICY "Users can delete comments on their accounts" ON public.social_med
 FOR DELETE USING (
   EXISTS (
     SELECT 1 FROM public.social_media_accounts
-    WHERE id = account_id AND user_id::text = auth.uid()::text
+    WHERE id = account_id AND user_id = auth.uid()
   )
 );
 
