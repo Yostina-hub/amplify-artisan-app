@@ -1100,7 +1100,7 @@ FOR ALL USING (
   EXISTS (
     SELECT 1 FROM public.user_roles
     WHERE user_id = auth.uid() 
-    AND role = 'admin' 
+    AND role = 'admin'::public.app_role 
     AND company_id = public.get_user_company_id(auth.uid())
   )
 );
