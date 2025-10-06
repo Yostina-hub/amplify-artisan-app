@@ -94,9 +94,26 @@ async function runMigration() {
     
   } catch (error) {
     console.error('❌ Migration failed:', error.message);
+    // Extra diagnostics to pinpoint failing SQL
+    try {
+      if (error && error.position) {
+        const pos = parseInt(error.position, 10);
+        const contextRadius = 180;
+        const start = Math.max(0, pos - contextRadius);
+        const end = Math.min(migrationSQL.length, pos + contextRadius);
+        const context = migrationSQL.slice(start, end);
+        console.error('\n🔍 Error position:', error.position);
+        console.error('📍 SQL context around error (±', contextRadius, 'chars):\n');
+        console.error(context);
+      }
+    } catch (_) {
+      // ignore diagnostics errors
+    }
     console.error('');
     console.error('💡 If tables already exist, this is expected.');
     console.error('   The database might already be migrated.');
+    console.error('');
+    if (error && error.stack) console.error(error.stack);
     process.exit(1);
   } finally {
     await client.end();
