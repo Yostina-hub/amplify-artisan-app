@@ -13,14 +13,18 @@ import { toast } from "sonner";
 import { Plus, Edit, Trash2, User, Mail, Phone, Building2, Users, Sparkles, Download, Upload } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { PageHelp } from "@/components/PageHelp";
-import { useBranches } from "@/hooks/useBranches";
 import { ClickToCall } from "@/components/ClickToCall";
 
 export default function Contacts() {
-  const { accessibleBranches } = useBranches();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [exportFilters, setExportFilters] = useState({
+    dateFrom: "",
+    dateTo: "",
+    status: "",
+  });
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -34,34 +38,32 @@ export default function Contacts() {
     status: "active",
   });
   const queryClient = useQueryClient();
+  const itemsPerPage = 20;
 
-  const { data: contacts } = useQuery({
-    queryKey: ["contacts", searchQuery, accessibleBranches],
+  const { data: contactsData } = useQuery({
+    queryKey: ["contacts", searchQuery, currentPage],
     queryFn: async () => {
-      const { data: profile } = await supabase.from("profiles").select("branch_id").single();
+      const { data: profile } = await supabase.from("profiles").select("company_id").single();
       
       let query = supabase
         .from("contacts")
-        .select("*, accounts(name)")
-        .order("created_at", { ascending: false });
-
-      // Apply branch filtering if user has branch restrictions
-      if (accessibleBranches.length > 0 && profile?.branch_id) {
-        const branchIds = accessibleBranches.map(b => b.id);
-        // Filter by branches accessible to the user
-        query = query.in('company_id', [profile.branch_id]);
-      }
+        .select("*, accounts(name)", { count: "exact" })
+        .eq("company_id", profile?.company_id)
+        .order("created_at", { ascending: false })
+        .range((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage - 1);
 
       if (searchQuery) {
         query = query.or(`first_name.ilike.%${searchQuery}%,last_name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`);
       }
 
-      const { data, error } = await query;
+      const { data, error, count } = await query;
       if (error) throw error;
-      return data;
+      return { data, count };
     },
-    enabled: accessibleBranches !== undefined,
   });
+
+  const contacts = contactsData?.data || [];
+  const totalPages = Math.ceil((contactsData?.count || 0) / itemsPerPage);
 
   const { data: accounts } = useQuery({
     queryKey: ["accounts"],
@@ -78,7 +80,6 @@ export default function Contacts() {
 
   const createContactMutation = useMutation({
     mutationFn: async (data: any) => {
-      // Check for duplicate email
       if (data.email) {
         const { data: existingContact } = await supabase
           .from("contacts")
@@ -91,7 +92,6 @@ export default function Contacts() {
         }
       }
 
-      // Validate account exists if provided
       if (data.account_id) {
         const { data: account } = await supabase
           .from("accounts")
@@ -211,41 +211,67 @@ export default function Contacts() {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
-  const exportToCSV = () => {
-    if (!contacts || contacts.length === 0) {
-      toast.error("No contacts to export");
-      return;
+  const exportToCSV = async () => {
+    try {
+      const { data: profile } = await supabase.from("profiles").select("company_id").single();
+      
+      let query = supabase
+        .from("contacts")
+        .select("*, accounts(name)")
+        .eq("company_id", profile?.company_id)
+        .order("created_at", { ascending: false });
+
+      if (exportFilters.dateFrom) {
+        query = query.gte("created_at", exportFilters.dateFrom);
+      }
+      if (exportFilters.dateTo) {
+        query = query.lte("created_at", exportFilters.dateTo);
+      }
+      if (exportFilters.status) {
+        query = query.eq("status", exportFilters.status);
+      }
+
+      const { data: exportData, error } = await query;
+      if (error) throw error;
+
+      if (!exportData || exportData.length === 0) {
+        toast.error("No contacts to export");
+        return;
+      }
+
+      const headers = ["First Name", "Last Name", "Email", "Phone", "Mobile", "Title", "Department", "Account", "Lead Source", "Status", "Created At"];
+      const csvData = exportData.map(contact => [
+        contact.first_name,
+        contact.last_name,
+        contact.email || "",
+        contact.phone || "",
+        contact.mobile || "",
+        contact.title || "",
+        contact.department || "",
+        contact.accounts?.name || "",
+        contact.lead_source || "",
+        contact.status,
+        new Date(contact.created_at).toLocaleDateString()
+      ]);
+
+      const csvContent = [
+        headers.join(","),
+        ...csvData.map(row => row.map(cell => `"${cell}"`).join(","))
+      ].join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `contacts_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success(`Exported ${exportData.length} contacts successfully`);
+    } catch (error) {
+      toast.error("Failed to export contacts");
     }
-
-    const headers = ["First Name", "Last Name", "Email", "Phone", "Mobile", "Title", "Department", "Account", "Lead Source", "Status"];
-    const csvData = contacts.map(contact => [
-      contact.first_name,
-      contact.last_name,
-      contact.email || "",
-      contact.phone || "",
-      contact.mobile || "",
-      contact.title || "",
-      contact.department || "",
-      contact.accounts?.name || "",
-      contact.lead_source || "",
-      contact.status
-    ]);
-
-    const csvContent = [
-      headers.join(","),
-      ...csvData.map(row => row.map(cell => `"${cell}"`).join(","))
-    ].join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `contacts_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success("Contacts exported successfully");
   };
 
   const handleImportCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -351,26 +377,14 @@ export default function Contacts() {
               Manage your customer relationships and contact database
             </p>
           </div>
-          <div className="flex gap-3">
-            <Button onClick={exportToCSV} size="lg" variant="outline" className="shadow-lg hover:shadow-xl transition-all hover:scale-105">
-              <Download className="mr-2 h-5 w-5" />
-              Export CSV
-            </Button>
-            <Button asChild size="lg" variant="outline" className="shadow-lg hover:shadow-xl transition-all hover:scale-105">
-              <label className="cursor-pointer flex items-center">
-                <Upload className="mr-2 h-5 w-5" />
-                Import CSV
-                <input type="file" accept=".csv" onChange={handleImportCSV} className="hidden" />
-              </label>
-            </Button>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button onClick={openCreateDialog} size="lg" className="shadow-lg hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-r from-accent to-primary animate-glow-pulse">
-                  <Plus className="mr-2 h-5 w-5" />
-                  New Contact
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto backdrop-blur-xl bg-card/95">
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={openCreateDialog} size="lg" className="shadow-lg hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-r from-accent to-primary animate-glow-pulse">
+                <Plus className="mr-2 h-5 w-5" />
+                New Contact
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto backdrop-blur-xl bg-card/95">
               <DialogHeader>
                 <DialogTitle className="text-2xl">{editingContact ? "Edit" : "Create"} Contact</DialogTitle>
               </DialogHeader>
@@ -496,183 +510,251 @@ export default function Contacts() {
           </Dialog>
         </div>
       </div>
-    </div>
 
-      {/* Enhanced Stats */}
-      <div className="grid gap-6 md:grid-cols-4">
-        <Card className="relative overflow-hidden group animate-slide-up" style={{ animationDelay: "100ms" }}>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-accent/20 to-transparent rounded-full blur-3xl animate-glow-pulse" />
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-accent/10 to-primary/5 group-hover:scale-110 transition-transform">
-                <User className="h-4 w-4 text-accent" />
+      {/* Action Bar with Export Filters */}
+      <Card className="backdrop-blur-sm bg-card/50 border-primary/10">
+        <CardContent className="pt-6">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <div className="flex gap-3">
+                <Button onClick={exportToCSV} size="lg" variant="outline" className="shadow-lg hover:shadow-xl transition-all hover:scale-105">
+                  <Download className="mr-2 h-5 w-5" />
+                  Export CSV
+                </Button>
+                <Button asChild size="lg" variant="outline" className="shadow-lg hover:shadow-xl transition-all hover:scale-105">
+                  <label className="cursor-pointer flex items-center">
+                    <Upload className="mr-2 h-5 w-5" />
+                    Import CSV
+                    <input type="file" accept=".csv" onChange={handleImportCSV} className="hidden" />
+                  </label>
+                </Button>
               </div>
-              Total Contacts
-            </CardTitle>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <Label>Date From</Label>
+                <Input
+                  type="date"
+                  value={exportFilters.dateFrom}
+                  onChange={(e) => setExportFilters({ ...exportFilters, dateFrom: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Date To</Label>
+                <Input
+                  type="date"
+                  value={exportFilters.dateTo}
+                  onChange={(e) => setExportFilters({ ...exportFilters, dateTo: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Status Filter</Label>
+                <Select value={exportFilters.status} onValueChange={(value) => setExportFilters({ ...exportFilters, status: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All statuses" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All statuses</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-end">
+                <Button 
+                  onClick={() => setExportFilters({ dateFrom: "", dateTo: "", status: "" })} 
+                  variant="outline"
+                  className="w-full"
+                >
+                  Clear Filters
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Summary Cards */}
+      <div className="grid gap-4 md:grid-cols-3 animate-slide-up" style={{ animationDelay: "200ms" }}>
+        <Card className="backdrop-blur-sm bg-card/50 hover:bg-card/80 transition-all hover:scale-105 hover:shadow-xl border-primary/10">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Total Contacts</CardTitle>
+            <User className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
-              {contacts?.length || 0}
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">In database</p>
+            <div className="text-3xl font-bold text-primary">{contactsData?.count || 0}</div>
           </CardContent>
         </Card>
 
-        <Card className="relative overflow-hidden group animate-slide-up" style={{ animationDelay: "200ms" }}>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/20 to-transparent rounded-full blur-3xl animate-glow-pulse" style={{ animationDelay: "500ms" }} />
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-primary/10 to-accent/5 group-hover:scale-110 transition-transform">
-                <Mail className="h-4 w-4 text-primary" />
-              </div>
-              With Email
-            </CardTitle>
+        <Card className="backdrop-blur-sm bg-card/50 hover:bg-card/80 transition-all hover:scale-105 hover:shadow-xl border-accent/10">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Active Contacts</CardTitle>
+            <Sparkles className="h-4 w-4 text-accent" />
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-primary">
-              {contacts?.filter(c => c.email).length || 0}
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">Reachable via email</p>
+            <div className="text-3xl font-bold text-accent">{contacts.filter(c => c.status === "active").length}</div>
           </CardContent>
         </Card>
 
-        <Card className="relative overflow-hidden group animate-slide-up" style={{ animationDelay: "300ms" }}>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-success/20 to-transparent rounded-full blur-3xl animate-glow-pulse" style={{ animationDelay: "1s" }} />
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-success/10 to-accent/5 group-hover:scale-110 transition-transform">
-                <Phone className="h-4 w-4 text-success" />
-              </div>
-              With Phone
-            </CardTitle>
+        <Card className="backdrop-blur-sm bg-card/50 hover:bg-card/80 transition-all hover:scale-105 hover:shadow-xl border-success/10">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">With Accounts</CardTitle>
+            <Building2 className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-success">
-              {contacts?.filter(c => c.phone || c.mobile).length || 0}
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">Call-ready contacts</p>
-          </CardContent>
-        </Card>
-
-        <Card className="relative overflow-hidden group animate-slide-up" style={{ animationDelay: "400ms" }}>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-accent/20 via-primary/20 to-success/20 rounded-full blur-3xl animate-glow-pulse" style={{ animationDelay: "1.5s" }} />
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-accent/10 via-primary/5 to-success/5 group-hover:scale-110 transition-transform">
-                <Building2 className="h-4 w-4 text-accent" />
-              </div>
-              With Accounts
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold bg-gradient-to-r from-accent via-primary to-success bg-clip-text text-transparent">
-              {contacts?.filter(c => c.account_id).length || 0}
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">Linked to accounts</p>
+            <div className="text-3xl font-bold text-success">{contacts.filter(c => c.account_id).length}</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Enhanced Table */}
-      <Card className="animate-slide-up" style={{ animationDelay: "500ms" }}>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-2xl flex items-center gap-2">
-                <Sparkles className="h-6 w-6 text-accent" />
-                All Contacts
-              </CardTitle>
-              <CardDescription>Search and manage your contact database</CardDescription>
-            </div>
-            <div className="relative">
-              <Input
-                placeholder="Search contacts..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="max-w-sm pl-10 backdrop-blur-sm bg-background/50"
-              />
-              <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            </div>
+      {/* Search Bar */}
+      <Card className="backdrop-blur-sm bg-card/50 border-primary/10 animate-slide-up" style={{ animationDelay: "300ms" }}>
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-4">
+            <Mail className="h-5 w-5 text-muted-foreground" />
+            <Input
+              placeholder="Search contacts by name or email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1 bg-background/50"
+            />
           </div>
-        </CardHeader>
-        <CardContent>
-          {contacts && contacts.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow className="hover:bg-muted/50">
-                  <TableHead>Name</TableHead>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Account</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+        </CardContent>
+      </Card>
+
+      {/* Contacts Table */}
+      <Card className="backdrop-blur-sm bg-card/50 border-primary/10 animate-slide-up" style={{ animationDelay: "400ms" }}>
+        <CardContent className="pt-6">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Contact</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Account</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {contacts.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    No contacts found. Create your first contact to get started.
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {contacts.map((contact: any) => (
-                  <TableRow key={contact.id} className="hover:bg-gradient-to-r hover:from-accent/5 hover:to-primary/5 transition-all group">
+              ) : (
+                contacts.map((contact) => (
+                  <TableRow key={contact.id} className="hover:bg-accent/5">
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <Avatar className="group-hover:scale-110 transition-transform">
-                          <AvatarFallback className="bg-gradient-to-br from-accent to-primary text-white">
+                        <Avatar className="h-10 w-10 border-2 border-primary/20">
+                          <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20 text-foreground">
                             {getInitials(contact.first_name, contact.last_name)}
                           </AvatarFallback>
                         </Avatar>
                         <div>
                           <div className="font-medium">{contact.first_name} {contact.last_name}</div>
-                          {contact.lead_source && (
-                            <div className="text-xs text-muted-foreground">Source: {contact.lead_source}</div>
-                          )}
+                          {contact.title && <div className="text-sm text-muted-foreground">{contact.title}</div>}
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>{contact.title || "-"}</TableCell>
-                    <TableCell>{contact.accounts?.name || "-"}</TableCell>
-                    <TableCell>{contact.email || "-"}</TableCell>
-                    <TableCell>{contact.phone || contact.mobile || "-"}</TableCell>
                     <TableCell>
-                      <Badge variant={contact.status === "active" ? "default" : "secondary"} className="animate-scale-in">
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        {contact.email || "-"}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        {contact.phone || contact.mobile || "-"}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {contact.accounts?.name ? (
+                        <div className="flex items-center gap-2">
+                          <Building2 className="h-4 w-4 text-muted-foreground" />
+                          {contact.accounts.name}
+                        </div>
+                      ) : "-"}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={contact.status === "active" ? "default" : "secondary"}>
                         {contact.status}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex items-center justify-end gap-2">
                         {(contact.phone || contact.mobile) && (
-                          <ClickToCall 
-                            phoneNumber={contact.phone || contact.mobile} 
+                          <ClickToCall
+                            phoneNumber={contact.phone || contact.mobile}
                             contactName={`${contact.first_name} ${contact.last_name}`}
                             variant="ghost"
+                            size="icon"
                             className="text-success"
                           />
                         )}
-                        <Button variant="ghost" size="icon" onClick={() => openEditDialog(contact)} className="hover:scale-110 transition-transform">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openEditDialog(contact)}
+                          className="hover:bg-primary/10 hover:text-primary"
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => deleteContactMutation.mutate(contact.id)}
-                          className="hover:scale-110 transition-transform hover:text-destructive"
+                          onClick={() => {
+                            if (confirm("Are you sure you want to delete this contact?")) {
+                              deleteContactMutation.mutate(contact.id);
+                            }
+                          }}
+                          className="hover:bg-destructive/10 hover:text-destructive"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-12">
-              <User className="h-16 w-16 text-muted-foreground/50 mb-4 animate-float" />
-              <p className="text-muted-foreground text-center">
-                No contacts found. Create your first contact!
-              </p>
-            </div>
-          )}
+                ))
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Card className="backdrop-blur-sm bg-card/50 border-primary/10">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                Page {currentPage} of {totalPages} ({contactsData?.count || 0} total contacts)
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

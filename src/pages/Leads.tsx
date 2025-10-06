@@ -17,10 +17,15 @@ import { useBranches } from "@/hooks/useBranches";
 import { ClickToCall } from "@/components/ClickToCall";
 
 export default function Leads() {
-  const { accessibleBranches } = useBranches();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingLead, setEditingLead] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [exportFilters, setExportFilters] = useState({
+    dateFrom: "",
+    dateTo: "",
+    status: "",
+  });
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -34,34 +39,33 @@ export default function Leads() {
     description: "",
   });
   const queryClient = useQueryClient();
+  const itemsPerPage = 20;
 
-  const { data: leads } = useQuery({
-    queryKey: ["leads", searchQuery, accessibleBranches],
+  const { data: leadsData } = useQuery({
+    queryKey: ["leads", searchQuery, currentPage],
     queryFn: async () => {
-      const { data: profile } = await supabase.from("profiles").select("branch_id").single();
+      const { data: profile } = await supabase.from("profiles").select("company_id").single();
       
       let query = supabase
         .from("leads")
-        .select("*")
+        .select("*", { count: "exact" })
         .eq("converted", false)
-        .order("created_at", { ascending: false });
-
-      // Apply branch filtering if user has branch restrictions
-      if (accessibleBranches.length > 0 && profile?.branch_id) {
-        const branchIds = accessibleBranches.map(b => b.id);
-        query = query.in('company_id', [profile.branch_id]);
-      }
+        .eq("company_id", profile?.company_id)
+        .order("created_at", { ascending: false })
+        .range((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage - 1);
 
       if (searchQuery) {
         query = query.or(`first_name.ilike.%${searchQuery}%,last_name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%,company.ilike.%${searchQuery}%`);
       }
 
-      const { data, error } = await query;
+      const { data, error, count } = await query;
       if (error) throw error;
-      return data;
+      return { data, count };
     },
-    enabled: accessibleBranches !== undefined,
   });
+
+  const leads = leadsData?.data || [];
+  const totalPages = Math.ceil((leadsData?.count || 0) / itemsPerPage);
 
   const createLeadMutation = useMutation({
     mutationFn: async (data: any) => {

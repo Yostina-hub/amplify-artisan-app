@@ -15,10 +15,15 @@ import { PageHelp } from "@/components/PageHelp";
 import { useBranches } from "@/hooks/useBranches";
 
 export default function Accounts() {
-  const { accessibleBranches } = useBranches();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [exportFilters, setExportFilters] = useState({
+    dateFrom: "",
+    dateTo: "",
+    status: "",
+  });
   const [formData, setFormData] = useState({
     name: "",
     account_type: "",
@@ -31,33 +36,32 @@ export default function Accounts() {
     status: "active",
   });
   const queryClient = useQueryClient();
+  const itemsPerPage = 20;
 
-  const { data: accounts } = useQuery({
-    queryKey: ["accounts", searchQuery, accessibleBranches],
+  const { data: accountsData } = useQuery({
+    queryKey: ["accounts", searchQuery, currentPage],
     queryFn: async () => {
-      const { data: profile } = await supabase.from("profiles").select("branch_id").single();
+      const { data: profile } = await supabase.from("profiles").select("company_id").single();
       
       let query = supabase
         .from("accounts")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      // Apply branch filtering if user has branch restrictions
-      if (accessibleBranches.length > 0 && profile?.branch_id) {
-        const branchIds = accessibleBranches.map(b => b.id);
-        query = query.in('company_id', [profile.branch_id]);
-      }
+        .select("*", { count: "exact" })
+        .eq("company_id", profile?.company_id)
+        .order("created_at", { ascending: false })
+        .range((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage - 1);
 
       if (searchQuery) {
         query = query.ilike("name", `%${searchQuery}%`);
       }
 
-      const { data, error } = await query;
+      const { data, error, count } = await query;
       if (error) throw error;
-      return data;
+      return { data, count };
     },
-    enabled: accessibleBranches !== undefined,
   });
+
+  const accounts = accountsData?.data || [];
+  const totalPages = Math.ceil((accountsData?.count || 0) / itemsPerPage);
 
   const createAccountMutation = useMutation({
     mutationFn: async (data: any) => {
