@@ -782,16 +782,16 @@ FOR ALL USING (public.has_role(auth.uid(), 'admin'));
 
 -- SOCIAL MEDIA ACCOUNTS TABLE POLICIES
 CREATE POLICY "Users can view their own accounts" ON public.social_media_accounts
-FOR SELECT USING (auth.uid() = user_id);
+FOR SELECT USING (auth.uid()::text = user_id::text);
 
 CREATE POLICY "Users can insert their own accounts" ON public.social_media_accounts
-FOR INSERT WITH CHECK (auth.uid() = user_id);
+FOR INSERT WITH CHECK (auth.uid()::text = user_id::text);
 
 CREATE POLICY "Users can update their own accounts" ON public.social_media_accounts
-FOR UPDATE USING (auth.uid() = user_id);
+FOR UPDATE USING (auth.uid()::text = user_id::text);
 
 CREATE POLICY "Users can delete their own accounts" ON public.social_media_accounts
-FOR DELETE USING (auth.uid() = user_id);
+FOR DELETE USING (auth.uid()::text = user_id::text);
 
 CREATE POLICY "Admins can view all accounts" ON public.social_media_accounts
 FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
@@ -810,16 +810,16 @@ FOR SELECT USING (public.has_role(auth.uid(), 'agent'));
 
 -- SOCIAL MEDIA POSTS TABLE POLICIES
 CREATE POLICY "Users can view their own posts" ON public.social_media_posts
-FOR SELECT USING (auth.uid() = user_id);
+FOR SELECT USING (auth.uid()::text = user_id::text);
 
 CREATE POLICY "Users can insert their own posts" ON public.social_media_posts
-FOR INSERT WITH CHECK (auth.uid() = user_id);
+FOR INSERT WITH CHECK (auth.uid()::text = user_id::text);
 
 CREATE POLICY "Users can update their own posts" ON public.social_media_posts
-FOR UPDATE USING (auth.uid() = user_id);
+FOR UPDATE USING (auth.uid()::text = user_id::text);
 
 CREATE POLICY "Users can delete their own posts" ON public.social_media_posts
-FOR DELETE USING (auth.uid() = user_id);
+FOR DELETE USING (auth.uid()::text = user_id::text);
 
 CREATE POLICY "Admins can view all posts" ON public.social_media_posts
 FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
@@ -839,44 +839,44 @@ FOR SELECT USING (public.has_role(auth.uid(), 'agent'));
 -- AD CAMPAIGNS TABLE POLICIES
 CREATE POLICY "Users can view their company campaigns" ON public.ad_campaigns
 FOR SELECT USING (
-  auth.uid() = user_id AND 
-  company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid())
+  auth.uid()::text = user_id::text AND 
+  company_id::text = (SELECT company_id::text FROM public.profiles WHERE id = auth.uid())
 );
 
 CREATE POLICY "Users can insert their company campaigns" ON public.ad_campaigns
 FOR INSERT WITH CHECK (
-  auth.uid() = user_id AND 
-  company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid())
+  auth.uid()::text = user_id::text AND 
+  company_id::text = (SELECT company_id::text FROM public.profiles WHERE id = auth.uid())
 );
 
 CREATE POLICY "Users can update their company campaigns" ON public.ad_campaigns
 FOR UPDATE USING (
-  auth.uid() = user_id AND 
-  company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid())
+  auth.uid()::text = user_id::text AND 
+  company_id::text = (SELECT company_id::text FROM public.profiles WHERE id = auth.uid())
 );
 
 CREATE POLICY "Users can delete their company campaigns" ON public.ad_campaigns
 FOR DELETE USING (
-  auth.uid() = user_id AND 
-  company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid())
+  auth.uid()::text = user_id::text AND 
+  company_id::text = (SELECT company_id::text FROM public.profiles WHERE id = auth.uid())
 );
 
 CREATE POLICY "Agents can view their company campaigns" ON public.ad_campaigns
 FOR SELECT USING (
   public.has_role(auth.uid(), 'agent') AND 
-  company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid())
+  company_id::text = (SELECT company_id::text FROM public.profiles WHERE id = auth.uid())
 );
 
 CREATE POLICY "Agents can insert their company campaigns" ON public.ad_campaigns
 FOR INSERT WITH CHECK (
   public.has_role(auth.uid(), 'agent') AND 
-  company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid())
+  company_id::text = (SELECT company_id::text FROM public.profiles WHERE id = auth.uid())
 );
 
 CREATE POLICY "Agents can update their company campaigns" ON public.ad_campaigns
 FOR UPDATE USING (
   public.has_role(auth.uid(), 'agent') AND 
-  company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid())
+  company_id::text = (SELECT company_id::text FROM public.profiles WHERE id = auth.uid())
 );
 
 CREATE POLICY "Admins can view all campaigns" ON public.ad_campaigns
@@ -893,16 +893,16 @@ FOR DELETE USING (public.has_role(auth.uid(), 'admin'));
 
 -- INFLUENCERS TABLE POLICIES
 CREATE POLICY "Users can view their own influencers" ON public.influencers
-FOR SELECT USING (auth.uid() = user_id);
+FOR SELECT USING (auth.uid()::text = user_id::text);
 
 CREATE POLICY "Users can insert their own influencers" ON public.influencers
-FOR INSERT WITH CHECK (auth.uid() = user_id);
+FOR INSERT WITH CHECK (auth.uid()::text = user_id::text);
 
 CREATE POLICY "Users can update their own influencers" ON public.influencers
-FOR UPDATE USING (auth.uid() = user_id);
+FOR UPDATE USING (auth.uid()::text = user_id::text);
 
 CREATE POLICY "Users can delete their own influencers" ON public.influencers
-FOR DELETE USING (auth.uid() = user_id);
+FOR DELETE USING (auth.uid()::text = user_id::text);
 
 CREATE POLICY "Admins can view all influencers" ON public.influencers
 FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
@@ -921,16 +921,16 @@ FOR SELECT USING (public.has_role(auth.uid(), 'agent'));
 
 -- INFLUENCER CAMPAIGNS TABLE POLICIES
 CREATE POLICY "Users can view their own campaigns" ON public.influencer_campaigns
-FOR SELECT USING (auth.uid() = user_id);
+FOR SELECT USING (auth.uid()::text = user_id::text);
 
 CREATE POLICY "Users can insert their own campaigns" ON public.influencer_campaigns
-FOR INSERT WITH CHECK (auth.uid() = user_id);
+FOR INSERT WITH CHECK (auth.uid()::text = user_id::text);
 
 CREATE POLICY "Users can update their own campaigns" ON public.influencer_campaigns
-FOR UPDATE USING (auth.uid() = user_id);
+FOR UPDATE USING (auth.uid()::text = user_id::text);
 
 CREATE POLICY "Users can delete their own campaigns" ON public.influencer_campaigns
-FOR DELETE USING (auth.uid() = user_id);
+FOR DELETE USING (auth.uid()::text = user_id::text);
 
 CREATE POLICY "Admins can view all campaigns" ON public.influencer_campaigns
 FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
@@ -952,7 +952,7 @@ CREATE POLICY "Users can view campaign influencers for their campaigns" ON publi
 FOR SELECT USING (
   EXISTS (
     SELECT 1 FROM public.influencer_campaigns
-    WHERE id = campaign_id AND user_id = auth.uid()
+    WHERE id = campaign_id AND user_id::text = auth.uid()::text
   )
 );
 
@@ -960,7 +960,7 @@ CREATE POLICY "Users can insert campaign influencers for their campaigns" ON pub
 FOR INSERT WITH CHECK (
   EXISTS (
     SELECT 1 FROM public.influencer_campaigns
-    WHERE id = campaign_id AND user_id = auth.uid()
+    WHERE id = campaign_id AND user_id::text = auth.uid()::text
   )
 );
 
@@ -968,7 +968,7 @@ CREATE POLICY "Users can update campaign influencers for their campaigns" ON pub
 FOR UPDATE USING (
   EXISTS (
     SELECT 1 FROM public.influencer_campaigns
-    WHERE id = campaign_id AND user_id = auth.uid()
+    WHERE id = campaign_id AND user_id::text = auth.uid()::text
   )
 );
 
@@ -976,7 +976,7 @@ CREATE POLICY "Users can delete campaign influencers for their campaigns" ON pub
 FOR DELETE USING (
   EXISTS (
     SELECT 1 FROM public.influencer_campaigns
-    WHERE id = campaign_id AND user_id = auth.uid()
+    WHERE id = campaign_id AND user_id::text = auth.uid()::text
   )
 );
 
@@ -999,7 +999,7 @@ CREATE POLICY "Users can insert comments on their accounts" ON public.social_med
 FOR INSERT WITH CHECK (
   EXISTS (
     SELECT 1 FROM public.social_media_accounts
-    WHERE id = account_id AND user_id = auth.uid()
+    WHERE id = account_id AND user_id::text = auth.uid()::text
   )
 );
 
@@ -1007,7 +1007,7 @@ CREATE POLICY "Users can update their account comments" ON public.social_media_c
 FOR UPDATE USING (
   EXISTS (
     SELECT 1 FROM public.social_media_accounts
-    WHERE id = account_id AND user_id = auth.uid()
+    WHERE id = account_id AND user_id::text = auth.uid()::text
   )
 );
 
@@ -1015,7 +1015,7 @@ CREATE POLICY "Users can delete comments on their accounts" ON public.social_med
 FOR DELETE USING (
   EXISTS (
     SELECT 1 FROM public.social_media_accounts
-    WHERE id = account_id AND user_id = auth.uid()
+    WHERE id = account_id AND user_id::text = auth.uid()::text
   )
 );
 
@@ -1045,23 +1045,23 @@ FOR DELETE USING (public.has_role(auth.uid(), 'agent'));
 
 -- AD IMPRESSIONS TABLE POLICIES
 CREATE POLICY "Users can view their own impressions" ON public.ad_impressions
-FOR SELECT USING (auth.uid() = user_id);
+FOR SELECT USING (auth.uid()::text = user_id::text);
 
 CREATE POLICY "Users can insert their own impressions" ON public.ad_impressions
-FOR INSERT WITH CHECK (auth.uid() = user_id);
+FOR INSERT WITH CHECK (auth.uid()::text = user_id::text);
 
 CREATE POLICY "Companies can view their ad impressions" ON public.ad_impressions
-FOR SELECT USING (company_id = public.get_user_company_id(auth.uid()));
+FOR SELECT USING (company_id::text = public.get_user_company_id(auth.uid())::text);
 
 CREATE POLICY "Admins can view all impressions" ON public.ad_impressions
 FOR ALL USING (public.has_role(auth.uid(), 'admin'));
 
 -- USER ENGAGEMENT TABLE POLICIES
 CREATE POLICY "Users can insert their own engagement" ON public.user_engagement
-FOR INSERT WITH CHECK (auth.uid() = user_id);
+FOR INSERT WITH CHECK (auth.uid()::text = user_id::text);
 
 CREATE POLICY "Users can view their own engagement" ON public.user_engagement
-FOR SELECT USING (auth.uid() = user_id);
+FOR SELECT USING (auth.uid()::text = user_id::text);
 
 CREATE POLICY "Admins can view all engagement" ON public.user_engagement
 FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
@@ -1082,11 +1082,11 @@ FOR ALL USING (public.has_role(auth.uid(), 'admin'));
 
 -- COMPANY PLATFORM SUBSCRIPTIONS TABLE POLICIES
 CREATE POLICY "Companies can view their own subscriptions" ON public.company_platform_subscriptions
-FOR SELECT USING (company_id = public.get_user_company_id(auth.uid()));
+FOR SELECT USING (company_id::text = public.get_user_company_id(auth.uid())::text);
 
 CREATE POLICY "Companies can request subscriptions" ON public.company_platform_subscriptions
 FOR INSERT WITH CHECK (
-  company_id = public.get_user_company_id(auth.uid()) AND 
+  company_id::text = public.get_user_company_id(auth.uid())::text AND 
   status = 'pending'
 );
 
@@ -1096,12 +1096,12 @@ FOR ALL USING (public.has_role(auth.uid(), 'admin'));
 -- COMPANY PLATFORM CONFIGS TABLE POLICIES
 CREATE POLICY "Company admins can manage their configs" ON public.company_platform_configs
 FOR ALL USING (
-  company_id = public.get_user_company_id(auth.uid()) AND
+  company_id::text = public.get_user_company_id(auth.uid())::text AND
   EXISTS (
     SELECT 1 FROM public.user_roles
-    WHERE user_id = auth.uid() 
+    WHERE user_id::text = auth.uid()::text 
     AND role = 'admin'::public.app_role 
-    AND company_id = public.get_user_company_id(auth.uid())
+    AND company_id::text = public.get_user_company_id(auth.uid())::text
   )
 );
 
@@ -1124,7 +1124,7 @@ FOR DELETE USING (public.has_role(auth.uid(), 'admin'));
 CREATE POLICY "Company admins can view their email config" ON public.email_configurations
 FOR SELECT USING (
   (company_id IS NOT NULL AND 
-   company_id = public.get_user_company_id(auth.uid()) AND 
+   company_id::text = public.get_user_company_id(auth.uid())::text AND 
    public.has_role(auth.uid(), 'admin')) OR 
   public.has_role(auth.uid(), 'admin')
 );
@@ -1132,7 +1132,7 @@ FOR SELECT USING (
 CREATE POLICY "Company admins can update their email config" ON public.email_configurations
 FOR UPDATE USING (
   (company_id IS NOT NULL AND 
-   company_id = public.get_user_company_id(auth.uid()) AND 
+   company_id::text = public.get_user_company_id(auth.uid())::text AND 
    public.has_role(auth.uid(), 'admin')) OR 
   public.has_role(auth.uid(), 'admin')
 );
@@ -1176,7 +1176,7 @@ CREATE POLICY "Users can view mentions for their accounts" ON public.social_medi
 FOR SELECT USING (
   EXISTS (
     SELECT 1 FROM public.social_media_accounts
-    WHERE id = account_id AND user_id = auth.uid()
+    WHERE id = account_id AND user_id::text = auth.uid()::text
   )
 );
 
@@ -1201,10 +1201,10 @@ FOR INSERT WITH CHECK (public.has_role(auth.uid(), 'agent'));
 -- INFLUENCER COMMUNICATIONS TABLE POLICIES
 CREATE POLICY "Users can view communications for their influencers" ON public.influencer_communications
 FOR SELECT USING (
-  auth.uid() = user_id OR 
+  auth.uid()::text = user_id::text OR 
   EXISTS (
     SELECT 1 FROM public.influencers
-    WHERE id = influencer_id AND user_id = auth.uid()
+    WHERE id = influencer_id AND user_id::text = auth.uid()::text
   )
 );
 
@@ -1232,7 +1232,7 @@ FOR SELECT USING (
   EXISTS (
     SELECT 1 FROM public.campaign_influencers ci
     JOIN public.influencer_campaigns ic ON ic.id = ci.campaign_id
-    WHERE ci.id = campaign_influencer_id AND ic.user_id = auth.uid()
+    WHERE ci.id = campaign_influencer_id AND ic.user_id::text = auth.uid()::text
   )
 );
 
@@ -1241,7 +1241,7 @@ FOR INSERT WITH CHECK (
   EXISTS (
     SELECT 1 FROM public.campaign_influencers ci
     JOIN public.influencer_campaigns ic ON ic.id = ci.campaign_id
-    WHERE ci.id = campaign_influencer_id AND ic.user_id = auth.uid()
+    WHERE ci.id = campaign_influencer_id AND ic.user_id::text = auth.uid()::text
   )
 );
 
@@ -1250,7 +1250,7 @@ FOR UPDATE USING (
   EXISTS (
     SELECT 1 FROM public.campaign_influencers ci
     JOIN public.influencer_campaigns ic ON ic.id = ci.campaign_id
-    WHERE ci.id = campaign_influencer_id AND ic.user_id = auth.uid()
+    WHERE ci.id = campaign_influencer_id AND ic.user_id::text = auth.uid()::text
   )
 );
 
