@@ -48,20 +48,9 @@ export default function Leads() {
       const userId = auth.user?.id;
       let companyId: string | undefined;
       if (userId) {
-        const { data: prof } = await supabase
-          .from("profiles")
-          .select("company_id")
-          .eq("id", userId)
-          .maybeSingle();
-        companyId = prof?.company_id as string | undefined;
-        if (!companyId) {
-          const { data: role } = await supabase
-            .from("user_roles")
-            .select("company_id")
-            .eq("user_id", userId)
-            .maybeSingle();
-          companyId = (role as any)?.company_id as string | undefined;
-        }
+        const { data: cid, error: cidError } = await supabase.rpc('get_user_company_id', { _user_id: userId });
+        if (cidError) throw cidError;
+        companyId = cid as string | undefined;
       }
       
       let query = supabase
@@ -119,20 +108,9 @@ export default function Leads() {
       const userId = auth.user?.id;
       let companyId: string | undefined;
       if (userId) {
-        const { data: prof } = await supabase
-          .from("profiles")
-          .select("company_id")
-          .eq("id", userId)
-          .maybeSingle();
-        companyId = prof?.company_id as string | undefined;
-        if (!companyId) {
-          const { data: role } = await supabase
-            .from("user_roles")
-            .select("company_id")
-            .eq("user_id", userId)
-            .maybeSingle();
-          companyId = (role as any)?.company_id as string | undefined;
-        }
+        const { data: cid, error: cidError } = await supabase.rpc('get_user_company_id', { _user_id: userId });
+        if (cidError) throw cidError;
+        companyId = cid as string | undefined;
       }
       const { error } = await supabase.from("leads").insert({
         ...data,
@@ -211,20 +189,9 @@ export default function Leads() {
       const userId = auth.user?.id;
       let companyId: string | undefined;
       if (userId) {
-        const { data: prof } = await supabase
-          .from("profiles")
-          .select("company_id")
-          .eq("id", userId)
-          .maybeSingle();
-        companyId = prof?.company_id as string | undefined;
-        if (!companyId) {
-          const { data: role } = await supabase
-            .from("user_roles")
-            .select("company_id")
-            .eq("user_id", userId)
-            .maybeSingle();
-          companyId = (role as any)?.company_id as string | undefined;
-        }
+        const { data: cid, error: cidError } = await supabase.rpc('get_user_company_id', { _user_id: userId });
+        if (cidError) throw cidError;
+        companyId = cid as string | undefined;
       }
 
       // Create contact from lead data
@@ -389,8 +356,14 @@ export default function Leads() {
           };
         });
 
-        const { data: profile } = await supabase.from("profiles").select("company_id").single();
-        const { data: user } = await supabase.auth.getUser();
+        const { data: auth } = await supabase.auth.getUser();
+        const userId = auth.user?.id;
+        let companyId: string | undefined;
+        if (userId) {
+          const { data: cid, error: cidError } = await supabase.rpc('get_user_company_id', { _user_id: userId });
+          if (cidError) throw cidError;
+          companyId = cid as string | undefined;
+        }
         
         let successCount = 0;
         let errorCount = 0;
@@ -403,8 +376,8 @@ export default function Leads() {
 
           const { error } = await supabase.from("leads").insert({
             ...lead,
-            company_id: profile?.company_id,
-            created_by: user.user?.id,
+            company_id: companyId,
+            created_by: userId,
           });
 
           if (error) {

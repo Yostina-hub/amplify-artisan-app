@@ -41,12 +41,19 @@ export default function Accounts() {
   const { data: accountsData } = useQuery({
     queryKey: ["accounts", searchQuery, currentPage],
     queryFn: async () => {
-      const { data: profile } = await supabase.from("profiles").select("company_id").single();
+      const { data: auth } = await supabase.auth.getUser();
+      const userId = auth.user?.id;
+      let companyId: string | undefined;
+      if (userId) {
+        const { data: cid, error: cidError } = await supabase.rpc('get_user_company_id', { _user_id: userId });
+        if (cidError) throw cidError;
+        companyId = cid as string | undefined;
+      }
       
       let query = supabase
         .from("accounts")
         .select("*", { count: "exact" })
-        .eq("company_id", profile?.company_id)
+        .eq("company_id", companyId)
         .order("created_at", { ascending: false })
         .range((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage - 1);
 
@@ -89,14 +96,20 @@ export default function Accounts() {
         }
       }
 
-      const { data: profile } = await supabase.from("profiles").select("company_id").single();
-      const { data: user } = await supabase.auth.getUser();
+      const { data: auth } = await supabase.auth.getUser();
+      const userId = auth.user?.id;
+      let companyId: string | undefined;
+      if (userId) {
+        const { data: cid, error: cidError } = await supabase.rpc('get_user_company_id', { _user_id: userId });
+        if (cidError) throw cidError;
+        companyId = cid as string | undefined;
+      }
       const { error } = await supabase.from("accounts").insert({
         ...data,
         annual_revenue: data.annual_revenue ? parseFloat(data.annual_revenue) : null,
         number_of_employees: data.number_of_employees ? parseInt(data.number_of_employees) : null,
-        company_id: profile?.company_id,
-        created_by: user.user?.id,
+        company_id: companyId,
+        created_by: userId,
       });
       if (error) throw error;
     },

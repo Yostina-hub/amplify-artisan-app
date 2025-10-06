@@ -117,20 +117,9 @@ export default function Contacts() {
       const userId = auth.user?.id;
       let companyId: string | undefined;
       if (userId) {
-        const { data: prof } = await supabase
-          .from("profiles")
-          .select("company_id")
-          .eq("id", userId)
-          .maybeSingle();
-        companyId = prof?.company_id as string | undefined;
-        if (!companyId) {
-          const { data: role } = await supabase
-            .from("user_roles")
-            .select("company_id")
-            .eq("user_id", userId)
-            .maybeSingle();
-          companyId = (role as any)?.company_id as string | undefined;
-        }
+        const { data: cid, error: cidError } = await supabase.rpc('get_user_company_id', { _user_id: userId });
+        if (cidError) throw cidError;
+        companyId = cid as string | undefined;
       }
       const { error } = await supabase.from("contacts").insert({
         ...data,
@@ -243,20 +232,9 @@ export default function Contacts() {
       const userId = auth.user?.id;
       let companyId: string | undefined;
       if (userId) {
-        const { data: prof } = await supabase
-          .from("profiles")
-          .select("company_id")
-          .eq("id", userId)
-          .maybeSingle();
-        companyId = prof?.company_id as string | undefined;
-        if (!companyId) {
-          const { data: role } = await supabase
-            .from("user_roles")
-            .select("company_id")
-            .eq("user_id", userId)
-            .maybeSingle();
-          companyId = (role as any)?.company_id as string | undefined;
-        }
+        const { data: cid, error: cidError } = await supabase.rpc('get_user_company_id', { _user_id: userId });
+        if (cidError) throw cidError;
+        companyId = cid as string | undefined;
       }
       
       let query = supabase
@@ -356,20 +334,9 @@ export default function Contacts() {
         const userId = auth.user?.id;
         let companyId: string | undefined;
         if (userId) {
-          const { data: prof } = await supabase
-            .from("profiles")
-            .select("company_id")
-            .eq("id", userId)
-            .maybeSingle();
-          companyId = prof?.company_id as string | undefined;
-          if (!companyId) {
-            const { data: role } = await supabase
-              .from("user_roles")
-              .select("company_id")
-              .eq("user_id", userId)
-              .maybeSingle();
-            companyId = (role as any)?.company_id as string | undefined;
-          }
+          const { data: cid, error: cidError } = await supabase.rpc('get_user_company_id', { _user_id: userId });
+          if (cidError) throw cidError;
+          companyId = cid as string | undefined;
         }
         
         let successCount = 0;
