@@ -74,7 +74,23 @@ async function runMigration() {
     console.log('  - Triggers created');
     console.log('  - Indexes created');
     console.log('');
+
+    // Seed super admin user
+    console.log('👤 Seeding super admin user...');
+    const seedSQL = readFileSync(
+      join(__dirname, 'seed-admin.sql'),
+      'utf8'
+    );
+    await client.query(seedSQL);
+    console.log('✅ Super admin user seeded');
+    console.log('');
     console.log('🎉 Your database is ready!');
+    console.log('');
+    console.log('🔐 Default Super Admin Credentials:');
+    console.log('   Email: abel.birara@gmail.com');
+    console.log('   Password: Admin@2025');
+    console.log('');
+    console.log('⚠️  IMPORTANT: Change the password after first login!');
     
   } catch (error) {
     console.error('❌ Migration failed:', error.message);

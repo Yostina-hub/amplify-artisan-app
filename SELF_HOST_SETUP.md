@@ -1,43 +1,78 @@
 # Self-Hosted Setup Guide
 
-## Initial Admin Account Setup
+## 🚀 Automatic Admin Setup (NEW!)
 
-For self-hosted deployments, follow these steps to create the initial admin account:
+For self-hosted deployments, the super admin user is **automatically created during deployment**.
 
-### Option 1: Sign Up Through the Application (Recommended)
+### Automated Setup Process
+
+When you run `./scripts/deploy.sh`, the system automatically:
+1. ✅ Creates database schema
+2. ✅ Seeds super admin user
+3. ✅ Assigns admin role
+4. ✅ Configures authentication
+
+**Default Super Admin Credentials:**
+- **Email**: abel.birara@gmail.com
+- **Password**: Admin@2025
+- **Role**: Admin (full system access)
+
+### First Login
 
 1. Navigate to your deployed application URL
-2. Go to the `/auth` page
-3. Click on "Sign Up" tab
-4. Register with:
-   - **Email**: abel.birara@gmail.com
-   - **Password**: Abel@2025 (or your preferred password)
-   - **Full Name**: Your name
+2. Go to `/auth`
+3. Click "Sign In"
+4. Use the credentials above
+5. **Change password immediately** after first login
 
-5. The system will automatically assign admin role to this email address
+### ⚠️ Security Warning
 
-**Important**: Make sure email confirmation is disabled in your Supabase Auth settings for initial setup.
+**CRITICAL**: The default password `Admin@2025` MUST be changed immediately after deployment!
 
-### Option 2: Create Admin User via SQL (If signup is not working)
+1. Login with default credentials
+2. Go to Settings → Account
+3. Change password to a strong, unique password
+4. Consider enabling 2FA if available
 
-If you cannot sign up through the application, run this SQL script directly in your Supabase SQL editor:
+---
+
+## Manual Admin Creation (Fallback Option)
+
+If automatic seeding fails, you can create the admin user manually:
+
+### Option 1: Re-run Seed Script
+
+```bash
+# SSH into your VPS
+ssh user@your-vps-ip
+
+# Navigate to project directory
+cd /var/www/socialhub
+
+# Run seed script manually
+psql $DATABASE_URL < scripts/seed-admin.sql
+```
+
+### Option 2: Manual SQL (Emergency Only)
+
+If the seed script fails, run this in your PostgreSQL console:
+
+```bash
+psql $DATABASE_URL
+```
 
 ```sql
--- First, ensure auth.users entry exists
--- You'll need to hash the password first using Supabase's auth.crypt function
--- This is a manual process and requires direct database access
-
--- After user is created in auth.users, the handle_new_user() trigger will automatically:
--- 1. Create a profile entry
--- 2. Assign admin role (for abel.birara@gmail.com)
-
--- If the trigger didn't fire, you can manually assign admin role:
-INSERT INTO public.user_roles (user_id, role)
-SELECT id, 'admin'::app_role
-FROM auth.users
-WHERE email = 'abel.birara@gmail.com'
-ON CONFLICT DO NOTHING;
+-- Run the entire seed-admin.sql file content
+-- See scripts/seed-admin.sql for the complete script
+\i scripts/seed-admin.sql
 ```
+
+### Option 3: Via Supabase Dashboard (If using Supabase)
+
+1. Go to Supabase Dashboard → SQL Editor
+2. Copy content from `scripts/seed-admin.sql`
+3. Execute the script
+4. Verify admin user created
 
 ### Configure Supabase Auth for Self-Hosted Deployment
 

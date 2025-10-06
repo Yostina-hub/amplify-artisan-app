@@ -1,5 +1,23 @@
 # VPS Deployment Guide
 
+## 🚀 Automatic Super Admin Setup
+
+**NEW**: The super admin user is now automatically created during deployment!
+
+When you run the deployment script, it automatically:
+- ✅ Creates super admin user
+- ✅ Assigns admin role  
+- ✅ Configures authentication
+- ✅ Ready to login immediately
+
+**Default Credentials**:
+- Email: `abel.birara@gmail.com`
+- Password: `Admin@2025`
+
+**⚠️ IMPORTANT**: Change this password immediately after first login!
+
+---
+
 ## Prerequisites
 
 1. **VPS Server** with Node.js 18+ installed

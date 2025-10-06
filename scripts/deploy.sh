@@ -42,11 +42,20 @@ fi
 
 echo "✅ Database migrations completed"
 
-# Step 2: Install dependencies (if needed)
+# Step 3: Display admin credentials
+echo ""
+echo "🔐 Default Super Admin Credentials:"
+echo "   Email: abel.birara@gmail.com"
+echo "   Password: Admin@2025"
+echo ""
+echo "⚠️  IMPORTANT: Change the password after first login!"
+echo ""
+
+# Step 4: Install dependencies (if needed)
 echo "📦 Installing dependencies..."
 npm install
 
-# Step 3: Build frontend
+# Step 5: Build frontend
 echo "🔨 Building frontend..."
 npm run build
 
@@ -57,7 +66,7 @@ fi
 
 echo "✅ Build completed"
 
-# Step 4: Restart web server (adjust based on your setup)
+# Step 6: Restart web server (adjust based on your setup)
 echo "🔄 Restarting web server..."
 if command -v systemctl &> /dev/null; then
   sudo systemctl restart nginx || true
