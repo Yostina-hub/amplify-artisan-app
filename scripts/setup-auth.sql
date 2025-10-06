@@ -34,7 +34,7 @@ AS $$
   SELECT NULLIF(current_setting('app.current_user_id', true), '')::uuid;
 $$;
 
--- Grant necessary permissions
-GRANT USAGE ON SCHEMA auth TO app_user;
-GRANT SELECT ON auth.users TO app_user;
-GRANT EXECUTE ON FUNCTION auth.uid() TO app_user;
+-- Grant necessary permissions (self-hosted safe defaults)
+GRANT USAGE ON SCHEMA auth TO PUBLIC;
+GRANT SELECT ON auth.users TO PUBLIC;
+GRANT EXECUTE ON FUNCTION auth.uid() TO PUBLIC;
