@@ -23,7 +23,7 @@ export default function Contacts() {
   const [exportFilters, setExportFilters] = useState({
     dateFrom: "",
     dateTo: "",
-    status: "",
+    status: "all",
   });
   const [formData, setFormData] = useState({
     first_name: "",
@@ -227,7 +227,7 @@ export default function Contacts() {
       if (exportFilters.dateTo) {
         query = query.lte("created_at", exportFilters.dateTo);
       }
-      if (exportFilters.status) {
+      if (exportFilters.status && exportFilters.status !== "all") {
         query = query.eq("status", exportFilters.status);
       }
 
@@ -549,12 +549,12 @@ export default function Contacts() {
               </div>
               <div>
                 <Label>Status Filter</Label>
-                <Select value={exportFilters.status} onValueChange={(value) => setExportFilters({ ...exportFilters, status: value })}>
+                <Select value={exportFilters.status} onValueChange={(value) => setExportFilters({ ...exportFilters, status: value === "all" ? "" : value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="All statuses" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All statuses</SelectItem>
+                    <SelectItem value="all">All statuses</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="inactive">Inactive</SelectItem>
                   </SelectContent>
@@ -562,7 +562,7 @@ export default function Contacts() {
               </div>
               <div className="flex items-end">
                 <Button 
-                  onClick={() => setExportFilters({ dateFrom: "", dateTo: "", status: "" })} 
+                  onClick={() => setExportFilters({ dateFrom: "", dateTo: "", status: "all" })} 
                   variant="outline"
                   className="w-full"
                 >
