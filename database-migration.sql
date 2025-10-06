@@ -1178,7 +1178,7 @@ CREATE POLICY "Users can view mentions for their accounts" ON public.social_medi
 FOR SELECT USING (
   EXISTS (
     SELECT 1 FROM public.social_media_accounts
-    WHERE id = account_id AND user_id::text = auth.uid()::text
+    WHERE id = account_id AND user_id = auth.uid()
   )
 );
 
