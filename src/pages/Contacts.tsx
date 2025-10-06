@@ -14,6 +14,7 @@ import { Plus, Edit, Trash2, User, Mail, Phone, Building2, Users, Sparkles, Down
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { PageHelp } from "@/components/PageHelp";
 import { useBranches } from "@/hooks/useBranches";
+import { ClickToCall } from "@/components/ClickToCall";
 
 export default function Contacts() {
   const { accessibleBranches } = useBranches();
@@ -637,6 +638,14 @@ export default function Contacts() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
+                        {(contact.phone || contact.mobile) && (
+                          <ClickToCall 
+                            phoneNumber={contact.phone || contact.mobile} 
+                            contactName={`${contact.first_name} ${contact.last_name}`}
+                            variant="ghost"
+                            className="text-success"
+                          />
+                        )}
                         <Button variant="ghost" size="icon" onClick={() => openEditDialog(contact)} className="hover:scale-110 transition-transform">
                           <Edit className="h-4 w-4" />
                         </Button>

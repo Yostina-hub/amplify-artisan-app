@@ -11,9 +11,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Plus, Edit, Trash2, UserPlus, TrendingUp, CheckCircle2, Sparkles, Download, Upload } from "lucide-react";
+import { Plus, Edit, Trash2, UserPlus, TrendingUp, CheckCircle2, Sparkles, Download, Upload, ArrowRight } from "lucide-react";
 import { PageHelp } from "@/components/PageHelp";
 import { useBranches } from "@/hooks/useBranches";
+import { ClickToCall } from "@/components/ClickToCall";
 
 export default function Leads() {
   const { accessibleBranches } = useBranches();
@@ -143,6 +144,60 @@ export default function Leads() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["leads"] });
       toast.success("Lead deleted successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error.message);
+    },
+  });
+
+  const convertLeadMutation = useMutation({
+    mutationFn: async (lead: any) => {
+      // Check if contact with this email already exists
+      if (lead.email) {
+        const { data: existingContact } = await supabase
+          .from("contacts")
+          .select("id, first_name, last_name")
+          .eq("email", lead.email)
+          .maybeSingle();
+        
+        if (existingContact) {
+          throw new Error(`Contact with email ${lead.email} already exists: ${existingContact.first_name} ${existingContact.last_name}`);
+        }
+      }
+
+      const { data: profile } = await supabase.from("profiles").select("company_id").single();
+      const { data: user } = await supabase.auth.getUser();
+
+      // Create contact from lead data
+      const { error: contactError } = await supabase.from("contacts").insert({
+        first_name: lead.first_name,
+        last_name: lead.last_name,
+        email: lead.email,
+        phone: lead.phone,
+        title: lead.title,
+        lead_source: lead.lead_source,
+        status: "active",
+        company_id: profile?.company_id,
+        created_by: user.user?.id,
+      });
+
+      if (contactError) throw contactError;
+
+      // Mark lead as converted
+      const { error: updateError } = await supabase
+        .from("leads")
+        .update({ 
+          converted: true,
+          converted_date: new Date().toISOString()
+        })
+        .eq("id", lead.id);
+
+      if (updateError) throw updateError;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["leads"] });
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      toast.success("Lead converted to contact successfully");
     },
     onError: (error: any) => {
       toast.error(error.message);
@@ -615,6 +670,25 @@ export default function Leads() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
+                        {lead.phone && (
+                          <ClickToCall 
+                            phoneNumber={lead.phone} 
+                            contactName={`${lead.first_name} ${lead.last_name}`}
+                            variant="ghost"
+                            className="text-success"
+                          />
+                        )}
+                        {lead.lead_status === "qualified" && (
+                          <Button 
+                            variant="default" 
+                            size="sm" 
+                            onClick={() => convertLeadMutation.mutate(lead)}
+                            className="bg-gradient-to-r from-success to-accent hover:scale-105 transition-all animate-glow-pulse"
+                          >
+                            <ArrowRight className="h-4 w-4 mr-1" />
+                            Convert
+                          </Button>
+                        )}
                         <Button variant="ghost" size="icon" onClick={() => openEditDialog(lead)} className="hover:scale-110 transition-transform">
                           <Edit className="h-4 w-4" />
                         </Button>

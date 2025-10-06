@@ -85,6 +85,7 @@ import TTSSettings from "./pages/TTSSettings";
 import BranchManagement from "./pages/admin/BranchManagement";
 import PermissionManagement from "./pages/admin/PermissionManagement";
 import CallCenterIntegrations from "./pages/admin/CallCenterIntegrations";
+import CallReports from "./pages/CallReports";
 
 const queryClient = new QueryClient();
 
@@ -180,6 +181,7 @@ const App = () => (
               <Route path="/quotes" element={<ProtectedRoute><Quotes /></ProtectedRoute>} />
               <Route path="/invoices" element={<ProtectedRoute><Invoices /></ProtectedRoute>} />
               <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+              <Route path="/call-reports" element={<ProtectedRoute><CallReports /></ProtectedRoute>} />
               <Route path="/email-marketing" element={<ProtectedRoute><EmailMarketing /></ProtectedRoute>} />
               <Route path="/documents" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
               <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />

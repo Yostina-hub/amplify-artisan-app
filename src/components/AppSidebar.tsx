@@ -58,6 +58,7 @@ const builderItems = [
     { title: "Project Management", url: "/project-management", icon: FolderKanban },
     { title: "Contract Management", url: "/contract-management", icon: FileCheck },
     { title: "Reports", url: "/reports", icon: BarChart3 },
+    { title: "Call Reports", url: "/call-reports", icon: Phone },
     { title: "Email Marketing", url: "/email-marketing", icon: Mail },
     { title: "Documents", url: "/documents", icon: FileText },
   ];
