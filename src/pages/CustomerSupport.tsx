@@ -44,6 +44,7 @@ import {
   ThumbsDown,
   MoreVertical,
   Eye,
+  Phone,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -52,6 +53,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { ClickToCall } from "@/components/ClickToCall";
 
 const CustomerSupport = () => {
   const { toast } = useToast();
@@ -74,6 +76,7 @@ const CustomerSupport = () => {
       ticket_number: "TKT-001234",
       subject: "Login issues with mobile app",
       customer_name: "John Smith",
+      customer_phone: "+1-555-0123",
       priority: "high",
       status: "in_progress",
       category: "technical",
@@ -87,6 +90,7 @@ const CustomerSupport = () => {
       ticket_number: "TKT-001235",
       subject: "Billing discrepancy on latest invoice",
       customer_name: "Emily Davis",
+      customer_phone: "+1-555-0124",
       priority: "urgent",
       status: "open",
       category: "billing",
@@ -100,6 +104,7 @@ const CustomerSupport = () => {
       ticket_number: "TKT-001236",
       subject: "Feature request: Dark mode",
       customer_name: "Mike Chen",
+      customer_phone: "+1-555-0125",
       priority: "low",
       status: "pending",
       category: "feature_request",
@@ -423,7 +428,20 @@ const CustomerSupport = () => {
                         </div>
                       </TableCell>
                       <TableCell className="max-w-xs truncate">{ticket.subject}</TableCell>
-                      <TableCell>{ticket.customer_name}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {ticket.customer_name}
+                          {ticket.customer_phone && (
+                            <ClickToCall 
+                              phoneNumber={ticket.customer_phone}
+                              contactName={ticket.customer_name}
+                              variant="ghost"
+                              size="icon"
+                              className="text-success"
+                            />
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell>{getPriorityBadge(ticket.priority)}</TableCell>
                       <TableCell>{getStatusBadge(ticket.status)}</TableCell>
                       <TableCell>

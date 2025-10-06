@@ -86,6 +86,7 @@ import BranchManagement from "./pages/admin/BranchManagement";
 import PermissionManagement from "./pages/admin/PermissionManagement";
 import CallCenterIntegrations from "./pages/admin/CallCenterIntegrations";
 import CallReports from "./pages/CallReports";
+import FirewallManagement from "./pages/admin/FirewallManagement";
 
 const queryClient = new QueryClient();
 
@@ -146,6 +147,7 @@ const App = () => (
               <Route path="/admin/branches" element={<ProtectedRoute requiredRole="admin"><BranchManagement /></ProtectedRoute>} />
               <Route path="/admin/permissions" element={<ProtectedRoute requiredRole="admin"><PermissionManagement /></ProtectedRoute>} />
               <Route path="/admin/call-center-integrations" element={<ProtectedRoute requiredRole="admin"><CallCenterIntegrations /></ProtectedRoute>} />
+              <Route path="/admin/firewall" element={<ProtectedRoute requiredRole="admin"><FirewallManagement /></ProtectedRoute>} />
               
               {/* Company routes */}
               <Route path="/company/email-settings" element={<ProtectedRoute><CompanyEmailSettings /></ProtectedRoute>} />

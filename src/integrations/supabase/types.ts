@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_logs: {
+        Row: {
+          block_reason: string | null
+          company_id: string | null
+          created_at: string | null
+          id: string
+          ip_address: string
+          is_blocked: boolean | null
+          request_path: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          block_reason?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address: string
+          is_blocked?: boolean | null
+          request_path?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          block_reason?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: string
+          is_blocked?: boolean | null
+          request_path?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       accounts: {
         Row: {
           account_type: string | null
@@ -2363,6 +2399,47 @@ export type Database = {
           },
         ]
       }
+      domain_whitelist: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          domain: string
+          id: string
+          is_active: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          domain: string
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          domain?: string
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domain_whitelist_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_campaigns: {
         Row: {
           bounced_count: number | null
@@ -2903,6 +2980,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "influencers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ip_whitelist: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          ip_address: string
+          is_active: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          ip_address: string
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          ip_address?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ip_whitelist_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
