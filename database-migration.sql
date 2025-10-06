@@ -5,7 +5,13 @@
 -- 1. CREATE ENUMS
 -- ============================================
 
-CREATE TYPE public.app_role AS ENUM ('admin', 'agent', 'user');
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_role') THEN
+    CREATE TYPE public.app_role AS ENUM ('admin', 'agent', 'user');
+  END IF;
+END
+$$;
 
 -- ============================================
 -- 2. CREATE TABLES (in dependency order)
