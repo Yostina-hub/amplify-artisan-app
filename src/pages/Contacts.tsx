@@ -43,14 +43,23 @@ export default function Contacts() {
   const { data: contactsData } = useQuery({
     queryKey: ["contacts", searchQuery, currentPage],
     queryFn: async () => {
-      const { data: profile } = await supabase.from("profiles").select("company_id").single();
+      const { data: auth } = await supabase.auth.getUser();
+      const userId = auth.user?.id;
+      let companyId: string | null = null;
+      if (userId) {
+        const { data: cid } = await supabase.rpc('get_user_company_id', { _user_id: userId });
+        companyId = (cid as any) ?? null;
+      }
       
       let query = supabase
         .from("contacts")
         .select("*, accounts(name)", { count: "exact" })
-        .eq("company_id", profile?.company_id)
         .order("created_at", { ascending: false })
         .range((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage - 1);
+
+      if (companyId) {
+        query = query.eq("company_id", companyId);
+      }
 
       if (searchQuery) {
         query = query.or(`first_name.ilike.%${searchQuery}%,last_name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`);
@@ -104,12 +113,29 @@ export default function Contacts() {
         }
       }
 
-      const { data: profile } = await supabase.from("profiles").select("company_id").single();
-      const { data: user } = await supabase.auth.getUser();
+      const { data: auth } = await supabase.auth.getUser();
+      const userId = auth.user?.id;
+      let companyId: string | undefined;
+      if (userId) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("company_id")
+          .eq("id", userId)
+          .maybeSingle();
+        companyId = prof?.company_id as string | undefined;
+        if (!companyId) {
+          const { data: role } = await supabase
+            .from("user_roles")
+            .select("company_id")
+            .eq("user_id", userId)
+            .maybeSingle();
+          companyId = (role as any)?.company_id as string | undefined;
+        }
+      }
       const { error } = await supabase.from("contacts").insert({
         ...data,
-        company_id: profile?.company_id,
-        created_by: user.user?.id,
+        company_id: companyId,
+        created_by: userId,
       });
       if (error) throw error;
     },
@@ -213,13 +239,34 @@ export default function Contacts() {
 
   const exportToCSV = async () => {
     try {
-      const { data: profile } = await supabase.from("profiles").select("company_id").single();
+      const { data: auth } = await supabase.auth.getUser();
+      const userId = auth.user?.id;
+      let companyId: string | undefined;
+      if (userId) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("company_id")
+          .eq("id", userId)
+          .maybeSingle();
+        companyId = prof?.company_id as string | undefined;
+        if (!companyId) {
+          const { data: role } = await supabase
+            .from("user_roles")
+            .select("company_id")
+            .eq("user_id", userId)
+            .maybeSingle();
+          companyId = (role as any)?.company_id as string | undefined;
+        }
+      }
       
       let query = supabase
         .from("contacts")
         .select("*, accounts(name)")
-        .eq("company_id", profile?.company_id)
         .order("created_at", { ascending: false });
+
+      if (companyId) {
+        query = query.eq("company_id", companyId);
+      }
 
       if (exportFilters.dateFrom) {
         query = query.gte("created_at", exportFilters.dateFrom);
@@ -305,8 +352,25 @@ export default function Contacts() {
           };
         });
 
-        const { data: profile } = await supabase.from("profiles").select("company_id").single();
-        const { data: user } = await supabase.auth.getUser();
+        const { data: auth } = await supabase.auth.getUser();
+        const userId = auth.user?.id;
+        let companyId: string | undefined;
+        if (userId) {
+          const { data: prof } = await supabase
+            .from("profiles")
+            .select("company_id")
+            .eq("id", userId)
+            .maybeSingle();
+          companyId = prof?.company_id as string | undefined;
+          if (!companyId) {
+            const { data: role } = await supabase
+              .from("user_roles")
+              .select("company_id")
+              .eq("user_id", userId)
+              .maybeSingle();
+            companyId = (role as any)?.company_id as string | undefined;
+          }
+        }
         
         let successCount = 0;
         let errorCount = 0;
@@ -319,8 +383,8 @@ export default function Contacts() {
 
           const { error } = await supabase.from("contacts").insert({
             ...contact,
-            company_id: profile?.company_id,
-            created_by: user.user?.id,
+            company_id: companyId,
+            created_by: userId,
           });
 
           if (error) {

@@ -44,15 +44,36 @@ export default function Leads() {
   const { data: leadsData } = useQuery({
     queryKey: ["leads", searchQuery, currentPage],
     queryFn: async () => {
-      const { data: profile } = await supabase.from("profiles").select("company_id").single();
+      const { data: auth } = await supabase.auth.getUser();
+      const userId = auth.user?.id;
+      let companyId: string | undefined;
+      if (userId) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("company_id")
+          .eq("id", userId)
+          .maybeSingle();
+        companyId = prof?.company_id as string | undefined;
+        if (!companyId) {
+          const { data: role } = await supabase
+            .from("user_roles")
+            .select("company_id")
+            .eq("user_id", userId)
+            .maybeSingle();
+          companyId = (role as any)?.company_id as string | undefined;
+        }
+      }
       
       let query = supabase
         .from("leads")
         .select("*", { count: "exact" })
         .eq("converted", false)
-        .eq("company_id", profile?.company_id)
         .order("created_at", { ascending: false })
         .range((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage - 1);
+
+      if (companyId) {
+        query = query.eq("company_id", companyId);
+      }
 
       if (searchQuery) {
         query = query.or(`first_name.ilike.%${searchQuery}%,last_name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%,company.ilike.%${searchQuery}%`);
@@ -94,13 +115,30 @@ export default function Leads() {
         }
       }
 
-      const { data: profile } = await supabase.from("profiles").select("company_id").single();
-      const { data: user } = await supabase.auth.getUser();
+      const { data: auth } = await supabase.auth.getUser();
+      const userId = auth.user?.id;
+      let companyId: string | undefined;
+      if (userId) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("company_id")
+          .eq("id", userId)
+          .maybeSingle();
+        companyId = prof?.company_id as string | undefined;
+        if (!companyId) {
+          const { data: role } = await supabase
+            .from("user_roles")
+            .select("company_id")
+            .eq("user_id", userId)
+            .maybeSingle();
+          companyId = (role as any)?.company_id as string | undefined;
+        }
+      }
       const { error } = await supabase.from("leads").insert({
         ...data,
         lead_score: parseInt(data.lead_score),
-        company_id: profile?.company_id,
-        created_by: user.user?.id,
+        company_id: companyId,
+        created_by: userId,
       });
       if (error) throw error;
     },
@@ -169,8 +207,25 @@ export default function Leads() {
         }
       }
 
-      const { data: profile } = await supabase.from("profiles").select("company_id").single();
-      const { data: user } = await supabase.auth.getUser();
+      const { data: auth } = await supabase.auth.getUser();
+      const userId = auth.user?.id;
+      let companyId: string | undefined;
+      if (userId) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("company_id")
+          .eq("id", userId)
+          .maybeSingle();
+        companyId = prof?.company_id as string | undefined;
+        if (!companyId) {
+          const { data: role } = await supabase
+            .from("user_roles")
+            .select("company_id")
+            .eq("user_id", userId)
+            .maybeSingle();
+          companyId = (role as any)?.company_id as string | undefined;
+        }
+      }
 
       // Create contact from lead data
       const { error: contactError } = await supabase.from("contacts").insert({
@@ -181,8 +236,8 @@ export default function Leads() {
         title: lead.title,
         lead_source: lead.lead_source,
         status: "active",
-        company_id: profile?.company_id,
-        created_by: user.user?.id,
+        company_id: companyId,
+        created_by: userId,
       });
 
       if (contactError) throw contactError;
