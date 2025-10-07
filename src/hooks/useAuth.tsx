@@ -29,6 +29,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const AUTH_MODE = import.meta.env.VITE_AUTH_MODE || 'supabase';
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<{ access_token: string } | null>(null);
@@ -40,13 +42,59 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const token = apiClient.getToken();
-    if (token) {
-      loadCurrentUser();
+    if (AUTH_MODE === 'supabase') {
+      initSupabaseAuth();
+    } else {
+      const token = apiClient.getToken();
+      if (token) {
+        loadCurrentUser();
+      } else {
+        setLoading(false);
+      }
+    }
+  }, []);
+
+  const initSupabaseAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (session) {
+      const userData = session.user;
+      setUser({
+        id: userData.id,
+        email: userData.email!,
+        full_name: userData.user_metadata?.full_name,
+      });
+      setSession({ access_token: session.access_token });
+      await fetchUserRoles(userData.id);
     } else {
       setLoading(false);
     }
-  }, []);
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        const userData = session.user;
+        setUser({
+          id: userData.id,
+          email: userData.email!,
+          full_name: userData.user_metadata?.full_name,
+        });
+        setSession({ access_token: session.access_token });
+        fetchUserRoles(userData.id);
+      } else {
+        setUser(null);
+        setSession(null);
+        setRoles([]);
+        setRolesDetailed([]);
+        setIsSuperAdmin(false);
+        setIsCompanyAdmin(false);
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  };
 
   const loadCurrentUser = async () => {
     setLoading(true);
@@ -100,43 +148,85 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    const response = await apiClient.register(email, password, fullName);
+    if (AUTH_MODE === 'supabase') {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+        },
+      });
 
-    if (response.error) {
-      throw new Error(response.error);
-    }
-
-    if (response.data) {
-      apiClient.setToken(response.data.access_token);
-      await loadCurrentUser();
+      if (error) {
+        throw new Error(error.message);
+      }
 
       toast({
         title: "Account created!",
-        description: "You can now use your credentials.",
+        description: "You can now sign in with your credentials.",
       });
+    } else {
+      const response = await apiClient.register(email, password, fullName);
+
+      if (response.error) {
+        throw new Error(response.error);
+      }
+
+      if (response.data) {
+        apiClient.setToken(response.data.access_token);
+        await loadCurrentUser();
+
+        toast({
+          title: "Account created!",
+          description: "You can now use your credentials.",
+        });
+      }
     }
   };
 
   const signIn = async (email: string, password: string) => {
-    const response = await apiClient.login(email, password);
+    if (AUTH_MODE === 'supabase') {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (response.error) {
-      throw new Error(response.error);
-    }
-
-    if (response.data) {
-      apiClient.setToken(response.data.access_token);
-      await loadCurrentUser();
+      if (error) {
+        throw new Error(error.message);
+      }
 
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
       });
+    } else {
+      const response = await apiClient.login(email, password);
+
+      if (response.error) {
+        throw new Error(response.error);
+      }
+
+      if (response.data) {
+        apiClient.setToken(response.data.access_token);
+        await loadCurrentUser();
+
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully signed in.",
+        });
+      }
     }
   };
 
   const signOut = async () => {
-    await apiClient.logout();
+    if (AUTH_MODE === 'supabase') {
+      await supabase.auth.signOut();
+    } else {
+      await apiClient.logout();
+    }
+
     setUser(null);
     setSession(null);
     setRoles([]);
