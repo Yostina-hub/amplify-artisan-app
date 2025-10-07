@@ -93,6 +93,15 @@ import CustomerHealthScore from "./pages/CustomerHealthScore";
 import DealIntelligence from "./pages/DealIntelligence";
 import RelationshipMap from "./pages/RelationshipMap";
 import VideoProspecting from "./pages/VideoProspecting";
+import LeadScoring from "./pages/LeadScoring";
+import EmailTemplates from "./pages/EmailTemplates";
+import SalesForecasting from "./pages/SalesForecasting";
+import LostReasonAnalysis from "./pages/LostReasonAnalysis";
+import CustomerJourney from "./pages/CustomerJourney";
+import InventoryIntegration from "./pages/InventoryIntegration";
+import WebsiteCapture from "./pages/WebsiteCapture";
+import CampaignROI from "./pages/CampaignROI";
+import RecurringRevenue from "./pages/RecurringRevenue";
 
 const queryClient = new QueryClient();
 
@@ -201,6 +210,15 @@ const App = () => (
               <Route path="/customer-health" element={<ProtectedRoute><CustomerHealthScore /></ProtectedRoute>} />
               <Route path="/relationship-map" element={<ProtectedRoute><RelationshipMap /></ProtectedRoute>} />
               <Route path="/video-prospecting" element={<ProtectedRoute><VideoProspecting /></ProtectedRoute>} />
+              <Route path="/lead-scoring" element={<ProtectedRoute><LeadScoring /></ProtectedRoute>} />
+              <Route path="/email-templates" element={<ProtectedRoute><EmailTemplates /></ProtectedRoute>} />
+              <Route path="/sales-forecasting" element={<ProtectedRoute><SalesForecasting /></ProtectedRoute>} />
+              <Route path="/lost-reason-analysis" element={<ProtectedRoute><LostReasonAnalysis /></ProtectedRoute>} />
+              <Route path="/customer-journey" element={<ProtectedRoute><CustomerJourney /></ProtectedRoute>} />
+              <Route path="/inventory-integration" element={<ProtectedRoute><InventoryIntegration /></ProtectedRoute>} />
+              <Route path="/website-capture" element={<ProtectedRoute><WebsiteCapture /></ProtectedRoute>} />
+              <Route path="/campaign-roi" element={<ProtectedRoute><CampaignROI /></ProtectedRoute>} />
+              <Route path="/recurring-revenue" element={<ProtectedRoute><RecurringRevenue /></ProtectedRoute>} />
               <Route path="/call-center" element={<ProtectedRoute><CallCenter /></ProtectedRoute>} />
               <Route path="/project-management" element={<ProtectedRoute><ProjectManagement /></ProtectedRoute>} />
               <Route path="/contract-management" element={<ProtectedRoute><ContractManagement /></ProtectedRoute>} />
