@@ -89,6 +89,8 @@ import CallReports from "./pages/CallReports";
 import FirewallManagement from "./pages/admin/FirewallManagement";
 import CallScripts from "./pages/CallScripts";
 import ProposalGenerator from "./pages/ProposalGenerator";
+import CustomerHealthScore from "./pages/CustomerHealthScore";
+import DealIntelligence from "./pages/DealIntelligence";
 
 const queryClient = new QueryClient();
 
@@ -180,6 +182,7 @@ const App = () => (
               <Route path="/accounts" element={<ProtectedRoute><Accounts /></ProtectedRoute>} />
               <Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
               <Route path="/pipeline" element={<ProtectedRoute><SalesPipeline /></ProtectedRoute>} />
+              <Route path="/deal-intelligence" element={<ProtectedRoute><DealIntelligence /></ProtectedRoute>} />
               <Route path="/activities" element={<ProtectedRoute><Activities /></ProtectedRoute>} />
               <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
               <Route path="/quotes" element={<ProtectedRoute><Quotes /></ProtectedRoute>} />
@@ -193,6 +196,7 @@ const App = () => (
               <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
               <Route path="/territory-management" element={<ProtectedRoute><TerritoryManagement /></ProtectedRoute>} />
               <Route path="/customer-support" element={<ProtectedRoute><CustomerSupport /></ProtectedRoute>} />
+              <Route path="/customer-health" element={<ProtectedRoute><CustomerHealthScore /></ProtectedRoute>} />
               <Route path="/call-center" element={<ProtectedRoute><CallCenter /></ProtectedRoute>} />
               <Route path="/project-management" element={<ProtectedRoute><ProjectManagement /></ProtectedRoute>} />
               <Route path="/contract-management" element={<ProtectedRoute><ContractManagement /></ProtectedRoute>} />
