@@ -7,21 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts";
-import {
-  Heart,
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
-  CheckCircle2,
-  Activity,
-  Users,
-  DollarSign,
-  Clock,
-  MessageSquare,
-  Target,
-  Zap,
-  Search
-} from "lucide-react";
+import { Heart, TrendingUp, TrendingDown, TriangleAlert as AlertTriangle, CircleCheck as CheckCircle2, Activity, Users, DollarSign, Clock, MessageSquare, Target, Zap, Search } from "lucide-react";
 import { PageHelp } from "@/components/PageHelp";
 
 interface HealthScore {
