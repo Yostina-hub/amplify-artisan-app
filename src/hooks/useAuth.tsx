@@ -115,7 +115,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const fetchUserRoles = async (userId: string) => {
     const { data, error } = await supabase
       .from('user_roles')
-      .select('role, company_id')
+      .select('role')
       .eq('user_id', userId);
 
     if (error) {
@@ -128,10 +128,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    const detailed = (data || []).map(r => ({ role: r.role as UserRole, company_id: (r as any).company_id ?? null }));
+    const detailed = (data || []).map(r => ({ role: r.role as UserRole, company_id: null }));
     const userRoles = detailed.map(r => r.role);
-    const superAdmin = detailed.some(r => r.role === 'admin' && (r.company_id === null || r.company_id === undefined));
-    const companyAdmin = detailed.some(r => r.role === 'admin' && r.company_id);
+    const superAdmin = userRoles.includes('admin');
+    const companyAdmin = false;
 
     setRoles(userRoles);
     setRolesDetailed(detailed);
@@ -141,9 +141,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const hasRole = (role: UserRole) => {
-    if (role === 'admin') {
-      return rolesDetailed.some(r => r.role === 'admin' && (r.company_id === null || r.company_id === undefined));
-    }
     return roles.includes(role);
   };
 
