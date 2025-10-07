@@ -12,21 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import {
-  Sparkles,
-  FileText,
-  Download,
-  Send,
-  CheckCircle2,
-  DollarSign,
-  Calendar,
-  Target,
-  TrendingUp,
-  Zap,
-  Copy,
-  Edit,
-  Eye
-} from "lucide-react";
+import { Sparkles, FileText, Download, Send, CircleCheck as CheckCircle2, DollarSign, Calendar, Target, TrendingUp, Zap, Copy, CreditCard as Edit, Eye } from "lucide-react";
 import { PageHelp } from "@/components/PageHelp";
 
 interface ProposalData {

@@ -11,22 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
-import {
-  Plus,
-  Edit,
-  Copy,
-  Phone,
-  MessageSquare,
-  Target,
-  TrendingUp,
-  Users,
-  Zap,
-  BookOpen,
-  CheckCircle2,
-  AlertCircle,
-  Play,
-  Clock
-} from "lucide-react";
+import { Plus, CreditCard as Edit, Copy, Phone, MessageSquare, Target, TrendingUp, Users, Zap, BookOpen, CircleCheck as CheckCircle2, CircleAlert as AlertCircle, Play, Clock } from "lucide-react";
 import { PageHelp } from "@/components/PageHelp";
 
 interface CallScript {
