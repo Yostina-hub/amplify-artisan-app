@@ -6,19 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter, ZAxis } from "recharts";
-import {
-  Target,
-  TrendingUp,
-  TrendingDown,
-  Zap,
-  AlertCircle,
-  CheckCircle2,
-  Clock,
-  DollarSign,
-  Activity,
-  Brain,
-  Sparkles
-} from "lucide-react";
+import { Target, TrendingUp, TrendingDown, Zap, CircleAlert as AlertCircle, CircleCheck as CheckCircle2, Clock, DollarSign, Activity, Brain, Sparkles } from "lucide-react";
 import { PageHelp } from "@/components/PageHelp";
 
 interface Deal {
