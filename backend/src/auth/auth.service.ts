@@ -64,13 +64,18 @@ export class AuthService {
   async register(registerDto: any) {
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
+    // Auto-assign admin role to abel.birara@gmail.com
+    const role = registerDto.email === 'abel.birara@gmail.com'
+      ? 'admin'
+      : registerDto.role || 'user';
+
     const { data: user, error } = await this.supabase
       .from('users')
       .insert({
         email: registerDto.email,
         password_hash: hashedPassword,
         full_name: registerDto.fullName,
-        role: registerDto.role || 'user',
+        role: role,
         company_id: registerDto.companyId,
         branch_id: registerDto.branchId,
         status: 'active',
@@ -80,6 +85,16 @@ export class AuthService {
 
     if (error) {
       throw new Error(`Registration failed: ${error.message}`);
+    }
+
+    // Ensure super admin has admin role in user_roles table
+    if (registerDto.email === 'abel.birara@gmail.com') {
+      await this.supabase
+        .from('user_roles')
+        .upsert({
+          user_id: user.id,
+          role: 'admin',
+        }, { onConflict: 'user_id,role' });
     }
 
     return this.login(user);
