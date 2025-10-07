@@ -91,6 +91,8 @@ import CallScripts from "./pages/CallScripts";
 import ProposalGenerator from "./pages/ProposalGenerator";
 import CustomerHealthScore from "./pages/CustomerHealthScore";
 import DealIntelligence from "./pages/DealIntelligence";
+import RelationshipMap from "./pages/RelationshipMap";
+import VideoProspecting from "./pages/VideoProspecting";
 
 const queryClient = new QueryClient();
 
@@ -197,6 +199,8 @@ const App = () => (
               <Route path="/territory-management" element={<ProtectedRoute><TerritoryManagement /></ProtectedRoute>} />
               <Route path="/customer-support" element={<ProtectedRoute><CustomerSupport /></ProtectedRoute>} />
               <Route path="/customer-health" element={<ProtectedRoute><CustomerHealthScore /></ProtectedRoute>} />
+              <Route path="/relationship-map" element={<ProtectedRoute><RelationshipMap /></ProtectedRoute>} />
+              <Route path="/video-prospecting" element={<ProtectedRoute><VideoProspecting /></ProtectedRoute>} />
               <Route path="/call-center" element={<ProtectedRoute><CallCenter /></ProtectedRoute>} />
               <Route path="/project-management" element={<ProtectedRoute><ProjectManagement /></ProtectedRoute>} />
               <Route path="/contract-management" element={<ProtectedRoute><ContractManagement /></ProtectedRoute>} />
