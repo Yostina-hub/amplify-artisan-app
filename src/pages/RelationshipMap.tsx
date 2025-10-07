@@ -8,24 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Network,
-  Users,
-  UserPlus,
-  Building,
-  Phone,
-  Mail,
-  MessageSquare,
-  TrendingUp,
-  Shield,
-  Star,
-  AlertCircle,
-  CheckCircle2,
-  Link as LinkIcon,
-  Plus,
-  Edit,
-  Trash2
-} from "lucide-react";
+import { Network, Users, UserPlus, Building, Phone, Mail, MessageSquare, TrendingUp, Shield, Star, CircleAlert as AlertCircle, CircleCheck as CheckCircle2, Link as LinkIcon, Plus, CreditCard as Edit, Trash2 } from "lucide-react";
 import { PageHelp } from "@/components/PageHelp";
 
 interface Contact {
