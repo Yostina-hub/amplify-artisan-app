@@ -9,27 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import {
-  Video,
-  Play,
-  Pause,
-  Upload,
-  Send,
-  Link as LinkIcon,
-  BarChart3,
-  Eye,
-  Clock,
-  Download,
-  Share2,
-  MessageSquare,
-  TrendingUp,
-  Sparkles,
-  Users,
-  Mail,
-  Copy,
-  CheckCircle2,
-  AlertCircle
-} from "lucide-react";
+import { Video, Play, Pause, Upload, Send, Link as LinkIcon, ChartBar as BarChart3, Eye, Clock, Download, Share2, MessageSquare, TrendingUp, Sparkles, Users, Mail, Copy, CircleCheck as CheckCircle2, CircleAlert as AlertCircle } from "lucide-react";
 import { PageHelp } from "@/components/PageHelp";
 import { toast } from "sonner";
 
