@@ -87,6 +87,8 @@ import PermissionManagement from "./pages/admin/PermissionManagement";
 import CallCenterIntegrations from "./pages/admin/CallCenterIntegrations";
 import CallReports from "./pages/CallReports";
 import FirewallManagement from "./pages/admin/FirewallManagement";
+import CallScripts from "./pages/CallScripts";
+import ProposalGenerator from "./pages/ProposalGenerator";
 
 const queryClient = new QueryClient();
 
@@ -181,9 +183,11 @@ const App = () => (
               <Route path="/activities" element={<ProtectedRoute><Activities /></ProtectedRoute>} />
               <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
               <Route path="/quotes" element={<ProtectedRoute><Quotes /></ProtectedRoute>} />
+              <Route path="/proposal-generator" element={<ProtectedRoute><ProposalGenerator /></ProtectedRoute>} />
               <Route path="/invoices" element={<ProtectedRoute><Invoices /></ProtectedRoute>} />
               <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
               <Route path="/call-reports" element={<ProtectedRoute><CallReports /></ProtectedRoute>} />
+              <Route path="/call-scripts" element={<ProtectedRoute><CallScripts /></ProtectedRoute>} />
               <Route path="/email-marketing" element={<ProtectedRoute><EmailMarketing /></ProtectedRoute>} />
               <Route path="/documents" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
               <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
