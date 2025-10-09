@@ -4,9 +4,7 @@ export interface Service {
   value: string;
   path: string;
   icon: React.ComponentType<{ className?: string }>;
-  category: 'social' | 'marketing' | 'ai' | 'crm' | 'service' | 'projects' | 'builders' | 'admin';
-  requiresPermission?: string;
-  requiresRole?: string;
+  category: 'create' | 'engage' | 'grow' | 'admin';
 }
 
 export interface ServiceCategory {

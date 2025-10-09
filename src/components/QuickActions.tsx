@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Plus, Users, Building2, FileText, Calendar, Mail, Phone, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,7 +26,6 @@ import { toast } from "sonner";
 
 export function QuickActions() {
   const navigate = useNavigate();
-  const { isSuperAdmin, isCompanyAdmin } = useAuth();
   const [isContactDialogOpen, setIsContactDialogOpen] = useState(false);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
 

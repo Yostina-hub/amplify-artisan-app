@@ -37,7 +37,6 @@ const companyAdminItems = [
 // Super admin only
 const superAdminItems = [
   { title: "Admin Console", url: "/admin", icon: Shield },
-  { title: "Content Moderation", url: "/admin/moderation", icon: Shield },
   { title: "System Management", url: "/admin/settings", icon: Cog },
 ];
 
