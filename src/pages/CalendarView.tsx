@@ -17,6 +17,8 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { useNotifications } from "@/hooks/useNotifications";
 
 interface Event {
   id: string;
@@ -49,6 +51,7 @@ const categoryBadgeColors = {
 
 export default function CalendarView() {
   const { session } = useAuth();
+  const { sendEventCreatedNotification } = useNotifications();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [view, setView] = useState<"month" | "week" | "day">("month");
@@ -204,6 +207,9 @@ export default function CalendarView() {
       setEvents([...events, newEventObj]);
       setIsAddEventOpen(false);
       toast.success("Event created successfully!");
+      
+      // Send notification
+      await sendEventCreatedNotification(newEvent.title);
       
       // Reset form
       setNewEvent({

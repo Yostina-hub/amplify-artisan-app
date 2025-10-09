@@ -20,9 +20,28 @@ import {
   Users,
   Target,
 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/hooks/useAuth";
+import { useNotifications } from "@/hooks/useNotifications";
 
 export default function LayoutShowcase() {
+  const { sendNotification } = useNotifications();
+
+  const testNotification = async (type: "info" | "success" | "warning" | "error") => {
+    const messages = {
+      info: { title: "Information", message: "This is an informational notification" },
+      success: { title: "Success!", message: "Operation completed successfully" },
+      warning: { title: "Warning", message: "Please review this important notice" },
+      error: { title: "Error", message: "Something went wrong, please try again" },
+    };
+
+    await sendNotification({
+      ...messages[type],
+      type,
+      actionUrl: "/layout-showcase",
+      actionLabel: "View Details",
+    });
+  };
+
   const features = [
     {
       title: "Command Palette",
@@ -261,6 +280,36 @@ export default function LayoutShowcase() {
       </Card>
 
       {/* Call to Action */}
+      <Card className="bg-gradient-to-br from-primary/10 via-purple-500/10 to-accent/10 border-2 border-primary/20">
+        <CardContent className="flex flex-col items-center justify-center text-center p-12">
+          <Sparkles className="h-12 w-12 text-primary mb-4" />
+          <h3 className="text-2xl font-bold mb-2">Test Notification System</h3>
+          <p className="text-muted-foreground mb-6 max-w-lg">
+            Click any button below to test the real-time notification system. Notifications
+            will appear in the bell icon at the top right corner.
+          </p>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <Button onClick={() => testNotification("info")} variant="outline" className="gap-2">
+              <Bell className="h-4 w-4" />
+              Test Info
+            </Button>
+            <Button onClick={() => testNotification("success")} variant="outline" className="gap-2">
+              <Bell className="h-4 w-4" />
+              Test Success
+            </Button>
+            <Button onClick={() => testNotification("warning")} variant="outline" className="gap-2">
+              <Bell className="h-4 w-4" />
+              Test Warning
+            </Button>
+            <Button onClick={() => testNotification("error")} variant="outline" className="gap-2">
+              <Bell className="h-4 w-4" />
+              Test Error
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Original Call to Action */}
       <Card className="bg-gradient-to-br from-primary/10 via-purple-500/10 to-accent/10 border-2 border-primary/20">
         <CardContent className="flex flex-col items-center justify-center text-center p-12">
           <Sparkles className="h-12 w-12 text-primary mb-4" />

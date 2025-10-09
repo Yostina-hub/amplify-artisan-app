@@ -12,63 +12,178 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 interface Notification {
   id: string;
   title: string;
   message: string;
   type: "info" | "success" | "warning" | "error";
-  timestamp: Date;
+  created_at: string;
   read: boolean;
-  action?: {
-    label: string;
-    onClick: () => void;
-  };
+  action_url?: string;
+  action_label?: string;
 }
 
 export function NotificationsCenter() {
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: "1",
-      title: "Welcome to the Platform",
-      message: "Explore all the cutting-edge features available to you.",
-      type: "info",
-      timestamp: new Date(),
-      read: false,
-    },
-    {
-      id: "2",
-      title: "New Lead Assigned",
-      message: "You have been assigned a new lead from the pipeline.",
-      type: "success",
-      timestamp: new Date(Date.now() - 3600000),
-      read: false,
-    },
-    {
-      id: "3",
-      title: "System Maintenance",
-      message: "Scheduled maintenance on Sunday at 2 AM EST.",
-      type: "warning",
-      timestamp: new Date(Date.now() - 7200000),
-      read: true,
-    },
-  ]);
+  const { session } = useAuth();
+  const navigate = useNavigate();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const markAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+  // Fetch notifications
+  const fetchNotifications = async () => {
+    if (!session?.user?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      
+      const typedData: Notification[] = (data || []).map(item => ({
+        id: item.id,
+        title: item.title,
+        message: item.message,
+        type: item.type as "info" | "success" | "warning" | "error",
+        created_at: item.created_at,
+        read: item.read,
+        action_url: item.action_url || undefined,
+        action_label: item.action_label || undefined,
+      }));
+      
+      setNotifications(typedData);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    toast.success("All notifications marked as read");
+  useEffect(() => {
+    fetchNotifications();
+  }, [session?.user?.id]);
+
+  // Real-time subscription
+  useEffect(() => {
+    if (!session?.user?.id) return;
+
+    const channel = supabase
+      .channel('notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${session.user.id}`
+        },
+        (payload) => {
+          const newNotification = payload.new as Notification;
+          setNotifications((prev) => [newNotification, ...prev]);
+          
+          // Show toast for new notification
+          toast(newNotification.title, {
+            description: newNotification.message,
+            icon: getIcon(newNotification.type),
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${session.user.id}`
+        },
+        (payload) => {
+          const updatedNotification = payload.new as Notification;
+          setNotifications((prev) =>
+            prev.map((n) => (n.id === updatedNotification.id ? updatedNotification : n))
+          );
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${session.user.id}`
+        },
+        (payload) => {
+          setNotifications((prev) => prev.filter((n) => n.id !== payload.old.id));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [session?.user?.id]);
+
+  const markAsRead = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("notifications")
+        .update({ read: true })
+        .eq("id", id);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      toast.error("Failed to mark notification as read");
+    }
   };
 
-  const deleteNotification = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  const markAllAsRead = async () => {
+    if (!session?.user?.id) return;
+
+    try {
+      const { error } = await supabase
+        .from("notifications")
+        .update({ read: true })
+        .eq("user_id", session.user.id)
+        .eq("read", false);
+
+      if (error) throw error;
+
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      toast.success("All notifications marked as read");
+    } catch (error) {
+      console.error("Error marking all as read:", error);
+      toast.error("Failed to mark all as read");
+    }
+  };
+
+  const deleteNotification = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("notifications")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+      toast.error("Failed to delete notification");
+    }
+  };
+
+  const handleActionClick = (notification: Notification) => {
+    if (notification.action_url) {
+      navigate(notification.action_url);
+      markAsRead(notification.id);
+    }
   };
 
   const getIcon = (type: string) => {
@@ -84,7 +199,8 @@ export function NotificationsCenter() {
     }
   };
 
-  const formatTimestamp = (date: Date) => {
+  const formatTimestamp = (dateString: string) => {
+    const date = new Date(dateString);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const minutes = Math.floor(diff / 60000);
@@ -105,7 +221,7 @@ export function NotificationsCenter() {
           {unreadCount > 0 && (
             <Badge
               variant="destructive"
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs animate-pulse"
             >
               {unreadCount}
             </Badge>
@@ -128,7 +244,11 @@ export function NotificationsCenter() {
         </div>
         <DropdownMenuSeparator />
         <ScrollArea className="h-[400px]">
-          {notifications.length === 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <Bell className="h-8 w-8 text-muted-foreground mb-2" />
               <p className="text-sm text-muted-foreground">No notifications</p>
@@ -137,9 +257,12 @@ export function NotificationsCenter() {
             notifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`group relative px-2 py-3 hover:bg-accent transition-colors ${
+                className={`group relative px-2 py-3 hover:bg-accent transition-colors cursor-pointer ${
                   !notification.read ? "bg-accent/50" : ""
                 }`}
+                onClick={() => {
+                  if (!notification.read) markAsRead(notification.id);
+                }}
               >
                 <div className="flex items-start gap-3">
                   <div className="mt-1">{getIcon(notification.type)}</div>
@@ -154,7 +277,10 @@ export function NotificationsCenter() {
                             variant="ghost"
                             size="icon"
                             className="h-6 w-6"
-                            onClick={() => markAsRead(notification.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              markAsRead(notification.id);
+                            }}
                           >
                             <Check className="h-3 w-3" />
                           </Button>
@@ -163,7 +289,10 @@ export function NotificationsCenter() {
                           variant="ghost"
                           size="icon"
                           className="h-6 w-6"
-                          onClick={() => deleteNotification(notification.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteNotification(notification.id);
+                          }}
                         >
                           <X className="h-3 w-3" />
                         </Button>
@@ -173,16 +302,19 @@ export function NotificationsCenter() {
                       {notification.message}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {formatTimestamp(notification.timestamp)}
+                      {formatTimestamp(notification.created_at)}
                     </p>
-                    {notification.action && (
+                    {notification.action_url && notification.action_label && (
                       <Button
                         variant="link"
                         size="sm"
                         className="h-auto p-0 text-xs"
-                        onClick={notification.action.onClick}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleActionClick(notification);
+                        }}
                       >
-                        {notification.action.label}
+                        {notification.action_label}
                       </Button>
                     )}
                   </div>
