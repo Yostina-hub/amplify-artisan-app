@@ -8,8 +8,7 @@ import { Link } from "react-router-dom";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AnimatedSocialShowcase } from "@/components/AnimatedSocialShowcase";
-import { AdminGrowthShowcase } from "@/components/AdminGrowthShowcase";
+import { UnifiedGrowthShowcase } from "@/components/UnifiedGrowthShowcase";
 
 interface LocationMetric {
   country: string;
@@ -730,11 +729,8 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      {/* Admin Growth Showcase */}
-      <AdminGrowthShowcase />
-
-      {/* Animated Social Media Showcase */}
-      <AnimatedSocialShowcase />
+      {/* Unified Growth Showcase */}
+      <UnifiedGrowthShowcase userType="admin" />
 
       <Card className="border-2 hover:shadow-xl transition-all duration-300 hover:border-primary/20 animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-[1000ms]">
         <CardHeader>
