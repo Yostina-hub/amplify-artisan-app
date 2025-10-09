@@ -120,6 +120,7 @@ export function CommandPalette() {
     { id: "admin-companies", label: "Company Management", icon: Building2, action: () => navigate("/admin/companies"), group: "Super Admin", requiresRole: "superadmin" },
     { id: "admin-branches", label: "Branch Management", icon: Building2, action: () => navigate("/admin/branches"), group: "Super Admin", requiresRole: "superadmin" },
     { id: "admin-permissions", label: "Permissions", icon: Shield, action: () => navigate("/admin/permissions"), group: "Super Admin", requiresRole: "superadmin" },
+    { id: "admin-moderation", label: "Content Moderation", icon: Shield, action: () => navigate("/admin/moderation"), group: "Super Admin", requiresRole: "superadmin" },
     { id: "admin-platforms", label: "Social Platforms", icon: Globe, action: () => navigate("/admin/social-platforms"), group: "Super Admin", requiresRole: "superadmin" },
     { id: "admin-api", label: "API Management", icon: Database, action: () => navigate("/admin/api-management"), group: "Super Admin", requiresRole: "superadmin" },
     

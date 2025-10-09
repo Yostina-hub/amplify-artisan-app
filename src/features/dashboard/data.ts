@@ -346,6 +346,15 @@ export const SERVICES: Service[] = [
     category: 'admin'
   },
   { 
+    id: 'content-moderation', 
+    title: 'Content Moderation', 
+    value: 'Review & moderate content.', 
+    path: '/admin/moderation',
+    icon: Shield,
+    category: 'admin',
+    requiresRole: 'admin'
+  },
+  { 
     id: 'help', 
     title: 'Help & Support', 
     value: 'Get help when you need it.', 
