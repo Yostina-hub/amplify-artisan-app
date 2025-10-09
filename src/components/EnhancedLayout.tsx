@@ -3,7 +3,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { LogOut, User, Settings, Sun, Moon, Zap, Activity, Wifi } from "lucide-react";
+import { LogOut, User, Settings, Sun, Moon, Zap, Activity, Wifi, PanelLeftClose, PanelLeft } from "lucide-react";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import {
   DropdownMenu,
@@ -91,7 +91,10 @@ export function EnhancedLayout() {
             <div className="flex items-center justify-between h-full px-6">
               {/* Left Section */}
               <div className="flex items-center gap-4">
-                <SidebarTrigger className="hover:bg-primary/10 transition-colors" />
+                <SidebarTrigger className="hover:bg-primary/10 transition-colors">
+                  <PanelLeft className="h-5 w-5" />
+                  <span className="sr-only">Toggle Sidebar</span>
+                </SidebarTrigger>
                 
                 {/* Breadcrumb Navigation */}
                 <Separator orientation="vertical" className="h-6" />
