@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { usePermissions } from "@/hooks/usePermissions";
 import {
   CommandDialog,
   CommandEmpty,
@@ -38,11 +40,15 @@ interface CommandItem {
   action: () => void;
   group: string;
   keywords?: string[];
+  requiresRole?: "admin" | "superadmin";
+  requiresPermission?: string;
 }
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const { isSuperAdmin, isCompanyAdmin, hasRole } = useAuth();
+  const { hasPermission } = usePermissions();
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -56,41 +62,78 @@ export function CommandPalette() {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  const commands: CommandItem[] = [
+  const allCommands: CommandItem[] = [
     // Navigation
     { id: "nav-dashboard", label: "Dashboard", icon: Home, action: () => navigate("/dashboard"), group: "Navigation" },
-    { id: "nav-contacts", label: "Contacts", icon: Users, action: () => navigate("/contacts"), group: "Navigation" },
-    { id: "nav-accounts", label: "Accounts", icon: Building2, action: () => navigate("/accounts"), group: "Navigation" },
-    { id: "nav-leads", label: "Leads", icon: UserPlus, action: () => navigate("/leads"), group: "Navigation" },
-    { id: "nav-analytics", label: "Analytics", icon: BarChart3, action: () => navigate("/admin/reach-analytics"), group: "Navigation" },
     { id: "nav-calendar", label: "Calendar", icon: Calendar, action: () => navigate("/calendar"), group: "Navigation" },
+    
+    // Social Media
+    { id: "social-composer", label: "Composer", icon: MessageCircle, action: () => navigate("/composer"), group: "Social Media" },
+    { id: "social-inbox", label: "Social Inbox", icon: MessageCircle, action: () => navigate("/social-inbox"), group: "Social Media" },
+    { id: "social-listening", label: "Social Listening", icon: Globe, action: () => navigate("/social-listening"), group: "Social Media" },
+    { id: "social-monitoring", label: "Brand Monitoring", icon: Globe, action: () => navigate("/brand-monitoring"), group: "Social Media" },
+    { id: "social-intelligence", label: "Social Intelligence", icon: Sparkles, action: () => navigate("/social-intelligence"), group: "Social Media" },
+    { id: "social-metrics", label: "Social Metrics", icon: BarChart3, action: () => navigate("/social-media-metrics"), group: "Social Media" },
+    
+    // Marketing
+    { id: "marketing-ads", label: "Ad Campaigns", icon: Globe, action: () => navigate("/ad-campaigns"), group: "Marketing" },
+    { id: "marketing-influencer", label: "Influencer Marketing", icon: Users, action: () => navigate("/influencer-marketing"), group: "Marketing" },
+    { id: "marketing-email", label: "Email Marketing", icon: Mail, action: () => navigate("/email-marketing"), group: "Marketing" },
+    { id: "marketing-analytics", label: "Analytics", icon: BarChart3, action: () => navigate("/analytics"), group: "Marketing" },
     
     // AI Features
     { id: "ai-studio", label: "AI Content Studio", icon: Sparkles, action: () => navigate("/ai-studio"), group: "AI Features" },
-    { id: "ai-inbox", label: "Social Inbox", icon: MessageCircle, action: () => navigate("/social-inbox"), group: "AI Features" },
     { id: "ai-automation", label: "Automation", icon: Zap, action: () => navigate("/automation"), group: "AI Features" },
     { id: "ai-analytics", label: "AI Analytics", icon: BarChart3, action: () => navigate("/ai-analytics"), group: "AI Features" },
     
     // CRM
+    { id: "crm-contacts", label: "Contacts", icon: Users, action: () => navigate("/contacts"), group: "CRM" },
+    { id: "crm-accounts", label: "Accounts", icon: Building2, action: () => navigate("/accounts"), group: "CRM" },
+    { id: "crm-leads", label: "Leads", icon: UserPlus, action: () => navigate("/leads"), group: "CRM" },
     { id: "crm-pipeline", label: "Sales Pipeline", icon: BarChart3, action: () => navigate("/pipeline"), group: "CRM" },
+    { id: "crm-activities", label: "Activities", icon: Calendar, action: () => navigate("/activities"), group: "CRM" },
+    { id: "crm-products", label: "Products", icon: Database, action: () => navigate("/products"), group: "CRM" },
     { id: "crm-quotes", label: "Quotes", icon: FileText, action: () => navigate("/quotes"), group: "CRM" },
     { id: "crm-invoices", label: "Invoices", icon: FileCheck, action: () => navigate("/invoices"), group: "CRM" },
     { id: "crm-payments", label: "Payments", icon: CreditCard, action: () => navigate("/payments"), group: "CRM" },
-    { id: "crm-support", label: "Customer Support", icon: Phone, action: () => navigate("/customer-support"), group: "CRM" },
-    { id: "crm-callcenter", label: "Call Center", icon: Phone, action: () => navigate("/call-center"), group: "CRM" },
+    { id: "crm-reports", label: "Reports", icon: FileText, action: () => navigate("/reports"), group: "CRM" },
+    { id: "crm-documents", label: "Documents", icon: FileText, action: () => navigate("/documents"), group: "CRM" },
+    { id: "crm-territory", label: "Territory Management", icon: Globe, action: () => navigate("/territory-management"), group: "CRM" },
+    { id: "crm-contracts", label: "Contract Management", icon: FileCheck, action: () => navigate("/contract-management"), group: "CRM" },
     
-    // Admin
-    { id: "admin-users", label: "User Management", icon: Users, action: () => navigate("/admin/users"), group: "Admin" },
-    { id: "admin-companies", label: "Company Management", icon: Building2, action: () => navigate("/admin/companies"), group: "Admin" },
-    { id: "admin-branches", label: "Branch Management", icon: Building2, action: () => navigate("/admin/branches"), group: "Admin" },
-    { id: "admin-permissions", label: "Permissions", icon: Shield, action: () => navigate("/admin/permissions"), group: "Admin" },
-    { id: "admin-api", label: "API Management", icon: Database, action: () => navigate("/admin/api-management"), group: "Admin" },
-    { id: "admin-platforms", label: "Social Platforms", icon: Globe, action: () => navigate("/admin/social-platforms"), group: "Admin" },
+    // Service & Support
+    { id: "service-support", label: "Customer Support", icon: Phone, action: () => navigate("/customer-support"), group: "Service" },
+    { id: "service-callcenter", label: "Call Center", icon: Phone, action: () => navigate("/call-center"), group: "Service" },
+    { id: "service-reports", label: "Call Reports", icon: BarChart3, action: () => navigate("/call-reports"), group: "Service" },
+    
+    // Projects
+    { id: "projects", label: "Project Management", icon: Database, action: () => navigate("/project-management"), group: "Projects" },
+    
+    // Admin - Company
+    { id: "company-email", label: "Email Settings", icon: Mail, action: () => navigate("/company/email-settings"), group: "Company Admin", requiresRole: "admin" },
+    { id: "company-audit", label: "Audit Log", icon: Shield, action: () => navigate("/company/audit-log"), group: "Company Admin", requiresRole: "admin" },
+    { id: "company-platforms", label: "Platform Subscriptions", icon: Globe, action: () => navigate("/company/platform-subscriptions"), group: "Company Admin", requiresRole: "admin" },
+    { id: "company-api", label: "API Management", icon: Database, action: () => navigate("/company/api-management"), group: "Company Admin", requiresRole: "admin" },
+    
+    // Admin - Super
+    { id: "admin-users", label: "User Management", icon: Users, action: () => navigate("/admin/users"), group: "Super Admin", requiresRole: "superadmin" },
+    { id: "admin-companies", label: "Company Management", icon: Building2, action: () => navigate("/admin/companies"), group: "Super Admin", requiresRole: "superadmin" },
+    { id: "admin-branches", label: "Branch Management", icon: Building2, action: () => navigate("/admin/branches"), group: "Super Admin", requiresRole: "superadmin" },
+    { id: "admin-permissions", label: "Permissions", icon: Shield, action: () => navigate("/admin/permissions"), group: "Super Admin", requiresRole: "superadmin" },
+    { id: "admin-platforms", label: "Social Platforms", icon: Globe, action: () => navigate("/admin/social-platforms"), group: "Super Admin", requiresRole: "superadmin" },
+    { id: "admin-api", label: "API Management", icon: Database, action: () => navigate("/admin/api-management"), group: "Super Admin", requiresRole: "superadmin" },
     
     // Settings
     { id: "settings", label: "Settings", icon: Settings, action: () => navigate("/settings"), group: "Settings" },
-    { id: "settings-email", label: "Email Settings", icon: Mail, action: () => navigate("/company/email-settings"), group: "Settings" },
+    { id: "help", label: "Help", icon: Phone, action: () => navigate("/help"), group: "Settings" },
   ];
+
+  // Filter commands based on user permissions
+  const commands = allCommands.filter(cmd => {
+    if (cmd.requiresRole === "superadmin") return isSuperAdmin;
+    if (cmd.requiresRole === "admin") return isSuperAdmin || isCompanyAdmin;
+    return true;
+  });
 
   const handleSelect = (action: () => void) => {
     setOpen(false);
@@ -115,7 +158,7 @@ export function CommandPalette() {
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
           
-          {["Navigation", "AI Features", "CRM", "Admin", "Settings"].map((group) => {
+          {["Navigation", "Social Media", "Marketing", "AI Features", "CRM", "Service", "Projects", "Company Admin", "Super Admin", "Settings"].map((group) => {
             const groupCommands = commands.filter((cmd) => cmd.group === group);
             if (groupCommands.length === 0) return null;
             
