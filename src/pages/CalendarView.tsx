@@ -56,6 +56,8 @@ export default function CalendarView() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
+  const [isEditEventOpen, setIsEditEventOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [newEvent, setNewEvent] = useState({
     title: "",
@@ -236,6 +238,87 @@ export default function CalendarView() {
     }
   };
 
+  const handleEditEvent = (event: Event) => {
+    setEditingEvent(event);
+    setNewEvent({
+      title: event.title,
+      description: event.description,
+      date: event.date,
+      time: event.time,
+      endTime: event.endTime || "",
+      category: event.category,
+      location: event.location || "",
+    });
+    setIsEditEventOpen(true);
+  };
+
+  const handleUpdateEvent = async () => {
+    if (!session?.user?.id || !editingEvent) {
+      toast.error("You must be logged in to update events");
+      return;
+    }
+
+    if (!newEvent.title.trim()) {
+      toast.error("Please enter an event title");
+      return;
+    }
+
+    try {
+      const eventDateTime = new Date(newEvent.date);
+      if (newEvent.time) {
+        const [hours, minutes] = newEvent.time.split(':');
+        eventDateTime.setHours(parseInt(hours), parseInt(minutes));
+      }
+
+      const { data, error } = await supabase
+        .from("calendar_events")
+        .update({
+          title: newEvent.title,
+          description: newEvent.description,
+          event_date: eventDateTime.toISOString(),
+          event_time: newEvent.time,
+          end_time: newEvent.endTime,
+          category: newEvent.category,
+          location: newEvent.location || null,
+        })
+        .eq("id", editingEvent.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const updatedEvent: Event = {
+        id: data.id,
+        title: data.title,
+        description: data.description || "",
+        date: new Date(data.event_date),
+        time: data.event_time || "",
+        endTime: data.end_time || undefined,
+        category: data.category as Event["category"],
+        location: data.location || undefined,
+        color: categoryColors[data.category as Event["category"]],
+      };
+
+      setEvents(events.map(e => e.id === updatedEvent.id ? updatedEvent : e));
+      setIsEditEventOpen(false);
+      setEditingEvent(null);
+      toast.success("Event updated successfully!");
+      
+      setNewEvent({
+        title: "",
+        description: "",
+        date: new Date(),
+        time: "",
+        endTime: "",
+        category: "meeting",
+        location: "",
+      });
+    } catch (error) {
+      console.error("Error updating event:", error);
+      toast.error("Failed to update event");
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -362,6 +445,105 @@ export default function CalendarView() {
                     />
                   </div>
                   <Button onClick={handleAddEvent} className="w-full">Create Event</Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Edit Event Dialog */}
+            <Dialog open={isEditEventOpen} onOpenChange={setIsEditEventOpen}>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Edit Event</DialogTitle>
+                  <DialogDescription>
+                    Update your calendar event
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-title">Event Title</Label>
+                    <Input
+                      id="edit-title"
+                      placeholder="Team Meeting"
+                      value={newEvent.title}
+                      onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-description">Description</Label>
+                    <Textarea
+                      id="edit-description"
+                      placeholder="Discuss project updates..."
+                      value={newEvent.description}
+                      onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Date</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className="w-full justify-start text-left font-normal">
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {format(newEvent.date, "PPP")}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <CalendarComponent
+                            mode="single"
+                            selected={newEvent.date}
+                            onSelect={(date) => date && setNewEvent({ ...newEvent, date })}
+                            initialFocus
+                            className="pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-category">Category</Label>
+                      <Select value={newEvent.category} onValueChange={(value: Event["category"]) => setNewEvent({ ...newEvent, category: value })}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="meeting">Meeting</SelectItem>
+                          <SelectItem value="deadline">Deadline</SelectItem>
+                          <SelectItem value="social">Social</SelectItem>
+                          <SelectItem value="personal">Personal</SelectItem>
+                          <SelectItem value="work">Work</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-time">Start Time</Label>
+                      <Input
+                        id="edit-time"
+                        type="time"
+                        value={newEvent.time}
+                        onChange={(e) => setNewEvent({ ...newEvent, time: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-endTime">End Time</Label>
+                      <Input
+                        id="edit-endTime"
+                        type="time"
+                        value={newEvent.endTime}
+                        onChange={(e) => setNewEvent({ ...newEvent, endTime: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-location">Location (Optional)</Label>
+                    <Input
+                      id="edit-location"
+                      placeholder="Conference Room A"
+                      value={newEvent.location}
+                      onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
+                    />
+                  </div>
+                  <Button onClick={handleUpdateEvent} className="w-full">Update Event</Button>
                 </div>
               </DialogContent>
             </Dialog>
@@ -506,6 +688,15 @@ export default function CalendarView() {
                                     {event.category}
                                   </Badge>
                                   <div className="flex gap-2 pt-2">
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline" 
+                                      className="flex-1"
+                                      onClick={() => handleEditEvent(event)}
+                                    >
+                                      <Edit className="h-3 w-3 mr-1" />
+                                      Edit
+                                    </Button>
                                     <Button 
                                       size="sm" 
                                       variant="outline" 
