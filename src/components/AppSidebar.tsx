@@ -20,7 +20,6 @@ const mainItems = [
   { title: "Layout Showcase", url: "/layout-showcase", icon: Layout },
   { title: "Composer", url: "/composer", icon: FileText },
   { title: "Calendar", url: "/calendar", icon: Calendar },
-  { title: "Settings", url: "/settings", icon: Settings },
 ];
 
 const analyticsItems = [
@@ -189,23 +188,6 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              
-              {/* Help & Documentation */}
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <NavLink
-                    to="/help"
-                    className={({ isActive }) =>
-                      isActive
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                        : "hover:bg-sidebar-accent/50"
-                    }
-                  >
-                    <FileText className="h-4 w-4" />
-                    <span>Help</span>
-                  </NavLink>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
