@@ -11,10 +11,12 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronLeft, ChevronRight, Plus, Clock, MapPin, Users, Tag, Search, Filter, Calendar as CalendarIcon, MoreVertical, Edit, Trash, Copy } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Event {
   id: string;
@@ -46,44 +48,15 @@ const categoryBadgeColors = {
 };
 
 export default function CalendarView() {
+  const { session } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [view, setView] = useState<"month" | "week" | "day">("month");
-  const [events, setEvents] = useState<Event[]>([
-    {
-      id: "1",
-      title: "Team Standup",
-      description: "Daily team sync meeting",
-      date: new Date(2025, 9, 15, 10, 0),
-      time: "10:00 AM",
-      endTime: "10:30 AM",
-      category: "meeting",
-      location: "Conference Room A",
-      attendees: ["John", "Sarah", "Mike"],
-      color: categoryColors.meeting,
-    },
-    {
-      id: "2",
-      title: "Project Deadline",
-      description: "Submit final deliverables",
-      date: new Date(2025, 9, 20, 17, 0),
-      time: "5:00 PM",
-      category: "deadline",
-      color: categoryColors.deadline,
-    },
-    {
-      id: "3",
-      title: "Social Media Campaign Launch",
-      description: "Launch Q4 social media campaign",
-      date: new Date(2025, 9, 18, 9, 0),
-      time: "9:00 AM",
-      category: "social",
-      color: categoryColors.social,
-    },
-  ]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [newEvent, setNewEvent] = useState({
     title: "",
     description: "",
@@ -108,6 +81,46 @@ export default function CalendarView() {
 
   const monthName = currentDate.toLocaleString("default", { month: "long" });
   const year = currentDate.getFullYear();
+
+  // Fetch events from database
+  const fetchEvents = async () => {
+    if (!session?.user?.id) return;
+    
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("calendar_events")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .order("event_date", { ascending: true });
+
+      if (error) throw error;
+
+      const formattedEvents: Event[] = (data || []).map((event) => ({
+        id: event.id,
+        title: event.title,
+        description: event.description || "",
+        date: new Date(event.event_date),
+        time: event.event_time || "",
+        endTime: event.end_time || undefined,
+        category: event.category as Event["category"],
+        location: event.location || undefined,
+        attendees: event.attendees || undefined,
+        color: categoryColors[event.category as Event["category"]],
+      }));
+
+      setEvents(formattedEvents);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      toast.error("Failed to load events");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, [session?.user?.id]);
 
   const previousMonth = () => {
     setCurrentDate(
@@ -137,36 +150,102 @@ export default function CalendarView() {
     .sort((a, b) => a.date.getTime() - b.date.getTime())
     .slice(0, 5);
 
-  const handleAddEvent = () => {
-    const event: Event = {
-      id: Date.now().toString(),
-      title: newEvent.title,
-      description: newEvent.description,
-      date: newEvent.date,
-      time: newEvent.time,
-      endTime: newEvent.endTime,
-      category: newEvent.category,
-      location: newEvent.location,
-      color: categoryColors[newEvent.category],
-    };
-    setEvents([...events, event]);
-    setIsAddEventOpen(false);
-    toast.success("Event added successfully!");
-    setNewEvent({
-      title: "",
-      description: "",
-      date: new Date(),
-      time: "",
-      endTime: "",
-      category: "meeting",
-      location: "",
-    });
+  const handleAddEvent = async () => {
+    if (!session?.user?.id) {
+      toast.error("You must be logged in to create events");
+      return;
+    }
+
+    if (!newEvent.title.trim()) {
+      toast.error("Please enter an event title");
+      return;
+    }
+
+    try {
+      // Combine date and time for the event_date
+      const eventDateTime = new Date(newEvent.date);
+      if (newEvent.time) {
+        const [hours, minutes] = newEvent.time.split(':');
+        eventDateTime.setHours(parseInt(hours), parseInt(minutes));
+      }
+
+      const { data, error } = await supabase
+        .from("calendar_events")
+        .insert({
+          user_id: session.user.id,
+          title: newEvent.title,
+          description: newEvent.description,
+          event_date: eventDateTime.toISOString(),
+          event_time: newEvent.time,
+          end_time: newEvent.endTime,
+          category: newEvent.category,
+          location: newEvent.location || null,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Add to local state
+      const newEventObj: Event = {
+        id: data.id,
+        title: data.title,
+        description: data.description || "",
+        date: new Date(data.event_date),
+        time: data.event_time || "",
+        endTime: data.end_time || undefined,
+        category: data.category as Event["category"],
+        location: data.location || undefined,
+        color: categoryColors[data.category as Event["category"]],
+      };
+
+      setEvents([...events, newEventObj]);
+      setIsAddEventOpen(false);
+      toast.success("Event created successfully!");
+      
+      // Reset form
+      setNewEvent({
+        title: "",
+        description: "",
+        date: new Date(),
+        time: "",
+        endTime: "",
+        category: "meeting",
+        location: "",
+      });
+    } catch (error) {
+      console.error("Error creating event:", error);
+      toast.error("Failed to create event");
+    }
   };
 
-  const handleDeleteEvent = (id: string) => {
-    setEvents(events.filter((e) => e.id !== id));
-    toast.success("Event deleted successfully!");
+  const handleDeleteEvent = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("calendar_events")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      setEvents(events.filter((e) => e.id !== id));
+      toast.success("Event deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      toast.error("Failed to delete event");
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading calendar...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 animate-in fade-in-50 duration-700">
@@ -427,10 +506,6 @@ export default function CalendarView() {
                                     {event.category}
                                   </Badge>
                                   <div className="flex gap-2 pt-2">
-                                    <Button size="sm" variant="outline" className="flex-1">
-                                      <Edit className="h-3 w-3 mr-1" />
-                                      Edit
-                                    </Button>
                                     <Button 
                                       size="sm" 
                                       variant="outline" 

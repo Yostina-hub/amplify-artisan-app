@@ -791,6 +791,62 @@ export type Database = {
           },
         ]
       }
+      calendar_events: {
+        Row: {
+          attendees: string[] | null
+          category: string
+          company_id: string | null
+          created_at: string | null
+          description: string | null
+          end_time: string | null
+          event_date: string
+          event_time: string | null
+          id: string
+          location: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          attendees?: string[] | null
+          category: string
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          end_time?: string | null
+          event_date: string
+          event_time?: string | null
+          id?: string
+          location?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          attendees?: string[] | null
+          category?: string
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          end_time?: string | null
+          event_date?: string
+          event_time?: string | null
+          id?: string
+          location?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       call_campaigns: {
         Row: {
           call_window_end: string | null
