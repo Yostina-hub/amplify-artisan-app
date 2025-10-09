@@ -36,6 +36,7 @@ import { EmailModule } from './email/email.module';
 import { AutomationModule } from './automation/automation.module';
 import { CallCenterModule } from './call-center/call-center.module';
 import { ActivitiesModule } from './activities/activities.module';
+import { SocialPostsModule } from './social-posts/social-posts.module';
 
 @Module({
   imports: [
@@ -88,6 +89,7 @@ import { ActivitiesModule } from './activities/activities.module';
     AutomationModule,
     CallCenterModule,
     ActivitiesModule,
+    SocialPostsModule,
   ],
 })
 export class AppModule {}
