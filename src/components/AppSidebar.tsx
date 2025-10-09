@@ -16,6 +16,7 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const mainItems = [
+  { title: "Admin Dashboard", url: "/admin", icon: Shield },
   { title: "Layout Showcase", url: "/layout-showcase", icon: Layout },
   { title: "Composer", url: "/composer", icon: FileText },
   { title: "Calendar", url: "/calendar", icon: Calendar },
@@ -90,7 +91,6 @@ const companyAdminItems = [
 ];
 
 const adminManagementItems = [
-  { title: "Admin Dashboard", url: "/admin", icon: Shield },
   { title: "Company Management", url: "/admin/companies", icon: Building2 },
   { title: "User Management", url: "/admin/users", icon: Users },
   { title: "Content Moderation", url: "/admin/moderation", icon: Flag },
