@@ -46,10 +46,12 @@ interface Company {
   company_size: string | null;
   address: string | null;
   status: string;
-  rejection_reason: string | null;
-  applied_at: string;
+  is_active: boolean;
+  pricing_plan_id: string | null;
   approved_at: string | null;
+  approved_by: string | null;
   created_at: string;
+  updated_at: string;
 }
 
 export default function CompanyManagement() {
@@ -97,7 +99,7 @@ export default function CompanyManagement() {
       }
 
       const { data, error, count } = await query
-        .order("applied_at", { ascending: false })
+        .order("created_at", { ascending: false })
         .range(pagination.getRangeStart(), pagination.getRangeEnd());
 
       if (error) throw error;
@@ -121,6 +123,7 @@ export default function CompanyManagement() {
         .from("companies")
         .update({
           status: "approved",
+          is_active: true,
           approved_at: new Date().toISOString(),
           approved_by: user?.id,
         })
@@ -149,11 +152,14 @@ export default function CompanyManagement() {
     }
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+
       const { error } = await supabase
         .from("companies")
         .update({
           status: "rejected",
-          rejection_reason: rejectionReason,
+          is_active: false,
+          approved_by: user?.id,
         })
         .eq("id", selectedCompany.id);
 
@@ -180,7 +186,10 @@ export default function CompanyManagement() {
     try {
       const { error } = await supabase
         .from("companies")
-        .update({ status: "suspended" })
+        .update({
+          status: "rejected",
+          is_active: false
+        })
         .eq("id", company.id);
 
       if (error) throw error;
@@ -391,7 +400,7 @@ export default function CompanyManagement() {
                     <TableCell>{company.company_size || "—"}</TableCell>
                     <TableCell>{getStatusBadge(company.status)}</TableCell>
                     <TableCell className="text-muted-foreground">
-                      {new Date(company.applied_at).toLocaleDateString()}
+                      {new Date(company.created_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
@@ -620,7 +629,7 @@ export default function CompanyManagement() {
                 <div>
                   <Label className="text-muted-foreground">Applied Date</Label>
                   <p className="font-medium">
-                    {new Date(selectedCompany.applied_at).toLocaleDateString()}
+                    {new Date(selectedCompany.created_at).toLocaleDateString()}
                   </p>
                 </div>
                 {selectedCompany.approved_at && (
