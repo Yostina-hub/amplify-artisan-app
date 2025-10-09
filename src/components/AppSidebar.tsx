@@ -134,6 +134,9 @@ export function AppSidebar() {
   const { hasRole, roles, isCompanyAdmin, isSuperAdmin } = useAuth();
   const isCollapsed = state === "collapsed";
   const [analyticsOpen, setAnalyticsOpen] = useState(true);
+  const [aiOpen, setAiOpen] = useState(true);
+  const [builderOpen, setBuilderOpen] = useState(true);
+  const [crmOpen, setCrmOpen] = useState(true);
   const [marketingOpen, setMarketingOpen] = useState(false);
   const [monitoringOpen, setMonitoringOpen] = useState(false);
   const [adminManagementOpen, setAdminManagementOpen] = useState(true);
@@ -246,14 +249,14 @@ export function AppSidebar() {
         </Collapsible>
 
         {/* AI Features Section - Collapsible */}
-        <Collapsible open={true} onOpenChange={() => {}}>
+        <Collapsible open={aiOpen} onOpenChange={setAiOpen}>
           <SidebarGroup>
             {!isCollapsed && (
               <CollapsibleTrigger className="w-full" asChild>
                 <button className="w-full">
                   <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
                     <span className="font-medium">AI Features</span>
-                    <ChevronDown className="h-4 w-4 transition-transform duration-200 rotate-180" />
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${aiOpen ? 'rotate-180' : ''}`} />
                   </SidebarGroupLabel>
                 </button>
               </CollapsibleTrigger>
@@ -285,14 +288,14 @@ export function AppSidebar() {
         </Collapsible>
 
         {/* Enterprise Builder Section - Collapsible */}
-        <Collapsible open={true} onOpenChange={() => {}}>
+        <Collapsible open={builderOpen} onOpenChange={setBuilderOpen}>
           <SidebarGroup>
             {!isCollapsed && (
               <CollapsibleTrigger className="w-full" asChild>
                 <button className="w-full">
                   <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
                     <span className="font-medium">Enterprise Builder</span>
-                    <ChevronDown className="h-4 w-4 transition-transform duration-200 rotate-180" />
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${builderOpen ? 'rotate-180' : ''}`} />
                   </SidebarGroupLabel>
                 </button>
               </CollapsibleTrigger>
@@ -324,14 +327,14 @@ export function AppSidebar() {
         </Collapsible>
 
         {/* CRM Section - Collapsible */}
-        <Collapsible open={true} onOpenChange={() => {}}>
+        <Collapsible open={crmOpen} onOpenChange={setCrmOpen}>
           <SidebarGroup>
             {!isCollapsed && (
               <CollapsibleTrigger className="w-full" asChild>
                 <button className="w-full">
                   <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
                     <span className="font-medium">CRM</span>
-                    <ChevronDown className="h-4 w-4 transition-transform duration-200 rotate-180" />
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${crmOpen ? 'rotate-180' : ''}`} />
                   </SidebarGroupLabel>
                 </button>
               </CollapsibleTrigger>
