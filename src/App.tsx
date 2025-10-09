@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
+import { EnhancedLayout } from "./components/EnhancedLayout";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Index from "./pages/Index";
@@ -87,6 +88,7 @@ import PermissionManagement from "./pages/admin/PermissionManagement";
 import CallCenterIntegrations from "./pages/admin/CallCenterIntegrations";
 import CallReports from "./pages/CallReports";
 import FirewallManagement from "./pages/admin/FirewallManagement";
+import LayoutShowcase from "./pages/LayoutShowcase";
 
 const queryClient = new QueryClient();
 
@@ -107,11 +109,12 @@ const App = () => (
             <Route path="/company-application" element={<CompanyApplication />} />
             <Route path="*" element={<NotFound />} />
             
-            {/* Protected routes with shared layout */}
-            <Route element={<Layout />}>
+            {/* Protected routes with enhanced layout */}
+            <Route element={<EnhancedLayout />}>
               <Route path="/pending-approval" element={<ProtectedRoute allowUnapproved><PendingApproval /></ProtectedRoute>} />
               <Route path="/force-password" element={<ProtectedRoute allowUnapproved><ForcePasswordChange /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><DashboardRedirect /></ProtectedRoute>} />
+              <Route path="/layout-showcase" element={<ProtectedRoute><LayoutShowcase /></ProtectedRoute>} />
               <Route path="/company-dashboard" element={<ProtectedRoute><CompanyDashboard /></ProtectedRoute>} />
               <Route path="/user-dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/composer" element={<ProtectedRoute><Composer /></ProtectedRoute>} />

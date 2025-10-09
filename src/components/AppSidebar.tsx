@@ -17,6 +17,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 
 const mainItems = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
+  { title: "Layout Showcase", url: "/layout-showcase", icon: Layout },
   { title: "Composer", url: "/composer", icon: FileText },
   { title: "Calendar", url: "/calendar", icon: Calendar },
   { title: "Settings", url: "/settings", icon: Settings },
