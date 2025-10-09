@@ -699,7 +699,7 @@ export default function ReachAnalytics() {
                           <div className="flex items-center gap-2">
                             <Badge variant="outline">#{index + 1}</Badge>
                             <span className="text-xs text-muted-foreground">{new Date(post.created_at).toLocaleDateString()}</span>
-                            {post.platforms.map(platform => (<Badge key={platform} variant="secondary">{platform}</Badge>))}
+                            {(post.platforms || []).map(platform => (<Badge key={platform} variant="secondary">{platform}</Badge>))}
                           </div>
                           <p className="text-sm font-medium line-clamp-2">{post.content}</p>
                           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 text-xs">
@@ -735,7 +735,7 @@ export default function ReachAnalytics() {
             <CardHeader><CardTitle>Top Performing Campaigns</CardTitle><CardDescription>Based on click-through rate and engagement</CardDescription></CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {analytics?.topPerformingCampaigns.map((campaign, i) => (
+                {(analytics?.topPerformingCampaigns || []).map((campaign, i) => (
                   <div key={i} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                     <div className="flex-1">
                       <p className="font-medium">{campaign.name}</p>
@@ -862,15 +862,15 @@ export default function ReachAnalytics() {
             <>
               <Card><CardHeader><CardTitle className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" />AI-Powered Overview<Badge variant="secondary">{platforms.find(p => p.value === selectedPlatform)?.label}</Badge></CardTitle></CardHeader><CardContent><p className="text-foreground leading-relaxed">{aiInsights.overview}</p></CardContent></Card>
               <div className="grid gap-4 md:grid-cols-2">
-                <Card><CardHeader><CardTitle className="flex items-center gap-2"><TrendingUp className="h-5 w-5" />Top Performers</CardTitle></CardHeader><CardContent><div className="space-y-3">{aiInsights.top_performers.map((performer, i) => (<div key={i} className="flex items-center justify-between p-3 border rounded-lg"><div><p className="font-medium">{performer.name}</p><p className="text-sm text-muted-foreground">{performer.metric}</p></div><Badge variant="secondary">{performer.value}</Badge></div>))}</div></CardContent></Card>
+                <Card><CardHeader><CardTitle className="flex items-center gap-2"><TrendingUp className="h-5 w-5" />Top Performers</CardTitle></CardHeader><CardContent><div className="space-y-3">{(aiInsights.top_performers || []).map((performer, i) => (<div key={i} className="flex items-center justify-between p-3 border rounded-lg"><div><p className="font-medium">{performer.name}</p><p className="text-sm text-muted-foreground">{performer.metric}</p></div><Badge variant="secondary">{performer.value}</Badge></div>))}</div></CardContent></Card>
                 <Card><CardHeader><CardTitle className="flex items-center gap-2"><Users className="h-5 w-5" />Sentiment Analysis</CardTitle></CardHeader><CardContent><p className="text-foreground leading-relaxed">{aiInsights.sentiment_summary}</p></CardContent></Card>
               </div>
-              <Card><CardHeader><CardTitle className="flex items-center gap-2"><TrendingUp className="h-5 w-5 text-success" />Recommendations</CardTitle></CardHeader><CardContent><ul className="space-y-2">{aiInsights.recommendations.map((rec, i) => (<li key={i} className="flex items-start gap-2"><span className="text-success mt-1">✓</span><span>{rec}</span></li>))}</ul></CardContent></Card>
+              <Card><CardHeader><CardTitle className="flex items-center gap-2"><TrendingUp className="h-5 w-5 text-success" />Recommendations</CardTitle></CardHeader><CardContent><ul className="space-y-2">{(aiInsights.recommendations || []).map((rec, i) => (<li key={i} className="flex items-start gap-2"><span className="text-success mt-1">✓</span><span>{rec}</span></li>))}</ul></CardContent></Card>
               <div className="grid gap-4 md:grid-cols-2">
-                <Card><CardHeader><CardTitle className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" />Growth Opportunities</CardTitle></CardHeader><CardContent><ul className="space-y-2">{aiInsights.growth_opportunities.map((opp, i) => (<li key={i} className="flex items-start gap-2"><span className="text-primary mt-1">→</span><span>{opp}</span></li>))}</ul></CardContent></Card>
-                <Card><CardHeader><CardTitle className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" />Risk Alerts</CardTitle></CardHeader><CardContent><ul className="space-y-2">{aiInsights.risk_alerts.map((alert, i) => (<li key={i} className="flex items-center gap-2"><span className="text-destructive mt-1">⚠</span><span>{alert}</span></li>))}</ul></CardContent></Card>
+                <Card><CardHeader><CardTitle className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" />Growth Opportunities</CardTitle></CardHeader><CardContent><ul className="space-y-2">{(aiInsights.growth_opportunities || []).map((opp, i) => (<li key={i} className="flex items-start gap-2"><span className="text-primary mt-1">→</span><span>{opp}</span></li>))}</ul></CardContent></Card>
+                <Card><CardHeader><CardTitle className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" />Risk Alerts</CardTitle></CardHeader><CardContent><ul className="space-y-2">{(aiInsights.risk_alerts || []).map((alert, i) => (<li key={i} className="flex items-center gap-2"><span className="text-destructive mt-1">⚠</span><span>{alert}</span></li>))}</ul></CardContent></Card>
               </div>
-              <Card><CardHeader><CardTitle>Platform-Specific Tips</CardTitle></CardHeader><CardContent><ul className="space-y-2">{aiInsights.platform_specific_tips.map((tip, i) => (<li key={i} className="flex items-start gap-2"><span className="text-primary mt-1">💡</span><span>{tip}</span></li>))}</ul></CardContent></Card>
+              <Card><CardHeader><CardTitle>Platform-Specific Tips</CardTitle></CardHeader><CardContent><ul className="space-y-2">{(aiInsights.platform_specific_tips || []).map((tip, i) => (<li key={i} className="flex items-start gap-2"><span className="text-primary mt-1">💡</span><span>{tip}</span></li>))}</ul></CardContent></Card>
             </>
           ) : (
             <Card><CardContent className="p-12 text-center"><p className="text-muted-foreground">Click "Refresh AI Analysis" to generate insights</p></CardContent></Card>
