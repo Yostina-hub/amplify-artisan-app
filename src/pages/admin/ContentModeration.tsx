@@ -200,6 +200,21 @@ const ContentModeration = () => {
           .eq("id", post.id);
 
         if (updateError) throw updateError;
+
+        // Send approval notification to post creator
+        if (post.user_id) {
+          await createNotification({
+            userId: post.user_id,
+            companyId: post.company_id,
+            title: "Post Approved & Scheduled",
+            message: `Your post has been approved and scheduled for ${new Date(scheduledFor).toLocaleString()}`,
+            type: "success",
+            actionUrl: "/composer",
+            actionLabel: "View Post",
+            metadata: { postId: post.id }
+          });
+        }
+
         return { scheduled: true, scheduledFor };
       }
 
@@ -216,6 +231,20 @@ const ContentModeration = () => {
         .eq("id", post.id);
 
       if (updateError) throw updateError;
+
+      // Send approval notification to post creator
+      if (post.user_id) {
+        await createNotification({
+          userId: post.user_id,
+          companyId: post.company_id,
+          title: "Post Approved & Published",
+          message: "Your post has been approved and published to all platforms!",
+          type: "success",
+          actionUrl: "/composer",
+          actionLabel: "View Post",
+          metadata: { postId: post.id }
+        });
+      }
 
       // Post to each platform
       const platforms = post.platforms || [];
@@ -880,6 +909,55 @@ const ContentModeration = () => {
                       )}
                     </div>
                   </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="border-t pt-4 flex gap-3 justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      if (selectedPost) {
+                        recheckContentMutation.mutate(selectedPost);
+                      }
+                    }}
+                    disabled={recheckingPostId === selectedPost?.id}
+                    className="gap-2"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${recheckingPostId === selectedPost?.id ? 'animate-spin' : ''}`} />
+                    AI Recheck
+                  </Button>
+
+                  {(selectedPost.flagged || selectedPost.status === "draft" || selectedPost.status === "scheduled") && (
+                    <Button
+                      variant="default"
+                      onClick={() => {
+                        if (selectedPost) {
+                          approvePostMutation.mutate(selectedPost);
+                          setIsViewDialogOpen(false);
+                        }
+                      }}
+                      className="gap-2"
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                      Approve & Publish
+                    </Button>
+                  )}
+
+                  {selectedPost.status !== "rejected" && (
+                    <Button
+                      variant="destructive"
+                      onClick={() => {
+                        setPostToReject(selectedPost);
+                        setRejectionReason("");
+                        setIsViewDialogOpen(false);
+                        setIsRejectDialogOpen(true);
+                      }}
+                      className="gap-2"
+                    >
+                      <XCircle className="h-4 w-4" />
+                      Reject
+                    </Button>
+                  )}
                 </div>
               </div>
             )}
