@@ -95,6 +95,7 @@ export default function ReachAnalytics() {
   const [aiInsights, setAiInsights] = useState<AIInsights | null>(null);
   const [loading, setLoading] = useState(true);
   const [analyzingAI, setAnalyzingAI] = useState(false);
+  const [syncingAll, setSyncingAll] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState<string>('all');
   const { toast } = useToast();
 
@@ -286,6 +287,44 @@ export default function ReachAnalytics() {
 
   const syncTelegramMetrics = () => syncPlatformMetrics('telegram');
 
+  const syncAllPlatforms = async () => {
+    try {
+      setSyncingAll(true);
+      const platformsToSync = ['telegram', 'facebook', 'instagram', 'twitter', 'linkedin', 'youtube', 'tiktok'];
+      
+      toast({
+        title: "Syncing all platforms",
+        description: "This may take a moment...",
+      });
+
+      for (const platform of platformsToSync) {
+        try {
+          await supabase.functions.invoke('sync-social-metrics', {
+            body: { platform }
+          });
+        } catch (error) {
+          console.error(`Error syncing ${platform}:`, error);
+        }
+      }
+
+      await fetchAllData();
+      
+      toast({
+        title: "Sync complete",
+        description: "All platform metrics have been updated",
+      });
+    } catch (error: any) {
+      console.error('Error syncing all platforms:', error);
+      toast({
+        title: "Sync failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setSyncingAll(false);
+    }
+  };
+
   const fetchAccountData = async () => {
     try {
       // Check if user is admin
@@ -447,10 +486,21 @@ export default function ReachAnalytics() {
             Comprehensive analytics, metrics, and AI-powered insights across all channels
           </p>
         </div>
-        <Button variant="outline" onClick={() => fetchAIInsights()} disabled={analyzingAI}>
-          <Sparkles className="h-4 w-4 mr-2" />
-          {analyzingAI ? 'Analyzing...' : 'Refresh AI Analysis'}
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="default" 
+            onClick={syncAllPlatforms} 
+            disabled={syncingAll}
+            className="bg-gradient-to-r from-primary to-accent hover:opacity-90"
+          >
+            <TrendingUp className="h-4 w-4 mr-2" />
+            {syncingAll ? 'Syncing...' : 'Sync All'}
+          </Button>
+          <Button variant="outline" onClick={() => fetchAIInsights()} disabled={analyzingAI}>
+            <Sparkles className="h-4 w-4 mr-2" />
+            {analyzingAI ? 'Analyzing...' : 'Refresh AI Analysis'}
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
