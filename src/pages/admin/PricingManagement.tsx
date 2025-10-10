@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, DollarSign } from "lucide-react";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BillingSystemAlert } from "@/components/admin/BillingSystemAlert";
 
 interface PricingPlan {
   id: string;
@@ -166,6 +167,8 @@ const PricingManagement = () => {
 
   return (
     <div className="space-y-6">
+      <BillingSystemAlert />
+      
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Pricing Management</h1>

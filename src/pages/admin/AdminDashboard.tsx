@@ -363,14 +363,17 @@ export default function AdminDashboard() {
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3">
-                <AccordionTrigger>3. Platform Subscriptions</AccordionTrigger>
+                <AccordionTrigger>3. Billing & Subscriptions</AccordionTrigger>
                 <AccordionContent className="space-y-2">
-                  <p>Review and approve company requests to subscribe to social media platforms.</p>
-                  <Link to="/admin/subscriptions">
+                  <p>Unified billing management - subscriptions, payments, and pricing in one place.</p>
+                  <Link to="/admin/billing">
                     <Button variant="link" className="p-0 h-auto">
-                      Go to Subscriptions <ArrowRight className="ml-2 h-4 w-4" />
+                      Go to Billing Management <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
+                  <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-950 rounded-md text-xs">
+                    <strong>New!</strong> All subscription, payment, and pricing management consolidated into one dashboard.
+                  </div>
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-4">

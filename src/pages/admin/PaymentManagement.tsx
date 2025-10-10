@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DollarSign, TrendingUp, CreditCard, Users, Calendar } from "lucide-react";
 import { format, subDays, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { BillingSystemAlert } from "@/components/admin/BillingSystemAlert";
 
 type TimeRange = "today" | "week" | "month" | "all";
 
@@ -139,6 +140,8 @@ const PaymentManagement = () => {
 
   return (
     <div className="space-y-6 p-6">
+      <BillingSystemAlert />
+      
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Payment Management</h1>

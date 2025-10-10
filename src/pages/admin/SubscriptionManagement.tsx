@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CheckCircle, XCircle, Clock, DollarSign, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { BillingSystemAlert } from "@/components/admin/BillingSystemAlert";
 
 const SubscriptionManagement = () => {
   const queryClient = useQueryClient();
@@ -115,6 +116,8 @@ const SubscriptionManagement = () => {
 
   return (
     <div className="space-y-6">
+      <BillingSystemAlert />
+      
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Subscription Management</h1>
