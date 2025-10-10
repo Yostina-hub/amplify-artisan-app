@@ -257,6 +257,11 @@ const ContentModeration = () => {
       if (!matchesSearch) return false;
     }
 
+    // If statusFilter is set to "published", show published posts regardless of viewMode
+    if (statusFilter === "published") {
+      return post.status === "published";
+    }
+
     // View mode filter
     if (viewMode === "queue") {
       // Queue shows draft and scheduled posts (not flagged or rejected)
