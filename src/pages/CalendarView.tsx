@@ -20,7 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
 
-const TIMEZONES = ["UTC", "America/New_York", "Europe/London", "Asia/Tokyo"];
+const TIMEZONES = ["Africa/Addis_Ababa", "UTC", "America/New_York", "Europe/London", "Asia/Tokyo"];
 
 interface Event {
   id: string;
@@ -92,7 +92,7 @@ export default function CalendarView() {
   const [isEditEventOpen, setIsEditEventOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [timezone, setTimezone] = useState("UTC");
+  const [timezone, setTimezone] = useState("Africa/Addis_Ababa");
   const [newEvent, setNewEvent] = useState({
     title: "",
     description: "",
@@ -142,8 +142,8 @@ export default function CalendarView() {
           .from("social_media_posts")
           .select("*, profiles!social_media_posts_user_id_fkey(full_name), approved_profiles:profiles!social_media_posts_approved_by_fkey(full_name)")
           .eq("company_id", profile.company_id)
-          .not("scheduled_for", "is", null)
-          .order("scheduled_for", { ascending: true });
+          .or("scheduled_at.not.is.null,scheduled_for.not.is.null")
+          .order("scheduled_at", { ascending: true, nullsFirst: false });
 
         if (!postsError && postsData) {
           scheduledPosts = postsData;
@@ -163,29 +163,37 @@ export default function CalendarView() {
           location: event.location || undefined,
           attendees: event.attendees || undefined,
           color: categoryConfig[event.category as Event["category"]].gradient,
-          timezone: "UTC",
+          timezone: "Africa/Addis_Ababa",
           isRecurring: false,
           meetingLink: "",
         })),
-        ...scheduledPosts.map((post) => ({
-          id: `post-${post.id}`,
-          title: `📱 ${post.platforms?.join(", ")} Post`,
-          description: post.content || "",
-          date: new Date(post.scheduled_for),
-          time: new Date(post.scheduled_for).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
-          category: "social" as Event["category"],
-          color: categoryConfig.social.gradient,
-          metadata: {
-            type: "social_post",
-            postId: post.id,
-            platforms: post.platforms,
-            status: post.status,
-            postedBy: post.profiles?.full_name || "Unknown",
-            approvedBy: post.approved_profiles?.full_name || null,
-            approvedAt: post.approved_at,
-            scheduledFor: post.scheduled_for,
-          }
-        }))
+        ...scheduledPosts.map((post) => {
+          const scheduledDate = post.scheduled_at || post.scheduled_for;
+          return {
+            id: `post-${post.id}`,
+            title: `📱 ${post.platforms?.join(", ")} Post`,
+            description: post.content || "",
+            date: new Date(scheduledDate),
+            time: new Date(scheduledDate).toLocaleTimeString('en-US', { 
+              hour: '2-digit', 
+              minute: '2-digit', 
+              hour12: false,
+              timeZone: 'Africa/Addis_Ababa'
+            }),
+            category: "social" as Event["category"],
+            color: categoryConfig.social.gradient,
+            metadata: {
+              type: "social_post",
+              postId: post.id,
+              platforms: post.platforms,
+              status: post.status,
+              postedBy: post.profiles?.full_name || "Unknown",
+              approvedBy: post.approved_profiles?.full_name || null,
+              approvedAt: post.approved_at,
+              scheduledFor: scheduledDate,
+            }
+          };
+        })
       ];
 
       setEvents(formattedEvents);
@@ -324,7 +332,7 @@ export default function CalendarView() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {["UTC", "America/New_York", "America/Los_Angeles", "Europe/London", "Europe/Paris", "Asia/Tokyo", "Asia/Shanghai", "Asia/Dubai"].map(tz => (
+                {["Africa/Addis_Ababa", "UTC", "America/New_York", "America/Los_Angeles", "Europe/London", "Europe/Paris", "Asia/Tokyo", "Asia/Shanghai", "Asia/Dubai"].map(tz => (
                   <SelectItem key={tz} value={tz}>{tz}</SelectItem>
                 ))}
               </SelectContent>
