@@ -14,6 +14,9 @@ import { Plus, Edit, Trash2, User, Mail, Phone, Building2, Users, Sparkles, Down
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { PageHelp } from "@/components/PageHelp";
 import { ClickToCall } from "@/components/ClickToCall";
+import { AIAssistant } from "@/components/crm/AIAssistant";
+import { PredictiveInsights } from "@/components/crm/PredictiveInsights";
+import { SmartSearch } from "@/components/crm/SmartSearch";
 
 export default function Contacts() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -25,6 +28,7 @@ export default function Contacts() {
     dateTo: "",
     status: "all",
   });
+  const [aiInsights, setAiInsights] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -785,6 +789,31 @@ export default function Contacts() {
             </div>
           </CardContent>
         </Card>
+      )}
+      
+      {/* AI Features */}
+      <AIAssistant
+        context="Contact Management"
+        contextData={{
+          totalContacts: contacts?.length || 0,
+          activeContacts: contacts?.filter((c: any) => c.status === "active").length || 0,
+          recentContacts: contacts?.slice(0, 5) || []
+        }}
+        suggestions={[
+          "Which contacts haven't been contacted recently?",
+          "Show me high-value contacts",
+          "Find contacts needing follow-up",
+          "Analyze contact engagement patterns",
+        ]}
+      />
+      
+      {contacts && contacts.length > 0 && (
+        <div className="mt-6">
+          <PredictiveInsights
+            title="Contact Insights"
+            insights={aiInsights}
+          />
+        </div>
       )}
     </div>
   );

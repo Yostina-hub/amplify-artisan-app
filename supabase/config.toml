@@ -53,3 +53,12 @@ verify_jwt = false
 
 [functions.text-to-speech]
 verify_jwt = false
+
+[functions.ai-crm-assistant]
+verify_jwt = true
+
+[functions.ai-lead-scoring]
+verify_jwt = true
+
+[functions.ai-sales-forecast]
+verify_jwt = true
