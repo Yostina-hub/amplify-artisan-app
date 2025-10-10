@@ -10,6 +10,7 @@ import { PageHelp } from "@/components/PageHelp";
 import Softphone from "@/components/call-center/Softphone";
 import SipSettings from "@/components/call-center/SipSettings";
 import ExtensionAuth from "@/components/call-center/ExtensionAuth";
+import CallPreferences from "@/components/call-center/CallPreferences";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function CallCenter() {
@@ -305,6 +306,13 @@ export default function CallCenter() {
                 <FileText className="h-4 w-4 mr-2" />
                 Cases
               </TabsTrigger>
+              <TabsTrigger 
+                value="settings" 
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 py-3 text-base font-normal text-muted-foreground data-[state=active]:text-foreground"
+              >
+                <UserCheck className="h-4 w-4 mr-2" />
+                Settings
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="softphone" className="space-y-4">
@@ -494,6 +502,10 @@ export default function CallCenter() {
                   <p className="text-muted-foreground">Case management coming soon...</p>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="settings" className="space-y-4">
+              <CallPreferences onOpenPersonalSettings={() => setIsSettingsOpen(true)} />
             </TabsContent>
           </Tabs>
 

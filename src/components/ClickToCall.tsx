@@ -26,9 +26,9 @@ export function ClickToCall({
   const [agentExtension, setAgentExtension] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Fetch company integration configuration
-  const { data: companyIntegration } = useQuery({
-    queryKey: ["call-center-integration"],
+  // Fetch user preferences and company integration
+  const { data: callConfig } = useQuery({
+    queryKey: ["call-center-config"],
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) return null;
@@ -39,34 +39,63 @@ export function ClickToCall({
         .eq("id", user.user.id)
         .single();
 
-      if (!profile?.company_id) return null;
+      if (!profile?.company_id) return { useCompany: false, companyIntegration: null, userPreference: null };
 
-      const { data } = await supabase
+      // Get user preferences
+      const { data: userPref } = await supabase
+        .from("user_call_preferences")
+        .select("*")
+        .eq("user_id", user.user.id)
+        .maybeSingle();
+
+      // Get company integration
+      const { data: companyInt } = await supabase
         .from("call_center_integrations")
         .select("*")
         .eq("company_id", profile.company_id)
         .eq("is_active", true)
         .maybeSingle();
 
-      return data;
+      // Check if company has active subscription
+      const hasActiveSubscription = companyInt?.subscription_active && 
+        (!companyInt?.subscription_expires_at || new Date(companyInt.subscription_expires_at) > new Date());
+
+      // Determine if user should use company integration
+      const useCompany = (userPref?.use_company_integration ?? true) && hasActiveSubscription;
+
+      return {
+        useCompany,
+        companyIntegration: companyInt,
+        userPreference: userPref,
+        hasActiveSubscription
+      };
     },
   });
 
-  // Load SIP config from company integration or localStorage
+  // Load SIP config based on user preference
   useState(() => {
-    if (companyIntegration?.configuration) {
-      const configuration = companyIntegration.configuration as Record<string, any>;
+    if (callConfig?.useCompany && callConfig?.companyIntegration?.configuration) {
+      // Use company integration
+      const configuration = callConfig.companyIntegration.configuration as Record<string, any>;
       const config = {
         sipServer: configuration.sip_server || "",
-        sipUser: agentExtension || companyIntegration.account_sid || "",
-        sipPassword: companyIntegration.api_key_encrypted || "",
+        sipUser: agentExtension || callConfig.companyIntegration.account_sid || "",
+        sipPassword: callConfig.companyIntegration.api_key_encrypted || "",
         sipDomain: configuration.sip_domain || "",
       };
       setSipConfig(config);
       if (config.sipServer && config.sipUser && config.sipPassword) {
         setIsAuthenticated(true);
       }
+    } else if (callConfig?.userPreference?.personal_sip_config) {
+      // Use personal config from database
+      const config = callConfig.userPreference.personal_sip_config as any;
+      setSipConfig(config);
+      if (config.sipServer && config.sipUser && config.sipPassword) {
+        setIsAuthenticated(true);
+      }
     } else {
+      // Fallback to localStorage
       const savedConfig = localStorage.getItem("sip-config");
       if (savedConfig) {
         const parsed = JSON.parse(savedConfig);
@@ -143,7 +172,12 @@ export function ClickToCall({
           ) : (
             <div className="text-center py-8">
               <Phone className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground mb-2">
+                {callConfig?.hasActiveSubscription 
+                  ? "Company call center subscription is available"
+                  : "No active call center subscription"}
+              </p>
+              <p className="text-sm text-muted-foreground">
                 Please configure SIP settings in the Call Center page to enable calling.
               </p>
             </div>

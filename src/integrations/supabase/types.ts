@@ -957,6 +957,9 @@ export type Database = {
           is_active: boolean | null
           phone_number: string | null
           provider: string
+          subscription_active: boolean | null
+          subscription_expires_at: string | null
+          subscription_plan: string | null
           updated_at: string
           webhook_url: string | null
         }
@@ -970,6 +973,9 @@ export type Database = {
           is_active?: boolean | null
           phone_number?: string | null
           provider: string
+          subscription_active?: boolean | null
+          subscription_expires_at?: string | null
+          subscription_plan?: string | null
           updated_at?: string
           webhook_url?: string | null
         }
@@ -983,6 +989,9 @@ export type Database = {
           is_active?: boolean | null
           phone_number?: string | null
           provider?: string
+          subscription_active?: boolean | null
+          subscription_expires_at?: string | null
+          subscription_plan?: string | null
           updated_at?: string
           webhook_url?: string | null
         }
@@ -5995,6 +6004,44 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      user_call_preferences: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          id: string
+          personal_sip_config: Json | null
+          updated_at: string | null
+          use_company_integration: boolean | null
+          user_id: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          personal_sip_config?: Json | null
+          updated_at?: string | null
+          use_company_integration?: boolean | null
+          user_id: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          personal_sip_config?: Json | null
+          updated_at?: string | null
+          use_company_integration?: boolean | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_call_preferences_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_content_preferences: {
         Row: {
