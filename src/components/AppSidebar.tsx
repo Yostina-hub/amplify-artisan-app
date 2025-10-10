@@ -124,7 +124,6 @@ const adminConfigItems = [
 ];
 
 const adminMonitoringItems = [
-  { title: "Analytics Hub", url: "/admin/reach-analytics", icon: BarChart3 },
   { title: "Audit Log", url: "/admin/audit-log", icon: FileSearch },
 ];
 
