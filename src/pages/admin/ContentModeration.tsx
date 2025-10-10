@@ -215,7 +215,6 @@ const ContentModeration = () => {
 
         const updates: any = {
           flagged: false,
-          approved_by: user?.id,
           approved_at: now,
         };
         if (isScheduled) {
@@ -223,7 +222,6 @@ const ContentModeration = () => {
           updates.scheduled_for = scheduledFor;
         } else if (post.status !== 'published') {
           updates.status = 'published';
-          updates.published_at = now;
         }
 
         const { error: updateError } = await supabase

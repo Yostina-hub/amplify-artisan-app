@@ -76,7 +76,6 @@ serve(async (req) => {
 
     let updatePayload: Record<string, unknown> = {
       flagged: false,
-      approved_by: user.id,
       approved_at: nowIso,
     };
 
@@ -93,7 +92,7 @@ serve(async (req) => {
       // keep status as published, just mark approved
       result.alreadyPublished = true;
     } else {
-      updatePayload = { ...updatePayload, status: 'published', published_at: nowIso };
+      updatePayload = { ...updatePayload, status: 'published' };
     }
 
     const { error: updateErr } = await supabase
