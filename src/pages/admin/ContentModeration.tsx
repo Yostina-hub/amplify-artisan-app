@@ -117,6 +117,45 @@ const ContentModeration = () => {
     },
   });
 
+  const approvePostMutation = useMutation({
+    mutationFn: async (post: any) => {
+      // First update the post status
+      const { error: updateError } = await supabase
+        .from("social_media_posts")
+        .update({ 
+          status: "published",
+          flagged: false,
+        })
+        .eq("id", post.id);
+
+      if (updateError) throw updateError;
+
+      // If the post is for Telegram, trigger the posting
+      if (post.platforms?.includes("telegram")) {
+        const { error: telegramError } = await supabase.functions.invoke("post-to-telegram", {
+          body: { 
+            postId: post.id,
+            companyId: post.company_id
+          }
+        });
+
+        if (telegramError) {
+          console.error("Error posting to Telegram:", telegramError);
+          throw new Error("Post approved but failed to send to Telegram");
+        }
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["moderation-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["moderation-stats"] });
+      toast.success("Post approved and published to Telegram");
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to approve post");
+      console.error("Error approving post:", error);
+    },
+  });
+
   const filteredPosts = posts?.filter((post) => {
     // Search filter
     const matchesSearch = post.content?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -353,10 +392,7 @@ const ContentModeration = () => {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => updatePostMutation.mutate({ 
-                                id: post.id, 
-                                updates: { flagged: false, status: "published" } 
-                              })}
+                              onClick={() => approvePostMutation.mutate(post)}
                               className="gap-2"
                             >
                               <CheckCircle2 className="h-4 w-4" />
