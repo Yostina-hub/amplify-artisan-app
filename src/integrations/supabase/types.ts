@@ -2536,6 +2536,7 @@ export type Database = {
           bounced_count: number | null
           clicked_count: number | null
           company_id: string
+          contact_filter: Json | null
           created_at: string
           created_by: string
           id: string
@@ -2544,6 +2545,7 @@ export type Database = {
           opened_count: number | null
           recipients_count: number | null
           scheduled_at: string | null
+          scheduled_for: string | null
           sent_at: string | null
           sent_count: number | null
           status: string | null
@@ -2556,6 +2558,7 @@ export type Database = {
           bounced_count?: number | null
           clicked_count?: number | null
           company_id: string
+          contact_filter?: Json | null
           created_at?: string
           created_by: string
           id?: string
@@ -2564,6 +2567,7 @@ export type Database = {
           opened_count?: number | null
           recipients_count?: number | null
           scheduled_at?: string | null
+          scheduled_for?: string | null
           sent_at?: string | null
           sent_count?: number | null
           status?: string | null
@@ -2576,6 +2580,7 @@ export type Database = {
           bounced_count?: number | null
           clicked_count?: number | null
           company_id?: string
+          contact_filter?: Json | null
           created_at?: string
           created_by?: string
           id?: string
@@ -2584,6 +2589,7 @@ export type Database = {
           opened_count?: number | null
           recipients_count?: number | null
           scheduled_at?: string | null
+          scheduled_for?: string | null
           sent_at?: string | null
           sent_count?: number | null
           status?: string | null
@@ -2660,6 +2666,59 @@ export type Database = {
             foreignKeyName: "email_configurations_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_contacts: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string
+          custom_fields: Json | null
+          email: string
+          first_name: string | null
+          id: string
+          last_name: string | null
+          phone: string | null
+          subscription_status: string | null
+          tags: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by: string
+          custom_fields?: Json | null
+          email: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+          subscription_status?: string | null
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          custom_fields?: Json | null
+          email?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+          subscription_status?: string | null
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_contacts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -2799,6 +2858,69 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_tracking: {
+        Row: {
+          bounced_at: string | null
+          campaign_id: string
+          click_count: number | null
+          clicked_at: string | null
+          contact_id: string | null
+          created_at: string
+          email: string
+          id: string
+          metadata: Json | null
+          open_count: number | null
+          opened_at: string | null
+          sent_at: string | null
+          unsubscribed_at: string | null
+        }
+        Insert: {
+          bounced_at?: string | null
+          campaign_id: string
+          click_count?: number | null
+          clicked_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          metadata?: Json | null
+          open_count?: number | null
+          opened_at?: string | null
+          sent_at?: string | null
+          unsubscribed_at?: string | null
+        }
+        Update: {
+          bounced_at?: string | null
+          campaign_id?: string
+          click_count?: number | null
+          clicked_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          metadata?: Json | null
+          open_count?: number | null
+          opened_at?: string | null
+          sent_at?: string | null
+          unsubscribed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_tracking_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "email_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_tracking_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "email_contacts"
             referencedColumns: ["id"]
           },
         ]

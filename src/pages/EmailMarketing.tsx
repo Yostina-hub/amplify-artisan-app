@@ -1,86 +1,51 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PageHelp } from "@/components/PageHelp";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
-import { Plus, Search, Mail, Send, FileText, TrendingUp, Phone, PhoneCall, Clock } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { Mail, Plus, Trash2, Send, Calendar, TrendingUp, Users, Phone, Clock, Eye, MousePointer, Play } from "lucide-react";
+import { PageHelp } from "@/components/PageHelp";
+import { useEngagementTracker } from "@/hooks/useEngagementTracker";
+import ContactsManager from "@/components/email/ContactsManager";
+import CampaignScheduler from "@/components/email/CampaignScheduler";
 import { format } from "date-fns";
 
-type EmailTemplate = {
-  id: string;
-  name: string;
-  subject: string;
-  body_html: string;
-  template_type: string;
-  is_active: boolean;
-  created_at: string;
-};
-
-type EmailCampaign = {
-  id: string;
-  name: string;
-  subject: string;
-  status: string;
-  recipients_count: number;
-  sent_count: number;
-  opened_count: number;
-  clicked_count: number;
-  created_at: string;
-};
-
-type CallCampaign = {
-  id: string;
-  name: string;
-  campaign_type: string;
-  status: string;
-  total_contacts: number;
-  calls_made: number;
-  calls_completed: number;
-  leads_generated: number;
-  scheduled_at: string | null;
-  created_at: string;
-};
-
-type CallLog = {
-  id: string;
-  phone_number: string;
-  contact_name: string | null;
-  call_status: string;
-  call_outcome: string | null;
-  call_duration_seconds: number | null;
-  engagement_score: number | null;
-  call_started_at: string | null;
-  created_at: string;
-};
-
 export default function EmailMarketing() {
+  const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
-  const [campaignDialogOpen, setCampaignDialogOpen] = useState(false);
-  const [callCampaignDialogOpen, setCallCampaignDialogOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [templateData, setTemplateData] = useState({
+  useEngagementTracker();
+
+  const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
+  const [isCampaignDialogOpen, setIsCampaignDialogOpen] = useState(false);
+  const [isCallCampaignDialogOpen, setIsCallCampaignDialogOpen] = useState(false);
+  const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
+  const [previewCampaign, setPreviewCampaign] = useState<any>(null);
+  const [testEmail, setTestEmail] = useState("");
+
+  const [newTemplate, setNewTemplate] = useState({
     name: "",
     subject: "",
     body_html: "",
-    template_type: "general",
   });
-  const [campaignData, setCampaignData] = useState({
+
+  const [newCampaign, setNewCampaign] = useState({
     name: "",
     subject: "",
+    content: "",
     template_id: "",
+    scheduled_for: null as Date | null,
   });
-  const [callCampaignData, setCallCampaignData] = useState({
+
+  const [newCallCampaign, setNewCallCampaign] = useState({
     name: "",
     description: "",
     campaign_type: "one_time",
@@ -88,7 +53,7 @@ export default function EmailMarketing() {
   });
 
   const { data: session } = useQuery({
-    queryKey: ["session"],
+    queryKey: ['session'],
     queryFn: async () => {
       const { data } = await supabase.auth.getSession();
       return data.session;
@@ -96,285 +61,329 @@ export default function EmailMarketing() {
   });
 
   const { data: profile } = useQuery({
-    queryKey: ["profile", session?.user?.id],
+    queryKey: ['profile', session?.user?.id],
     queryFn: async () => {
       if (!session?.user?.id) return null;
-      const { data } = await supabase
-        .from("profiles")
-        .select("company_id")
-        .eq("id", session.user.id)
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', session.user.id)
         .single();
+      if (error) throw error;
       return data;
     },
     enabled: !!session?.user?.id,
   });
 
   const { data: templates = [] } = useQuery({
-    queryKey: ["email_templates", searchQuery],
+    queryKey: ['email-templates', profile?.company_id],
     queryFn: async () => {
-      let query = supabase
-        .from("email_templates" as any)
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (searchQuery) {
-        query = query.ilike("name", `%${searchQuery}%`);
-      }
-
-      const { data, error } = await query;
+      if (!profile?.company_id) return [];
+      const { data, error } = await supabase
+        .from('email_templates')
+        .select('*')
+        .eq('company_id', profile.company_id)
+        .order('created_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as unknown as EmailTemplate[];
+      return data;
     },
+    enabled: !!profile?.company_id,
   });
 
   const { data: campaigns = [] } = useQuery({
-    queryKey: ["email_campaigns"],
+    queryKey: ['email-campaigns', profile?.company_id],
     queryFn: async () => {
+      if (!profile?.company_id) return [];
       const { data, error } = await supabase
-        .from("email_campaigns" as any)
-        .select("*")
-        .order("created_at", { ascending: false });
+        .from('email_campaigns')
+        .select('*, email_templates(*)')
+        .eq('company_id', profile.company_id)
+        .order('created_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as unknown as EmailCampaign[];
+      return data;
     },
+    enabled: !!profile?.company_id,
   });
 
   const { data: callCampaigns = [] } = useQuery({
-    queryKey: ["call_campaigns"],
+    queryKey: ['call-campaigns', profile?.company_id],
     queryFn: async () => {
+      if (!profile?.company_id) return [];
       const { data, error } = await supabase
-        .from("call_campaigns" as any)
-        .select("*")
-        .order("created_at", { ascending: false });
+        .from('call_campaigns')
+        .select('*')
+        .eq('company_id', profile.company_id)
+        .order('created_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as unknown as CallCampaign[];
+      return data;
     },
+    enabled: !!profile?.company_id,
   });
 
   const { data: callLogs = [] } = useQuery({
-    queryKey: ["call_logs"],
+    queryKey: ['call-logs', profile?.company_id],
     queryFn: async () => {
+      if (!profile?.company_id) return [];
       const { data, error } = await supabase
-        .from("call_logs" as any)
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(100);
+        .from('call_logs')
+        .select('*')
+        .eq('company_id', profile.company_id)
+        .order('created_at', { ascending: false })
+        .limit(50);
       if (error) throw error;
-      return (data || []) as unknown as CallLog[];
+      return data;
     },
+    enabled: !!profile?.company_id,
   });
 
   const createTemplateMutation = useMutation({
-    mutationFn: async (data: typeof templateData) => {
-      const { error } = await supabase.from("email_templates" as any).insert({
-        ...data,
-        company_id: profile?.company_id,
-        created_by: session?.user?.id,
-      });
+    mutationFn: async (template: typeof newTemplate) => {
+      const { error } = await supabase
+        .from('email_templates')
+        .insert([{
+          ...template,
+          company_id: profile?.company_id,
+          created_by: session?.user?.id,
+        }]);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["email_templates"] });
-      toast.success("Template created successfully");
+      queryClient.invalidateQueries({ queryKey: ['email-templates'] });
+      toast({ title: "Template created successfully" });
+      setIsTemplateDialogOpen(false);
       resetTemplateForm();
     },
-    onError: (error) => {
-      toast.error(`Failed to create template: ${error.message}`);
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
   const createCampaignMutation = useMutation({
-    mutationFn: async (data: typeof campaignData) => {
-      const { error } = await supabase.from("email_campaigns" as any).insert({
-        ...data,
-        company_id: profile?.company_id,
-        created_by: session?.user?.id,
-      });
+    mutationFn: async (campaign: typeof newCampaign) => {
+      const { error } = await supabase
+        .from('email_campaigns')
+        .insert([{
+          ...campaign,
+          scheduled_for: campaign.scheduled_for?.toISOString(),
+          company_id: profile?.company_id,
+          created_by: session?.user?.id,
+          status: campaign.scheduled_for ? 'scheduled' : 'draft',
+        }]);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["email_campaigns"] });
-      toast.success("Campaign created successfully");
+      queryClient.invalidateQueries({ queryKey: ['email-campaigns'] });
+      toast({ title: "Campaign created successfully" });
+      setIsCampaignDialogOpen(false);
       resetCampaignForm();
     },
-    onError: (error) => {
-      toast.error(`Failed to create campaign: ${error.message}`);
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const createCallCampaignMutation = useMutation({
+    mutationFn: async (campaign: typeof newCallCampaign) => {
+      const { error } = await supabase
+        .from('call_campaigns')
+        .insert([{
+          ...campaign,
+          company_id: profile?.company_id,
+          created_by: session?.user?.id,
+        }]);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['call-campaigns'] });
+      toast({ title: "Call campaign created successfully" });
+      setIsCallCampaignDialogOpen(false);
+      resetCallCampaignForm();
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
   const deleteTemplateMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("email_templates" as any).delete().eq("id", id);
+      const { error } = await supabase
+        .from('email_templates')
+        .delete()
+        .eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["email_templates"] });
-      toast.success("Template deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ['email-templates'] });
+      toast({ title: "Template deleted" });
     },
   });
 
   const deleteCampaignMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("email_campaigns" as any).delete().eq("id", id);
+      const { error } = await supabase
+        .from('email_campaigns')
+        .delete()
+        .eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["email_campaigns"] });
-      toast.success("Campaign deleted successfully");
-    },
-  });
-
-  const createCallCampaignMutation = useMutation({
-    mutationFn: async (data: typeof callCampaignData) => {
-      const { error } = await supabase.from("call_campaigns" as any).insert({
-        ...data,
-        scheduled_at: data.scheduled_at || null,
-        company_id: profile?.company_id,
-        created_by: session?.user?.id,
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["call_campaigns"] });
-      toast.success("Call campaign created successfully");
-      resetCallCampaignForm();
-    },
-    onError: (error) => {
-      toast.error(`Failed to create call campaign: ${error.message}`);
+      queryClient.invalidateQueries({ queryKey: ['email-campaigns'] });
+      toast({ title: "Campaign deleted" });
     },
   });
 
   const deleteCallCampaignMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("call_campaigns" as any).delete().eq("id", id);
+      const { error } = await supabase
+        .from('call_campaigns')
+        .delete()
+        .eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["call_campaigns"] });
-      toast.success("Call campaign deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ['call-campaigns'] });
+      toast({ title: "Call campaign deleted" });
+    },
+  });
+
+  const sendCampaignMutation = useMutation({
+    mutationFn: async ({ campaignId, testMode, testEmail }: { campaignId: string, testMode?: boolean, testEmail?: string }) => {
+      const { data, error } = await supabase.functions.invoke('send-marketing-email', {
+        body: { campaignId, testMode, testEmail },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['email-campaigns'] });
+      toast({
+        title: "Success",
+        description: variables.testMode 
+          ? "Test email sent successfully" 
+          : `Campaign sent to ${data.sentCount} contacts`,
+      });
+      setIsPreviewDialogOpen(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
   const handleTemplateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createTemplateMutation.mutate(templateData);
+    createTemplateMutation.mutate(newTemplate);
   };
 
   const handleCampaignSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createCampaignMutation.mutate(campaignData);
-  };
-
-  const resetTemplateForm = () => {
-    setTemplateData({
-      name: "",
-      subject: "",
-      body_html: "",
-      template_type: "general",
-    });
-    setTemplateDialogOpen(false);
-  };
-
-  const resetCampaignForm = () => {
-    setCampaignData({
-      name: "",
-      subject: "",
-      template_id: "",
-    });
-    setCampaignDialogOpen(false);
+    createCampaignMutation.mutate(newCampaign);
   };
 
   const handleCallCampaignSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createCallCampaignMutation.mutate(callCampaignData);
+    createCallCampaignMutation.mutate(newCallCampaign);
+  };
+
+  const resetTemplateForm = () => {
+    setNewTemplate({ name: "", subject: "", body_html: "" });
+  };
+
+  const resetCampaignForm = () => {
+    setNewCampaign({ name: "", subject: "", content: "", template_id: "", scheduled_for: null });
   };
 
   const resetCallCampaignForm = () => {
-    setCallCampaignData({
-      name: "",
-      description: "",
-      campaign_type: "one_time",
-      scheduled_at: "",
-    });
-    setCallCampaignDialogOpen(false);
+    setNewCallCampaign({ name: "", description: "", campaign_type: "one_time", scheduled_at: "" });
+  };
+
+  const handlePreview = (campaign: any) => {
+    setPreviewCampaign(campaign);
+    setIsPreviewDialogOpen(true);
+  };
+
+  const handleSendTest = () => {
+    if (previewCampaign && testEmail) {
+      sendCampaignMutation.mutate({
+        campaignId: previewCampaign.id,
+        testMode: true,
+        testEmail,
+      });
+    }
+  };
+
+  const handleSendCampaign = (campaignId: string) => {
+    sendCampaignMutation.mutate({ campaignId });
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      draft: "outline",
-      scheduled: "secondary",
-      sending: "secondary",
+    const variants: Record<string, "default" | "secondary" | "destructive"> = {
+      draft: "secondary",
+      scheduled: "default",
       sent: "default",
-      paused: "outline",
-      cancelled: "destructive",
-      in_progress: "secondary",
-      completed: "default",
+      failed: "destructive",
     };
-    return <Badge variant={variants[status] || "outline"}>{status}</Badge>;
+    return <Badge variant={variants[status] || "default"}>{status}</Badge>;
   };
 
-  const getCallOutcomeBadge = (outcome: string | null) => {
-    if (!outcome) return <Badge variant="outline">-</Badge>;
+  const getCallOutcomeBadge = (outcome: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive"> = {
-      lead_generated: "default",
-      interested: "default",
-      not_interested: "secondary",
-      callback_requested: "secondary",
-      do_not_call: "destructive",
-      wrong_number: "destructive",
+      answered: "default",
+      no_answer: "secondary",
+      busy: "secondary",
+      failed: "destructive",
     };
-    return <Badge variant={variants[outcome] || "outline"}>{outcome.replace("_", " ")}</Badge>;
+    return <Badge variant={variants[outcome] || "secondary"}>{outcome}</Badge>;
   };
 
   const campaignStats = {
     total: campaigns.length,
-    draft: campaigns.filter((c) => c.status === "draft").length,
-    sent: campaigns.filter((c) => c.status === "sent").length,
-    totalSent: campaigns.reduce((sum, c) => sum + c.sent_count, 0),
-    totalOpened: campaigns.reduce((sum, c) => sum + c.opened_count, 0),
-    avgOpenRate: campaigns.length
-      ? (
-          (campaigns.reduce((sum, c) => sum + (c.sent_count ? (c.opened_count / c.sent_count) * 100 : 0), 0) /
-            campaigns.length)
-        ).toFixed(1)
-      : 0,
+    sent: campaigns.filter(c => c.status === 'sent').length,
+    scheduled: campaigns.filter(c => c.status === 'scheduled').length,
+    draft: campaigns.filter(c => c.status === 'draft').length,
+    totalSent: campaigns.reduce((sum, c) => sum + (c.sent_count || 0), 0),
+    totalOpened: campaigns.reduce((sum, c) => sum + (c.opened_count || 0), 0),
+    totalClicked: campaigns.reduce((sum, c) => sum + (c.clicked_count || 0), 0),
+    openRate: campaigns.reduce((sum, c) => sum + (c.sent_count || 0), 0) > 0
+      ? ((campaigns.reduce((sum, c) => sum + (c.opened_count || 0), 0) / campaigns.reduce((sum, c) => sum + (c.sent_count || 0), 0)) * 100).toFixed(1)
+      : '0.0',
+    clickRate: campaigns.reduce((sum, c) => sum + (c.sent_count || 0), 0) > 0
+      ? ((campaigns.reduce((sum, c) => sum + (c.clicked_count || 0), 0) / campaigns.reduce((sum, c) => sum + (c.sent_count || 0), 0)) * 100).toFixed(1)
+      : '0.0',
   };
 
   const callStats = {
-    totalCampaigns: callCampaigns.length,
-    activeCampaigns: callCampaigns.filter((c) => c.status === "in_progress").length,
-    totalCalls: callCampaigns.reduce((sum, c) => sum + c.calls_made, 0),
-    completedCalls: callCampaigns.reduce((sum, c) => sum + c.calls_completed, 0),
-    leadsGenerated: callCampaigns.reduce((sum, c) => sum + c.leads_generated, 0),
-    avgCompletionRate: callCampaigns.length
-      ? (
-          (callCampaigns.reduce((sum, c) => sum + (c.calls_made ? (c.calls_completed / c.calls_made) * 100 : 0), 0) /
-            callCampaigns.length)
-        ).toFixed(1)
-      : 0,
+    total: callCampaigns.length,
+    active: callCampaigns.filter(c => c.status === 'active').length,
+    totalCalls: callCampaigns.reduce((sum, c) => sum + (c.calls_made || 0), 0),
+    completedCalls: callCampaigns.reduce((sum, c) => sum + (c.calls_completed || 0), 0),
+    leadsGenerated: callCampaigns.reduce((sum, c) => sum + (c.leads_generated || 0), 0),
   };
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       <PageHelp
-        title="Marketing Campaigns"
+        title="Email & Call Marketing"
         description="Create and manage email and call campaigns to reach your customers. Track campaign performance with detailed analytics."
         features={[
           "Design email campaigns with custom templates",
           "Schedule and manage call campaigns",
           "Track email open rates and click-through rates",
           "Monitor call campaign performance and outcomes",
-          "Record call logs with engagement scores",
-          "Analyze campaign effectiveness with real-time metrics"
+          "Manage contact lists and segments",
+          "Send test emails before launching campaigns"
         ]}
         tips={[
           "Test email templates before sending large campaigns",
           "Schedule campaigns for optimal sending times",
           "Use call scripts to maintain consistent messaging",
           "Review analytics regularly to optimize campaign strategies",
-          "Follow up on leads generated from campaigns promptly"
         ]}
       />
+
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Marketing Campaigns</h1>
@@ -395,6 +404,7 @@ export default function EmailMarketing() {
             </p>
           </CardContent>
         </Card>
+        
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Emails Sent</CardTitle>
@@ -405,24 +415,26 @@ export default function EmailMarketing() {
             <p className="text-xs text-muted-foreground mt-1">Total emails delivered</p>
           </CardContent>
         </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Emails Opened</CardTitle>
-            <Mail className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Open Rate</CardTitle>
+            <Eye className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{campaignStats.totalOpened}</div>
-            <p className="text-xs text-muted-foreground mt-1">Recipients engaged</p>
+            <div className="text-2xl font-bold">{campaignStats.openRate}%</div>
+            <p className="text-xs text-muted-foreground mt-1">{campaignStats.totalOpened} opens</p>
           </CardContent>
         </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Open Rate</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Click Rate</CardTitle>
+            <MousePointer className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{campaignStats.avgOpenRate}%</div>
-            <p className="text-xs text-muted-foreground mt-1">Across all campaigns</p>
+            <div className="text-2xl font-bold">{campaignStats.clickRate}%</div>
+            <p className="text-xs text-muted-foreground mt-1">{campaignStats.totalClicked} clicks</p>
           </CardContent>
         </Card>
       </div>
@@ -430,54 +442,49 @@ export default function EmailMarketing() {
       <Tabs defaultValue="campaigns" className="space-y-6">
         <TabsList>
           <TabsTrigger value="campaigns">Email Campaigns</TabsTrigger>
+          <TabsTrigger value="contacts">Contacts</TabsTrigger>
           <TabsTrigger value="call_campaigns">Call Campaigns</TabsTrigger>
           <TabsTrigger value="templates">Email Templates</TabsTrigger>
         </TabsList>
 
         <TabsContent value="campaigns" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search campaigns..." className="pl-8" />
-            </div>
-            <Dialog open={campaignDialogOpen} onOpenChange={setCampaignDialogOpen}>
+          <div className="flex justify-end">
+            <Dialog open={isCampaignDialogOpen} onOpenChange={setIsCampaignDialogOpen}>
               <DialogTrigger asChild>
-                <Button onClick={() => resetCampaignForm()}>
+                <Button>
                   <Plus className="mr-2 h-4 w-4" />
                   New Campaign
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-w-2xl">
                 <DialogHeader>
                   <DialogTitle>Create Email Campaign</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleCampaignSubmit} className="space-y-4">
                   <div>
-                    <Label htmlFor="campaign_name">Campaign Name *</Label>
+                    <Label>Campaign Name *</Label>
                     <Input
-                      id="campaign_name"
-                      value={campaignData.name}
-                      onChange={(e) => setCampaignData({ ...campaignData, name: e.target.value })}
+                      value={newCampaign.name}
+                      onChange={(e) => setNewCampaign({ ...newCampaign, name: e.target.value })}
                       required
                     />
                   </div>
                   <div>
-                    <Label htmlFor="campaign_subject">Subject *</Label>
+                    <Label>Subject *</Label>
                     <Input
-                      id="campaign_subject"
-                      value={campaignData.subject}
-                      onChange={(e) => setCampaignData({ ...campaignData, subject: e.target.value })}
+                      value={newCampaign.subject}
+                      onChange={(e) => setNewCampaign({ ...newCampaign, subject: e.target.value })}
                       required
                     />
                   </div>
                   <div>
-                    <Label htmlFor="template_id">Template</Label>
+                    <Label>Template</Label>
                     <Select
-                      value={campaignData.template_id}
-                      onValueChange={(value) => setCampaignData({ ...campaignData, template_id: value })}
+                      value={newCampaign.template_id}
+                      onValueChange={(value) => setNewCampaign({ ...newCampaign, template_id: value })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select template" />
+                        <SelectValue placeholder="Select template (optional)" />
                       </SelectTrigger>
                       <SelectContent>
                         {templates.map((template) => (
@@ -488,11 +495,27 @@ export default function EmailMarketing() {
                       </SelectContent>
                     </Select>
                   </div>
+                  <div>
+                    <Label>Content *</Label>
+                    <Textarea
+                      value={newCampaign.content}
+                      onChange={(e) => setNewCampaign({ ...newCampaign, content: e.target.value })}
+                      rows={6}
+                      placeholder="Email content (supports HTML)"
+                      required
+                    />
+                  </div>
+                  <CampaignScheduler
+                    scheduledFor={newCampaign.scheduled_for}
+                    onScheduleChange={(date) => setNewCampaign({ ...newCampaign, scheduled_for: date })}
+                  />
                   <div className="flex justify-end gap-2">
-                    <Button type="button" variant="outline" onClick={resetCampaignForm}>
+                    <Button type="button" variant="outline" onClick={() => setIsCampaignDialogOpen(false)}>
                       Cancel
                     </Button>
-                    <Button type="submit">Create Campaign</Button>
+                    <Button type="submit" disabled={createCampaignMutation.isPending}>
+                      Create Campaign
+                    </Button>
                   </div>
                 </form>
               </DialogContent>
@@ -500,24 +523,29 @@ export default function EmailMarketing() {
           </div>
 
           <Card>
-            <CardContent className="p-0">
+            <CardHeader>
+              <CardTitle>Email Campaigns</CardTitle>
+              <CardDescription>Manage and track your email campaigns</CardDescription>
+            </CardHeader>
+            <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Subject</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Recipients</TableHead>
                     <TableHead>Sent</TableHead>
                     <TableHead>Opened</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>Clicked</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {campaigns.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center">
-                        No campaigns found
+                      <TableCell colSpan={8} className="text-center text-muted-foreground">
+                        No campaigns yet. Create your first campaign to get started.
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -526,23 +554,37 @@ export default function EmailMarketing() {
                         <TableCell className="font-medium">{campaign.name}</TableCell>
                         <TableCell>{campaign.subject}</TableCell>
                         <TableCell>{getStatusBadge(campaign.status)}</TableCell>
-                        <TableCell>{campaign.recipients_count}</TableCell>
-                        <TableCell>{campaign.sent_count}</TableCell>
+                        <TableCell>{campaign.sent_count || 0}</TableCell>
+                        <TableCell>{campaign.opened_count || 0}</TableCell>
+                        <TableCell>{campaign.clicked_count || 0}</TableCell>
+                        <TableCell>{format(new Date(campaign.created_at), 'MMM d, yyyy')}</TableCell>
                         <TableCell>
-                          {campaign.opened_count} (
-                          {campaign.sent_count
-                            ? ((campaign.opened_count / campaign.sent_count) * 100).toFixed(1)
-                            : 0}
-                          %)
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => deleteCampaignMutation.mutate(campaign.id)}
-                          >
-                            Delete
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handlePreview(campaign)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            {campaign.status === 'draft' && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleSendCampaign(campaign.id)}
+                                disabled={sendCampaignMutation.isPending}
+                              >
+                                <Send className="h-4 w-4" />
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => deleteCampaignMutation.mutate(campaign.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))
@@ -553,129 +595,69 @@ export default function EmailMarketing() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="call_campaigns" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Campaigns</CardTitle>
-                <Phone className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{callStats.totalCampaigns}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {callStats.activeCampaigns} active
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Calls Made</CardTitle>
-                <PhoneCall className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{callStats.totalCalls}</div>
-                <p className="text-xs text-muted-foreground mt-1">{callStats.completedCalls} completed</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Leads Generated</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{callStats.leadsGenerated}</div>
-                <p className="text-xs text-muted-foreground mt-1">From call campaigns</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{callStats.avgCompletionRate}%</div>
-                <p className="text-xs text-muted-foreground mt-1">Average success rate</p>
-              </CardContent>
-            </Card>
-          </div>
+        <TabsContent value="contacts" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Email Contacts</CardTitle>
+              <CardDescription>Manage your email marketing contacts</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {profile?.company_id && <ContactsManager companyId={profile.company_id} />}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-          <div className="flex justify-between items-center">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search call campaigns..." className="pl-8" />
-            </div>
-            <Dialog open={callCampaignDialogOpen} onOpenChange={setCallCampaignDialogOpen}>
+        <TabsContent value="call_campaigns" className="space-y-4">
+          <div className="flex justify-end">
+            <Dialog open={isCallCampaignDialogOpen} onOpenChange={setIsCallCampaignDialogOpen}>
               <DialogTrigger asChild>
-                <Button onClick={() => resetCallCampaignForm()}>
+                <Button>
                   <Plus className="mr-2 h-4 w-4" />
                   New Call Campaign
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl">
+              <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Create Call Campaign</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleCallCampaignSubmit} className="space-y-4">
                   <div>
-                    <Label htmlFor="call_campaign_name">Campaign Name *</Label>
+                    <Label>Campaign Name *</Label>
                     <Input
-                      id="call_campaign_name"
-                      value={callCampaignData.name}
-                      onChange={(e) => setCallCampaignData({ ...callCampaignData, name: e.target.value })}
+                      value={newCallCampaign.name}
+                      onChange={(e) => setNewCallCampaign({ ...newCallCampaign, name: e.target.value })}
                       required
                     />
                   </div>
                   <div>
-                    <Label htmlFor="call_description">Description</Label>
+                    <Label>Description</Label>
                     <Textarea
-                      id="call_description"
-                      value={callCampaignData.description}
-                      onChange={(e) => setCallCampaignData({ ...callCampaignData, description: e.target.value })}
-                      rows={3}
+                      value={newCallCampaign.description}
+                      onChange={(e) => setNewCallCampaign({ ...newCallCampaign, description: e.target.value })}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="campaign_type">Campaign Type *</Label>
+                    <Label>Campaign Type</Label>
                     <Select
-                      value={callCampaignData.campaign_type}
-                      onValueChange={(value) => setCallCampaignData({ ...callCampaignData, campaign_type: value })}
+                      value={newCallCampaign.campaign_type}
+                      onValueChange={(value) => setNewCallCampaign({ ...newCallCampaign, campaign_type: value })}
                     >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="one_time">One Time</SelectItem>
-                        <SelectItem value="scheduled">Scheduled</SelectItem>
                         <SelectItem value="recurring">Recurring</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                  {(callCampaignData.campaign_type === "scheduled" || callCampaignData.campaign_type === "recurring") && (
-                    <div>
-                      <Label htmlFor="scheduled_at">Schedule For</Label>
-                      <Input
-                        id="scheduled_at"
-                        type="datetime-local"
-                        value={callCampaignData.scheduled_at}
-                        onChange={(e) => setCallCampaignData({ ...callCampaignData, scheduled_at: e.target.value })}
-                      />
-                    </div>
-                  )}
-                  <div className="bg-muted p-4 rounded-lg">
-                    <p className="text-sm font-medium mb-2">Campaign Features:</p>
-                    <ul className="text-sm text-muted-foreground space-y-1">
-                      <li>✓ Automatic lead generation tracking</li>
-                      <li>✓ Customer engagement scoring</li>
-                      <li>✓ Call center integration (Twilio, Vonage, etc.)</li>
-                      <li>✓ Automated retry logic for failed calls</li>
-                      <li>✓ Real-time call analytics</li>
-                    </ul>
-                  </div>
                   <div className="flex justify-end gap-2">
-                    <Button type="button" variant="outline" onClick={resetCallCampaignForm}>
+                    <Button type="button" variant="outline" onClick={() => setIsCallCampaignDialogOpen(false)}>
                       Cancel
                     </Button>
-                    <Button type="submit">Create Campaign</Button>
+                    <Button type="submit" disabled={createCallCampaignMutation.isPending}>
+                      Create Campaign
+                    </Button>
                   </div>
                 </form>
               </DialogContent>
@@ -685,120 +667,45 @@ export default function EmailMarketing() {
           <Card>
             <CardHeader>
               <CardTitle>Call Campaigns</CardTitle>
+              <CardDescription>Manage your call center campaigns</CardDescription>
             </CardHeader>
-            <CardContent className="p-0">
+            <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Contacts</TableHead>
                     <TableHead>Calls Made</TableHead>
                     <TableHead>Completed</TableHead>
                     <TableHead>Leads</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {callCampaigns.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center">
-                        No call campaigns found
+                      <TableCell colSpan={7} className="text-center text-muted-foreground">
+                        No call campaigns yet. Create your first campaign to get started.
                       </TableCell>
                     </TableRow>
                   ) : (
                     callCampaigns.map((campaign) => (
                       <TableRow key={campaign.id}>
                         <TableCell className="font-medium">{campaign.name}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{campaign.campaign_type.replace("_", " ")}</Badge>
-                        </TableCell>
+                        <TableCell>{campaign.campaign_type}</TableCell>
                         <TableCell>{getStatusBadge(campaign.status)}</TableCell>
-                        <TableCell>{campaign.total_contacts}</TableCell>
-                        <TableCell>{campaign.calls_made}</TableCell>
+                        <TableCell>{campaign.calls_made || 0}</TableCell>
+                        <TableCell>{campaign.calls_completed || 0}</TableCell>
+                        <TableCell>{campaign.leads_generated || 0}</TableCell>
                         <TableCell>
-                          {campaign.calls_completed} (
-                          {campaign.calls_made
-                            ? ((campaign.calls_completed / campaign.calls_made) * 100).toFixed(1)
-                            : 0}
-                          %)
-                        </TableCell>
-                        <TableCell>{campaign.leads_generated}</TableCell>
-                        <TableCell className="text-right">
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => deleteCallCampaignMutation.mutate(campaign.id)}
                           >
-                            Delete
+                            <Trash2 className="h-4 w-4" />
                           </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Call Logs & Engagement Tracking</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Contact</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Outcome</TableHead>
-                    <TableHead>Duration</TableHead>
-                    <TableHead>Engagement</TableHead>
-                    <TableHead>Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {callLogs.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center">
-                        No call logs yet
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    callLogs.map((log) => (
-                      <TableRow key={log.id}>
-                        <TableCell className="font-medium">{log.contact_name || "Unknown"}</TableCell>
-                        <TableCell>{log.phone_number}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{log.call_status.replace("_", " ")}</Badge>
-                        </TableCell>
-                        <TableCell>{getCallOutcomeBadge(log.call_outcome)}</TableCell>
-                        <TableCell>
-                          {log.call_duration_seconds
-                            ? `${Math.floor(log.call_duration_seconds / 60)}m ${log.call_duration_seconds % 60}s`
-                            : "-"}
-                        </TableCell>
-                        <TableCell>
-                          {log.engagement_score !== null ? (
-                            <div className="flex items-center gap-2">
-                              <div className="text-sm font-medium">{log.engagement_score}/100</div>
-                              <div className="w-20 bg-muted rounded-full h-2">
-                                <div
-                                  className="bg-primary h-2 rounded-full"
-                                  style={{ width: `${log.engagement_score}%` }}
-                                />
-                              </div>
-                            </div>
-                          ) : (
-                            "-"
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {log.call_started_at
-                            ? format(new Date(log.call_started_at), "MMM dd, HH:mm")
-                            : format(new Date(log.created_at), "MMM dd")}
                         </TableCell>
                       </TableRow>
                     ))
@@ -810,83 +717,52 @@ export default function EmailMarketing() {
         </TabsContent>
 
         <TabsContent value="templates" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search templates..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8"
-              />
-            </div>
-            <Dialog open={templateDialogOpen} onOpenChange={setTemplateDialogOpen}>
+          <div className="flex justify-end">
+            <Dialog open={isTemplateDialogOpen} onOpenChange={setIsTemplateDialogOpen}>
               <DialogTrigger asChild>
-                <Button onClick={() => resetTemplateForm()}>
+                <Button>
                   <Plus className="mr-2 h-4 w-4" />
                   New Template
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl">
+              <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Create Email Template</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleTemplateSubmit} className="space-y-4">
                   <div>
-                    <Label htmlFor="template_name">Template Name *</Label>
+                    <Label>Template Name *</Label>
                     <Input
-                      id="template_name"
-                      value={templateData.name}
-                      onChange={(e) => setTemplateData({ ...templateData, name: e.target.value })}
+                      value={newTemplate.name}
+                      onChange={(e) => setNewTemplate({ ...newTemplate, name: e.target.value })}
                       required
                     />
                   </div>
                   <div>
-                    <Label htmlFor="template_type">Type *</Label>
-                    <Select
-                      value={templateData.template_type}
-                      onValueChange={(value) => setTemplateData({ ...templateData, template_type: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="general">General</SelectItem>
-                        <SelectItem value="quote">Quote</SelectItem>
-                        <SelectItem value="invoice">Invoice</SelectItem>
-                        <SelectItem value="payment_reminder">Payment Reminder</SelectItem>
-                        <SelectItem value="welcome">Welcome</SelectItem>
-                        <SelectItem value="follow_up">Follow Up</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="subject">Subject *</Label>
+                    <Label>Subject *</Label>
                     <Input
-                      id="subject"
-                      value={templateData.subject}
-                      onChange={(e) => setTemplateData({ ...templateData, subject: e.target.value })}
+                      value={newTemplate.subject}
+                      onChange={(e) => setNewTemplate({ ...newTemplate, subject: e.target.value })}
                       required
                     />
                   </div>
                   <div>
-                    <Label htmlFor="body_html">Email Body (HTML) *</Label>
+                    <Label>Content *</Label>
                     <Textarea
-                      id="body_html"
-                      value={templateData.body_html}
-                      onChange={(e) => setTemplateData({ ...templateData, body_html: e.target.value })}
-                      rows={10}
+                      value={newTemplate.body_html}
+                      onChange={(e) => setNewTemplate({ ...newTemplate, body_html: e.target.value })}
+                      rows={8}
+                      placeholder="Email template content (supports HTML)"
                       required
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Use variables like {"{"}{"{"} customer_name {"}"}{"}"}, {"{"}{"{"} total_amount {"}"}{"}"}, etc.
-                    </p>
                   </div>
                   <div className="flex justify-end gap-2">
-                    <Button type="button" variant="outline" onClick={resetTemplateForm}>
+                    <Button type="button" variant="outline" onClick={() => setIsTemplateDialogOpen(false)}>
                       Cancel
                     </Button>
-                    <Button type="submit">Create Template</Button>
+                    <Button type="submit" disabled={createTemplateMutation.isPending}>
+                      Create Template
+                    </Button>
                   </div>
                 </form>
               </DialogContent>
@@ -894,44 +770,40 @@ export default function EmailMarketing() {
           </div>
 
           <Card>
-            <CardContent className="p-0">
+            <CardHeader>
+              <CardTitle>Email Templates</CardTitle>
+              <CardDescription>Manage your reusable email templates</CardDescription>
+            </CardHeader>
+            <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>Type</TableHead>
                     <TableHead>Subject</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {templates.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center">
-                        No templates found
+                      <TableCell colSpan={4} className="text-center text-muted-foreground">
+                        No templates yet. Create your first template to get started.
                       </TableCell>
                     </TableRow>
                   ) : (
                     templates.map((template) => (
                       <TableRow key={template.id}>
                         <TableCell className="font-medium">{template.name}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{template.template_type}</Badge>
-                        </TableCell>
                         <TableCell>{template.subject}</TableCell>
+                        <TableCell>{format(new Date(template.created_at), 'MMM d, yyyy')}</TableCell>
                         <TableCell>
-                          <Badge variant={template.is_active ? "default" : "secondary"}>
-                            {template.is_active ? "Active" : "Inactive"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => deleteTemplateMutation.mutate(template.id)}
                           >
-                            Delete
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -943,6 +815,56 @@ export default function EmailMarketing() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Preview & Send Dialog */}
+      <Dialog open={isPreviewDialogOpen} onOpenChange={setIsPreviewDialogOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Campaign Preview & Send</DialogTitle>
+          </DialogHeader>
+          {previewCampaign && (
+            <div className="space-y-4">
+              <div className="border rounded-lg p-4 bg-muted">
+                <div className="mb-2">
+                  <strong>Subject:</strong> {previewCampaign.subject}
+                </div>
+                <div className="border-t pt-4 mt-4">
+                <div dangerouslySetInnerHTML={{ 
+                    __html: previewCampaign.email_templates?.body_html || previewCampaign.content 
+                  }} />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Send Test Email</Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="email"
+                    placeholder="test@example.com"
+                    value={testEmail}
+                    onChange={(e) => setTestEmail(e.target.value)}
+                  />
+                  <Button
+                    onClick={handleSendTest}
+                    disabled={!testEmail || sendCampaignMutation.isPending}
+                  >
+                    Send Test
+                  </Button>
+                </div>
+              </div>
+              {previewCampaign.status === 'draft' && (
+                <Button
+                  className="w-full"
+                  onClick={() => handleSendCampaign(previewCampaign.id)}
+                  disabled={sendCampaignMutation.isPending}
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  Send Campaign to All Contacts
+                </Button>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
