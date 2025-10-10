@@ -6,13 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Trash2, Plus, TrendingUp, MessageCircle, Hash, Eye, ExternalLink, Calendar, ThumbsUp } from "lucide-react";
+import { Trash2, Plus, TrendingUp, MessageCircle, Hash, Eye, ExternalLink, Calendar, ThumbsUp, Shield, Globe, Sparkles, BarChart3, Target } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
+import { Progress } from "@/components/ui/progress";
 
 type Keyword = {
   id: string;
@@ -150,23 +151,68 @@ export default function BrandMonitoring() {
     return colors[platform.toLowerCase()] || "text-foreground";
   };
 
-  return (
-    <div className="space-y-6 animate-in fade-in-50 duration-500">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Brand Monitoring</h1>
-        <p className="text-muted-foreground mt-1">
-          Track mentions, keywords, and trending topics across social media
-        </p>
-      </div>
+  const stats = {
+    totalMentions: mentions.length,
+    avgSentiment: mentions.length > 0 
+      ? Math.round((mentions.filter(m => m.sentiment === 'positive').length / mentions.length) * 100)
+      : 0,
+    avgEngagement: mentions.length > 0
+      ? Math.round(mentions.reduce((sum, m) => sum + m.engagement_count, 0) / mentions.length)
+      : 0,
+    trendingTopics: trends.length
+  };
 
-      <Tabs defaultValue="keywords" className="space-y-4">
-        <TabsList>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-emerald-500/5 to-teal-500/5 animate-in fade-in-50 duration-700">
+      <div className="container mx-auto p-6 space-y-6">
+        {/* Enhanced Header */}
+        <div className="backdrop-blur-sm bg-card/80 p-8 rounded-2xl border-2 border-primary/20 shadow-2xl">
+          <div className="flex items-center gap-4">
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg">
+              <Shield className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 bg-clip-text text-transparent">
+                Brand Monitoring 360°
+              </h1>
+              <p className="text-muted-foreground mt-2 text-lg flex items-center gap-2">
+                <Sparkles className="h-4 w-4" />
+                360° brand protection • Real-time alerts • Crisis prevention • Global coverage
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Enhanced Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { label: "Total Mentions", value: stats.totalMentions, icon: MessageCircle, color: "from-emerald-500 to-teal-500" },
+            { label: "Brand Sentiment", value: `${stats.avgSentiment}%`, icon: TrendingUp, color: "from-teal-500 to-cyan-500" },
+            { label: "Avg. Engagement", value: stats.avgEngagement, icon: Target, color: "from-cyan-500 to-blue-500" },
+            { label: "Trending Topics", value: stats.trendingTopics, icon: BarChart3, color: "from-blue-500 to-indigo-500" }
+          ].map((stat, idx) => (
+            <Card key={idx} className="backdrop-blur-sm bg-card/95 border-2 hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <CardHeader className="pb-2">
+                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center mb-2`}>
+                  <stat.icon className="h-5 w-5 text-white" />
+                </div>
+                <CardTitle className="text-sm text-muted-foreground">{stat.label}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{stat.value}</div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <Tabs defaultValue="keywords" className="space-y-4">
+          <TabsList>
           <TabsTrigger value="keywords">Keywords</TabsTrigger>
           <TabsTrigger value="mentions">Mentions</TabsTrigger>
           <TabsTrigger value="trends">Trending Topics</TabsTrigger>
-        </TabsList>
+          </TabsList>
 
-        <TabsContent value="keywords" className="space-y-4">
+          <TabsContent value="keywords" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Tracked Keywords</CardTitle>
@@ -440,6 +486,7 @@ export default function BrandMonitoring() {
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 }

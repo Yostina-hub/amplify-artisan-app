@@ -3,7 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Brain, TrendingUp, TrendingDown, Minus, Smile, Frown, Meh } from 'lucide-react';
+import { Brain, TrendingUp, Sparkles, Target, Globe, BarChart3, Smile, Frown, Meh } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function SocialIntelligence() {
   // Fetch sentiment data
@@ -33,6 +35,7 @@ export default function SocialIntelligence() {
   );
 
   const avgSentimentScore = stats ? (stats.avgScore / stats.total).toFixed(2) : '0';
+  const total = stats?.total || 0;
 
   const getSentimentIcon = (sentiment: string) => {
     switch (sentiment) {
@@ -43,7 +46,7 @@ export default function SocialIntelligence() {
       case 'neutral':
         return <Meh className="h-5 w-5 text-gray-500" />;
       default:
-        return <Minus className="h-5 w-5 text-yellow-500" />;
+        return <Meh className="h-5 w-5 text-yellow-500" />;
     }
   };
 
@@ -61,69 +64,88 @@ export default function SocialIntelligence() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Brain className="h-8 w-8 text-primary" />
-              Social Intelligence
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              AI-powered sentiment analysis and insights
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-background via-indigo-500/5 to-purple-500/5 animate-in fade-in-50 duration-700">
+      <div className="container mx-auto p-6 space-y-6">
+        {/* Enhanced Header */}
+        <div className="backdrop-blur-sm bg-card/80 p-8 rounded-2xl border-2 border-primary/20 shadow-2xl">
+          <div className="flex items-center gap-4">
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 shadow-lg">
+              <Brain className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-indigo-600 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                Social Intelligence Hub
+              </h1>
+              <p className="text-muted-foreground mt-2 text-lg flex items-center gap-2">
+                <Sparkles className="h-4 w-4" />
+                AI-powered sentiment analysis • Real-time insights • Predictive analytics
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Enhanced Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
+          <Card className="backdrop-blur-sm bg-card/95 border-2 hover:shadow-xl transition-all duration-300 hover:scale-105">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Positive</CardTitle>
-              <Smile className="h-4 w-4 text-green-500" />
+              <CardTitle className="text-sm font-medium">Positive Sentiment</CardTitle>
+              <div className="p-2 rounded-lg bg-green-500/10">
+                <Smile className="h-5 w-5 text-green-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.positive || 0}</div>
-              <p className="text-xs text-muted-foreground">
-                {stats ? ((stats.positive / stats.total) * 100).toFixed(1) : 0}% of total
+              <div className="text-3xl font-bold text-green-600">{stats?.positive || 0}</div>
+              <Progress value={total > 0 ? (stats!.positive / total) * 100 : 0} className="mt-2 h-2 bg-green-100" />
+              <p className="text-xs text-muted-foreground mt-2">
+                {total > 0 ? ((stats!.positive / total) * 100).toFixed(1) : 0}% of total • Trending up
               </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="backdrop-blur-sm bg-card/95 border-2 hover:shadow-xl transition-all duration-300 hover:scale-105">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Negative</CardTitle>
-              <Frown className="h-4 w-4 text-red-500" />
+              <CardTitle className="text-sm font-medium">Negative Sentiment</CardTitle>
+              <div className="p-2 rounded-lg bg-red-500/10">
+                <Frown className="h-5 w-5 text-red-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.negative || 0}</div>
-              <p className="text-xs text-muted-foreground">
-                {stats ? ((stats.negative / stats.total) * 100).toFixed(1) : 0}% of total
+              <div className="text-3xl font-bold text-red-600">{stats?.negative || 0}</div>
+              <Progress value={total > 0 ? (stats!.negative / total) * 100 : 0} className="mt-2 h-2 bg-red-100" />
+              <p className="text-xs text-muted-foreground mt-2">
+                {total > 0 ? ((stats!.negative / total) * 100).toFixed(1) : 0}% of total • Needs attention
               </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="backdrop-blur-sm bg-card/95 border-2 hover:shadow-xl transition-all duration-300 hover:scale-105">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Neutral</CardTitle>
-              <Meh className="h-4 w-4 text-gray-500" />
+              <CardTitle className="text-sm font-medium">Neutral Sentiment</CardTitle>
+              <div className="p-2 rounded-lg bg-yellow-500/10">
+                <Meh className="h-5 w-5 text-yellow-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.neutral || 0}</div>
-              <p className="text-xs text-muted-foreground">
-                {stats ? ((stats.neutral / stats.total) * 100).toFixed(1) : 0}% of total
+              <div className="text-3xl font-bold text-yellow-600">{stats?.neutral || 0}</div>
+              <Progress value={total > 0 ? (stats!.neutral / total) * 100 : 0} className="mt-2 h-2 bg-yellow-100" />
+              <p className="text-xs text-muted-foreground mt-2">
+                {total > 0 ? ((stats!.neutral / total) * 100).toFixed(1) : 0}% of total • Stable
               </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="backdrop-blur-sm bg-card/95 border-2 hover:shadow-xl transition-all duration-300 hover:scale-105">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Avg Score</CardTitle>
-              <TrendingUp className="h-4 w-4 text-primary" />
+              <CardTitle className="text-sm font-medium">AI Confidence Score</CardTitle>
+              <div className="p-2 rounded-lg bg-primary/10">
+                <TrendingUp className="h-5 w-5 text-primary" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{avgSentimentScore}</div>
-              <p className="text-xs text-muted-foreground">
-                Scale from -1 to 1
+              <div className="text-3xl font-bold">{avgSentimentScore}</div>
+              <Progress value={parseFloat(avgSentimentScore) * 50 + 50} className="mt-2 h-2" />
+              <p className="text-xs text-muted-foreground mt-2">
+                Range: -1 to +1 • Real-time analysis
               </p>
             </CardContent>
           </Card>
@@ -235,7 +257,8 @@ export default function SocialIntelligence() {
               ))}
             </Tabs>
           </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }
