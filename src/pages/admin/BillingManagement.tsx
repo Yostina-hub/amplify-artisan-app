@@ -14,6 +14,7 @@ import { CheckCircle, XCircle, Clock, DollarSign, CreditCard, FileText, Trending
 import { toast } from "sonner";
 import { format } from "date-fns";
 import PricingPlansTab from "@/components/admin/PricingPlansTab";
+import PlatformSubscriptionsTab from "@/components/admin/PlatformSubscriptionsTab";
 
 const BillingManagement = () => {
   const queryClient = useQueryClient();
@@ -286,6 +287,7 @@ const BillingManagement = () => {
       <Tabs defaultValue="subscriptions" className="space-y-4">
         <TabsList>
           <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
+          <TabsTrigger value="platforms">Platform Access</TabsTrigger>
           <TabsTrigger value="payments">Payments</TabsTrigger>
           <TabsTrigger value="pricing">Pricing Plans</TabsTrigger>
         </TabsList>
@@ -372,6 +374,11 @@ const BillingManagement = () => {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Platform Subscriptions Tab */}
+        <TabsContent value="platforms">
+          <PlatformSubscriptionsTab />
         </TabsContent>
 
         {/* Payments Tab */}

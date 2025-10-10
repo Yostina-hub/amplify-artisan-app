@@ -1461,45 +1461,57 @@ export type Database = {
       }
       company_platform_subscriptions: {
         Row: {
+          billing_cycle: string | null
           company_id: string
           created_at: string | null
           expires_at: string | null
           id: string
           is_active: boolean | null
+          monthly_fee: number | null
+          payment_transaction_id: string | null
           platform_id: string
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: string | null
           subscribed_at: string | null
+          subscription_request_id: string | null
           updated_at: string | null
         }
         Insert: {
+          billing_cycle?: string | null
           company_id: string
           created_at?: string | null
           expires_at?: string | null
           id?: string
           is_active?: boolean | null
+          monthly_fee?: number | null
+          payment_transaction_id?: string | null
           platform_id: string
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string | null
           subscribed_at?: string | null
+          subscription_request_id?: string | null
           updated_at?: string | null
         }
         Update: {
+          billing_cycle?: string | null
           company_id?: string
           created_at?: string | null
           expires_at?: string | null
           id?: string
           is_active?: boolean | null
+          monthly_fee?: number | null
+          payment_transaction_id?: string | null
           platform_id?: string
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string | null
           subscribed_at?: string | null
+          subscription_request_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -1511,10 +1523,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "company_platform_subscriptions_payment_transaction_id_fkey"
+            columns: ["payment_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "payment_transactions"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "company_platform_subscriptions_platform_id_fkey"
             columns: ["platform_id"]
             isOneToOne: false
             referencedRelation: "social_platforms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_platform_subscriptions_subscription_request_id_fkey"
+            columns: ["subscription_request_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_requests"
             referencedColumns: ["id"]
           },
         ]
@@ -5282,6 +5308,7 @@ export type Database = {
       }
       subscription_requests: {
         Row: {
+          company_id: string | null
           company_name: string | null
           created_at: string | null
           email: string
@@ -5293,7 +5320,7 @@ export type Database = {
           metadata: Json | null
           payment_instructions: string | null
           payment_method: string | null
-          phone: string
+          phone: string | null
           pricing_plan_id: string | null
           rejection_reason: string | null
           reviewed_at: string | null
@@ -5305,6 +5332,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          company_id?: string | null
           company_name?: string | null
           created_at?: string | null
           email: string
@@ -5316,7 +5344,7 @@ export type Database = {
           metadata?: Json | null
           payment_instructions?: string | null
           payment_method?: string | null
-          phone: string
+          phone?: string | null
           pricing_plan_id?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
@@ -5328,6 +5356,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          company_id?: string | null
           company_name?: string | null
           created_at?: string | null
           email?: string
@@ -5339,7 +5368,7 @@ export type Database = {
           metadata?: Json | null
           payment_instructions?: string | null
           payment_method?: string | null
-          phone?: string
+          phone?: string | null
           pricing_plan_id?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
@@ -5351,6 +5380,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "subscription_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "subscription_requests_pricing_plan_id_fkey"
             columns: ["pricing_plan_id"]

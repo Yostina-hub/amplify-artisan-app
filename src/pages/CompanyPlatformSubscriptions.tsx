@@ -110,20 +110,56 @@ export default function CompanyPlatformSubscriptions() {
     try {
       setSubscribing(platformId);
 
-      const { error } = await supabase
+      // Get platform details including pricing
+      const platform = platforms.find(p => p.id === platformId);
+      if (!platform) throw new Error("Platform not found");
+
+      // Parse pricing info (format: "$X/month" or similar)
+      const monthlyFee = parseFloat(platform.pricing_info?.replace(/[^0-9.]/g, '') || '0');
+
+      // Get user email for subscription request
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      // Create subscription request record first
+      const { data: subRequest, error: reqError } = await supabase
+        .from('subscription_requests')
+        .insert({
+          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Platform Subscriber',
+          email: user.email || '',
+          company_id: companyId,
+          pricing_plan_id: null,
+          status: 'pending',
+          metadata: {
+            type: 'platform_subscription',
+            platform_id: platformId,
+            platform_name: platform.display_name,
+            monthly_fee: monthlyFee,
+          }
+        })
+        .select()
+        .single();
+
+      if (reqError) throw reqError;
+
+      // Create platform subscription with link to subscription request
+      const { error: subError } = await supabase
         .from("company_platform_subscriptions")
-        .insert([{
+        .insert({
           company_id: companyId,
           platform_id: platformId,
           is_active: false,
           status: 'pending',
-        }]);
+          subscription_request_id: subRequest.id,
+          monthly_fee: monthlyFee,
+          billing_cycle: 'monthly',
+        });
 
-      if (error) throw error;
+      if (subError) throw subError;
 
       toast({ 
         title: "Request submitted",
-        description: "Your subscription request has been sent to the admin for review"
+        description: "Your subscription request has been sent to admin for approval and payment processing"
       });
       fetchData();
     } catch (error: any) {

@@ -10,13 +10,14 @@ The billing management system has been consolidated into a single, professional 
 
 ## Features
 
-### 1. Subscriptions Management
+### 1. System-Wide Subscriptions Management
 
 **What it does:**
-- View all customer subscription requests
+- View all customer subscription requests for system access
 - Approve or reject requests with reasons
 - Automatic payment record creation upon approval
 - Status tracking throughout the lifecycle
+- Support for trial subscriptions
 
 **Workflow:**
 ```
@@ -29,10 +30,37 @@ Customer Request → Admin Review → Approve/Reject → Payment Created → Pay
 - `active` - Payment verified, subscription active
 - `rejected` - Request denied with reason
 
-### 2. Payment Management
+### 2. Platform Access Subscriptions (NEW - Integrated)
 
 **What it does:**
-- Track all payment transactions
+- Companies request access to specific social media platforms
+- Each platform has independent pricing and billing
+- Integrated with the unified payment system
+- Automatic payment record creation upon approval
+- Platform-specific billing cycles (monthly, quarterly, yearly)
+
+**Workflow:**
+```
+Company Request → Platform Subscription Created → Subscription Request Linked → Admin Review → 
+Approve/Reject → Payment Created → Payment Verified → Platform Access Activated
+```
+
+**Key Features:**
+- Unified billing dashboard shows both system and platform subscriptions
+- Platform-specific monthly fees tracked separately
+- Payment transactions link to platform subscriptions
+- Automatic subscription request creation for payment workflow
+
+**Statuses:**
+- `pending` - Awaiting admin approval
+- `approved` - Approved, payment instructions sent
+- `rejected` - Request denied with reason
+- Platform `is_active` - Access activated after payment verification
+
+### 3. Payment Management
+
+**What it does:**
+- Track all payment transactions (system and platform subscriptions)
 - Verify payments manually
 - Automatic subscription activation on verification
 - Revenue analytics and reporting
@@ -44,10 +72,10 @@ Customer Request → Admin Review → Approve/Reject → Payment Created → Pay
 
 **Workflow:**
 ```
-Payment Created → Pending → Admin Verifies → Subscription Activated
+Payment Created (System or Platform) → Pending → Admin Verifies → Subscription Activated
 ```
 
-### 3. Pricing Plans Management
+### 4. Pricing Plans Management
 
 **What it does:**
 - Create and manage pricing tiers
@@ -69,41 +97,74 @@ Payment Created → Pending → Admin Verifies → Subscription Activated
 
 ### Tables Involved
 
-1. **pricing_plans** - Master pricing data
+1. **pricing_plans** - Master pricing data for system subscriptions
    - Defines available subscription tiers
    - Features and limits per plan
 
-2. **subscription_requests** - Customer subscriptions
+2. **subscription_requests** - Unified table for all subscription types
    - Customer information
-   - Selected pricing plan
+   - Links to pricing plans (system subscriptions)
+   - Contains platform metadata for platform subscriptions
    - Status and payment tracking
 
-3. **payment_transactions** - Billing records
+3. **payment_transactions** - All billing records
    - Links to subscription request
+   - Supports both system and platform payments
    - Payment method and status
    - Transaction references
+
+4. **company_platform_subscriptions** (NEW) - Platform access tracking
+   - Links to social_platforms for platform details
+   - Links to subscription_requests for billing workflow
+   - Links to payment_transactions for payment tracking
+   - Platform-specific: monthly_fee, billing_cycle
+   - Separate approval workflow
+
+5. **social_platforms** - Available platforms with pricing
+   - pricing_info field describes costs
+   - subscription_required flag
 
 ### Relationships
 
 ```
 pricing_plans (1) ← (N) subscription_requests (1) ← (N) payment_transactions
+                            ↑
+company_platform_subscriptions (N) → (1) subscription_requests
+company_platform_subscriptions (N) → (1) social_platforms
+company_platform_subscriptions (N) → (1) companies
 ```
 
 ## Automated Workflows
 
-### Subscription Approval Flow
+### System Subscription Approval Flow
 
 1. Admin approves subscription request
 2. System creates payment transaction record automatically
 3. Payment instructions sent to customer
 4. Subscription status: `pending` → `approved`
+5. On payment verification: `approved` → `active`
+
+### Platform Subscription Approval Flow (NEW)
+
+1. Company requests platform access
+2. System creates company_platform_subscriptions + subscription_requests record
+3. Admin reviews in Platform Access tab
+4. On approval:
+   - Platform subscription status: `pending` → `approved`
+   - Payment transaction created if monthly_fee > 0
+   - Subscription request updated
+5. On payment verification:
+   - Payment status: `pending` → `verified`
+   - Platform is_active: `false` → `true`
+   - Company gains platform access
 
 ### Payment Verification Flow
 
 1. Admin verifies payment transaction
 2. System updates payment status to `verified`
 3. Linked subscription automatically activated
-4. Subscription status: `approved` → `active`
+4. System subscription: `approved` → `active`
+5. Platform subscription: `is_active` → `true`
 
 ## Integration Points
 
@@ -116,8 +177,15 @@ pricing_plans (1) ← (N) subscription_requests (1) ← (N) payment_transactions
 
 ### Components
 
-- `BillingManagement.tsx` - Main dashboard
+- `BillingManagement.tsx` - Main unified dashboard with 4 tabs:
+  - Subscriptions (system-wide)
+  - **Platform Access (NEW)** - Platform subscription management
+  - Payments (all transactions)
+  - Pricing Plans (plan configuration)
 - `PricingPlansTab.tsx` - Pricing management component
+- `PlatformSubscriptionsTab.tsx` (NEW) - Platform access management
+- `CompanyPlatformSubscriptions.tsx` - Company-facing platform request UI
+- `BillingSystemAlert.tsx` - Migration guidance banner
 
 ## Migration from Old System
 
