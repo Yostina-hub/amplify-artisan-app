@@ -39,7 +39,7 @@ const builderItems = [
   { title: "Form Builder", url: "/form-builder", icon: Box },
   { title: "Workflow Builder", url: "/workflow-builder", icon: Zap },
   { title: "Analytics Dashboard", url: "/reporting-dashboard", icon: BarChart3 },
-  { title: "CRM Roadmap", url: "/crm-roadmap", icon: Target },
+  { title: "ECC", url: "/crm-roadmap", icon: Target },
 ];
 
   const crmItems = [
