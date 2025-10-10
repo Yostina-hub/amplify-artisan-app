@@ -198,103 +198,12 @@ const ContentModeration = () => {
 
   const approvePostMutation = useMutation({
     mutationFn: async (post: any) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      // Check if post has a scheduled date
-      const scheduledFor = post.scheduled_at || post.scheduled_for;
-      const isScheduled = scheduledFor && new Date(scheduledFor) > new Date();
-
-      if (isScheduled) {
-        // Just approve it, don't publish yet
-        const { error: updateError } = await supabase
-          .from("social_media_posts")
-          .update({ 
-            status: "scheduled",
-            flagged: false,
-            approved_by: user?.id,
-            approved_at: new Date().toISOString(),
-            scheduled_for: scheduledFor,
-          })
-          .eq("id", post.id);
-
-        if (updateError) throw updateError;
-
-        // Send approval notification to post creator
-        if (post.user_id) {
-          await createNotification({
-            userId: post.user_id,
-            companyId: post.company_id,
-            title: "Post Approved & Scheduled",
-            message: `Your post has been approved and scheduled for ${new Date(scheduledFor).toLocaleString()}`,
-            type: "success",
-            actionUrl: "/composer",
-            actionLabel: "View Post",
-            metadata: { postId: post.id }
-          });
-        }
-
-        return { scheduled: true, scheduledFor };
-      }
-
-      // Check if post is already published - if so, just mark as approved
-      if (post.status === 'published') {
-        const { error: updateError } = await supabase
-          .from("social_media_posts")
-          .update({ 
-            flagged: false,
-            approved_by: user?.id,
-            approved_at: new Date().toISOString(),
-          })
-          .eq("id", post.id);
-
-        if (updateError) throw updateError;
-
-        // Send approval notification
-        if (post.user_id) {
-          await createNotification({
-            userId: post.user_id,
-            companyId: post.company_id,
-            title: "Post Approved",
-            message: "Your published post has been approved!",
-            type: "success",
-            actionUrl: "/composer",
-            actionLabel: "View Post",
-            metadata: { postId: post.id }
-          });
-        }
-
-        return { scheduled: false, alreadyPublished: true };
-      }
-
-      // Not scheduled and not published yet - publish now
-      const { error: updateError } = await supabase
-        .from("social_media_posts")
-        .update({ 
-          status: "published",
-          flagged: false,
-          approved_by: user?.id,
-          approved_at: new Date().toISOString(),
-          published_at: new Date().toISOString(),
-        })
-        .eq("id", post.id);
-
-      if (updateError) throw updateError;
-
-      // Send approval notification
-      if (post.user_id) {
-        await createNotification({
-          userId: post.user_id,
-          companyId: post.company_id,
-          title: "Post Approved & Published",
-          message: "Your post has been approved and published!",
-          type: "success",
-          actionUrl: "/composer",
-          actionLabel: "View Post",
-          metadata: { postId: post.id }
-        });
-      }
-
-      return { scheduled: false, alreadyPublished: false };
+      // Delegate approval to a secure backend function to avoid client-side RLS issues
+      const { data, error } = await supabase.functions.invoke('approve-post', {
+        body: { postId: post.id },
+      });
+      if (error) throw error;
+      return data as { scheduled?: boolean; scheduledFor?: string; alreadyPublished?: boolean };
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["moderation-posts"] });

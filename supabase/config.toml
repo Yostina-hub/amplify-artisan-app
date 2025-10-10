@@ -71,3 +71,11 @@ verify_jwt = true
 
 [functions.track-email-open]
 verify_jwt = false
+
+# Public: called by DB cron without JWT
+[functions.publish-scheduled-posts]
+verify_jwt = false
+
+# Secure: requires authenticated moderator
+[functions.approve-post]
+verify_jwt = true
