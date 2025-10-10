@@ -19,6 +19,8 @@ const mainItems = [
   { title: "Admin Dashboard", url: "/admin", icon: Shield },
   { title: "Composer", url: "/composer", icon: FileText },
   { title: "Calendar", url: "/calendar", icon: Calendar },
+  { title: "Social Inbox", url: "/social-inbox", icon: MessageCircle },
+  { title: "Content Moderation", url: "/admin/moderation", icon: Flag },
 ];
 
 const analyticsItems = [
@@ -27,7 +29,6 @@ const analyticsItems = [
 
 const aiItems = [
   { title: "AI Content Studio", url: "/ai-studio", icon: Sparkles },
-  { title: "Social Inbox", url: "/social-inbox", icon: MessageCircle },
   { title: "Social Intelligence", url: "/social-intelligence", icon: Brain },
   { title: "Automation", url: "/automation", icon: Zap },
   { title: "AI Analytics", url: "/ai-analytics", icon: LineChart },
@@ -80,7 +81,6 @@ const agentItems = [
 
 const companyAdminItems = [
   { title: "User Management", url: "/admin/users", icon: Users },
-  { title: "Content Moderation", url: "/admin/moderation", icon: Flag },
   { title: "Email Settings", url: "/company/email-settings", icon: Mail },
   { title: "Platform Subscriptions", url: "/company/platform-subscriptions", icon: Package },
   { title: "Platform API Settings", url: "/company/platform-settings", icon: Key },
@@ -93,7 +93,6 @@ const companyAdminItems = [
 const adminManagementItems = [
   { title: "Company Management", url: "/admin/companies", icon: Building2 },
   { title: "User Management", url: "/admin/users", icon: Users },
-  { title: "Content Moderation", url: "/admin/moderation", icon: Flag },
 ];
 
 const adminPlatformItems = [
