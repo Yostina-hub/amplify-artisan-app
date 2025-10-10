@@ -291,14 +291,7 @@ export default function Composer() {
           status: 'draft',
           user_id: user.id,
           company_id: profile?.company_id || null,
-          media_urls: mediaUrls,
-          metadata: {
-            language,
-            tone,
-            timezone,
-            location,
-            predicted_performance: performancePrediction,
-          }
+          media_urls: mediaUrls
         })
         .select()
         .single();
