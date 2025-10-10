@@ -33,7 +33,10 @@ const ContentModeration = () => {
         .select("*")
         .order("created_at", { ascending: sortOrder === "asc" });
 
-      if (statusFilter !== "all") {
+      // Handle flagged filter specially
+      if (statusFilter === "flagged") {
+        query = query.eq("flagged", true);
+      } else if (statusFilter !== "all") {
         query = query.eq("status", statusFilter);
       }
 
@@ -224,8 +227,9 @@ const ContentModeration = () => {
 
     // View mode filter
     if (viewMode === "queue") {
-      // Queue shows draft and scheduled posts
+      // Queue shows draft and scheduled posts (not flagged or rejected)
       if (post.status !== "draft" && post.status !== "scheduled") return false;
+      if (post.flagged) return false; // Exclude flagged posts from queue
       if (hideNew) return false; // Hide if "hide new" is enabled
     } else {
       // Kanban shows rejected and flagged posts
@@ -282,7 +286,7 @@ const ContentModeration = () => {
           <Card 
             className="border-2 hover:border-destructive/50 transition-all group cursor-pointer hover:shadow-lg"
             onClick={() => {
-              setStatusFilter("all");
+              setStatusFilter("flagged");
               setPlatformFilter("all");
               setViewMode("kanban");
               setCurrentPage(1);
@@ -423,6 +427,7 @@ const ContentModeration = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="flagged">🚩 Flagged by AI</SelectItem>
                     <SelectItem value="draft">Pending</SelectItem>
                     <SelectItem value="scheduled">Scheduled</SelectItem>
                     <SelectItem value="published">Published</SelectItem>
