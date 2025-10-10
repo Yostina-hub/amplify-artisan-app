@@ -567,6 +567,29 @@ const ContentModeration = () => {
                             ))}
                           </div>
                           <p className="text-sm leading-relaxed">{post.content}</p>
+                          
+                          {/* Display rejection reason */}
+                          {post.rejection_reason && (
+                            <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3">
+                              <p className="text-sm font-medium text-destructive flex items-center gap-2">
+                                <XCircle className="h-4 w-4" />
+                                Rejection Reason:
+                              </p>
+                              <p className="text-sm text-muted-foreground mt-1 italic">"{post.rejection_reason}"</p>
+                            </div>
+                          )}
+
+                          {/* Display AI flag reason */}
+                          {post.flagged && post.flag_reason && (
+                            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
+                              <p className="text-sm font-medium text-yellow-700 dark:text-yellow-400 flex items-center gap-2">
+                                <AlertTriangle className="h-4 w-4" />
+                                AI Flagged:
+                              </p>
+                              <p className="text-sm text-muted-foreground mt-1 italic">"{post.flag_reason}"</p>
+                            </div>
+                          )}
+
                           {post.scheduled_at && (
                             <p className="text-xs text-muted-foreground flex items-center gap-1">
                               <Clock className="h-3 w-3" />
@@ -794,14 +817,31 @@ const ContentModeration = () => {
                         </div>
                       )}
 
+                      {selectedPost.flagged && selectedPost.flag_reason && (
+                        <div className="flex items-start gap-3 text-sm">
+                          <Badge variant="destructive" className="mt-0.5">
+                            <AlertTriangle className="h-3 w-3 mr-1" />
+                            AI Flagged
+                          </Badge>
+                          <div className="flex-1">
+                            <p className="font-medium text-destructive">Flagged by AI Moderation</p>
+                            <p className="text-sm mt-1 bg-destructive/10 border border-destructive/30 rounded p-2">
+                              <span className="font-medium">Reason:</span> "{selectedPost.flag_reason}"
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
                       {selectedPost.rejected_at && selectedPost.rejected_by && (
                         <div className="flex items-start gap-3 text-sm">
                           <Badge variant="destructive" className="mt-0.5">Rejected</Badge>
-                          <div>
+                          <div className="flex-1">
                             <p className="font-medium">{new Date(selectedPost.rejected_at).toLocaleString()}</p>
                             <p className="text-muted-foreground">By: {selectedPost.rejected_by.slice(0, 8)}...</p>
                             {selectedPost.rejection_reason && (
-                              <p className="text-sm mt-1 italic">Reason: "{selectedPost.rejection_reason}"</p>
+                              <p className="text-sm mt-2 bg-destructive/10 border border-destructive/30 rounded p-2">
+                                <span className="font-medium">Reason:</span> "{selectedPost.rejection_reason}"
+                              </p>
                             )}
                           </div>
                         </div>
