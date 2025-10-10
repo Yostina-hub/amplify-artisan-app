@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp, Sparkles, Brain, Zap, Target, DollarSign, Clock, ThumbsUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { PredictiveInsights } from '@/components/crm/PredictiveInsights';
 
 export default function AIAnalytics() {
   const { data: profile } = useQuery({
@@ -72,6 +73,23 @@ export default function AIAnalytics() {
         .limit(100);
       if (error) throw error;
       return data;
+    },
+    enabled: !!profile?.company_id,
+  });
+
+  const { data: insights } = useQuery({
+    queryKey: ['ai-insights-crm', profile?.company_id],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data, error } = await supabase.functions.invoke('generate-insights', {
+        body: { 
+          insightType: 'crm',
+          userId: user?.id,
+          companyId: profile?.company_id
+        }
+      });
+      if (error) throw error;
+      return data?.insights || [];
     },
     enabled: !!profile?.company_id,
   });
@@ -186,6 +204,9 @@ export default function AIAnalytics() {
             </CardContent>
           </Card>
         </div>
+
+        {/* AI Insights */}
+        <PredictiveInsights insights={insights || []} title="AI-Powered Insights" />
 
         <Tabs defaultValue="content" className="space-y-4">
           <TabsList>

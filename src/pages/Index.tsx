@@ -10,12 +10,53 @@ import { SubscriptionForm } from "@/components/SubscriptionForm";
 import { Footer } from "@/components/Footer";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { PredictiveInsights } from "@/components/crm/PredictiveInsights";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Index = () => {
   const navigate = useNavigate();
   const [subscriptionFormOpen, setSubscriptionFormOpen] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState<string>();
   const [isTrialMode, setIsTrialMode] = useState(false);
+
+  // Check if user is logged in and fetch profile
+  const { data: user } = useQuery({
+    queryKey: ['auth-user'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user;
+    },
+  });
+
+  const { data: profile } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const { data: insights } = useQuery({
+    queryKey: ['overview-insights', profile?.company_id],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke('generate-insights', {
+        body: { 
+          insightType: 'overview',
+          userId: user?.id,
+          companyId: profile?.company_id
+        }
+      });
+      if (error) throw error;
+      return data?.insights || [];
+    },
+    enabled: !!profile?.company_id && !!user?.id,
+  });
 
   const { data: pricingPlans, isLoading: pricingLoading } = useQuery({
     queryKey: ['pricing-plans'],
@@ -321,6 +362,27 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* AI Insights Dashboard - Only for logged in users */}
+      {user && profile?.company_id && (
+        <div className="bg-white py-16">
+          <div className="container mx-auto px-6">
+            <div className="max-w-7xl mx-auto">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                  <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                    Your Business Insights
+                  </span>
+                </h2>
+                <p className="text-muted-foreground">
+                  AI-powered recommendations to grow your business
+                </p>
+              </div>
+              <PredictiveInsights insights={insights || []} title="Strategic Overview" />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Integrations Section */}
       <div id="integrations" className="relative overflow-hidden bg-white py-24">

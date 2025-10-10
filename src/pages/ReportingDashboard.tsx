@@ -8,6 +8,7 @@ import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Cart
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Download, TrendingUp, Database, FileText, Calendar } from "lucide-react";
 import { toast } from "sonner";
+import { PredictiveInsights } from "@/components/crm/PredictiveInsights";
 
 const COLORS = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
 
@@ -92,6 +93,36 @@ export default function ReportingDashboard() {
     },
   });
 
+  const { data: profile } = useQuery({
+    queryKey: ['profile'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user?.id)
+        .single();
+      return data;
+    },
+  });
+
+  const { data: insights } = useQuery({
+    queryKey: ['analytics-insights', profile?.company_id],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data, error } = await supabase.functions.invoke('generate-insights', {
+        body: { 
+          insightType: 'overview',
+          userId: user?.id,
+          companyId: profile?.company_id
+        }
+      });
+      if (error) throw error;
+      return data?.insights || [];
+    },
+    enabled: !!profile?.company_id,
+  });
+
   const selectedModule = modules?.find(m => m.id === selectedModuleId);
 
   // Calculate time series data
@@ -164,6 +195,9 @@ export default function ReportingDashboard() {
           </Button>
         )}
       </div>
+
+      {/* AI Insights */}
+      <PredictiveInsights insights={insights || []} title="Analytics Insights" />
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>

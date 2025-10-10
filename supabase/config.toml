@@ -62,3 +62,12 @@ verify_jwt = true
 
 [functions.ai-sales-forecast]
 verify_jwt = true
+
+[functions.generate-insights]
+verify_jwt = true
+
+[functions.send-marketing-email]
+verify_jwt = true
+
+[functions.track-email-open]
+verify_jwt = false
