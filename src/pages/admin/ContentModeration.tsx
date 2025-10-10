@@ -198,12 +198,42 @@ const ContentModeration = () => {
 
   const approvePostMutation = useMutation({
     mutationFn: async (post: any) => {
-      // Delegate approval to a secure backend function to avoid client-side RLS issues
-      const { data, error } = await supabase.functions.invoke('approve-post', {
-        body: { postId: post.id },
-      });
-      if (error) throw error;
-      return data as { scheduled?: boolean; scheduledFor?: string; alreadyPublished?: boolean };
+      try {
+        // Primary: secure backend path
+        const { data, error } = await supabase.functions.invoke('approve-post', {
+          body: { postId: post.id },
+        });
+        if (error) throw error;
+        return data as { scheduled?: boolean; scheduledFor?: string; alreadyPublished?: boolean };
+      } catch (err) {
+        // Fallback: client-side update (in case function unavailable)
+        console.error('approve-post: function failed, using fallback', err);
+        const { data: { user } } = await supabase.auth.getUser();
+        const now = new Date().toISOString();
+        const scheduledFor = post.scheduled_at || post.scheduled_for;
+        const isScheduled = scheduledFor && new Date(scheduledFor) > new Date();
+
+        const updates: any = {
+          flagged: false,
+          approved_by: user?.id,
+          approved_at: now,
+        };
+        if (isScheduled) {
+          updates.status = 'scheduled';
+          updates.scheduled_for = scheduledFor;
+        } else if (post.status !== 'published') {
+          updates.status = 'published';
+          updates.published_at = now;
+        }
+
+        const { error: updateError } = await supabase
+          .from('social_media_posts')
+          .update(updates)
+          .eq('id', post.id);
+        if (updateError) throw updateError;
+
+        return { scheduled: !!isScheduled, scheduledFor, alreadyPublished: post.status === 'published' };
+      }
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["moderation-posts"] });
