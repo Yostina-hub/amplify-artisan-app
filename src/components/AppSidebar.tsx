@@ -19,7 +19,6 @@ const mainItems = [
   { title: "Admin Dashboard", url: "/admin", icon: Shield },
   { title: "Composer", url: "/composer", icon: FileText },
   { title: "Calendar", url: "/calendar", icon: Calendar },
-  { title: "Layout Showcase", url: "/layout-showcase", icon: Layout },
 ];
 
 const analyticsItems = [
@@ -72,6 +71,7 @@ const monitoringItems = [
   { title: "Brand Monitoring", url: "/brand-monitoring", icon: MessageCircle },
   { title: "Social Listening", url: "/social-listening", icon: Radio },
   { title: "Social Accounts", url: "/social-media-credentials", icon: Link2 },
+  { title: "Layout Showcase", url: "/layout-showcase", icon: Layout },
 ];
 
 const agentItems = [
