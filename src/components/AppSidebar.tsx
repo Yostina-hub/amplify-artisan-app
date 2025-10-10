@@ -16,111 +16,118 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const mainItems = [
-  { title: "Admin Dashboard", url: "/admin", icon: Shield },
+  { title: "Dashboard", url: "/admin", icon: Home },
   { title: "Composer", url: "/composer", icon: FileText },
   { title: "Calendar", url: "/calendar", icon: Calendar },
-  { title: "Social Inbox", url: "/social-inbox", icon: MessageCircle },
   { title: "Content Moderation", url: "/admin/moderation", icon: Flag },
 ];
 
+// Analytics & Insights - Consolidated
 const analyticsItems = [
-  { title: "Analytics Hub", url: "/admin/reach-analytics", icon: BarChart3 },
+  { title: "Overview Dashboard", url: "/reporting-dashboard", icon: BarChart3 },
+  { title: "Analytics Hub", url: "/admin/reach-analytics", icon: TrendingUp },
+  { title: "AI Insights", url: "/ai-analytics", icon: LineChart },
 ];
 
-const aiItems = [
+// AI & Automation - Consolidated
+const aiAutomationItems = [
   { title: "AI Content Studio", url: "/ai-studio", icon: Sparkles },
-  { title: "Social Intelligence", url: "/social-intelligence", icon: Brain },
-  { title: "Automation", url: "/automation", icon: Zap },
-  { title: "AI Analytics", url: "/ai-analytics", icon: LineChart },
+  { title: "Automation Workflows", url: "/automation", icon: Zap },
+  { title: "Workflow Builder", url: "/workflow-builder", icon: Zap },
 ];
 
+// Social Media Management - Consolidated
+const socialMediaItems = [
+  { title: "Social Inbox", url: "/social-inbox", icon: MessageCircle },
+  { title: "Connected Accounts", url: "/social-media-credentials", icon: Link2 },
+  { title: "Social Intelligence", url: "/social-intelligence", icon: Brain },
+  { title: "Social Listening", url: "/social-listening", icon: Radio },
+  { title: "Brand Monitoring", url: "/brand-monitoring", icon: MessageCircle },
+];
+
+// Enterprise Builder
 const builderItems = [
   { title: "Module Builder", url: "/module-builder", icon: Database },
   { title: "Form Builder", url: "/form-builder", icon: Box },
-  { title: "Workflow Builder", url: "/workflow-builder", icon: Zap },
-  { title: "Analytics Dashboard", url: "/reporting-dashboard", icon: BarChart3 },
   { title: "ECC", url: "/crm-roadmap", icon: Target },
 ];
 
-  const crmItems = [
-    { title: "Contacts", url: "/contacts", icon: UserCircle },
-    { title: "Accounts", url: "/accounts", icon: Building2 },
-    { title: "Leads", url: "/leads", icon: UserPlus },
-    { title: "Pipeline", url: "/pipeline", icon: GitBranch },
-    { title: "Activities", url: "/activities", icon: CheckSquare },
-    { title: "Products", url: "/products", icon: ShoppingCart },
-    { title: "Quotes", url: "/quotes", icon: FileSpreadsheet },
-    { title: "Invoices", url: "/invoices", icon: Receipt },
-    { title: "Payments", url: "/payments", icon: Banknote },
-    { title: "Customer Support", url: "/customer-support", icon: Headphones },
-    { title: "Call Center", url: "/call-center", icon: Phone },
-    { title: "Territory Management", url: "/territory-management", icon: Target },
-    { title: "Project Management", url: "/project-management", icon: FolderKanban },
-    { title: "Contract Management", url: "/contract-management", icon: FileCheck },
-    { title: "Reports", url: "/reports", icon: BarChart3 },
-    { title: "Call Reports", url: "/call-reports", icon: Phone },
-    { title: "Email Marketing", url: "/email-marketing", icon: Mail },
-    { title: "Documents", url: "/documents", icon: FileText },
-  ];
+// CRM
+const crmItems = [
+  { title: "Contacts", url: "/contacts", icon: UserCircle },
+  { title: "Accounts", url: "/accounts", icon: Building2 },
+  { title: "Leads", url: "/leads", icon: UserPlus },
+  { title: "Pipeline", url: "/pipeline", icon: GitBranch },
+  { title: "Activities", url: "/activities", icon: CheckSquare },
+  { title: "Products", url: "/products", icon: ShoppingCart },
+  { title: "Quotes", url: "/quotes", icon: FileSpreadsheet },
+  { title: "Invoices", url: "/invoices", icon: Receipt },
+  { title: "Payments", url: "/payments", icon: Banknote },
+  { title: "Customer Support", url: "/customer-support", icon: Headphones },
+  { title: "Call Center", url: "/call-center", icon: Phone },
+  { title: "Territory Management", url: "/territory-management", icon: Target },
+  { title: "Project Management", url: "/project-management", icon: FolderKanban },
+  { title: "Contract Management", url: "/contract-management", icon: FileCheck },
+  { title: "Reports", url: "/reports", icon: BarChart3 },
+  { title: "Call Reports", url: "/call-reports", icon: Phone },
+  { title: "Email Marketing", url: "/email-marketing", icon: Mail },
+  { title: "Documents", url: "/documents", icon: FileText },
+];
 
+// Marketing
 const marketingItems = [
   { title: "Ad Campaigns", url: "/ad-campaigns", icon: Megaphone },
   { title: "Influencer Marketing", url: "/influencer-marketing", icon: Users },
 ];
 
-const monitoringItems = [
-  { title: "Brand Monitoring", url: "/brand-monitoring", icon: MessageCircle },
-  { title: "Social Listening", url: "/social-listening", icon: Radio },
-  { title: "Social Accounts", url: "/social-media-credentials", icon: Link2 },
-  { title: "Layout Showcase", url: "/layout-showcase", icon: Layout },
-];
-
+// Agents
 const agentItems = [
   { title: "Agents Dashboard", url: "/agents", icon: Briefcase },
 ];
 
-const companyAdminItems = [
+// Company Settings - Consolidated
+const companySettingsItems = [
   { title: "User Management", url: "/admin/users", icon: Users },
-  { title: "Email Settings", url: "/company/email-settings", icon: Mail },
-  { title: "Platform Subscriptions", url: "/company/platform-subscriptions", icon: Package },
+  { title: "Platform Access", url: "/company/platform-subscriptions", icon: Package },
   { title: "Platform API Settings", url: "/company/platform-settings", icon: Key },
+  { title: "Email Settings", url: "/company/email-settings", icon: Mail },
   { title: "API Integrations", url: "/company/api-management", icon: Database },
-  { title: "Call Center Integrations", url: "/company/call-center-integrations", icon: Phone },
+  { title: "Call Center Setup", url: "/company/call-center-integrations", icon: Phone },
   { title: "TTS/STT Settings", url: "/tts-settings", icon: Volume2 },
   { title: "Audit Log", url: "/company/audit-log", icon: FileSearch },
 ];
 
+// Admin - Management
 const adminManagementItems = [
   { title: "Company Management", url: "/admin/companies", icon: Building2 },
   { title: "User Management", url: "/admin/users", icon: Users },
+  { title: "Branch Management", url: "/admin/branches", icon: GitBranch },
 ];
 
-const adminPlatformItems = [
-  { title: "Social Platforms", url: "/admin/social-platforms", icon: Globe },
-  { title: "Platform Subscriptions", url: "/admin/platform-subscriptions", icon: Package },
-];
-
+// Admin - Business Operations
 const adminBusinessItems = [
   { title: "Billing Management", url: "/admin/billing", icon: CreditCard },
   { title: "Industry Management", url: "/admin/industries", icon: Layers },
   { title: "Landing Page Manager", url: "/admin/landing-page", icon: FileText },
 ];
 
-const adminConfigItems = [
-  { title: "Branch Management", url: "/admin/branches", icon: GitBranch },
+// Admin - Platform Configuration
+const adminPlatformItems = [
+  { title: "Social Platforms", url: "/admin/social-platforms", icon: Globe },
   { title: "Permission Management", url: "/admin/permissions", icon: Shield },
+];
+
+// Admin - System Configuration
+const adminSystemItems = [
   { title: "Firewall Management", url: "/admin/firewall", icon: Shield },
   { title: "API Integrations", url: "/admin/api-management", icon: Database },
-  { title: "Call Center Integrations", url: "/admin/call-center-integrations", icon: Phone },
+  { title: "Call Center Setup", url: "/admin/call-center-integrations", icon: Phone },
   { title: "Public Content", url: "/admin/public-content", icon: Layout },
   { title: "Email Settings", url: "/admin/email-settings", icon: Mail },
   { title: "Social Auth Settings", url: "/admin/social-auth", icon: Key },
   { title: "TTS/STT Settings", url: "/tts-settings", icon: Volume2 },
   { title: "Trial Settings", url: "/admin/trial-settings", icon: Settings },
   { title: "System Settings", url: "/admin/settings", icon: Cog },
-];
-
-const adminMonitoringItems = [
   { title: "Audit Log", url: "/admin/audit-log", icon: FileSearch },
 ];
 
@@ -130,31 +137,31 @@ export function AppSidebar() {
   const isCollapsed = state === "collapsed";
   const [showAll, setShowAll] = useState(true);
   const [analyticsOpen, setAnalyticsOpen] = useState(true);
-  const [aiOpen, setAiOpen] = useState(true);
+  const [aiAutomationOpen, setAiAutomationOpen] = useState(true);
+  const [socialMediaOpen, setSocialMediaOpen] = useState(false);
   const [builderOpen, setBuilderOpen] = useState(true);
   const [crmOpen, setCrmOpen] = useState(true);
   const [marketingOpen, setMarketingOpen] = useState(false);
-  const [monitoringOpen, setMonitoringOpen] = useState(false);
+  const [companySettingsOpen, setCompanySettingsOpen] = useState(false);
   const [adminManagementOpen, setAdminManagementOpen] = useState(true);
   const [adminPlatformOpen, setAdminPlatformOpen] = useState(false);
   const [adminBusinessOpen, setAdminBusinessOpen] = useState(false);
-  const [adminConfigOpen, setAdminConfigOpen] = useState(false);
-  const [adminMonitoringOpen, setAdminMonitoringOpen] = useState(false);
+  const [adminSystemOpen, setAdminSystemOpen] = useState(false);
 
   const toggleAll = () => {
     const newState = !showAll;
     setShowAll(newState);
     setAnalyticsOpen(newState);
-    setAiOpen(newState);
+    setAiAutomationOpen(newState);
+    setSocialMediaOpen(newState);
     setBuilderOpen(newState);
     setCrmOpen(newState);
     setMarketingOpen(newState);
-    setMonitoringOpen(newState);
+    setCompanySettingsOpen(newState);
     setAdminManagementOpen(newState);
     setAdminPlatformOpen(newState);
     setAdminBusinessOpen(newState);
-    setAdminConfigOpen(newState);
-    setAdminMonitoringOpen(newState);
+    setAdminSystemOpen(newState);
   };
 
   console.log('AppSidebar - User roles:', roles);
@@ -203,13 +210,13 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Analytics Section - Collapsible */}
+        {/* Analytics & Insights Section - Collapsible */}
         <Collapsible open={analyticsOpen} onOpenChange={setAnalyticsOpen}>
           <SidebarGroup>
             <CollapsibleTrigger className="w-full" asChild>
               <button className="w-full">
                 <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
-                  <span className="font-medium">Analytics</span>
+                  <span className="font-medium">Analytics & Insights</span>
                   {!isCollapsed && (
                     <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${analyticsOpen ? 'rotate-180' : ''}`} />
                   )}
@@ -242,15 +249,15 @@ export function AppSidebar() {
           </SidebarGroup>
         </Collapsible>
 
-        {/* AI Features Section - Collapsible */}
-        <Collapsible open={aiOpen} onOpenChange={setAiOpen}>
+        {/* AI & Automation Section - Collapsible */}
+        <Collapsible open={aiAutomationOpen} onOpenChange={setAiAutomationOpen}>
           <SidebarGroup>
             <CollapsibleTrigger className="w-full" asChild>
               <button className="w-full">
                 <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
-                  <span className="font-medium">AI Features</span>
+                  <span className="font-medium">AI & Automation</span>
                   {!isCollapsed && (
-                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${aiOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${aiAutomationOpen ? 'rotate-180' : ''}`} />
                   )}
                 </SidebarGroupLabel>
               </button>
@@ -258,7 +265,7 @@ export function AppSidebar() {
             <CollapsibleContent>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {aiItems.map((item) => (
+                  {aiAutomationItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
                         <NavLink
@@ -398,15 +405,15 @@ export function AppSidebar() {
           </SidebarGroup>
         </Collapsible>
 
-        {/* Monitoring Section - Collapsible */}
-        <Collapsible open={monitoringOpen} onOpenChange={setMonitoringOpen}>
+        {/* Social Media Management Section - Collapsible */}
+        <Collapsible open={socialMediaOpen} onOpenChange={setSocialMediaOpen}>
           <SidebarGroup>
             <CollapsibleTrigger className="w-full" asChild>
               <button className="w-full">
                 <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
-                  <span className="font-medium">Monitoring</span>
+                  <span className="font-medium">Social Media</span>
                   {!isCollapsed && (
-                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${monitoringOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${socialMediaOpen ? 'rotate-180' : ''}`} />
                   )}
                 </SidebarGroupLabel>
               </button>
@@ -414,7 +421,7 @@ export function AppSidebar() {
             <CollapsibleContent>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {monitoringItems.map((item) => (
+                  {socialMediaItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
                         <NavLink
@@ -466,33 +473,46 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {/* Company Admin Section */}
+        {/* Company Settings Section - Collapsible */}
         {isCompanyAdmin && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Company Settings</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {companyAdminItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to={item.url}
-                        end
-                        className={({ isActive }) =>
-                          isActive
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                            : "hover:bg-sidebar-accent/50"
-                        }
-                      >
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          <Collapsible open={companySettingsOpen} onOpenChange={setCompanySettingsOpen}>
+            <SidebarGroup>
+              <CollapsibleTrigger className="w-full" asChild>
+                <button className="w-full">
+                  <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
+                    <span className="font-medium">Company Settings</span>
+                    {!isCollapsed && (
+                      <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${companySettingsOpen ? 'rotate-180' : ''}`} />
+                    )}
+                  </SidebarGroupLabel>
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {companySettingsItems.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild>
+                          <NavLink
+                            to={item.url}
+                            end
+                            className={({ isActive }) =>
+                              isActive
+                                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                : "hover:bg-sidebar-accent/50"
+                            }
+                          >
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
         )}
 
         {/* Super Admin Section - Management */}
@@ -537,14 +557,14 @@ export function AppSidebar() {
           </Collapsible>
         )}
 
-        {/* Super Admin Section - Platforms */}
+        {/* Super Admin Section - Platform */}
         {isSuperAdmin && (
           <Collapsible open={adminPlatformOpen} onOpenChange={setAdminPlatformOpen}>
             <SidebarGroup>
                 <CollapsibleTrigger className="w-full" asChild>
                   <button className="w-full">
                     <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
-                      <span className="font-medium">Platforms</span>
+                      <span className="font-medium">Platform</span>
                       {!isCollapsed && (
                         <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminPlatformOpen ? 'rotate-180' : ''}`} />
                       )}
@@ -621,16 +641,16 @@ export function AppSidebar() {
           </Collapsible>
         )}
 
-        {/* Super Admin Section - Configuration */}
+        {/* Super Admin Section - System Configuration */}
         {isSuperAdmin && (
-          <Collapsible open={adminConfigOpen} onOpenChange={setAdminConfigOpen}>
+          <Collapsible open={adminSystemOpen} onOpenChange={setAdminSystemOpen}>
             <SidebarGroup>
                 <CollapsibleTrigger className="w-full" asChild>
                   <button className="w-full">
                     <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
-                      <span className="font-medium">Configuration</span>
+                      <span className="font-medium">System Configuration</span>
                       {!isCollapsed && (
-                        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminConfigOpen ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminSystemOpen ? 'rotate-180' : ''}`} />
                       )}
                     </SidebarGroupLabel>
                   </button>
@@ -638,49 +658,7 @@ export function AppSidebar() {
               <CollapsibleContent>
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    {adminConfigItems.map((item) => (
-                      <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton asChild>
-                          <NavLink
-                            to={item.url}
-                            end
-                            className={({ isActive }) =>
-                              isActive
-                                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                                : "hover:bg-sidebar-accent/50"
-                            }
-                          >
-                            <item.icon className="h-4 w-4" />
-                            <span>{item.title}</span>
-                          </NavLink>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </CollapsibleContent>
-            </SidebarGroup>
-          </Collapsible>
-        )}
-
-        {/* Super Admin Section - Monitoring */}
-        {isSuperAdmin && (
-          <Collapsible open={adminMonitoringOpen} onOpenChange={setAdminMonitoringOpen}>
-            <SidebarGroup>
-                <CollapsibleTrigger className="w-full" asChild>
-                  <button className="w-full">
-                    <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
-                      <span className="font-medium">Monitoring</span>
-                      {!isCollapsed && (
-                        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminMonitoringOpen ? 'rotate-180' : ''}`} />
-                      )}
-                    </SidebarGroupLabel>
-                  </button>
-                </CollapsibleTrigger>
-              <CollapsibleContent>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {adminMonitoringItems.map((item) => (
+                    {adminSystemItems.map((item) => (
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton asChild>
                           <NavLink
