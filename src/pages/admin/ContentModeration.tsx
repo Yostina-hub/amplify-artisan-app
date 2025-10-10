@@ -131,7 +131,7 @@ const ContentModeration = () => {
       const { data: { user } } = await supabase.auth.getUser();
       
       // Check if post has a scheduled date
-      const scheduledFor = post.scheduled_for;
+      const scheduledFor = post.scheduled_at || post.scheduled_for;
       const isScheduled = scheduledFor && new Date(scheduledFor) > new Date();
 
       if (isScheduled) {
@@ -143,6 +143,7 @@ const ContentModeration = () => {
             flagged: false,
             approved_by: user?.id,
             approved_at: new Date().toISOString(),
+            scheduled_for: scheduledFor,
           })
           .eq("id", post.id);
 
