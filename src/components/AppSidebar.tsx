@@ -1,4 +1,4 @@
-import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2, Mail, Link2, Globe, Key, Package, BarChart2, Layers, DollarSign, CreditCard, FileSearch, ChevronDown, Wallet, Layout, Database, Sparkles, Brain, Zap, LineChart, Box, Target, UserCircle, UserPlus, GitBranch, CheckSquare, ShoppingCart, FileSpreadsheet, Receipt, Banknote, Headphones, Phone, FolderKanban, FileCheck, Volume2, ChevronRight } from "lucide-react";
+import { Home, FileText, Calendar, BarChart3, Settings, Shield, Users, Flag, Cog, Briefcase, TrendingUp, Megaphone, MessageCircle, Radio, Building2, Mail, Link2, Globe, Key, Package, BarChart2, Layers, DollarSign, CreditCard, FileSearch, ChevronDown, Wallet, Layout, Database, Sparkles, Brain, Zap, LineChart, Box, Target, UserCircle, UserPlus, GitBranch, CheckSquare, ShoppingCart, FileSpreadsheet, Receipt, Banknote, Headphones, Phone, FolderKanban, FileCheck, Volume2, ChevronRight, ChevronsDown, ChevronsUp } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
@@ -132,6 +132,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const { hasRole, roles, isCompanyAdmin, isSuperAdmin } = useAuth();
   const isCollapsed = state === "collapsed";
+  const [showAll, setShowAll] = useState(true);
   const [analyticsOpen, setAnalyticsOpen] = useState(true);
   const [aiOpen, setAiOpen] = useState(true);
   const [builderOpen, setBuilderOpen] = useState(true);
@@ -143,6 +144,22 @@ export function AppSidebar() {
   const [adminBusinessOpen, setAdminBusinessOpen] = useState(false);
   const [adminConfigOpen, setAdminConfigOpen] = useState(false);
   const [adminMonitoringOpen, setAdminMonitoringOpen] = useState(false);
+
+  const toggleAll = () => {
+    const newState = !showAll;
+    setShowAll(newState);
+    setAnalyticsOpen(newState);
+    setAiOpen(newState);
+    setBuilderOpen(newState);
+    setCrmOpen(newState);
+    setMarketingOpen(newState);
+    setMonitoringOpen(newState);
+    setAdminManagementOpen(newState);
+    setAdminPlatformOpen(newState);
+    setAdminBusinessOpen(newState);
+    setAdminConfigOpen(newState);
+    setAdminMonitoringOpen(newState);
+  };
 
   console.log('AppSidebar - User roles:', roles);
   console.log('AppSidebar - Is super admin:', isSuperAdmin);
@@ -157,6 +174,23 @@ export function AppSidebar() {
               <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 SocialHub
               </h1>
+              <button
+                onClick={toggleAll}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                title={showAll ? "Collapse all sections" : "Expand all sections"}
+              >
+                {showAll ? (
+                  <>
+                    <ChevronsUp className="h-3 w-3" />
+                    <span>Less</span>
+                  </>
+                ) : (
+                  <>
+                    <ChevronsDown className="h-3 w-3" />
+                    <span>More</span>
+                  </>
+                )}
+              </button>
             </>
           ) : (
             <div className="w-8 h-8 mx-auto rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
