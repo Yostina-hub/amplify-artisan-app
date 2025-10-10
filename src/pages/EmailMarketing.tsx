@@ -17,6 +17,7 @@ import { PageHelp } from "@/components/PageHelp";
 import { useEngagementTracker } from "@/hooks/useEngagementTracker";
 import ContactsManager from "@/components/email/ContactsManager";
 import CampaignScheduler from "@/components/email/CampaignScheduler";
+import EmailAnalytics from "@/components/email/EmailAnalytics";
 import { format } from "date-fns";
 
 export default function EmailMarketing() {
@@ -442,6 +443,7 @@ export default function EmailMarketing() {
       <Tabs defaultValue="campaigns" className="space-y-6">
         <TabsList>
           <TabsTrigger value="campaigns">Email Campaigns</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="contacts">Contacts</TabsTrigger>
           <TabsTrigger value="call_campaigns">Call Campaigns</TabsTrigger>
           <TabsTrigger value="templates">Email Templates</TabsTrigger>
@@ -593,6 +595,10 @@ export default function EmailMarketing() {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="analytics" className="space-y-4">
+          <EmailAnalytics campaigns={campaigns} />
         </TabsContent>
 
         <TabsContent value="contacts" className="space-y-4">
