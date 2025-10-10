@@ -35,6 +35,9 @@ export default function Analytics() {
   const scheduledPosts = posts?.filter(p => p.status === "scheduled").length || 0;
   const draftPosts = posts?.filter(p => p.status === "draft").length || 0;
   const totalViews = posts?.reduce((sum, post) => sum + (post.views || 0), 0) || 0;
+  const totalLikes = posts?.reduce((sum, post) => sum + (post.likes || 0), 0) || 0;
+  const totalShares = posts?.reduce((sum, post) => sum + (post.shares || 0), 0) || 0;
+  const totalClicks = posts?.reduce((sum, post) => sum + (post.clicks || 0), 0) || 0;
   const avgEngagementRate = publishedPosts
     ? (posts.filter(p => p.status === "published").reduce((sum, post) => sum + (post.engagement_rate || 0), 0) / publishedPosts).toFixed(1)
     : "0";
@@ -60,32 +63,6 @@ export default function Analytics() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Posts</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalPosts}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              All content created
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Published</CardTitle>
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{publishedPosts}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Live on platforms
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Views</CardTitle>
             <Eye className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -99,13 +76,39 @@ export default function Analytics() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Engagement Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Likes</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{avgEngagementRate}%</div>
+            <div className="text-2xl font-bold">{totalLikes.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Average interaction
+              Reactions received
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Shares</CardTitle>
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalShares.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Content shared
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Clicks</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalClicks.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Link clicks
             </p>
           </CardContent>
         </Card>
@@ -146,7 +149,7 @@ export default function Analytics() {
       {/* Recent Activity */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Posts</CardTitle>
+          <CardTitle>Recent Posts with Reactions</CardTitle>
         </CardHeader>
         <CardContent>
           {posts?.length === 0 ? (
@@ -155,28 +158,45 @@ export default function Analytics() {
             </p>
           ) : (
             <div className="space-y-3">
-              {posts?.slice(0, 5).map((post) => (
-                <div key={post.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex-1">
-                    <p className="font-medium text-sm line-clamp-1">{post.content}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {new Date(post.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="text-right ml-4">
-                    <span className={`text-xs px-2 py-1 rounded-full ${
+              {posts?.slice(0, 10).map((post) => (
+                <div key={post.id} className="p-4 border rounded-lg space-y-2">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <p className="font-medium text-sm line-clamp-2">{post.content}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {new Date(post.created_at).toLocaleDateString()} • {post.platforms?.join(", ")}
+                      </p>
+                    </div>
+                    <span className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${
                       post.status === "published" ? "bg-green-100 text-green-800" :
                       post.status === "scheduled" ? "bg-blue-100 text-blue-800" :
                       "bg-gray-100 text-gray-800"
                     }`}>
                       {post.status}
                     </span>
-                    {post.views > 0 && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {post.views} views
-                      </p>
-                    )}
                   </div>
+                  
+                  {/* Reaction metrics */}
+                  {post.status === "published" && (
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2 border-t">
+                      <div className="flex items-center gap-1">
+                        <Eye className="h-3 w-3" />
+                        <span>{post.views || 0} views</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <TrendingUp className="h-3 w-3" />
+                        <span>{post.likes || 0} likes</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <MessageSquare className="h-3 w-3" />
+                        <span>{post.shares || 0} shares</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <FileText className="h-3 w-3" />
+                        <span>{post.clicks || 0} clicks</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
