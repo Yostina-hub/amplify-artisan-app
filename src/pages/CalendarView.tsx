@@ -167,31 +167,36 @@ export default function CalendarView() {
           isRecurring: false,
           meetingLink: "",
         })),
-        ...scheduledPosts.map((post) => {
-          const scheduledDate = post.scheduled_at || post.scheduled_for;
-          return {
-            id: `post-${post.id}`,
-            title: `📱 ${post.platforms?.join(", ")} Post`,
-            description: post.content || "",
-            date: new Date(scheduledDate),
-            time: new Date(scheduledDate).toLocaleTimeString('en-US', { 
-              hour: '2-digit', 
-              minute: '2-digit', 
-              hour12: false,
-              timeZone: 'Africa/Addis_Ababa'
-            }),
-            category: "social" as Event["category"],
-            color: categoryConfig.social.gradient,
-            metadata: {
-              type: "social_post",
-              postId: post.id,
-              platforms: post.platforms,
-              status: post.status,
-              approvedAt: post.approved_at,
-              scheduledFor: scheduledDate,
-            }
-          };
-        })
+        ...scheduledPosts
+          .filter((post) => {
+            const scheduledDate = post.scheduled_at || post.scheduled_for;
+            return new Date(scheduledDate) >= new Date(); // Only show future posts
+          })
+          .map((post) => {
+            const scheduledDate = post.scheduled_at || post.scheduled_for;
+            return {
+              id: `post-${post.id}`,
+              title: `📱 ${post.platforms?.join(", ")} Post`,
+              description: post.content || "",
+              date: new Date(scheduledDate),
+              time: new Date(scheduledDate).toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                hour12: false,
+                timeZone: 'Africa/Addis_Ababa'
+              }),
+              category: "social" as Event["category"],
+              color: categoryConfig.social.gradient,
+              metadata: {
+                type: "social_post",
+                postId: post.id,
+                platforms: post.platforms,
+                status: post.status,
+                approvedAt: post.approved_at,
+                scheduledFor: scheduledDate,
+              }
+            };
+          })
       ];
 
       setEvents(formattedEvents);
@@ -608,17 +613,75 @@ export default function CalendarView() {
                     <ScrollArea className="h-[calc(100%-24px)]">
                       <div className="space-y-1">
                         {dayEvents.slice(0, 3).map((event) => (
-                          <div
-                            key={event.id}
-                            className={cn(
-                              "text-xs px-2 py-1 rounded-md truncate font-medium text-white bg-gradient-to-r",
-                              categoryConfig[event.category].gradient,
-                              "shadow-sm hover:shadow-md transition-shadow"
-                            )}
-                            title={event.title}
-                          >
-                            {categoryConfig[event.category].icon} {event.title}
-                          </div>
+                          <Popover key={event.id}>
+                            <PopoverTrigger asChild>
+                              <div
+                                className={cn(
+                                  "text-xs px-2 py-1 rounded-md truncate font-medium text-white bg-gradient-to-r cursor-pointer",
+                                  categoryConfig[event.category].gradient,
+                                  "shadow-sm hover:shadow-md transition-shadow"
+                                )}
+                              >
+                                {categoryConfig[event.category].icon} {event.title}
+                              </div>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80" side="right">
+                              <div className="space-y-3">
+                                <div>
+                                  <h4 className="font-semibold text-base flex items-center gap-2">
+                                    {categoryConfig[event.category].icon} {event.title}
+                                  </h4>
+                                  <Badge className={categoryConfig[event.category].badge}>
+                                    {event.category}
+                                  </Badge>
+                                </div>
+                                {event.description && (
+                                  <p className="text-sm text-muted-foreground">{event.description}</p>
+                                )}
+                                <div className="space-y-2 text-sm">
+                                  <div className="flex items-center gap-2">
+                                    <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                                    <span>{format(event.date, "PPP")}</span>
+                                  </div>
+                                  {event.time && (
+                                    <div className="flex items-center gap-2">
+                                      <Clock className="h-4 w-4 text-muted-foreground" />
+                                      <span>{event.time} {event.endTime && `- ${event.endTime}`}</span>
+                                    </div>
+                                  )}
+                                  {event.location && (
+                                    <div className="flex items-center gap-2">
+                                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                                      <span>{event.location}</span>
+                                    </div>
+                                  )}
+                                  {event.metadata?.platforms && (
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-muted-foreground">Platforms:</span>
+                                      <span>{event.metadata.platforms.join(", ")}</span>
+                                    </div>
+                                  )}
+                                  {event.metadata?.status && (
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-muted-foreground">Status:</span>
+                                      <Badge variant="outline">{event.metadata.status}</Badge>
+                                    </div>
+                                  )}
+                                </div>
+                                {!event.id.startsWith("post-") && (
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => handleDeleteEvent(event.id)}
+                                    className="w-full"
+                                  >
+                                    <Trash className="h-4 w-4 mr-2" />
+                                    Delete Event
+                                  </Button>
+                                )}
+                              </div>
+                            </PopoverContent>
+                          </Popover>
                         ))}
                         {dayEvents.length > 3 && (
                           <div className="text-xs text-center text-muted-foreground py-1">
