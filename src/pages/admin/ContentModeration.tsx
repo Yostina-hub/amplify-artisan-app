@@ -620,23 +620,26 @@ const ContentModeration = () => {
                               <TooltipContent>View full details</TooltipContent>
                             </Tooltip>
                             
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => recheckContentMutation.mutate(post)}
-                                  disabled={recheckingPostId === post.id}
-                                  className="gap-2"
-                                >
-                                  <RefreshCw className={`h-4 w-4 ${recheckingPostId === post.id ? 'animate-spin' : ''}`} />
-                                  <span className="hidden md:inline">AI Recheck</span>
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Recheck with AI moderation</TooltipContent>
-                            </Tooltip>
+                            {/* AI Recheck - disabled for already published posts */}
+                            {post.status !== 'published' && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => recheckContentMutation.mutate(post)}
+                                    disabled={recheckingPostId === post.id}
+                                    className="gap-2"
+                                  >
+                                    <RefreshCw className={`h-4 w-4 ${recheckingPostId === post.id ? 'animate-spin' : ''}`} />
+                                    <span className="hidden md:inline">AI Recheck</span>
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Recheck with AI moderation</TooltipContent>
+                              </Tooltip>
+                            )}
                             
-                            {(post.flagged || post.status === "draft") && (
+                            {(post.flagged || post.status === "draft" || post.status === "scheduled") && (
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <Button
@@ -657,25 +660,28 @@ const ContentModeration = () => {
                               </Tooltip>
                             )}
                             
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  onClick={() => {
-                                    setPostToReject(post);
-                                    setRejectionReason("");
-                                    setIsRejectDialogOpen(true);
-                                  }}
-                                  disabled={updatePostMutation.isPending}
-                                  className="gap-2"
-                                >
-                                  <XCircle className="h-4 w-4" />
-                                  <span className="hidden md:inline">Reject</span>
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Reject this post</TooltipContent>
-                            </Tooltip>
+                            {/* Reject - disabled for already published posts */}
+                            {post.status !== 'published' && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => {
+                                      setPostToReject(post);
+                                      setRejectionReason("");
+                                      setIsRejectDialogOpen(true);
+                                    }}
+                                    disabled={updatePostMutation.isPending}
+                                    className="gap-2"
+                                  >
+                                    <XCircle className="h-4 w-4" />
+                                    <span className="hidden md:inline">Reject</span>
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Reject this post</TooltipContent>
+                              </Tooltip>
+                            )}
                           </div>
                         </div>
                       </CardContent>
