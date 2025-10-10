@@ -349,7 +349,7 @@ const ContentModeration = () => {
                             <RefreshCw className={`h-4 w-4 ${recheckingPostId === post.id ? 'animate-spin' : ''}`} />
                             AI Recheck
                           </Button>
-                          {post.flagged && (
+                          {(post.flagged || post.status === "draft") && (
                             <Button
                               size="sm"
                               variant="outline"
