@@ -5231,6 +5231,9 @@ export type Database = {
       }
       social_media_posts: {
         Row: {
+          approval_comment: string | null
+          approved_at: string | null
+          approved_by: string | null
           clicks: number | null
           company_id: string | null
           content: string
@@ -5247,8 +5250,12 @@ export type Database = {
           platform_post_ids: Json | null
           platforms: string[]
           reach: number | null
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
           saves: number | null
           scheduled_at: string | null
+          scheduled_for: string | null
           shares: number | null
           status: string | null
           updated_at: string | null
@@ -5257,6 +5264,9 @@ export type Database = {
           views: number | null
         }
         Insert: {
+          approval_comment?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           clicks?: number | null
           company_id?: string | null
           content: string
@@ -5273,8 +5283,12 @@ export type Database = {
           platform_post_ids?: Json | null
           platforms: string[]
           reach?: number | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
           saves?: number | null
           scheduled_at?: string | null
+          scheduled_for?: string | null
           shares?: number | null
           status?: string | null
           updated_at?: string | null
@@ -5283,6 +5297,9 @@ export type Database = {
           views?: number | null
         }
         Update: {
+          approval_comment?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           clicks?: number | null
           company_id?: string | null
           content?: string
@@ -5299,8 +5316,12 @@ export type Database = {
           platform_post_ids?: Json | null
           platforms?: string[]
           reach?: number | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
           saves?: number | null
           scheduled_at?: string | null
+          scheduled_for?: string | null
           shares?: number | null
           status?: string | null
           updated_at?: string | null
@@ -6548,6 +6569,10 @@ export type Database = {
       can_access_branch: {
         Args: { _branch_id: string; _user_id: string }
         Returns: boolean
+      }
+      check_scheduled_posts: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       get_branch_hierarchy: {
         Args: { branch_uuid: string }

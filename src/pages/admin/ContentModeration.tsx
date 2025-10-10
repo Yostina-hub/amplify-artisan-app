@@ -119,12 +119,37 @@ const ContentModeration = () => {
 
   const approvePostMutation = useMutation({
     mutationFn: async (post: any) => {
-      // First update the post status
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Check if post has a scheduled date
+      const scheduledFor = post.scheduled_for;
+      const isScheduled = scheduledFor && new Date(scheduledFor) > new Date();
+
+      if (isScheduled) {
+        // Just approve it, don't publish yet
+        const { error: updateError } = await supabase
+          .from("social_media_posts")
+          .update({ 
+            status: "scheduled",
+            flagged: false,
+            approved_by: user?.id,
+            approved_at: new Date().toISOString(),
+          })
+          .eq("id", post.id);
+
+        if (updateError) throw updateError;
+        return { scheduled: true, scheduledFor };
+      }
+
+      // Not scheduled, publish immediately
       const { error: updateError } = await supabase
         .from("social_media_posts")
         .update({ 
           status: "published",
           flagged: false,
+          approved_by: user?.id,
+          approved_at: new Date().toISOString(),
+          published_at: new Date().toISOString(),
         })
         .eq("id", post.id);
 
@@ -162,11 +187,17 @@ const ContentModeration = () => {
       if (errors.length > 0) {
         throw new Error(`Post approved but some platforms failed: ${errors.join(', ')}`);
       }
+
+      return { scheduled: false };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["moderation-posts"] });
       queryClient.invalidateQueries({ queryKey: ["moderation-stats"] });
-      toast.success("Post approved and published to all platforms");
+      if (result.scheduled) {
+        toast.success(`Post approved and scheduled for ${new Date(result.scheduledFor).toLocaleString()}`);
+      } else {
+        toast.success("Post approved and published to all platforms");
+      }
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "Failed to approve post");
@@ -421,13 +452,21 @@ const ContentModeration = () => {
                               Approve
                             </Button>
                           )}
-                          <Button
+                           <Button
                             size="sm"
                             variant="destructive"
-                            onClick={() => updatePostMutation.mutate({ 
-                              id: post.id, 
-                              updates: { status: "rejected", flagged: true } 
-                            })}
+                            onClick={async () => {
+                              const { data: { user } } = await supabase.auth.getUser();
+                              updatePostMutation.mutate({ 
+                                id: post.id, 
+                                updates: { 
+                                  status: "rejected", 
+                                  flagged: false,
+                                  rejected_by: user?.id,
+                                  rejected_at: new Date().toISOString(),
+                                }
+                              });
+                            }}
                             className="gap-2"
                           >
                             <XCircle className="h-4 w-4" />
@@ -451,86 +490,152 @@ const ContentModeration = () => {
 
         {/* View Dialog */}
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Content Details</DialogTitle>
-              <DialogDescription>Full content and metadata</DialogDescription>
+              <DialogTitle className="flex items-center gap-2">
+                <Eye className="h-5 w-5" />
+                Post Details & History
+              </DialogTitle>
             </DialogHeader>
             {selectedPost && (
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-semibold mb-2">Status</h4>
-                  <div className="flex gap-2">
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
                     {getStatusBadge(selectedPost.status, selectedPost.flagged)}
-                  </div>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-2">Platforms</h4>
-                  <div className="flex gap-2 flex-wrap">
                     {selectedPost.platforms?.map((platform: string) => (
                       <Badge key={platform} variant="outline" className="capitalize">
                         {platform}
                       </Badge>
                     ))}
                   </div>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-2">Content</h4>
-                  <p className="text-sm leading-relaxed bg-muted p-4 rounded-lg">
-                    {selectedPost.content}
-                  </p>
-                </div>
-                {selectedPost.flag_reason && (
-                  <div>
-                    <h4 className="font-semibold mb-2 text-destructive">Flag Reason</h4>
-                    <p className="text-sm bg-destructive/10 p-4 rounded-lg border border-destructive/20">
-                      {selectedPost.flag_reason}
+                  
+                  <div className="space-y-2">
+                    <h3 className="font-semibold text-lg">Content</h3>
+                    <p className="text-sm leading-relaxed bg-muted/50 p-4 rounded-lg">
+                      {selectedPost.content}
                     </p>
                   </div>
-                )}
-                {selectedPost.scheduled_at && (
-                  <div>
-                    <h4 className="font-semibold mb-2">Scheduled For</h4>
-                    <p className="text-sm">{new Date(selectedPost.scheduled_at).toLocaleString()}</p>
-                  </div>
-                )}
-                <div>
-                  <h4 className="font-semibold mb-2">Created At</h4>
-                  <p className="text-sm">{new Date(selectedPost.created_at).toLocaleString()}</p>
-                </div>
-                {selectedPost.media_urls && selectedPost.media_urls.length > 0 && (
-                  <div>
-                    <h4 className="font-semibold mb-2">Media</h4>
-                    <div className="grid grid-cols-2 gap-2">
-                      {selectedPost.media_urls.map((media: any, idx: number) => {
-                        const mediaUrl = typeof media === 'string' ? media : media.url;
-                        const mediaType = typeof media === 'string' ? 'photo' : media.type;
-                        
-                        if (mediaType === 'video') {
+
+                  {selectedPost.media_urls && selectedPost.media_urls.length > 0 && (
+                    <div className="space-y-2">
+                      <h3 className="font-semibold text-lg">Media</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        {selectedPost.media_urls.map((media: any, idx: number) => {
+                          const mediaUrl = typeof media === 'string' ? media : media.url;
+                          const mediaType = typeof media === 'string' ? 'photo' : media.type;
+                          
+                          if (mediaType === 'video') {
+                            return (
+                              <video 
+                                key={idx}
+                                controls
+                                className="rounded-lg w-full h-48 object-cover"
+                              >
+                                <source src={mediaUrl} type="video/mp4" />
+                              </video>
+                            );
+                          }
+                          
                           return (
-                            <video 
+                            <img
                               key={idx}
-                              controls
-                              className="rounded-lg border w-full h-48 object-cover"
-                            >
-                              <source src={mediaUrl} type="video/mp4" />
-                              Your browser does not support the video tag.
-                            </video>
+                              src={mediaUrl}
+                              alt={`Media ${idx + 1}`}
+                              className="rounded-lg w-full h-48 object-cover"
+                            />
                           );
-                        }
-                        
-                        return (
-                          <img 
-                            key={idx} 
-                            src={mediaUrl} 
-                            alt={`Media ${idx + 1}`} 
-                            className="rounded-lg border w-full h-48 object-cover"
-                          />
-                        );
-                      })}
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedPost.hashtags && selectedPost.hashtags.length > 0 && (
+                    <div className="space-y-2">
+                      <h3 className="font-semibold text-lg">Hashtags</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedPost.hashtags.map((tag: string, idx: number) => (
+                          <Badge key={idx} variant="secondary">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* History Section */}
+                  <div className="space-y-3 border-t pt-4">
+                    <h3 className="font-semibold text-lg">History & Timeline</h3>
+                    <div className="space-y-3">
+                      {selectedPost.created_at && (
+                        <div className="flex items-start gap-3 text-sm">
+                          <Badge variant="outline" className="mt-0.5">Created</Badge>
+                          <div>
+                            <p className="font-medium">{new Date(selectedPost.created_at).toLocaleString()}</p>
+                            {selectedPost.user_id && <p className="text-muted-foreground">By user: {selectedPost.user_id.slice(0, 8)}...</p>}
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedPost.approved_at && selectedPost.approved_by && (
+                        <div className="flex items-start gap-3 text-sm">
+                          <Badge variant="outline" className="mt-0.5 bg-green-500/10">Approved</Badge>
+                          <div>
+                            <p className="font-medium">{new Date(selectedPost.approved_at).toLocaleString()}</p>
+                            <p className="text-muted-foreground">By: {selectedPost.approved_by.slice(0, 8)}...</p>
+                            {selectedPost.approval_comment && (
+                              <p className="text-sm mt-1 italic">"{selectedPost.approval_comment}"</p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedPost.rejected_at && selectedPost.rejected_by && (
+                        <div className="flex items-start gap-3 text-sm">
+                          <Badge variant="destructive" className="mt-0.5">Rejected</Badge>
+                          <div>
+                            <p className="font-medium">{new Date(selectedPost.rejected_at).toLocaleString()}</p>
+                            <p className="text-muted-foreground">By: {selectedPost.rejected_by.slice(0, 8)}...</p>
+                            {selectedPost.rejection_reason && (
+                              <p className="text-sm mt-1 italic">Reason: "{selectedPost.rejection_reason}"</p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedPost.scheduled_for && (
+                        <div className="flex items-start gap-3 text-sm">
+                          <Badge variant="outline" className="mt-0.5 bg-blue-500/10">
+                            <Clock className="h-3 w-3 mr-1" />
+                            Scheduled
+                          </Badge>
+                          <div>
+                            <p className="font-medium">{new Date(selectedPost.scheduled_for).toLocaleString()}</p>
+                            <p className="text-muted-foreground">Will publish at this time</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedPost.published_at && (
+                        <div className="flex items-start gap-3 text-sm">
+                          <Badge variant="outline" className="mt-0.5 bg-green-500/10">Published</Badge>
+                          <div>
+                            <p className="font-medium">{new Date(selectedPost.published_at).toLocaleString()}</p>
+                            {selectedPost.platform_post_url && (
+                              <a
+                                href={selectedPost.platform_post_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary hover:underline text-sm"
+                              >
+                                View on platform →
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             )}
           </DialogContent>

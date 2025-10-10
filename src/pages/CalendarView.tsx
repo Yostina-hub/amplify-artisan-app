@@ -38,6 +38,7 @@ interface Event {
   recurrenceRule?: string;
   meetingLink?: string;
   reminders?: number[];
+  metadata?: any;
 }
 
 const categoryConfig = {
@@ -119,29 +120,73 @@ export default function CalendarView() {
     
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      // Fetch calendar events
+      const { data: calendarData, error: calendarError } = await supabase
         .from("calendar_events")
         .select("*")
         .eq("user_id", session.user.id)
         .order("event_date", { ascending: true });
 
-      if (error) throw error;
+      if (calendarError) throw calendarError;
 
-      const formattedEvents: Event[] = (data || []).map((event) => ({
-        id: event.id,
-        title: event.title,
-        description: event.description || "",
-        date: new Date(event.event_date),
-        time: event.event_time || "",
-        endTime: event.end_time || undefined,
-        category: event.category as Event["category"],
-        location: event.location || undefined,
-        attendees: event.attendees || undefined,
-        color: categoryConfig[event.category as Event["category"]].gradient,
-        timezone: "UTC",
-        isRecurring: false,
-        meetingLink: "",
-      }));
+      // Fetch scheduled social media posts
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("company_id")
+        .eq("id", session.user.id)
+        .single();
+
+      let scheduledPosts: any[] = [];
+      if (profile?.company_id) {
+        const { data: postsData, error: postsError } = await supabase
+          .from("social_media_posts")
+          .select("*, profiles!social_media_posts_user_id_fkey(full_name), approved_profiles:profiles!social_media_posts_approved_by_fkey(full_name)")
+          .eq("company_id", profile.company_id)
+          .not("scheduled_for", "is", null)
+          .order("scheduled_for", { ascending: true });
+
+        if (!postsError && postsData) {
+          scheduledPosts = postsData;
+        }
+      }
+
+      // Combine calendar events and scheduled posts
+      const formattedEvents: Event[] = [
+        ...(calendarData || []).map((event) => ({
+          id: event.id,
+          title: event.title,
+          description: event.description || "",
+          date: new Date(event.event_date),
+          time: event.event_time || "",
+          endTime: event.end_time || undefined,
+          category: event.category as Event["category"],
+          location: event.location || undefined,
+          attendees: event.attendees || undefined,
+          color: categoryConfig[event.category as Event["category"]].gradient,
+          timezone: "UTC",
+          isRecurring: false,
+          meetingLink: "",
+        })),
+        ...scheduledPosts.map((post) => ({
+          id: `post-${post.id}`,
+          title: `📱 ${post.platforms?.join(", ")} Post`,
+          description: post.content || "",
+          date: new Date(post.scheduled_for),
+          time: new Date(post.scheduled_for).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+          category: "social" as Event["category"],
+          color: categoryConfig.social.gradient,
+          metadata: {
+            type: "social_post",
+            postId: post.id,
+            platforms: post.platforms,
+            status: post.status,
+            postedBy: post.profiles?.full_name || "Unknown",
+            approvedBy: post.approved_profiles?.full_name || null,
+            approvedAt: post.approved_at,
+            scheduledFor: post.scheduled_for,
+          }
+        }))
+      ];
 
       setEvents(formattedEvents);
     } catch (error) {
