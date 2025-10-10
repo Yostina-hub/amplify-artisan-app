@@ -67,7 +67,11 @@ export function EnhancedLayout() {
 
   const getBreadcrumbs = () => {
     const paths = location.pathname.split("/").filter(Boolean);
-    const breadcrumbs = [{ label: "Home", path: "/dashboard" }];
+    
+    // Don't add "Home" if we're already on /dashboard
+    const breadcrumbs = location.pathname === "/dashboard" 
+      ? [] 
+      : [{ label: "Home", path: "/dashboard" }];
 
     let currentPath = "";
     paths.forEach((segment) => {
@@ -120,7 +124,7 @@ export function EnhancedLayout() {
                 <Breadcrumb className="hidden lg:block">
                   <BreadcrumbList>
                     {breadcrumbs.map((crumb, index) => (
-                      <div key={crumb.path} className="flex items-center">
+                      <div key={`${crumb.path}-${index}`} className="flex items-center">
                         {index > 0 && <BreadcrumbSeparator />}
                         <BreadcrumbItem>
                           {index === breadcrumbs.length - 1 ? (
