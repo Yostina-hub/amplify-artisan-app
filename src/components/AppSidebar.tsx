@@ -102,9 +102,6 @@ const adminPlatformItems = [
 
 const adminBusinessItems = [
   { title: "Billing Management", url: "/admin/billing", icon: CreditCard },
-  { title: "Subscription Management", url: "/admin/subscriptions", icon: CreditCard },
-  { title: "Payment Management", url: "/admin/payments", icon: Wallet },
-  { title: "Pricing Management", url: "/admin/pricing", icon: DollarSign },
   { title: "Industry Management", url: "/admin/industries", icon: Layers },
   { title: "Landing Page Manager", url: "/admin/landing-page", icon: FileText },
 ];
