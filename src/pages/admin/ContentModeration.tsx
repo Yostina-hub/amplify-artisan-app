@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Shield, AlertTriangle, CheckCircle2, XCircle, Search, Filter, Globe, Clock, Eye, LayoutList, LayoutGrid, RefreshCw } from "lucide-react";
+import { Shield, AlertTriangle, CheckCircle2, XCircle, Search, Filter, Globe, Clock, Eye, LayoutList, LayoutGrid, RefreshCw, ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -20,15 +20,18 @@ const ContentModeration = () => {
   const [selectedPost, setSelectedPost] = useState<any>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [recheckingPostId, setRecheckingPostId] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   const queryClient = useQueryClient();
 
   const { data: posts, isLoading } = useQuery({
-    queryKey: ["moderation-posts", statusFilter, platformFilter],
+    queryKey: ["moderation-posts", statusFilter, platformFilter, sortOrder],
     queryFn: async () => {
       let query = supabase
         .from("social_media_posts")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: sortOrder === "asc" });
 
       if (statusFilter !== "all") {
         query = query.eq("status", statusFilter);
@@ -206,24 +209,30 @@ const ContentModeration = () => {
   });
 
   const filteredPosts = posts?.filter((post) => {
-    // View mode filter first
-    if (viewMode === "queue") {
-      // Queue only shows draft (new/pending) posts
-      if (post.status !== "draft") return false;
-      if (hideNew) return false; // Hide if "hide new" is enabled
-    } else {
-      // Kanban shows rejected and flagged posts
-      if (post.status !== "rejected" && !post.flagged) return false;
-    }
-
     // Search filter (only if search term exists)
     if (searchTerm.trim()) {
       const matchesSearch = post.content?.toLowerCase().includes(searchTerm.toLowerCase());
       if (!matchesSearch) return false;
     }
 
+    // View mode filter
+    if (viewMode === "queue") {
+      // Queue shows draft and scheduled posts
+      if (post.status !== "draft" && post.status !== "scheduled") return false;
+      if (hideNew) return false; // Hide if "hide new" is enabled
+    } else {
+      // Kanban shows rejected and flagged posts
+      if (post.status !== "rejected" && !post.flagged) return false;
+    }
+
     return true;
   });
+
+  // Pagination
+  const totalPages = Math.ceil((filteredPosts?.length || 0) / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedPosts = filteredPosts?.slice(startIndex, endIndex);
 
   const getStatusBadge = (status: string, flagged: boolean) => {
     if (flagged) {
@@ -326,51 +335,79 @@ const ContentModeration = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search content..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search content..."
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="pl-10"
+                  />
+                </div>
+                <Select value={statusFilter} onValueChange={(value) => {
+                  setStatusFilter(value);
+                  setCurrentPage(1);
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="draft">Pending</SelectItem>
+                    <SelectItem value="scheduled">Scheduled</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={platformFilter} onValueChange={(value) => {
+                  setPlatformFilter(value);
+                  setCurrentPage(1);
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Filter by platform" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Platforms</SelectItem>
+                    <SelectItem value="facebook">Facebook</SelectItem>
+                    <SelectItem value="twitter">Twitter</SelectItem>
+                    <SelectItem value="instagram">Instagram</SelectItem>
+                    <SelectItem value="linkedin">LinkedIn</SelectItem>
+                    <SelectItem value="tiktok">TikTok</SelectItem>
+                    <SelectItem value="telegram">Telegram</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="hideNew"
+                    checked={hideNew}
+                    onChange={(e) => setHideNew(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  <label htmlFor="hideNew" className="text-sm font-medium">
+                    Hide New
+                  </label>
+                </div>
               </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="draft">Pending</SelectItem>
-                  <SelectItem value="published">Published</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={platformFilter} onValueChange={setPlatformFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by platform" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Platforms</SelectItem>
-                  <SelectItem value="facebook">Facebook</SelectItem>
-                  <SelectItem value="twitter">Twitter</SelectItem>
-                  <SelectItem value="instagram">Instagram</SelectItem>
-                  <SelectItem value="linkedin">LinkedIn</SelectItem>
-                  <SelectItem value="tiktok">TikTok</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="hideNew"
-                  checked={hideNew}
-                  onChange={(e) => setHideNew(e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-300"
-                />
-                <label htmlFor="hideNew" className="text-sm font-medium">
-                  Hide New
-                </label>
+
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                  className="gap-2"
+                >
+                  <ArrowUpDown className="h-4 w-4" />
+                  {sortOrder === "desc" ? "Newest First" : "Oldest First"}
+                </Button>
+                <div className="text-sm text-muted-foreground">
+                  Showing {filteredPosts?.length || 0} posts
+                </div>
               </div>
             </div>
           </CardContent>
@@ -395,9 +432,9 @@ const ContentModeration = () => {
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
                 <p className="text-muted-foreground mt-4">Loading content...</p>
               </div>
-            ) : filteredPosts && filteredPosts.length > 0 ? (
+            ) : paginatedPosts && paginatedPosts.length > 0 ? (
               <div className="space-y-4">
-                {filteredPosts.map((post) => (
+                {paginatedPosts.map((post) => (
                   <Card key={post.id} className="border hover:border-primary/50 transition-all">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between gap-4">
@@ -483,6 +520,62 @@ const ContentModeration = () => {
                 <Shield className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
                 <p className="text-muted-foreground text-lg">No content to review</p>
                 <p className="text-sm text-muted-foreground mt-2">All content has been moderated</p>
+              </div>
+            )}
+
+            {/* Pagination */}
+            {filteredPosts && filteredPosts.length > itemsPerPage && (
+              <div className="flex items-center justify-between mt-6 pt-6 border-t">
+                <div className="text-sm text-muted-foreground">
+                  Page {currentPage} of {totalPages} • {filteredPosts.length} total posts
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className="gap-2"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Previous
+                  </Button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={currentPage === pageNum ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setCurrentPage(pageNum)}
+                          className="w-8 h-8 p-0"
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    className="gap-2"
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>
