@@ -65,7 +65,14 @@ const Auth = () => {
         return;
       }
       
-      navigate('/dashboard');
+      // Check user role and redirect accordingly
+      const { data: userRoles } = await supabase
+        .from('user_roles')
+        .select('role, company_id')
+        .eq('user_id', user.id);
+      
+      const isSuperAdmin = userRoles?.some(r => r.role === 'admin' && !r.company_id);
+      navigate(isSuperAdmin ? '/admin' : '/dashboard');
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -120,7 +127,15 @@ const Auth = () => {
         description: "Your password has been changed successfully.",
       });
 
-      navigate('/dashboard');
+      // Check user role and redirect accordingly
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: userRoles } = await supabase
+        .from('user_roles')
+        .select('role, company_id')
+        .eq('user_id', user?.id);
+      
+      const isSuperAdmin = userRoles?.some(r => r.role === 'admin' && !r.company_id);
+      navigate(isSuperAdmin ? '/admin' : '/dashboard');
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -151,7 +166,16 @@ const Auth = () => {
       setSignInForm({ email: signUpForm.email, password: signUpForm.password });
       // Auto sign in after signup
       await signIn(signUpForm.email, signUpForm.password);
-      navigate('/dashboard');
+      
+      // Check user role and redirect accordingly
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: userRoles } = await supabase
+        .from('user_roles')
+        .select('role, company_id')
+        .eq('user_id', user?.id);
+      
+      const isSuperAdmin = userRoles?.some(r => r.role === 'admin' && !r.company_id);
+      navigate(isSuperAdmin ? '/admin' : '/dashboard');
     } catch (error: any) {
       toast({
         variant: "destructive",
