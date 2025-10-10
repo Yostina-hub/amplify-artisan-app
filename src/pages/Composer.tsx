@@ -32,9 +32,9 @@ const LANGUAGES = [
 ];
 
 const TIMEZONES = [
-  "UTC", "America/New_York", "America/Los_Angeles", "Europe/London", 
-  "Europe/Paris", "Asia/Tokyo", "Asia/Shanghai", "Asia/Dubai",
-  "Australia/Sydney", "Africa/Cairo"
+  "Africa/Addis_Ababa", "UTC", "America/New_York", "America/Los_Angeles", 
+  "Europe/London", "Europe/Paris", "Asia/Tokyo", "Asia/Shanghai", 
+  "Asia/Dubai", "Australia/Sydney", "Africa/Cairo"
 ];
 
 const TONES = [
@@ -50,7 +50,7 @@ export default function Composer() {
   const [content, setContent] = useState("");
   const [date, setDate] = useState<Date>();
   const [time, setTime] = useState("12:00");
-  const [timezone, setTimezone] = useState("UTC");
+  const [timezone, setTimezone] = useState("Africa/Addis_Ababa");
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
@@ -609,14 +609,20 @@ export default function Composer() {
                       </div>
 
                       <div className="space-y-2 md:col-span-2">
-                        <Label>Timezone</Label>
+                        <Label className="flex items-center gap-2">
+                          <Globe className="h-4 w-4" />
+                          Timezone
+                        </Label>
                         <Select value={timezone} onValueChange={setTimezone}>
-                          <SelectTrigger>
+                          <SelectTrigger className="bg-background">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="bg-background z-50">
                             {TIMEZONES.map(tz => (
-                              <SelectItem key={tz} value={tz}>{tz}</SelectItem>
+                              <SelectItem key={tz} value={tz}>
+                                {tz === "Africa/Addis_Ababa" ? "🇪🇹 " : ""}
+                                {tz.replace(/_/g, " ")}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -624,13 +630,31 @@ export default function Composer() {
                     </div>
 
                     {date && (
-                      <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <div className="flex items-center gap-2 text-blue-900 dark:text-blue-300">
-                          <TrendingUp className="h-4 w-4" />
-                          <span className="text-sm font-medium">
-                            Optimal posting time detected! This time has 23% higher engagement.
-                          </span>
+                      <div className="space-y-3">
+                        <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <div className="flex items-center gap-2 text-blue-900 dark:text-blue-300">
+                            <TrendingUp className="h-4 w-4" />
+                            <span className="text-sm font-medium">
+                              Optimal posting time detected! This time has 23% higher engagement.
+                            </span>
+                          </div>
                         </div>
+                        
+                        {time && (
+                          <div className="p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+                            <div className="flex items-center gap-2 text-green-900 dark:text-green-300">
+                              <Globe className="h-4 w-4" />
+                              <div className="flex-1">
+                                <span className="text-sm font-medium block">
+                                  🇪🇹 Scheduled for: {format(date, "PPP")} at {time}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  Addis Ababa Time (EAT - UTC+3)
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </TabsContent>
@@ -772,10 +796,10 @@ export default function Composer() {
                 <div className="space-y-2">
                   <Label>Language</Label>
                   <Select value={language} onValueChange={setLanguage}>
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-background">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-background z-50">
                       {LANGUAGES.map(lang => (
                         <SelectItem key={lang.code} value={lang.code}>
                           <span className="flex items-center gap-2">

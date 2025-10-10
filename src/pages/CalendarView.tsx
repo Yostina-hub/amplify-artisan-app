@@ -330,13 +330,16 @@ export default function CalendarView() {
           
           <div className="flex gap-2">
             <Select value={timezone} onValueChange={setTimezone}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-[200px] bg-background">
                 <Globe className="h-4 w-4 mr-2" />
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-background z-50">
                 {["Africa/Addis_Ababa", "UTC", "America/New_York", "America/Los_Angeles", "Europe/London", "Europe/Paris", "Asia/Tokyo", "Asia/Shanghai", "Asia/Dubai"].map(tz => (
-                  <SelectItem key={tz} value={tz}>{tz}</SelectItem>
+                  <SelectItem key={tz} value={tz}>
+                    {tz === "Africa/Addis_Ababa" ? "🇪🇹 " : ""}
+                    {tz.replace(/_/g, " ")}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -400,10 +403,10 @@ export default function CalendarView() {
                     <div className="space-y-2">
                       <Label htmlFor="category">Category *</Label>
                       <Select value={newEvent.category} onValueChange={(value: Event["category"]) => setNewEvent({ ...newEvent, category: value })}>
-                        <SelectTrigger>
+                        <SelectTrigger className="bg-background">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-background z-50">
                           {Object.entries(categoryConfig).map(([key, config]) => (
                             <SelectItem key={key} value={key}>
                               <span className="flex items-center gap-2">
@@ -489,10 +492,10 @@ export default function CalendarView() {
 
                       {newEvent.isRecurring && (
                         <Select value={newEvent.recurrenceRule} onValueChange={(value) => setNewEvent({ ...newEvent, recurrenceRule: value })}>
-                          <SelectTrigger>
+                          <SelectTrigger className="bg-background">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="bg-background z-50">
                             <SelectItem value="daily">Daily</SelectItem>
                             <SelectItem value="weekly">Weekly</SelectItem>
                             <SelectItem value="monthly">Monthly</SelectItem>
@@ -541,11 +544,11 @@ export default function CalendarView() {
                 </div>
 
                 <Select value={filterCategory} onValueChange={setFilterCategory}>
-                  <SelectTrigger className="w-[150px]">
+                  <SelectTrigger className="w-[150px] bg-background">
                     <Filter className="h-4 w-4 mr-2" />
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-background z-50">
                     <SelectItem value="all">All Categories</SelectItem>
                     {Object.entries(categoryConfig).map(([key, config]) => (
                       <SelectItem key={key} value={key}>
