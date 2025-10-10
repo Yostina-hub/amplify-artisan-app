@@ -140,7 +140,7 @@ export default function CalendarView() {
       if (profile?.company_id) {
         const { data: postsData, error: postsError } = await supabase
           .from("social_media_posts")
-          .select("*, profiles!social_media_posts_user_id_fkey(full_name), approved_profiles:profiles!social_media_posts_approved_by_fkey(full_name)")
+          .select("id, platforms, content, status, approved_at, scheduled_at, scheduled_for")
           .eq("company_id", profile.company_id)
           .or("scheduled_at.not.is.null,scheduled_for.not.is.null")
           .order("scheduled_at", { ascending: true, nullsFirst: false });
@@ -187,8 +187,6 @@ export default function CalendarView() {
               postId: post.id,
               platforms: post.platforms,
               status: post.status,
-              postedBy: post.profiles?.full_name || "Unknown",
-              approvedBy: post.approved_profiles?.full_name || null,
               approvedAt: post.approved_at,
               scheduledFor: scheduledDate,
             }
