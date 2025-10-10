@@ -210,6 +210,45 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {/* Social Media Management Section - Collapsible */}
+        <Collapsible open={socialMediaOpen} onOpenChange={setSocialMediaOpen}>
+          <SidebarGroup>
+            <CollapsibleTrigger className="w-full" asChild>
+              <button className="w-full">
+                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
+                  <span className="font-medium">Social Media</span>
+                  {!isCollapsed && (
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${socialMediaOpen ? 'rotate-180' : ''}`} />
+                  )}
+                </SidebarGroupLabel>
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {socialMediaItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink
+                          to={item.url}
+                          className={({ isActive }) =>
+                            isActive
+                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                              : "hover:bg-sidebar-accent/50"
+                          }
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
+
         {/* Analytics & Insights Section - Collapsible */}
         <Collapsible open={analyticsOpen} onOpenChange={setAnalyticsOpen}>
           <SidebarGroup>
@@ -405,44 +444,6 @@ export function AppSidebar() {
           </SidebarGroup>
         </Collapsible>
 
-        {/* Social Media Management Section - Collapsible */}
-        <Collapsible open={socialMediaOpen} onOpenChange={setSocialMediaOpen}>
-          <SidebarGroup>
-            <CollapsibleTrigger className="w-full" asChild>
-              <button className="w-full">
-                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
-                  <span className="font-medium">Social Media</span>
-                  {!isCollapsed && (
-                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${socialMediaOpen ? 'rotate-180' : ''}`} />
-                  )}
-                </SidebarGroupLabel>
-              </button>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {socialMediaItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild>
-                        <NavLink
-                          to={item.url}
-                          className={({ isActive }) =>
-                            isActive
-                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                              : "hover:bg-sidebar-accent/50"
-                          }
-                        >
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </NavLink>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
 
         {/* Agents Section */}
         {hasRole('agent') && (
