@@ -16,7 +16,6 @@ import { CalendarIcon, Image, Smile, Twitter, Instagram, Linkedin, Facebook, You
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 const LANGUAGES = [
@@ -68,7 +67,6 @@ export default function Composer() {
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
   const [performancePrediction, setPerformancePrediction] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { toast: showToast } = useToast();
 
   const platforms = [
     { id: "twitter", name: "Twitter", icon: Twitter, color: "from-[#1DA1F2] to-[#1a8cd8]", maxChars: 280 },
@@ -225,14 +223,21 @@ export default function Composer() {
 
     setLoading(true);
     try {
+      toast.info("Saving your post...");
+      
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('company_id')
         .eq('id', user.id)
         .single();
+
+      if (profileError) {
+        console.error('Profile fetch error:', profileError);
+        throw new Error("Failed to fetch user profile");
+      }
 
       // Prepare final content with hashtags and mentions
       let finalContent = content.trim();
@@ -298,7 +303,14 @@ export default function Composer() {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Insert error:', error);
+        throw error;
+      }
+
+      if (!newPost) {
+        throw new Error("Post created but no data returned");
+      }
 
       // Auto-moderate
       if (newPost?.id) {
@@ -311,12 +323,11 @@ export default function Composer() {
         }).catch(err => console.error('Auto-moderation error:', err));
       }
 
-      showToast({
-        title: "Post created successfully",
-        description: scheduledDateTime 
-          ? `Scheduled for ${format(new Date(scheduledDateTime), "PPP 'at' p")}`
-          : "Your post is pending review",
-      });
+      toast.success(
+        scheduledDateTime 
+          ? `Post scheduled for ${format(new Date(scheduledDateTime), "PPP 'at' p")}`
+          : "Post saved as draft successfully!"
+      );
 
       // Reset form
       setContent("");
@@ -329,12 +340,10 @@ export default function Composer() {
       setMentions([]);
       setLocation("");
       setPerformancePrediction(null);
+      setAiSuggestions([]);
     } catch (error: any) {
-      showToast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      console.error('Save post error:', error);
+      toast.error(error.message || "Failed to save post. Please try again.");
     } finally {
       setLoading(false);
     }
