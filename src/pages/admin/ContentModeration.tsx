@@ -157,19 +157,23 @@ const ContentModeration = () => {
   });
 
   const filteredPosts = posts?.filter((post) => {
-    // Search filter
-    const matchesSearch = post.content?.toLowerCase().includes(searchTerm.toLowerCase());
-    if (!matchesSearch) return false;
-
-    // View mode filter
+    // View mode filter first
     if (viewMode === "queue") {
       // Queue only shows draft (new/pending) posts
+      if (post.status !== "draft") return false;
       if (hideNew) return false; // Hide if "hide new" is enabled
-      return post.status === "draft";
     } else {
       // Kanban shows rejected and flagged posts
-      return post.status === "rejected" || post.flagged;
+      if (post.status !== "rejected" && !post.flagged) return false;
     }
+
+    // Search filter (only if search term exists)
+    if (searchTerm.trim()) {
+      const matchesSearch = post.content?.toLowerCase().includes(searchTerm.toLowerCase());
+      if (!matchesSearch) return false;
+    }
+
+    return true;
   });
 
   const getStatusBadge = (status: string, flagged: boolean) => {
