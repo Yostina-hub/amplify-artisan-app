@@ -105,6 +105,33 @@ serve(async (req) => {
       throw updateErr;
     }
 
+    // If not scheduled and not already published, publish to platforms now
+    if (!isScheduled && post.status !== 'published') {
+      const platforms = post.platforms || [];
+      console.log(`approve-post: Publishing to platforms:`, platforms);
+      
+      for (const platform of platforms) {
+        try {
+          if (platform === 'telegram') {
+            const { error: telegramErr } = await supabase.functions.invoke('post-to-telegram', {
+              body: { 
+                postId: post.id,
+                companyId: post.company_id
+              }
+            });
+            if (telegramErr) {
+              console.error(`approve-post: Telegram error:`, telegramErr);
+            } else {
+              console.log(`approve-post: Posted to Telegram successfully`);
+            }
+          }
+          // Add other platforms here as needed
+        } catch (platformErr) {
+          console.error(`approve-post: Error posting to ${platform}:`, platformErr);
+        }
+      }
+    }
+
     return new Response(
       JSON.stringify(result),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
