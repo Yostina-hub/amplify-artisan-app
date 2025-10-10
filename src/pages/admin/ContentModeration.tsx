@@ -444,14 +444,32 @@ const ContentModeration = () => {
                   <div>
                     <h4 className="font-semibold mb-2">Media</h4>
                     <div className="grid grid-cols-2 gap-2">
-                      {selectedPost.media_urls.map((url: string, idx: number) => (
-                        <img 
-                          key={idx} 
-                          src={url} 
-                          alt={`Media ${idx + 1}`} 
-                          className="rounded-lg border w-full h-48 object-cover"
-                        />
-                      ))}
+                      {selectedPost.media_urls.map((media: any, idx: number) => {
+                        const mediaUrl = typeof media === 'string' ? media : media.url;
+                        const mediaType = typeof media === 'string' ? 'photo' : media.type;
+                        
+                        if (mediaType === 'video') {
+                          return (
+                            <video 
+                              key={idx}
+                              controls
+                              className="rounded-lg border w-full h-48 object-cover"
+                            >
+                              <source src={mediaUrl} type="video/mp4" />
+                              Your browser does not support the video tag.
+                            </video>
+                          );
+                        }
+                        
+                        return (
+                          <img 
+                            key={idx} 
+                            src={mediaUrl} 
+                            alt={`Media ${idx + 1}`} 
+                            className="rounded-lg border w-full h-48 object-cover"
+                          />
+                        );
+                      })}
                     </div>
                   </div>
                 )}
