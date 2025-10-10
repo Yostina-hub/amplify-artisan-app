@@ -65,10 +65,16 @@ const ContentModeration = () => {
         .select("id", { count: "exact" })
         .eq("status", "published");
 
+      const { data: rejectedPosts } = await supabase
+        .from("social_media_posts")
+        .select("id", { count: "exact" })
+        .eq("status", "rejected");
+
       return {
         flagged: flaggedPosts?.length || 0,
         pending: pendingPosts?.length || 0,
         approved: approvedPosts?.length || 0,
+        rejected: rejectedPosts?.length || 0,
       };
     },
   });
@@ -271,7 +277,7 @@ const ContentModeration = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card 
             className="border-2 hover:border-destructive/50 transition-all group cursor-pointer hover:shadow-lg"
             onClick={() => {
@@ -342,6 +348,30 @@ const ContentModeration = () => {
             <CardContent>
               <div className="text-3xl font-bold text-green-600">{stats?.approved || 0}</div>
               <p className="text-xs text-muted-foreground mt-1">Click to view published posts</p>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="border-2 hover:border-red-500/50 transition-all group cursor-pointer hover:shadow-lg"
+            onClick={() => {
+              setStatusFilter("rejected");
+              setPlatformFilter("all");
+              setViewMode("kanban");
+              setCurrentPage(1);
+              setTimeout(() => {
+                document.getElementById("content-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }, 100);
+            }}
+          >
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2 group-hover:text-red-700 transition-colors">
+                <XCircle className="h-4 w-4 text-red-600" />
+                Rejected Content
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-red-600">{stats?.rejected || 0}</div>
+              <p className="text-xs text-muted-foreground mt-1">Click to review rejected posts</p>
             </CardContent>
           </Card>
         </div>
