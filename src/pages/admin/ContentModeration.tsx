@@ -130,25 +130,43 @@ const ContentModeration = () => {
 
       if (updateError) throw updateError;
 
-      // If the post is for Telegram, trigger the posting
-      if (post.platforms?.includes("telegram")) {
-        const { error: telegramError } = await supabase.functions.invoke("post-to-telegram", {
-          body: { 
-            postId: post.id,
-            companyId: post.company_id
-          }
-        });
+      // Post to each platform
+      const platforms = post.platforms || [];
+      const errors: string[] = [];
 
-        if (telegramError) {
-          console.error("Error posting to Telegram:", telegramError);
-          throw new Error("Post approved but failed to send to Telegram");
+      for (const platform of platforms) {
+        try {
+          if (platform === "telegram") {
+            const { error } = await supabase.functions.invoke("post-to-telegram", {
+              body: { 
+                postId: post.id,
+                companyId: post.company_id
+              }
+            });
+            if (error) errors.push(`Telegram: ${error.message}`);
+          } else {
+            // Use publish-to-platform for other platforms
+            const { error } = await supabase.functions.invoke("publish-to-platform", {
+              body: { 
+                contentId: post.id,
+                platforms: [platform]
+              }
+            });
+            if (error) errors.push(`${platform}: ${error.message}`);
+          }
+        } catch (err) {
+          errors.push(`${platform}: ${err instanceof Error ? err.message : 'Unknown error'}`);
         }
+      }
+
+      if (errors.length > 0) {
+        throw new Error(`Post approved but some platforms failed: ${errors.join(', ')}`);
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["moderation-posts"] });
       queryClient.invalidateQueries({ queryKey: ["moderation-stats"] });
-      toast.success("Post approved and published to Telegram");
+      toast.success("Post approved and published to all platforms");
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "Failed to approve post");
