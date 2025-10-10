@@ -10,9 +10,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Edit, Trash2, Building2, DollarSign, Users2 } from "lucide-react";
+import { Plus, Edit, Trash2, Building2, DollarSign, Users2, Phone } from "lucide-react";
 import { PageHelp } from "@/components/PageHelp";
 import { useBranches } from "@/hooks/useBranches";
+import { ClickToCall } from "@/components/ClickToCall";
 
 export default function Accounts() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -441,6 +442,7 @@ export default function Accounts() {
                   <TableHead>Name</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Industry</TableHead>
+                  <TableHead>Phone</TableHead>
                   <TableHead>Revenue</TableHead>
                   <TableHead>Employees</TableHead>
                   <TableHead>Status</TableHead>
@@ -458,6 +460,14 @@ export default function Accounts() {
                     </TableCell>
                     <TableCell>{account.account_type || "-"}</TableCell>
                     <TableCell>{account.industry || "-"}</TableCell>
+                    <TableCell>
+                      {account.phone ? (
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          {account.phone}
+                        </div>
+                      ) : "-"}
+                    </TableCell>
                     <TableCell>{account.annual_revenue ? formatCurrency(account.annual_revenue) : "-"}</TableCell>
                     <TableCell>{account.number_of_employees || "-"}</TableCell>
                     <TableCell>
@@ -467,6 +477,15 @@ export default function Accounts() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
+                        {account.phone && (
+                          <ClickToCall
+                            phoneNumber={account.phone}
+                            contactName={account.name}
+                            variant="ghost"
+                            size="icon"
+                            className="text-success"
+                          />
+                        )}
                         <Button variant="ghost" size="icon" onClick={() => openEditDialog(account)}>
                           <Edit className="h-4 w-4" />
                         </Button>
