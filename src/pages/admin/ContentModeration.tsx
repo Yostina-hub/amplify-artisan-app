@@ -7,12 +7,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Shield, AlertTriangle, CheckCircle2, XCircle, Search, Filter, Globe, Clock, Eye } from "lucide-react";
+import { Shield, AlertTriangle, CheckCircle2, XCircle, Search, Filter, Globe, Clock, Eye, LayoutList, LayoutGrid, RefreshCw } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const ContentModeration = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [platformFilter, setPlatformFilter] = useState("all");
+  const [viewMode, setViewMode] = useState<"queue" | "kanban">("queue");
+  const [hideNew, setHideNew] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<any>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [recheckingPostId, setRecheckingPostId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data: posts, isLoading } = useQuery({
@@ -81,9 +88,50 @@ const ContentModeration = () => {
     },
   });
 
-  const filteredPosts = posts?.filter((post) =>
-    post.content?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const recheckContentMutation = useMutation({
+    mutationFn: async (post: any) => {
+      setRecheckingPostId(post.id);
+      const { data, error } = await supabase.functions.invoke("moderate-content", {
+        body: {
+          postId: post.id,
+          content: post.content,
+          platforms: post.platforms || [],
+        },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data, post) => {
+      queryClient.invalidateQueries({ queryKey: ["moderation-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["moderation-stats"] });
+      setRecheckingPostId(null);
+      if (data.shouldFlag) {
+        toast.warning(`Content flagged: ${data.flagReason}`);
+      } else {
+        toast.success("Content passed AI moderation");
+      }
+    },
+    onError: () => {
+      setRecheckingPostId(null);
+      toast.error("Failed to recheck content");
+    },
+  });
+
+  const filteredPosts = posts?.filter((post) => {
+    // Search filter
+    const matchesSearch = post.content?.toLowerCase().includes(searchTerm.toLowerCase());
+    if (!matchesSearch) return false;
+
+    // View mode filter
+    if (viewMode === "queue") {
+      // Queue only shows draft (new/pending) posts
+      if (hideNew) return false; // Hide if "hide new" is enabled
+      return post.status === "draft";
+    } else {
+      // Kanban shows rejected and flagged posts
+      return post.status === "rejected" || post.flagged;
+    }
+  });
 
   const getStatusBadge = (status: string, flagged: boolean) => {
     if (flagged) {
@@ -163,16 +211,30 @@ const ContentModeration = () => {
           </Card>
         </div>
 
-        {/* Filters */}
+        {/* View Toggle and Filters */}
         <Card className="border-2">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Filter className="h-5 w-5" />
-              Advanced Filters
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Filter className="h-5 w-5" />
+                Advanced Filters
+              </CardTitle>
+              <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "queue" | "kanban")} className="w-auto">
+                <TabsList>
+                  <TabsTrigger value="queue" className="gap-2">
+                    <LayoutList className="h-4 w-4" />
+                    Content Queue
+                  </TabsTrigger>
+                  <TabsTrigger value="kanban" className="gap-2">
+                    <LayoutGrid className="h-4 w-4" />
+                    Kanban Board
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -206,6 +268,18 @@ const ContentModeration = () => {
                   <SelectItem value="tiktok">TikTok</SelectItem>
                 </SelectContent>
               </Select>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="hideNew"
+                  checked={hideNew}
+                  onChange={(e) => setHideNew(e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300"
+                />
+                <label htmlFor="hideNew" className="text-sm font-medium">
+                  Hide New
+                </label>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -214,10 +288,14 @@ const ContentModeration = () => {
         <Card className="border-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5" />
-              Content Queue
+              {viewMode === "queue" ? <LayoutList className="h-5 w-5" /> : <LayoutGrid className="h-5 w-5" />}
+              {viewMode === "queue" ? "Content Queue" : "Kanban Board"}
             </CardTitle>
-            <CardDescription>Review and moderate social media content</CardDescription>
+            <CardDescription>
+              {viewMode === "queue" 
+                ? "Review new and pending content" 
+                : "Manage rejected and flagged content"}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -249,6 +327,28 @@ const ContentModeration = () => {
                           )}
                         </div>
                         <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedPost(post);
+                              setIsViewDialogOpen(true);
+                            }}
+                            className="gap-2"
+                          >
+                            <Eye className="h-4 w-4" />
+                            View
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => recheckContentMutation.mutate(post)}
+                            disabled={recheckingPostId === post.id}
+                            className="gap-2"
+                          >
+                            <RefreshCw className={`h-4 w-4 ${recheckingPostId === post.id ? 'animate-spin' : ''}`} />
+                            AI Recheck
+                          </Button>
                           {post.flagged && (
                             <Button
                               size="sm"
@@ -290,6 +390,75 @@ const ContentModeration = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* View Dialog */}
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Content Details</DialogTitle>
+              <DialogDescription>Full content and metadata</DialogDescription>
+            </DialogHeader>
+            {selectedPost && (
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2">Status</h4>
+                  <div className="flex gap-2">
+                    {getStatusBadge(selectedPost.status, selectedPost.flagged)}
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Platforms</h4>
+                  <div className="flex gap-2 flex-wrap">
+                    {selectedPost.platforms?.map((platform: string) => (
+                      <Badge key={platform} variant="outline" className="capitalize">
+                        {platform}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Content</h4>
+                  <p className="text-sm leading-relaxed bg-muted p-4 rounded-lg">
+                    {selectedPost.content}
+                  </p>
+                </div>
+                {selectedPost.flag_reason && (
+                  <div>
+                    <h4 className="font-semibold mb-2 text-destructive">Flag Reason</h4>
+                    <p className="text-sm bg-destructive/10 p-4 rounded-lg border border-destructive/20">
+                      {selectedPost.flag_reason}
+                    </p>
+                  </div>
+                )}
+                {selectedPost.scheduled_at && (
+                  <div>
+                    <h4 className="font-semibold mb-2">Scheduled For</h4>
+                    <p className="text-sm">{new Date(selectedPost.scheduled_at).toLocaleString()}</p>
+                  </div>
+                )}
+                <div>
+                  <h4 className="font-semibold mb-2">Created At</h4>
+                  <p className="text-sm">{new Date(selectedPost.created_at).toLocaleString()}</p>
+                </div>
+                {selectedPost.media_urls && selectedPost.media_urls.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold mb-2">Media</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {selectedPost.media_urls.map((url: string, idx: number) => (
+                        <img 
+                          key={idx} 
+                          src={url} 
+                          alt={`Media ${idx + 1}`} 
+                          className="rounded-lg border w-full h-48 object-cover"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
