@@ -272,42 +272,76 @@ const ContentModeration = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="border-2 hover:border-primary/50 transition-all group">
+          <Card 
+            className="border-2 hover:border-destructive/50 transition-all group cursor-pointer hover:shadow-lg"
+            onClick={() => {
+              setStatusFilter("all");
+              setPlatformFilter("all");
+              setViewMode("kanban");
+              setCurrentPage(1);
+              // Scroll to content list
+              setTimeout(() => {
+                document.getElementById("content-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }, 100);
+            }}
+          >
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2 group-hover:text-destructive transition-colors">
                 <AlertTriangle className="h-4 w-4 text-destructive" />
                 Flagged Content
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-destructive">{stats?.flagged || 0}</div>
-              <p className="text-xs text-muted-foreground mt-1">Requires immediate review</p>
+              <p className="text-xs text-muted-foreground mt-1">Click to review flagged posts</p>
             </CardContent>
           </Card>
 
-          <Card className="border-2 hover:border-primary/50 transition-all group">
+          <Card 
+            className="border-2 hover:border-yellow-500/50 transition-all group cursor-pointer hover:shadow-lg"
+            onClick={() => {
+              setStatusFilter("draft");
+              setPlatformFilter("all");
+              setViewMode("queue");
+              setCurrentPage(1);
+              setTimeout(() => {
+                document.getElementById("content-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }, 100);
+            }}
+          >
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2 group-hover:text-yellow-600 transition-colors">
                 <Clock className="h-4 w-4 text-yellow-500" />
                 Pending Review
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-yellow-500">{stats?.pending || 0}</div>
-              <p className="text-xs text-muted-foreground mt-1">Awaiting moderation</p>
+              <p className="text-xs text-muted-foreground mt-1">Click to review pending posts</p>
             </CardContent>
           </Card>
 
-          <Card className="border-2 hover:border-primary/50 transition-all group">
+          <Card 
+            className="border-2 hover:border-green-500/50 transition-all group cursor-pointer hover:shadow-lg"
+            onClick={() => {
+              setStatusFilter("published");
+              setPlatformFilter("all");
+              setViewMode("queue");
+              setCurrentPage(1);
+              setTimeout(() => {
+                document.getElementById("content-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }, 100);
+            }}
+          >
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2 group-hover:text-green-700 transition-colors">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 Approved Content
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-green-600">{stats?.approved || 0}</div>
-              <p className="text-xs text-muted-foreground mt-1">Published successfully</p>
+              <p className="text-xs text-muted-foreground mt-1">Click to view published posts</p>
             </CardContent>
           </Card>
         </div>
@@ -414,7 +448,7 @@ const ContentModeration = () => {
         </Card>
 
         {/* Content List */}
-        <Card className="border-2">
+        <Card id="content-list" className="border-2 scroll-mt-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               {viewMode === "queue" ? <LayoutList className="h-5 w-5" /> : <LayoutGrid className="h-5 w-5" />}
