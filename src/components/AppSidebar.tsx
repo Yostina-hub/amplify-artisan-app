@@ -170,28 +170,9 @@ export function AppSidebar() {
       <SidebarContent>
         <div className="px-6 py-4 flex items-center justify-between">
           {!isCollapsed ? (
-            <>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                SocialHub
-              </h1>
-              <button
-                onClick={toggleAll}
-                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                title={showAll ? "Collapse all sections" : "Expand all sections"}
-              >
-                {showAll ? (
-                  <>
-                    <ChevronsUp className="h-3 w-3" />
-                    <span>Less</span>
-                  </>
-                ) : (
-                  <>
-                    <ChevronsDown className="h-3 w-3" />
-                    <span>More</span>
-                  </>
-                )}
-              </button>
-            </>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              SocialHub
+            </h1>
           ) : (
             <div className="w-8 h-8 mx-auto rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
               <span className="text-white font-bold text-sm">SH</span>
@@ -727,6 +708,27 @@ export function AppSidebar() {
             </SidebarGroup>
           </Collapsible>
         )}
+        
+        {/* Toggle All Button at Bottom */}
+        <div className="mt-auto p-4 border-t border-sidebar-border">
+          <button
+            onClick={toggleAll}
+            className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-md bg-sidebar-accent hover:bg-sidebar-accent/80 transition-colors text-sm font-medium"
+            title={showAll ? "Collapse all sections" : "Expand all sections"}
+          >
+            {showAll ? (
+              <>
+                <ChevronsUp className="h-4 w-4" />
+                {!isCollapsed && <span>Show Less</span>}
+              </>
+            ) : (
+              <>
+                <ChevronsDown className="h-4 w-4" />
+                {!isCollapsed && <span>Show More</span>}
+              </>
+            )}
+          </button>
+        </div>
       </SidebarContent>
     </Sidebar>
   );
