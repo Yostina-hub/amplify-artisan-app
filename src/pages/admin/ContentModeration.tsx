@@ -923,19 +923,21 @@ const ContentModeration = () => {
 
                 {/* Action Buttons */}
                 <div className="border-t pt-4 flex gap-3 justify-end">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      if (selectedPost) {
-                        recheckContentMutation.mutate(selectedPost);
-                      }
-                    }}
-                    disabled={recheckingPostId === selectedPost?.id || recheckContentMutation.isPending}
-                    className="gap-2"
-                  >
-                    <RefreshCw className={`h-4 w-4 ${recheckingPostId === selectedPost?.id ? 'animate-spin' : ''}`} />
-                    {recheckingPostId === selectedPost?.id ? "Rechecking..." : "AI Recheck"}
-                  </Button>
+                  {selectedPost.status !== "published" && (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        if (selectedPost) {
+                          recheckContentMutation.mutate(selectedPost);
+                        }
+                      }}
+                      disabled={recheckingPostId === selectedPost?.id || recheckContentMutation.isPending}
+                      className="gap-2"
+                    >
+                      <RefreshCw className={`h-4 w-4 ${recheckingPostId === selectedPost?.id ? 'animate-spin' : ''}`} />
+                      {recheckingPostId === selectedPost?.id ? "Rechecking..." : "AI Recheck"}
+                    </Button>
+                  )}
 
                   {(selectedPost.flagged || selectedPost.status === "draft" || selectedPost.status === "scheduled") && (
                     <Button
@@ -955,7 +957,7 @@ const ContentModeration = () => {
                     </Button>
                   )}
 
-                  {selectedPost.status !== "rejected" && (
+                  {selectedPost.status !== "rejected" && selectedPost.status !== "published" && (
                     <Button
                       variant="destructive"
                       onClick={() => {
