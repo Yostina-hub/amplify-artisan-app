@@ -114,33 +114,16 @@ Deno.serve(async (req) => {
       ? posts.reduce((sum, p) => sum + (p.engagement_rate || 0), 0) / posts.length
       : metrics.engagement;
 
-    // Get or create social_media_account
-    let accountId: string;
-    const { data: existingAccount } = await supabaseClient
+    // Use existing social_media_account if present (do not auto-create to avoid constraint issues)
+    const { data: existingAccount, error: existingErr } = await supabaseClient
       .from('social_media_accounts')
       .select('id')
       .eq('company_id', profile.company_id)
       .eq('platform', platform)
-      .single();
+      .maybeSingle();
 
-    if (existingAccount) {
-      accountId = existingAccount.id;
-    } else {
-      const { data: newAccount, error: accountError } = await supabaseClient
-        .from('social_media_accounts')
-        .insert({
-          user_id: user.id,
-          company_id: profile.company_id,
-          platform: platform,
-          account_id: config.channel_id || 'configured',
-          account_name: `${platform.charAt(0).toUpperCase() + platform.slice(1)} Account`,
-          access_token: 'configured',
-        })
-        .select()
-        .single();
-
-      if (accountError) throw accountError;
-      accountId = newAccount.id;
+    if (!existingErr && !existingAccount) {
+      console.log(`No ${platform} account row found for company ${profile.company_id} - skipping account creation`);
     }
 
     // Metrics synced - social_media_metrics table removed from system

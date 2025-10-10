@@ -210,8 +210,8 @@ export default function ReachAnalytics() {
       let query = supabase
         .from('social_media_posts')
         .select('*')
-        .gte('created_at', startDate.toISOString())
-        .order('engagement_rate', { ascending: false });
+        .or(`created_at.gte.${startDate.toISOString()},approved_at.gte.${startDate.toISOString()},scheduled_for.gte.${startDate.toISOString()}`)
+        .order('created_at', { ascending: false });
 
       // If not admin, filter by company_id
       if (!isAdmin) {
@@ -290,36 +290,35 @@ export default function ReachAnalytics() {
   const syncAllPlatforms = async () => {
     try {
       setSyncingAll(true);
-      const platformsToSync = ['telegram', 'facebook', 'instagram', 'twitter', 'linkedin', 'youtube', 'tiktok'];
-      
+
+      // Determine configured/connected platforms for this company
+      const platformsFromAccounts = Array.from(new Set((accounts || []).map(a => a.platform))).filter(Boolean) as string[];
+      const platformsToSync = platformsFromAccounts.length > 0 ? platformsFromAccounts : ['telegram'];
+
       toast({
-        title: "Syncing all platforms",
-        description: "This may take a moment...",
+        title: "Syncing platforms",
+        description: `Syncing: ${platformsToSync.join(', ')}`,
       });
 
+      // Run syncs sequentially to avoid API limits and noisy errors
       for (const platform of platformsToSync) {
         try {
-          await supabase.functions.invoke('sync-social-metrics', {
-            body: { platform }
-          });
+          const { error } = await supabase.functions.invoke('sync-social-metrics', { body: { platform } });
+          if (error) throw error;
         } catch (error) {
           console.error(`Error syncing ${platform}:`, error);
         }
       }
 
       await fetchAllData();
-      
+
       toast({
         title: "Sync complete",
-        description: "All platform metrics have been updated",
+        description: "Configured platforms updated",
       });
     } catch (error: any) {
-      console.error('Error syncing all platforms:', error);
-      toast({
-        title: "Sync failed",
-        description: error.message,
-        variant: "destructive",
-      });
+      console.error('Error syncing platforms:', error);
+      toast({ title: "Sync failed", description: error.message, variant: "destructive" });
     } finally {
       setSyncingAll(false);
     }
