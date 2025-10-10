@@ -3,7 +3,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { LogOut, User, Settings, Sun, Moon, Zap, Activity, Wifi, PanelLeftClose, PanelLeft } from "lucide-react";
+import { LogOut, User, Settings, Sun, Moon, Zap, Activity, Wifi, PanelLeftClose, PanelLeft, MessageSquare } from "lucide-react";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import {
   DropdownMenu,
@@ -19,6 +19,8 @@ import { CommandPalette } from "./CommandPalette";
 import { NotificationsCenter } from "./NotificationsCenter";
 import { QuickActions } from "./QuickActions";
 import { useTheme } from "next-themes";
+import { BottomNav } from "./BottomNav";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -33,6 +35,7 @@ export function EnhancedLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, setTheme } = useTheme();
+  const isMobile = useIsMobile();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [lastSync, setLastSync] = useState(new Date());
 
@@ -82,23 +85,39 @@ export function EnhancedLayout() {
   const breadcrumbs = getBreadcrumbs();
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-background via-background to-muted/20">
-        <AppSidebar />
-        <div className="flex-1 flex flex-col">
+        {!isMobile && <AppSidebar />}
+        <div className="flex-1 flex flex-col pb-16 lg:pb-0">
           {/* Enhanced Header */}
-          <header className="h-16 border-b border-border bg-card/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
-            <div className="flex items-center justify-between h-full px-6">
+          <header className="h-14 lg:h-16 border-b border-border bg-card/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
+            <div className="flex items-center justify-between h-full px-3 lg:px-6">
               {/* Left Section */}
-              <div className="flex items-center gap-4">
-                <SidebarTrigger className="hover:bg-primary/10 transition-colors">
-                  <PanelLeft className="h-5 w-5" />
-                  <span className="sr-only">Toggle Sidebar</span>
-                </SidebarTrigger>
+              <div className="flex items-center gap-2 lg:gap-4">
+                {!isMobile && (
+                  <>
+                    <SidebarTrigger className="hover:bg-primary/10 transition-colors">
+                      <PanelLeft className="h-5 w-5" />
+                      <span className="sr-only">Toggle Sidebar</span>
+                    </SidebarTrigger>
+                    <Separator orientation="vertical" className="h-6" />
+                  </>
+                )}
+                
+                {/* Mobile: Show app logo */}
+                {isMobile && (
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                      <MessageSquare className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                      SocialHub
+                    </span>
+                  </div>
+                )}
                 
                 {/* Breadcrumb Navigation */}
-                <Separator orientation="vertical" className="h-6" />
-                <Breadcrumb className="hidden md:block">
+                <Breadcrumb className="hidden lg:block">
                   <BreadcrumbList>
                     {breadcrumbs.map((crumb, index) => (
                       <div key={crumb.path} className="flex items-center">
@@ -127,7 +146,7 @@ export function EnhancedLayout() {
               </div>
 
               {/* Right Section */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1 lg:gap-3">
                 {/* Status Indicators */}
                 <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-md bg-accent/50">
                   <Wifi
@@ -145,49 +164,51 @@ export function EnhancedLayout() {
                   </span>
                 </div>
 
-                {/* Theme Toggle */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className="hidden md:flex"
-                >
-                  {theme === "dark" ? (
-                    <Sun className="h-5 w-5" />
-                  ) : (
-                    <Moon className="h-5 w-5" />
-                  )}
-                </Button>
+                {/* Theme Toggle - Desktop only */}
+                {!isMobile && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  >
+                    {theme === "dark" ? (
+                      <Sun className="h-5 w-5" />
+                    ) : (
+                      <Moon className="h-5 w-5" />
+                    )}
+                  </Button>
+                )}
 
-                {/* Quick Actions */}
-                <QuickActions />
+                {/* Quick Actions - Desktop only */}
+                {!isMobile && <QuickActions />}
 
                 {/* Notifications */}
                 <NotificationsCenter />
 
-                <Separator orientation="vertical" className="h-8" />
+                {!isMobile && <Separator orientation="vertical" className="h-8" />}
 
-                {/* User Profile */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="gap-2 hover:bg-primary/10 transition-all"
-                    >
-                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary via-purple-500 to-accent flex items-center justify-center shadow-lg">
-                        <User className="h-4 w-4 text-white" />
-                      </div>
-                      <div className="hidden lg:flex flex-col items-start">
-                        <span className="text-sm font-medium max-w-[150px] truncate">
-                          {user?.email?.split("@")[0]}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {roles[0] || "User"}
-                        </span>
-                      </div>
-                    </Button>
-                  </DropdownMenuTrigger>
+                {/* User Profile - Desktop only */}
+                {!isMobile && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="gap-2 hover:bg-primary/10 transition-all"
+                      >
+                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary via-purple-500 to-accent flex items-center justify-center shadow-lg">
+                          <User className="h-4 w-4 text-white" />
+                        </div>
+                        <div className="hidden lg:flex flex-col items-start">
+                          <span className="text-sm font-medium max-w-[150px] truncate">
+                            {user?.email?.split("@")[0]}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {roles[0] || "User"}
+                          </span>
+                        </div>
+                      </Button>
+                    </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-64">
                     <DropdownMenuLabel>
                       <div className="flex flex-col space-y-2">
@@ -217,20 +238,22 @@ export function EnhancedLayout() {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+                )}
               </div>
             </div>
           </header>
 
           {/* Main Content Area */}
-          <main className="flex-1 p-6 overflow-auto">
+          <main className="flex-1 p-3 lg:p-6 overflow-auto">
             <div className="max-w-[1600px] mx-auto">
               <Outlet />
             </div>
           </main>
 
-          {/* Enhanced Footer */}
-          <footer className="border-t border-border bg-card/50 backdrop-blur-sm">
-            <div className="px-6 py-3">
+          {/* Enhanced Footer - Desktop only */}
+          {!isMobile && (
+            <footer className="border-t border-border bg-card/50 backdrop-blur-sm">
+              <div className="px-6 py-3">
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
@@ -267,6 +290,10 @@ export function EnhancedLayout() {
               </div>
             </div>
           </footer>
+          )}
+          
+          {/* Bottom Navigation - Mobile only */}
+          <BottomNav />
         </div>
       </div>
     </SidebarProvider>

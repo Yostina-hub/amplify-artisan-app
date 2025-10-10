@@ -130,12 +130,12 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 border-b border-border bg-white/80 backdrop-blur-md shadow-sm">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3 group cursor-pointer" onClick={() => navigate("/")}>
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-              <MessageSquare className="h-6 w-6 text-white" />
+        <div className="container mx-auto px-4 lg:px-6 py-3 lg:py-4 flex justify-between items-center">
+          <div className="flex items-center gap-2 lg:gap-3 group cursor-pointer" onClick={() => navigate("/")}>
+            <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+              <MessageSquare className="h-5 w-5 lg:h-6 lg:w-6 text-white" />
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <span className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               SocialHub
             </span>
           </div>
@@ -162,17 +162,17 @@ const Index = () => {
               Enterprise
             </button>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 lg:gap-4">
             <Button 
               variant="ghost" 
               onClick={() => navigate("/auth")} 
-              className="text-sm font-semibold hidden md:flex hover:text-primary hover:bg-primary/5 transition-all"
+              className="text-xs lg:text-sm font-semibold hidden md:flex hover:text-primary hover:bg-primary/5 transition-all px-3 lg:px-4"
             >
               Log in
             </Button>
             <Button 
               onClick={() => handleGetStarted(undefined, true)} 
-              className="text-sm font-semibold hidden md:flex bg-gradient-to-r from-primary to-accent hover:opacity-90 shadow-lg hover:shadow-xl transition-all hover:scale-105"
+              className="text-xs lg:text-sm font-semibold hidden md:flex bg-gradient-to-r from-primary to-accent hover:opacity-90 shadow-lg hover:shadow-xl transition-all hover:scale-105 px-3 lg:px-4"
             >
               Start Free Trial
             </Button>
@@ -187,7 +187,7 @@ const Index = () => {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(184_91%_17%_/_0.08),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,hsl(6_78%_57%_/_0.06),transparent_50%)]" />
         
-        <div className="container mx-auto px-6 py-20 lg:py-28 relative z-10">
+        <div className="container mx-auto px-4 lg:px-6 py-12 lg:py-20 xl:py-28 relative z-10">
           <div className="max-w-5xl mx-auto text-center space-y-10">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 animate-in fade-in-50 slide-in-from-top-4 duration-700">
               <Sparkles className="h-4 w-4 text-primary" />
@@ -196,49 +196,51 @@ const Index = () => {
               </span>
             </div>
             
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight animate-in fade-in-50 slide-in-from-bottom-6 duration-700 delay-100">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight tracking-tight animate-in fade-in-50 slide-in-from-bottom-6 duration-700 delay-100">
               <span className="text-foreground">Transform Your Social Media</span>
-              <br />
+              <br className="hidden sm:block" />
               <span className="text-foreground">Into a</span>{" "}
               <span className="bg-gradient-to-r from-primary via-primary-glow to-accent bg-clip-text text-transparent animate-in fade-in-50 duration-1000 delay-300">
                 Growth Engine
               </span>
             </h1>
             
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed animate-in fade-in-50 slide-in-from-bottom-4 duration-700 delay-200">
+            <p className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed animate-in fade-in-50 slide-in-from-bottom-4 duration-700 delay-200 px-4">
               Harness the power of AI-driven analytics, seamless scheduling, and unified management. 
               Grow your audience, boost engagement, and drive real results—all from one intelligent platform.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700 delay-300">
+            <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center items-center pt-4 lg:pt-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700 delay-300 px-4">
               <Button
                 size="lg"
                 onClick={() => handleGetStarted(undefined, true)}
-                className="text-base font-semibold px-10 h-14 rounded-xl shadow-lg hover:shadow-2xl transition-all hover:scale-105 bg-gradient-to-r from-primary to-accent"
+                className="text-sm lg:text-base font-semibold px-6 lg:px-10 h-12 lg:h-14 rounded-xl shadow-lg hover:shadow-2xl transition-all hover:scale-105 bg-gradient-to-r from-primary to-accent w-full sm:w-auto"
               >
-                Start Free Trial - No Credit Card
+                <span className="hidden sm:inline">Start Free Trial - No Credit Card</span>
+                <span className="sm:hidden">Start Free Trial</span>
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 onClick={() => navigate("/auth")}
-                className="text-base font-semibold px-10 h-14 rounded-xl border-2 hover:bg-gradient-to-r hover:from-primary/5 hover:to-accent/5 transition-all hover:scale-105"
+                className="text-sm lg:text-base font-semibold px-6 lg:px-10 h-12 lg:h-14 rounded-xl border-2 hover:bg-gradient-to-r hover:from-primary/5 hover:to-accent/5 transition-all hover:scale-105 w-full sm:w-auto"
               >
                 Watch Demo
               </Button>
             </div>
             
-            <div className="flex items-center justify-center gap-6 pt-6 text-sm text-muted-foreground animate-in fade-in-50 duration-700 delay-500">
+            <div className="flex flex-wrap items-center justify-center gap-4 lg:gap-6 pt-4 lg:pt-6 text-xs lg:text-sm text-muted-foreground animate-in fade-in-50 duration-700 delay-500 px-4">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-success" />
+                <CheckCircle2 className="h-4 w-4 lg:h-5 lg:w-5 text-success" />
                 <span>14-day free trial</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-success" />
-                <span>No credit card required</span>
+                <CheckCircle2 className="h-4 w-4 lg:h-5 lg:w-5 text-success" />
+                <span className="hidden sm:inline">No credit card required</span>
+                <span className="sm:hidden">No card needed</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-success" />
+                <CheckCircle2 className="h-4 w-4 lg:h-5 lg:w-5 text-success" />
                 <span>Cancel anytime</span>
               </div>
             </div>
