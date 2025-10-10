@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const ContentModeration = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("draft");
   const [platformFilter, setPlatformFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"queue" | "kanban">("queue");
   const [hideNew, setHideNew] = useState(false);
