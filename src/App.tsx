@@ -107,7 +107,6 @@ const App = () => (
             <Route path="/industry/:slug" element={<Industry />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/company-application" element={<CompanyApplication />} />
-            <Route path="*" element={<NotFound />} />
             
             {/* Protected routes with enhanced layout */}
             <Route element={<EnhancedLayout />}>
@@ -117,6 +116,7 @@ const App = () => (
               <Route path="/layout-showcase" element={<ProtectedRoute><LayoutShowcase /></ProtectedRoute>} />
               <Route path="/composer" element={<ProtectedRoute><Composer /></ProtectedRoute>} />
               <Route path="/calendar" element={<ProtectedRoute><CalendarView /></ProtectedRoute>} />
+              <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
               <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
               <Route path="/ad-campaigns" element={<ProtectedRoute><AdCampaigns /></ProtectedRoute>} />
@@ -197,6 +197,9 @@ const App = () => (
               
               <Route path="/social-accounts" element={<ProtectedRoute><SocialMediaCredentials /></ProtectedRoute>} />
             </Route>
+            
+            {/* 404 catch-all - must be last */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
