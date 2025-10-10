@@ -47,6 +47,7 @@ import AuditLog from "./pages/admin/AuditLog";
 import CompanyAuditLog from "./pages/CompanyAuditLog";
 import SocialAuthSettings from "./pages/admin/SocialAuthSettings";
 import PaymentManagement from "./pages/admin/PaymentManagement";
+import BillingManagement from "./pages/admin/BillingManagement";
 import PublicContentManager from "./pages/admin/PublicContentManager";
 import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -139,6 +140,7 @@ const App = () => (
               <Route path="/admin/pricing" element={<ProtectedRoute requiredRole="admin"><PricingManagement /></ProtectedRoute>} />
               <Route path="/admin/subscriptions" element={<ProtectedRoute requiredRole="admin"><SubscriptionManagement /></ProtectedRoute>} />
               <Route path="/admin/payments" element={<ProtectedRoute requiredRole="admin"><PaymentManagement /></ProtectedRoute>} />
+              <Route path="/admin/billing" element={<ProtectedRoute requiredRole="admin"><BillingManagement /></ProtectedRoute>} />
               <Route path="/admin/trial-settings" element={<ProtectedRoute requiredRole="admin"><TrialSettings /></ProtectedRoute>} />
               <Route path="/admin/audit-log" element={<ProtectedRoute requiredRole="admin"><AuditLog /></ProtectedRoute>} />
               <Route path="/admin/social-auth" element={<ProtectedRoute requiredRole="admin"><SocialAuthSettings /></ProtectedRoute>} />
