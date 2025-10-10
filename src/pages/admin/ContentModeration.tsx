@@ -10,6 +10,9 @@ import { toast } from "sonner";
 import { Shield, AlertTriangle, CheckCircle2, XCircle, Search, Filter, Globe, Clock, Eye, LayoutList, LayoutGrid, RefreshCw, ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { createNotification } from "@/lib/notifications";
 
 const ContentModeration = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -23,6 +26,9 @@ const ContentModeration = () => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
+  const [postToReject, setPostToReject] = useState<any>(null);
+  const [rejectionReason, setRejectionReason] = useState("");
   const queryClient = useQueryClient();
 
   const { data: posts, isLoading } = useQuery({
@@ -83,12 +89,55 @@ const ContentModeration = () => {
   });
 
   const updatePostMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
+    mutationFn: async ({ id, updates, post }: { id: string; updates: any; post?: any }) => {
       const { error } = await supabase
         .from("social_media_posts")
         .update(updates)
         .eq("id", id);
       if (error) throw error;
+
+      // Send notifications if post is rejected or flagged
+      if (updates.status === "rejected" && post) {
+        // Get admin users to notify supervisors
+        const { data: adminUsers } = await supabase
+          .from("user_roles")
+          .select("user_id")
+          .eq("role", "admin");
+
+        // Notify post creator
+        if (post.user_id) {
+          await createNotification({
+            userId: post.user_id,
+            companyId: post.company_id,
+            title: "Post Rejected",
+            message: updates.rejection_reason 
+              ? `Your post has been rejected. Reason: ${updates.rejection_reason}`
+              : "Your post has been rejected by the moderation team.",
+            type: "error",
+            actionUrl: "/composer",
+            actionLabel: "Edit Post",
+            metadata: { postId: id }
+          });
+        }
+
+        // Notify supervisors/admins
+        if (adminUsers && adminUsers.length > 0) {
+          for (const admin of adminUsers) {
+            await createNotification({
+              userId: admin.user_id,
+              companyId: post.company_id,
+              title: "Post Rejected",
+              message: `A post has been rejected. ${updates.rejection_reason ? `Reason: ${updates.rejection_reason}` : ''}`,
+              type: "warning",
+              actionUrl: "/admin/moderation",
+              actionLabel: "View Details",
+              metadata: { postId: id }
+            });
+          }
+        }
+      }
+
+      return { post };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["moderation-posts"] });
@@ -559,20 +608,13 @@ const ContentModeration = () => {
                               Approve
                             </Button>
                           )}
-                           <Button
+                          <Button
                             size="sm"
                             variant="destructive"
-                            onClick={async () => {
-                              const { data: { user } } = await supabase.auth.getUser();
-                              updatePostMutation.mutate({ 
-                                id: post.id, 
-                                updates: { 
-                                  status: "rejected", 
-                                  flagged: false,
-                                  rejected_by: user?.id,
-                                  rejected_at: new Date().toISOString(),
-                                }
-                              });
+                            onClick={() => {
+                              setPostToReject(post);
+                              setRejectionReason("");
+                              setIsRejectDialogOpen(true);
                             }}
                             className="gap-2"
                           >
@@ -801,6 +843,66 @@ const ContentModeration = () => {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Rejection Dialog */}
+        <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reject Post</DialogTitle>
+              <DialogDescription>
+                Please provide a reason for rejecting this post. This will be shared with the post creator.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="rejection-reason">Rejection Reason (Optional)</Label>
+                <Textarea
+                  id="rejection-reason"
+                  placeholder="Enter the reason for rejection..."
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  rows={4}
+                  className="resize-none"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsRejectDialogOpen(false);
+                  setPostToReject(null);
+                  setRejectionReason("");
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={async () => {
+                  if (!postToReject) return;
+                  const { data: { user } } = await supabase.auth.getUser();
+                  updatePostMutation.mutate({ 
+                    id: postToReject.id,
+                    post: postToReject,
+                    updates: { 
+                      status: "rejected", 
+                      flagged: false,
+                      rejected_by: user?.id,
+                      rejected_at: new Date().toISOString(),
+                      rejection_reason: rejectionReason.trim() || null,
+                    }
+                  });
+                  setIsRejectDialogOpen(false);
+                  setPostToReject(null);
+                  setRejectionReason("");
+                }}
+              >
+                Confirm Rejection
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

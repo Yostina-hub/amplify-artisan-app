@@ -151,6 +151,62 @@ Provide your analysis in JSON format.`
         console.error('Failed to update post:', updateError);
       } else {
         console.log(`Post ${postId} flagged: ${moderationResult.flagReason}`);
+        
+        // Get post details to send notifications
+        const { data: post, error: postError } = await supabaseClient
+          .from('social_media_posts')
+          .select('user_id, company_id')
+          .eq('id', postId)
+          .single();
+
+        if (!postError && post) {
+          // Notify post creator
+          if (post.user_id) {
+            await supabaseClient
+              .from('notifications')
+              .insert({
+                user_id: post.user_id,
+                company_id: post.company_id,
+                title: 'Content Flagged by AI',
+                message: `Your post has been flagged for review. Reason: ${moderationResult.flagReason} (Severity: ${moderationResult.severity})`,
+                type: 'warning',
+                action_url: '/composer',
+                action_label: 'View Post',
+                metadata: { 
+                  postId, 
+                  violations: moderationResult.violations,
+                  severity: moderationResult.severity 
+                }
+              });
+          }
+
+          // Notify admins/supervisors
+          const { data: adminUsers } = await supabaseClient
+            .from('user_roles')
+            .select('user_id')
+            .eq('role', 'admin');
+
+          if (adminUsers && adminUsers.length > 0) {
+            const notifications = adminUsers.map(admin => ({
+              user_id: admin.user_id,
+              company_id: post.company_id,
+              title: 'Content Flagged by AI',
+              message: `A post has been flagged for review. Reason: ${moderationResult.flagReason} (Severity: ${moderationResult.severity})`,
+              type: 'warning',
+              action_url: '/admin/moderation',
+              action_label: 'Review Content',
+              metadata: { 
+                postId, 
+                violations: moderationResult.violations,
+                severity: moderationResult.severity 
+              }
+            }));
+
+            await supabaseClient
+              .from('notifications')
+              .insert(notifications);
+          }
+        }
       }
     }
 

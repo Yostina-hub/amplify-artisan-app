@@ -102,59 +102,68 @@ export async function notifyCompany(
   }
 }
 
-/**
- * System notification templates for common events
- */
-export const NotificationTemplates = {
-  welcome: (userId: string): CreateNotificationParams => ({
-    userId,
-    title: "Welcome to the Platform!",
-    message: "Explore all the cutting-edge features available to you.",
-    type: "info",
-    actionUrl: "/layout-showcase",
-    actionLabel: "Take a Tour",
-  }),
+  /**
+   * System notification templates for common events
+   */
+  export const NotificationTemplates = {
+    welcome: (userId: string): CreateNotificationParams => ({
+      userId,
+      title: "Welcome to the Platform!",
+      message: "Explore all the cutting-edge features available to you.",
+      type: "info",
+      actionUrl: "/layout-showcase",
+      actionLabel: "Take a Tour",
+    }),
 
-  leadAssigned: (userId: string, leadName: string): CreateNotificationParams => ({
-    userId,
-    title: "New Lead Assigned",
-    message: `You have been assigned a new lead: ${leadName}`,
-    type: "success",
-    actionUrl: "/leads",
-    actionLabel: "View Lead",
-  }),
+    leadAssigned: (userId: string, leadName: string): CreateNotificationParams => ({
+      userId,
+      title: "New Lead Assigned",
+      message: `You have been assigned a new lead: ${leadName}`,
+      type: "success",
+      actionUrl: "/leads",
+      actionLabel: "View Lead",
+    }),
 
-  taskDue: (userId: string, taskName: string): CreateNotificationParams => ({
-    userId,
-    title: "Task Due Soon",
-    message: `Task "${taskName}" is due within 24 hours`,
-    type: "warning",
-    actionUrl: "/activities",
-    actionLabel: "View Tasks",
-  }),
+    taskDue: (userId: string, taskName: string): CreateNotificationParams => ({
+      userId,
+      title: "Task Due Soon",
+      message: `Task "${taskName}" is due within 24 hours`,
+      type: "warning",
+      actionUrl: "/activities",
+      actionLabel: "View Tasks",
+    }),
 
-  eventCreated: (userId: string, eventTitle: string): CreateNotificationParams => ({
-    userId,
-    title: "Event Created",
-    message: `New event "${eventTitle}" has been added to your calendar`,
-    type: "success",
-    actionUrl: "/calendar",
-    actionLabel: "View Calendar",
-  }),
+    eventCreated: (userId: string, eventTitle: string): CreateNotificationParams => ({
+      userId,
+      title: "Event Created",
+      message: `New event "${eventTitle}" has been added to your calendar`,
+      type: "success",
+      actionUrl: "/calendar",
+      actionLabel: "View Calendar",
+    }),
 
-  paymentReceived: (userId: string, amount: string): CreateNotificationParams => ({
-    userId,
-    title: "Payment Received",
-    message: `Payment of ${amount} has been successfully processed`,
-    type: "success",
-    actionUrl: "/payments",
-    actionLabel: "View Payments",
-  }),
+    paymentReceived: (userId: string, amount: string): CreateNotificationParams => ({
+      userId,
+      title: "Payment Received",
+      message: `Payment of ${amount} has been successfully processed`,
+      type: "success",
+      actionUrl: "/payments",
+      actionLabel: "View Payments",
+    }),
 
-  systemMaintenance: (userId: string, scheduledTime: string): CreateNotificationParams => ({
-    userId,
-    title: "Scheduled Maintenance",
-    message: `System maintenance scheduled for ${scheduledTime}`,
-    type: "warning",
-  }),
-};
+    systemMaintenance: (userId: string, scheduledTime: string): CreateNotificationParams => ({
+      userId,
+      title: "Scheduled Maintenance",
+      message: `System maintenance scheduled for ${scheduledTime}`,
+      type: "warning",
+    }),
+
+    contentFlagged: (userId: string, reason: string, severity: string): CreateNotificationParams => ({
+      userId,
+      title: "Content Flagged by AI",
+      message: `Your post has been flagged for review. Reason: ${reason} (Severity: ${severity})`,
+      type: "warning",
+      actionUrl: "/composer",
+      actionLabel: "View Post",
+    }),
+  };
