@@ -18,28 +18,29 @@ export const RecommendedContentFeed = () => {
   const { data: recommendations, isLoading, refetch } = useQuery({
     queryKey: ['content-recommendations', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Step 1: fetch recommendations (no join). Include rows with no expiry OR future expiry
+      const nowIso = new Date().toISOString();
+      const { data: recs, error: recErr } = await supabase
         .from('content_recommendations')
-        .select(`
-          *,
-          social_media_posts (
-            id,
-            content,
-            platforms,
-            created_at,
-            likes,
-            shares,
-            views
-          )
-        `)
+        .select('*')
         .eq('user_id', user?.id)
         .eq('is_viewed', false)
-        .gte('expires_at', new Date().toISOString())
+        .or(`expires_at.is.null,expires_at.gte.${nowIso}`)
         .order('recommendation_score', { ascending: false })
         .limit(10);
-      
-      if (error) throw error;
-      return data;
+
+      if (recErr) throw recErr;
+      if (!recs || recs.length === 0) return [];
+
+      // Step 2: fetch referenced posts in one query and merge
+      const postIds = recs.map(r => r.post_id);
+      const { data: posts, error: postsErr } = await supabase
+        .from('social_media_posts')
+        .select('id, content, platforms, created_at, likes, shares, views')
+        .in('id', postIds);
+      if (postsErr) throw postsErr;
+      const postMap = new Map(posts?.map(p => [p.id, p]) || []);
+      return recs.map(r => ({ ...r, social_media_posts: postMap.get(r.post_id) }));
     },
     enabled: !!user,
   });

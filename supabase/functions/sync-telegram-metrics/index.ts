@@ -150,7 +150,8 @@ Deno.serve(async (req) => {
       .select('*')
       .eq('company_id', profile.company_id)
       .contains('platforms', ['telegram'])
-      .eq('status', 'published')
+      // Include posts that have been posted but may still be marked scheduled
+      .in('status', ['published', 'scheduled'])
       .not('platform_post_ids', 'is', null)
       .order('created_at', { ascending: false })
       .limit(50);

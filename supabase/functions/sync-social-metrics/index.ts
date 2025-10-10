@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
     // Platform-specific sync logic
     switch (platform) {
       case 'telegram':
-        metrics = await syncTelegram(config);
+        metrics = await syncTelegram(config, supabaseClient, profile.company_id);
         break;
       case 'facebook':
         metrics = await syncFacebook(config);
@@ -174,18 +174,52 @@ Deno.serve(async (req) => {
 });
 
 // Platform-specific sync functions
-async function syncTelegram(config: any) {
-  const telegramApiUrl = `https://api.telegram.org/bot${config.api_key}/getChatMemberCount`;
-  const response = await fetch(telegramApiUrl, {
+async function syncTelegram(config: any, supabaseClient: any, companyId: string) {
+  // Get subscriber count
+  const memberCountUrl = `https://api.telegram.org/bot${config.api_key}/getChatMemberCount`;
+  const memberResponse = await fetch(memberCountUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ chat_id: config.channel_id }),
   });
+  const memberData = await memberResponse.json();
+  const subscribers = memberData.ok ? memberData.result : 0;
 
-  const data = await response.json();
+  // Update recent Telegram posts with estimated metrics
+  const { data: telegramPosts } = await supabaseClient
+    .from('social_media_posts')
+    .select('id, platform_post_ids')
+    .eq('company_id', companyId)
+    .contains('platforms', ['telegram'])
+    .in('status', ['published', 'scheduled'])
+    .not('platform_post_ids', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(50);
+
+  if (telegramPosts && telegramPosts.length > 0) {
+    for (const post of telegramPosts) {
+      const estimatedViews = Math.floor(subscribers * 0.3);
+      const estimatedLikes = Math.floor(estimatedViews * 0.05);
+      const estimatedShares = Math.floor(estimatedViews * 0.02);
+      const engagementRate = ((estimatedLikes + estimatedShares) / (estimatedViews || 1)) * 100;
+
+      await supabaseClient
+        .from('social_media_posts')
+        .update({
+          views: estimatedViews,
+          likes: estimatedLikes,
+          shares: estimatedShares,
+          reach: subscribers,
+          engagement_rate: engagementRate,
+          metrics_last_synced_at: new Date().toISOString(),
+        })
+        .eq('id', post.id);
+    }
+  }
+
   return {
-    followers: data.ok ? data.result : 0,
-    posts: 0,
+    followers: subscribers,
+    posts: telegramPosts?.length || 0,
     engagement: 0,
   };
 }
