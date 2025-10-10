@@ -218,7 +218,7 @@ export default function ReachAnalytics() {
           .from('profiles')
           .select('company_id')
           .eq('id', user?.id)
-          .single();
+          .maybeSingle();
 
         if (!profile?.company_id) {
           console.log('No company_id found for user');
@@ -233,7 +233,7 @@ export default function ReachAnalytics() {
 
       let filteredPosts = postsData || [];
       if (platformFilter !== 'all') {
-        filteredPosts = filteredPosts.filter(post => post.platforms.includes(platformFilter));
+        filteredPosts = filteredPosts.filter(post => Array.isArray(post.platforms) && post.platforms.includes(platformFilter));
         console.log('Filtered by platform:', platformFilter, '- Result:', filteredPosts.length, 'posts');
       }
 
@@ -318,7 +318,7 @@ export default function ReachAnalytics() {
           .from('profiles')
           .select('company_id')
           .eq('id', user?.id)
-          .single();
+          .maybeSingle();
 
         if (!profile?.company_id) return;
 
@@ -703,12 +703,12 @@ export default function ReachAnalytics() {
                           </div>
                           <p className="text-sm font-medium line-clamp-2">{post.content}</p>
                           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 text-xs">
-                            <div className="flex items-center gap-1"><Eye className="h-3 w-3" /><span>{post.views.toLocaleString()}</span></div>
-                            <div className="flex items-center gap-1"><Heart className="h-3 w-3 text-red-500" /><span>{post.likes.toLocaleString()}</span></div>
-                            <div className="flex items-center gap-1"><Share2 className="h-3 w-3 text-blue-500" /><span>{post.shares.toLocaleString()}</span></div>
-                            <div className="flex items-center gap-1"><Bookmark className="h-3 w-3 text-green-500" /><span>{post.saves.toLocaleString()}</span></div>
-                            <div className="flex items-center gap-1"><MousePointerClick className="h-3 w-3" /><span>{post.clicks.toLocaleString()}</span></div>
-                            <div className="flex items-center gap-1"><TrendingUp className="h-3 w-3 text-accent" /><span>{post.engagement_rate.toFixed(2)}%</span></div>
+                            <div className="flex items-center gap-1"><Eye className="h-3 w-3" /><span>{(post.views || 0).toLocaleString()}</span></div>
+                            <div className="flex items-center gap-1"><Heart className="h-3 w-3 text-red-500" /><span>{(post.likes || 0).toLocaleString()}</span></div>
+                            <div className="flex items-center gap-1"><Share2 className="h-3 w-3 text-blue-500" /><span>{(post.shares || 0).toLocaleString()}</span></div>
+                            <div className="flex items-center gap-1"><Bookmark className="h-3 w-3 text-green-500" /><span>{(post.saves || 0).toLocaleString()}</span></div>
+                            <div className="flex items-center gap-1"><MousePointerClick className="h-3 w-3" /><span>{(post.clicks || 0).toLocaleString()}</span></div>
+                            <div className="flex items-center gap-1"><TrendingUp className="h-3 w-3 text-accent" /><span>{((post.engagement_rate || 0).toFixed(2))}%</span></div>
                           </div>
                         </div>
                       </div>
