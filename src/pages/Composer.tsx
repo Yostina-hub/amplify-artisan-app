@@ -305,15 +305,36 @@ export default function Composer() {
         throw new Error("Post created but no data returned");
       }
 
-      // Auto-moderate
+      // Auto-moderate with AI
       if (newPost?.id) {
-        supabase.functions.invoke('moderate-content', {
-          body: {
-            postId: newPost.id,
-            content: finalContent,
-            platforms: selectedPlatforms
+        toast.info("🤖 AI is analyzing your content...");
+        
+        try {
+          const { data: moderationData, error: moderationError } = await supabase.functions.invoke('moderate-content', {
+            body: {
+              postId: newPost.id,
+              content: finalContent,
+              platforms: selectedPlatforms
+            }
+          });
+
+          if (moderationError) {
+            console.error('Auto-moderation error:', moderationError);
+            toast.warning("Content saved but moderation check failed");
+          } else if (moderationData?.shouldFlag) {
+            // Show warning for flagged content
+            toast.error(
+              `⚠️ Content flagged: ${moderationData.flagReason}\nSeverity: ${moderationData.severity}\nViolations: ${moderationData.violations?.join(', ') || 'None'}`,
+              { duration: 8000 }
+            );
+          } else {
+            // Content passed moderation
+            toast.success("✅ Content approved by AI moderation!");
           }
-        }).catch(err => console.error('Auto-moderation error:', err));
+        } catch (moderationErr) {
+          console.error('Moderation error:', moderationErr);
+          toast.warning("Content saved but moderation check encountered an issue");
+        }
       }
 
       toast.success(
