@@ -7,12 +7,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Shield, AlertTriangle, CheckCircle2, XCircle, Search, Filter, Globe, Clock, Eye, LayoutList, LayoutGrid, RefreshCw, ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { Shield, AlertTriangle, CheckCircle2, XCircle, Search, Filter, Globe, Clock, Eye, LayoutList, LayoutGrid, RefreshCw, ArrowUpDown, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { createNotification } from "@/lib/notifications";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const ContentModeration = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -29,6 +45,8 @@ const ContentModeration = () => {
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
   const [postToReject, setPostToReject] = useState<any>(null);
   const [rejectionReason, setRejectionReason] = useState("");
+  const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
+  const [postToApprove, setPostToApprove] = useState<any>(null);
   const queryClient = useQueryClient();
 
   const { data: posts, isLoading } = useQuery({
@@ -343,7 +361,7 @@ const ContentModeration = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       <div className="container mx-auto p-6 space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="space-y-2">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent flex items-center gap-3">
               <Shield className="h-10 w-10 text-primary animate-pulse" />
@@ -353,10 +371,25 @@ const ContentModeration = () => {
               Comprehensive content review powered by advanced AI algorithms
             </p>
           </div>
-          <Button size="lg" className="gap-2 shadow-lg hover:shadow-xl transition-all">
-            <Globe className="h-4 w-4" />
-            Multi-Language Support
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              onClick={() => {
+                queryClient.invalidateQueries({ queryKey: ["moderation-posts"] });
+                queryClient.invalidateQueries({ queryKey: ["moderation-stats"] });
+                toast.success("Data refreshed");
+              }}
+              className="gap-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Refresh
+            </Button>
+            <Button size="lg" className="gap-2 shadow-lg hover:shadow-xl transition-all">
+              <Globe className="h-4 w-4" />
+              Multi-Language
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -500,10 +533,10 @@ const ContentModeration = () => {
                   setStatusFilter(value);
                   setCurrentPage(1);
                 }}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background">
                     <SelectValue placeholder="Filter by status" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-background z-50">
                     <SelectItem value="all">All Status</SelectItem>
                     <SelectItem value="flagged">🚩 Flagged by AI</SelectItem>
                     <SelectItem value="draft">Pending</SelectItem>
@@ -516,10 +549,10 @@ const ContentModeration = () => {
                   setPlatformFilter(value);
                   setCurrentPage(1);
                 }}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background">
                     <SelectValue placeholder="Filter by platform" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-background z-50">
                     <SelectItem value="all">All Platforms</SelectItem>
                     <SelectItem value="facebook">Facebook</SelectItem>
                     <SelectItem value="twitter">Twitter</SelectItem>
@@ -581,104 +614,134 @@ const ContentModeration = () => {
                 <p className="text-muted-foreground mt-4">Loading content...</p>
               </div>
             ) : paginatedPosts && paginatedPosts.length > 0 ? (
-              <div className="space-y-4">
-                {paginatedPosts.map((post) => (
-                  <Card key={post.id} className="border hover:border-primary/50 transition-all">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 space-y-3">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            {getStatusBadge(post.status, post.flagged)}
-                            {post.platforms?.map((platform: string) => (
-                              <Badge key={platform} variant="outline" className="capitalize">
-                                {platform}
-                              </Badge>
-                            ))}
+              <TooltipProvider>
+                <div className="space-y-4">
+                  {paginatedPosts.map((post) => (
+                    <Card key={post.id} className="border hover:border-primary/50 transition-all hover:shadow-md">
+                      <CardContent className="p-6">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 space-y-3">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {getStatusBadge(post.status, post.flagged)}
+                              {post.platforms?.map((platform: string) => (
+                                <Badge key={platform} variant="outline" className="capitalize">
+                                  {platform}
+                                </Badge>
+                              ))}
+                            </div>
+                            <p className="text-sm leading-relaxed line-clamp-3">{post.content}</p>
+                            
+                            {/* Display rejection reason */}
+                            {post.rejection_reason && (
+                              <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3">
+                                <p className="text-sm font-medium text-destructive flex items-center gap-2">
+                                  <XCircle className="h-4 w-4" />
+                                  Rejection Reason:
+                                </p>
+                                <p className="text-sm text-muted-foreground mt-1 italic">"{post.rejection_reason}"</p>
+                              </div>
+                            )}
+
+                            {/* Display AI flag reason */}
+                            {post.flagged && post.flag_reason && (
+                              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
+                                <p className="text-sm font-medium text-yellow-700 dark:text-yellow-400 flex items-center gap-2">
+                                  <AlertTriangle className="h-4 w-4" />
+                                  AI Flagged:
+                                </p>
+                                <p className="text-sm text-muted-foreground mt-1 italic">"{post.flag_reason}"</p>
+                              </div>
+                            )}
+
+                            {post.scheduled_at && (
+                              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                Scheduled: {new Date(post.scheduled_at).toLocaleString()}
+                              </p>
+                            )}
                           </div>
-                          <p className="text-sm leading-relaxed">{post.content}</p>
-                          
-                          {/* Display rejection reason */}
-                          {post.rejection_reason && (
-                            <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3">
-                              <p className="text-sm font-medium text-destructive flex items-center gap-2">
-                                <XCircle className="h-4 w-4" />
-                                Rejection Reason:
-                              </p>
-                              <p className="text-sm text-muted-foreground mt-1 italic">"{post.rejection_reason}"</p>
-                            </div>
-                          )}
-
-                          {/* Display AI flag reason */}
-                          {post.flagged && post.flag_reason && (
-                            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
-                              <p className="text-sm font-medium text-yellow-700 dark:text-yellow-400 flex items-center gap-2">
-                                <AlertTriangle className="h-4 w-4" />
-                                AI Flagged:
-                              </p>
-                              <p className="text-sm text-muted-foreground mt-1 italic">"{post.flag_reason}"</p>
-                            </div>
-                          )}
-
-                          {post.scheduled_at && (
-                            <p className="text-xs text-muted-foreground flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              Scheduled: {new Date(post.scheduled_at).toLocaleString()}
-                            </p>
-                          )}
+                          <div className="flex gap-2">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setSelectedPost(post);
+                                    setIsViewDialogOpen(true);
+                                  }}
+                                  className="gap-2"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                  View
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>View full details</TooltipContent>
+                            </Tooltip>
+                            
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => recheckContentMutation.mutate(post)}
+                                  disabled={recheckingPostId === post.id}
+                                  className="gap-2"
+                                >
+                                  <RefreshCw className={`h-4 w-4 ${recheckingPostId === post.id ? 'animate-spin' : ''}`} />
+                                  <span className="hidden md:inline">AI Recheck</span>
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Recheck with AI moderation</TooltipContent>
+                            </Tooltip>
+                            
+                            {(post.flagged || post.status === "draft") && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="default"
+                                    onClick={() => {
+                                      setPostToApprove(post);
+                                      setIsApproveDialogOpen(true);
+                                    }}
+                                    disabled={approvePostMutation.isPending}
+                                    className="gap-2"
+                                  >
+                                    <CheckCircle2 className="h-4 w-4" />
+                                    <span className="hidden md:inline">Approve</span>
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Approve and publish</TooltipContent>
+                              </Tooltip>
+                            )}
+                            
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => {
+                                    setPostToReject(post);
+                                    setRejectionReason("");
+                                    setIsRejectDialogOpen(true);
+                                  }}
+                                  disabled={updatePostMutation.isPending}
+                                  className="gap-2"
+                                >
+                                  <XCircle className="h-4 w-4" />
+                                  <span className="hidden md:inline">Reject</span>
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Reject this post</TooltipContent>
+                            </Tooltip>
+                          </div>
                         </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedPost(post);
-                              setIsViewDialogOpen(true);
-                            }}
-                            className="gap-2"
-                          >
-                            <Eye className="h-4 w-4" />
-                            View
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => recheckContentMutation.mutate(post)}
-                            disabled={recheckingPostId === post.id}
-                            className="gap-2"
-                          >
-                            <RefreshCw className={`h-4 w-4 ${recheckingPostId === post.id ? 'animate-spin' : ''}`} />
-                            AI Recheck
-                          </Button>
-                          {(post.flagged || post.status === "draft") && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => approvePostMutation.mutate(post)}
-                              className="gap-2"
-                            >
-                              <CheckCircle2 className="h-4 w-4" />
-                              Approve
-                            </Button>
-                          )}
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => {
-                              setPostToReject(post);
-                              setRejectionReason("");
-                              setIsRejectDialogOpen(true);
-                            }}
-                            className="gap-2"
-                          >
-                            <XCircle className="h-4 w-4" />
-                            Reject
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </TooltipProvider>
             ) : (
               <div className="text-center py-12">
                 <Shield className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
@@ -920,11 +983,11 @@ const ContentModeration = () => {
                         recheckContentMutation.mutate(selectedPost);
                       }
                     }}
-                    disabled={recheckingPostId === selectedPost?.id}
+                    disabled={recheckingPostId === selectedPost?.id || recheckContentMutation.isPending}
                     className="gap-2"
                   >
                     <RefreshCw className={`h-4 w-4 ${recheckingPostId === selectedPost?.id ? 'animate-spin' : ''}`} />
-                    AI Recheck
+                    {recheckingPostId === selectedPost?.id ? "Rechecking..." : "AI Recheck"}
                   </Button>
 
                   {(selectedPost.flagged || selectedPost.status === "draft" || selectedPost.status === "scheduled") && (
@@ -932,14 +995,16 @@ const ContentModeration = () => {
                       variant="default"
                       onClick={() => {
                         if (selectedPost) {
-                          approvePostMutation.mutate(selectedPost);
+                          setPostToApprove(selectedPost);
+                          setIsApproveDialogOpen(true);
                           setIsViewDialogOpen(false);
                         }
                       }}
-                      className="gap-2"
+                      disabled={approvePostMutation.isPending}
+                      className="gap-2 bg-green-600 hover:bg-green-700"
                     >
                       <CheckCircle2 className="h-4 w-4" />
-                      Approve & Publish
+                      {approvePostMutation.isPending ? "Approving..." : "Approve & Publish"}
                     </Button>
                   )}
 
@@ -952,6 +1017,7 @@ const ContentModeration = () => {
                         setIsViewDialogOpen(false);
                         setIsRejectDialogOpen(true);
                       }}
+                      disabled={updatePostMutation.isPending}
                       className="gap-2"
                     >
                       <XCircle className="h-4 w-4" />
@@ -963,6 +1029,47 @@ const ContentModeration = () => {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Approve Confirmation Dialog */}
+        <AlertDialog open={isApproveDialogOpen} onOpenChange={setIsApproveDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-green-600" />
+                Confirm Approval
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to approve this post? It will be published to all selected platforms.
+                {postToApprove?.scheduled_at && (
+                  <span className="block mt-2 text-primary font-medium">
+                    This post is scheduled for {new Date(postToApprove.scheduled_at).toLocaleString()}
+                  </span>
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => {
+                setIsApproveDialogOpen(false);
+                setPostToApprove(null);
+              }}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  if (postToApprove) {
+                    approvePostMutation.mutate(postToApprove);
+                  }
+                  setIsApproveDialogOpen(false);
+                  setPostToApprove(null);
+                }}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                Confirm Approval
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Rejection Dialog */}
         <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
@@ -1017,8 +1124,16 @@ const ContentModeration = () => {
                   setPostToReject(null);
                   setRejectionReason("");
                 }}
+                disabled={updatePostMutation.isPending}
               >
-                Confirm Rejection
+                {updatePostMutation.isPending ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Rejecting...
+                  </>
+                ) : (
+                  "Confirm Rejection"
+                )}
               </Button>
             </div>
           </DialogContent>
