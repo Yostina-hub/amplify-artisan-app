@@ -236,7 +236,37 @@ const ContentModeration = () => {
         return { scheduled: true, scheduledFor };
       }
 
-      // Not scheduled, publish immediately
+      // Check if post is already published - if so, just mark as approved
+      if (post.status === 'published') {
+        const { error: updateError } = await supabase
+          .from("social_media_posts")
+          .update({ 
+            flagged: false,
+            approved_by: user?.id,
+            approved_at: new Date().toISOString(),
+          })
+          .eq("id", post.id);
+
+        if (updateError) throw updateError;
+
+        // Send approval notification
+        if (post.user_id) {
+          await createNotification({
+            userId: post.user_id,
+            companyId: post.company_id,
+            title: "Post Approved",
+            message: "Your published post has been approved!",
+            type: "success",
+            actionUrl: "/composer",
+            actionLabel: "View Post",
+            metadata: { postId: post.id }
+          });
+        }
+
+        return { scheduled: false, alreadyPublished: true };
+      }
+
+      // Not scheduled and not published yet - publish now
       const { error: updateError } = await supabase
         .from("social_media_posts")
         .update({ 
@@ -250,13 +280,13 @@ const ContentModeration = () => {
 
       if (updateError) throw updateError;
 
-      // Send approval notification to post creator
+      // Send approval notification
       if (post.user_id) {
         await createNotification({
           userId: post.user_id,
           companyId: post.company_id,
           title: "Post Approved & Published",
-          message: "Your post has been approved and published to all platforms!",
+          message: "Your post has been approved and published!",
           type: "success",
           actionUrl: "/composer",
           actionLabel: "View Post",
@@ -264,48 +294,17 @@ const ContentModeration = () => {
         });
       }
 
-      // Post to each platform
-      const platforms = post.platforms || [];
-      const errors: string[] = [];
-
-      for (const platform of platforms) {
-        try {
-          if (platform === "telegram") {
-            const { error } = await supabase.functions.invoke("post-to-telegram", {
-              body: { 
-                postId: post.id,
-                companyId: post.company_id
-              }
-            });
-            if (error) errors.push(`Telegram: ${error.message}`);
-          } else {
-            // Use publish-to-platform for other platforms
-            const { error } = await supabase.functions.invoke("publish-to-platform", {
-              body: { 
-                contentId: post.id,
-                platforms: [platform]
-              }
-            });
-            if (error) errors.push(`${platform}: ${error.message}`);
-          }
-        } catch (err) {
-          errors.push(`${platform}: ${err instanceof Error ? err.message : 'Unknown error'}`);
-        }
-      }
-
-      if (errors.length > 0) {
-        throw new Error(`Post approved but some platforms failed: ${errors.join(', ')}`);
-      }
-
-      return { scheduled: false };
+      return { scheduled: false, alreadyPublished: false };
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["moderation-posts"] });
       queryClient.invalidateQueries({ queryKey: ["moderation-stats"] });
       if (result.scheduled) {
         toast.success(`Post approved and scheduled for ${new Date(result.scheduledFor).toLocaleString()}`);
+      } else if (result.alreadyPublished) {
+        toast.success("Published post has been approved");
       } else {
-        toast.success("Post approved and published to all platforms");
+        toast.success("Post approved and marked as published");
       }
     },
     onError: (error) => {
