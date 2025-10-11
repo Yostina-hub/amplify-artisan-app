@@ -80,12 +80,7 @@ serve(async (req) => {
           .from('social_media_posts')
           .update({
             status: allSuccessful ? 'published' : 'failed',
-            published_at: allSuccessful ? new Date().toISOString() : null,
-            metadata: {
-              ...post.metadata,
-              publish_results: publishResults,
-              published_by_scheduler: true
-            }
+            published_at: allSuccessful ? new Date().toISOString() : null
           })
           .eq('id', post.id);
 
