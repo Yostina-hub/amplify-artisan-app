@@ -38,6 +38,14 @@ serve(async (req) => {
       try {
         console.log(`Publishing post ${post.id} to platforms:`, post.platforms);
 
+        // Lock: mark as publishing so cron won't re-pick it
+        const { error: lockError } = await supabase
+          .from('social_media_posts')
+          .update({ status: 'publishing' })
+          .eq('id', post.id)
+          .eq('status', 'scheduled');
+        if (lockError) throw lockError;
+
         // Get platform credentials for this company
         const platforms = post.platforms || [];
         const publishResults = [];
@@ -79,8 +87,7 @@ serve(async (req) => {
         const { error: updateError } = await supabase
           .from('social_media_posts')
           .update({
-            status: allSuccessful ? 'published' : 'failed',
-            published_at: allSuccessful ? new Date().toISOString() : null
+            status: allSuccessful ? 'published' : 'failed'
           })
           .eq('id', post.id);
 
