@@ -101,13 +101,17 @@ export default function ModuleBuilder() {
 
       if (!profile?.company_id) throw new Error('No company found');
 
+      // Extract color from moduleData and store in metadata
+      const { color, ...restModuleData } = moduleData;
+
       const { data, error } = await supabase
         .from('custom_modules')
         .insert({
-          ...moduleData,
+          ...restModuleData,
           company_id: profile.company_id,
           created_by: user.id,
           metadata: {
+            color,
             component_types: selectedComponentTypes,
             branch_access: selectedBranches,
           },
@@ -244,6 +248,7 @@ export default function ModuleBuilder() {
         icon_name: editingModule.icon_name,
         metadata: {
           ...editingModule.metadata,
+          color: editingModule.color,
           component_types: selectedComponentTypes,
           branch_access: selectedBranches,
         },
@@ -588,7 +593,10 @@ export default function ModuleBuilder() {
                         <Button
                           variant="outline"
                           onClick={() => {
-                            setEditingModule(selectedModule);
+                            setEditingModule({
+                              ...selectedModule,
+                              color: selectedModule.metadata?.color || '#3b82f6'
+                            });
                             setSelectedComponentTypes(selectedModule.metadata?.component_types || []);
                             setSelectedBranches(selectedModule.metadata?.branch_access || []);
                           }}
