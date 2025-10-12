@@ -141,8 +141,13 @@ const hasRole = (role: UserRole) => {
 
 const signOut = async () => {
   const { error } = await supabase.auth.signOut();
-  if (error) throw error;
   
+  // Ignore "session not found" errors - user is already logged out
+  if (error && error.message !== 'Session not found') {
+    console.error('Sign out error:', error);
+  }
+  
+  // Clear state regardless of error
   setRoles([]);
   setRolesDetailed([]);
   setIsSuperAdmin(false);
