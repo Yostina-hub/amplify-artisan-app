@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { EnhancedLayout } from "./components/EnhancedLayout";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { LiveChat } from "./components/LiveChat";
 import Index from "./pages/Index";
 import UnifiedDashboard from "./components/UnifiedDashboard";
 import Composer from "./pages/Composer";
@@ -201,6 +202,7 @@ const App = () => (
             {/* 404 catch-all - must be last */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <LiveChat />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
