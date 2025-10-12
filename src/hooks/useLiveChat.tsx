@@ -55,7 +55,7 @@ export const useLiveChat = () => {
         query = query.eq('guest_email', guestEmail);
       }
 
-      const { data: existing } = await query.order('created_at', { ascending: false }).limit(1).single();
+      const { data: existing } = await query.order('created_at', { ascending: false }).limit(1).maybeSingle();
 
       if (existing) {
         setConversation(existing as Conversation);
@@ -63,20 +63,34 @@ export const useLiveChat = () => {
       }
 
       // Create new conversation
-      const { data: newConv, error } = await supabase
-        .from('live_chat_conversations')
-        .insert({
-          user_id: user?.id || null,
-          guest_name: guestName || null,
-          guest_email: guestEmail || null,
-          status: 'pending',
-        })
-        .select()
-        .single();
+      if (user) {
+        const { data: newConv, error } = await supabase
+          .from('live_chat_conversations')
+          .insert({
+            user_id: user.id,
+            guest_name: guestName || null,
+            guest_email: guestEmail || null,
+            status: 'pending',
+          })
+          .select()
+          .single();
 
-      if (error) throw error;
-      setConversation(newConv as Conversation);
-      return newConv.id;
+        if (error) throw error;
+        setConversation(newConv as Conversation);
+        return newConv.id;
+      } else {
+        // Guest flow: use backend function (bypasses RLS safely)
+        const { data: fnData, error: fnError } = await supabase.functions.invoke('live-chat-init', {
+          body: {
+            guest_name: guestName || null,
+            guest_email: guestEmail || null,
+          },
+        });
+        if (fnError) throw fnError;
+        const conv = (fnData as any)?.conversation || (fnData as any);
+        setConversation(conv as Conversation);
+        return conv.id as string;
+      }
     } catch (error) {
       console.error('Error initializing conversation:', error);
       toast({
@@ -119,33 +133,45 @@ export const useLiveChat = () => {
       attachment_type: attachment.type,
     } : {};
 
-    const { error } = await supabase
-      .from('live_chat_messages')
-      .insert({
-        conversation_id: conversationId,
-        sender_id: user?.id || null,
-        sender_type: user ? 'user' : 'guest',
-        message: text.trim() || 'Sent a file',
-        metadata,
+    if (user) {
+      const { error } = await supabase
+        .from('live_chat_messages')
+        .insert({
+          conversation_id: conversationId,
+          sender_id: user.id,
+          sender_type: 'user',
+          message: text.trim() || 'Sent a file',
+          metadata,
+        });
+
+      if (error) {
+        console.error('Error sending message:', error);
+        toast({ title: 'Error', description: 'Failed to send message', variant: 'destructive' });
+        return;
+      }
+
+      try {
+        await supabase.functions.invoke('live-chat-ai-responder', {
+          body: { conversation_id: conversationId },
+        });
+      } catch (invokeError) {
+        console.error('AI responder invoke failed:', invokeError);
+      }
+    } else {
+      // Guest flow: send via backend (also triggers AI)
+      const { error: fnError } = await supabase.functions.invoke('live-chat-send', {
+        body: {
+          conversation_id: conversationId,
+          message: text.trim(),
+          attachment,
+        },
       });
 
-    if (error) {
-      console.error('Error sending message:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to send message',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // Trigger AI auto-response for this conversation (works for guests)
-    try {
-      await supabase.functions.invoke('live-chat-ai-responder', {
-        body: { conversation_id: conversationId },
-      });
-    } catch (invokeError) {
-      console.error('AI responder invoke failed:', invokeError);
+      if (fnError) {
+        console.error('Guest send failed:', fnError);
+        toast({ title: 'Error', description: 'Failed to send message', variant: 'destructive' });
+        return;
+      }
     }
   }, [user, toast]);
 
@@ -294,7 +320,7 @@ export const useLiveChat = () => {
       .from('chat_agent_status')
       .select('status')
       .limit(1)
-      .single()
+      .maybeSingle()
       .then(({ data }) => {
         if (data && (data.status === 'online' || data.status === 'away' || data.status === 'offline')) {
           setAgentStatus(data.status);

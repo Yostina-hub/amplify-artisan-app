@@ -83,3 +83,11 @@ verify_jwt = true
 # Live chat AI responder - public so guests can trigger
 [functions.live-chat-ai-responder]
 verify_jwt = false
+
+# Live chat guest init - public
+[functions.live-chat-init]
+verify_jwt = false
+
+# Live chat guest send - public
+[functions.live-chat-send]
+verify_jwt = false
