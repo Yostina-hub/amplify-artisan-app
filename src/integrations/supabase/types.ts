@@ -1225,6 +1225,41 @@ export type Database = {
           },
         ]
       }
+      chat_agent_status: {
+        Row: {
+          agent_id: string
+          company_id: string | null
+          created_at: string | null
+          last_seen_at: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          agent_id: string
+          company_id?: string | null
+          created_at?: string | null
+          last_seen_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          agent_id?: string
+          company_id?: string | null
+          created_at?: string | null
+          last_seen_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_agent_status_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_conversations: {
         Row: {
           company_id: string | null
@@ -1235,6 +1270,7 @@ export type Database = {
           last_message_at: string | null
           metadata: Json | null
           status: string | null
+          typing_users: Json | null
           user_id: string | null
         }
         Insert: {
@@ -1246,6 +1282,7 @@ export type Database = {
           last_message_at?: string | null
           metadata?: Json | null
           status?: string | null
+          typing_users?: Json | null
           user_id?: string | null
         }
         Update: {
@@ -1257,6 +1294,7 @@ export type Database = {
           last_message_at?: string | null
           metadata?: Json | null
           status?: string | null
+          typing_users?: Json | null
           user_id?: string | null
         }
         Relationships: [
