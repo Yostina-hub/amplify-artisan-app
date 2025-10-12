@@ -171,8 +171,8 @@ export function AppSidebar() {
   console.log('AppSidebar - Is company admin:', isCompanyAdmin);
 
   return (
-    <Sidebar collapsible="icon" className="border-r">
-      <SidebarContent className="bg-gradient-to-b from-sidebar/95 to-sidebar">
+    <Sidebar collapsible="icon" className="border-r bg-sidebar">
+      <SidebarContent className="bg-sidebar-background">
         <div className="px-4 py-6 flex items-center justify-between">
           {!isCollapsed ? (
             <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
