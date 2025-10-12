@@ -16,7 +16,7 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const mainItems = [
-  { title: "Dashboard", url: "/admin", icon: Home },
+  { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "Composer", url: "/composer", icon: FileText },
   { title: "Calendar", url: "/calendar", icon: Calendar },
   { title: "Content Moderation", url: "/admin/moderation", icon: Flag },
@@ -200,7 +200,7 @@ export function AppSidebar() {
                         `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                           isActive
                             ? "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-md font-medium"
-                            : "hover:bg-sidebar-accent text-sidebar-foreground"
+                            : "bg-sidebar-accent text-sidebar-foreground shadow-sm ring-1 ring-sidebar-border/50 hover:bg-sidebar-accent/80"
                         }`
                       }
                     >
