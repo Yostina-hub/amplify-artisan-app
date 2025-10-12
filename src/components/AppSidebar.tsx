@@ -171,7 +171,7 @@ export function AppSidebar() {
   console.log('AppSidebar - Is company admin:', isCompanyAdmin);
 
   return (
-    <Sidebar collapsible="icon" className="border-r bg-sidebar">
+    <Sidebar collapsible="none" className="border-r bg-sidebar">
       <SidebarContent className="bg-sidebar text-sidebar-foreground">
         <div className="px-4 py-6 flex items-center justify-between">
           {!isCollapsed ? (
