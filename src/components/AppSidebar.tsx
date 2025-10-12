@@ -172,7 +172,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="none" className="border-r bg-sidebar">
-      <SidebarContent className="bg-sidebar text-sidebar-foreground">
+      <SidebarContent className="bg-sidebar text-sidebar-foreground overflow-y-auto">
         <div className="px-4 py-6 flex items-center justify-between">
           {!isCollapsed ? (
             <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">

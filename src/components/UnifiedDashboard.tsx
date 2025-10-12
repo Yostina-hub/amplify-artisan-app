@@ -307,20 +307,6 @@ export default function UnifiedDashboard() {
         </>
       )}
 
-      {/* Service Grid (Non-Admin) */}
-      {!isAdmin && (
-        <div className="space-y-8 mt-8">
-          {SERVICE_CATEGORIES.map(category => (
-            <ServiceSection
-              key={category.id}
-              title={category.title}
-              services={category.services}
-              onAIClick={handleAIClick}
-            />
-          ))}
-        </div>
-      )}
-
       {/* AI Drawer */}
       <AIDrawer
         open={aiDrawerOpen}
