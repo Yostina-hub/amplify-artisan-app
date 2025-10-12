@@ -45,7 +45,7 @@ export const useLiveChat = () => {
     try {
       // Check for existing conversation
       let query = supabase
-        .from('chat_conversations')
+        .from('live_chat_conversations')
         .select('*')
         .eq('status', 'active');
 
@@ -58,29 +58,24 @@ export const useLiveChat = () => {
       const { data: existing } = await query.order('created_at', { ascending: false }).limit(1).single();
 
       if (existing) {
-        setConversation({
-          ...existing,
-          typing_users: Array.isArray(existing.typing_users) ? existing.typing_users : []
-        } as Conversation);
+        setConversation(existing as Conversation);
         return existing.id;
       }
 
       // Create new conversation
       const { data: newConv, error } = await supabase
-        .from('chat_conversations')
+        .from('live_chat_conversations')
         .insert({
           user_id: user?.id || null,
           guest_name: guestName || null,
           guest_email: guestEmail || null,
+          status: 'pending',
         })
         .select()
         .single();
 
       if (error) throw error;
-      setConversation({
-        ...newConv,
-        typing_users: Array.isArray(newConv.typing_users) ? newConv.typing_users : []
-      } as Conversation);
+      setConversation(newConv as Conversation);
       return newConv.id;
     } catch (error) {
       console.error('Error initializing conversation:', error);
@@ -97,7 +92,7 @@ export const useLiveChat = () => {
   // Fetch messages
   const fetchMessages = useCallback(async (conversationId: string) => {
     const { data, error } = await supabase
-      .from('chat_messages')
+      .from('live_chat_messages')
       .select('*')
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true });
@@ -125,7 +120,7 @@ export const useLiveChat = () => {
     } : {};
 
     const { error } = await supabase
-      .from('chat_messages')
+      .from('live_chat_messages')
       .insert({
         conversation_id: conversationId,
         sender_id: user?.id || null,
@@ -186,7 +181,7 @@ export const useLiveChat = () => {
       : currentTypers.filter(id => id !== userId);
 
     await supabase
-      .from('chat_conversations')
+      .from('live_chat_conversations')
       .update({ typing_users: newTypers })
       .eq('id', conversationId);
 
@@ -214,7 +209,7 @@ export const useLiveChat = () => {
     };
 
     const { error } = await supabase
-      .from('chat_messages')
+      .from('live_chat_messages')
       .update({ 
         metadata: { 
           ...message.metadata, 
@@ -241,7 +236,7 @@ export const useLiveChat = () => {
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'chat_messages',
+          table: 'live_chat_messages',
           filter: `conversation_id=eq.${conversation.id}`,
         },
         (payload) => {
@@ -258,7 +253,7 @@ export const useLiveChat = () => {
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'chat_conversations',
+          table: 'live_chat_conversations',
           filter: `id=eq.${conversation.id}`,
         },
         (payload) => {

@@ -88,6 +88,7 @@ import PermissionManagement from "./pages/admin/PermissionManagement";
 import CallCenterIntegrations from "./pages/admin/CallCenterIntegrations";
 import CallReports from "./pages/CallReports";
 import FirewallManagement from "./pages/admin/FirewallManagement";
+import LiveChatDashboard from "./pages/admin/LiveChatDashboard";
 import LayoutShowcase from "./pages/LayoutShowcase";
 
 const queryClient = new QueryClient();
@@ -151,6 +152,7 @@ const App = () => (
               <Route path="/admin/permissions" element={<ProtectedRoute requiredRole="admin"><PermissionManagement /></ProtectedRoute>} />
               <Route path="/admin/call-center-integrations" element={<ProtectedRoute requiredRole="admin"><CallCenterIntegrations /></ProtectedRoute>} />
               <Route path="/admin/firewall" element={<ProtectedRoute requiredRole="admin"><FirewallManagement /></ProtectedRoute>} />
+              <Route path="/admin/live-chat" element={<ProtectedRoute requiredRole="admin"><LiveChatDashboard /></ProtectedRoute>} />
               
               {/* Company routes */}
               <Route path="/company/email-settings" element={<ProtectedRoute><CompanyEmailSettings /></ProtectedRoute>} />

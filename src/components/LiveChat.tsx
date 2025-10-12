@@ -19,6 +19,7 @@ export const LiveChat = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -38,7 +39,15 @@ export const LiveChat = () => {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    
+    // Calculate unread count from agent messages when chat is closed
+    if (!isOpen && messages.length > 0) {
+      const agentMessages = messages.filter(m => m.sender_type === 'agent' && !m.is_read);
+      setUnreadCount(agentMessages.length);
+    } else if (isOpen) {
+      setUnreadCount(0);
+    }
+  }, [messages, isOpen]);
 
   const handleOpen = async () => {
     setIsOpen(true);
@@ -156,6 +165,11 @@ export const LiveChat = () => {
         <MessageCircle className="h-7 w-7" />
         {agentStatus === 'online' && (
           <span className="absolute top-0 right-0 h-4 w-4 bg-green-500 rounded-full border-2 border-background animate-ping" />
+        )}
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 h-6 w-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold border-2 border-background animate-bounce">
+            {unreadCount}
+          </span>
         )}
       </Button>
     );

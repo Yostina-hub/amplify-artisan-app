@@ -1260,94 +1260,6 @@ export type Database = {
           },
         ]
       }
-      chat_conversations: {
-        Row: {
-          company_id: string | null
-          created_at: string | null
-          guest_email: string | null
-          guest_name: string | null
-          id: string
-          last_message_at: string | null
-          metadata: Json | null
-          status: string | null
-          typing_users: Json | null
-          user_id: string | null
-        }
-        Insert: {
-          company_id?: string | null
-          created_at?: string | null
-          guest_email?: string | null
-          guest_name?: string | null
-          id?: string
-          last_message_at?: string | null
-          metadata?: Json | null
-          status?: string | null
-          typing_users?: Json | null
-          user_id?: string | null
-        }
-        Update: {
-          company_id?: string | null
-          created_at?: string | null
-          guest_email?: string | null
-          guest_name?: string | null
-          id?: string
-          last_message_at?: string | null
-          metadata?: Json | null
-          status?: string | null
-          typing_users?: Json | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "chat_conversations_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      chat_messages: {
-        Row: {
-          conversation_id: string
-          created_at: string | null
-          id: string
-          is_read: boolean | null
-          message: string
-          metadata: Json | null
-          sender_id: string | null
-          sender_type: string
-        }
-        Insert: {
-          conversation_id: string
-          created_at?: string | null
-          id?: string
-          is_read?: boolean | null
-          message: string
-          metadata?: Json | null
-          sender_id?: string | null
-          sender_type: string
-        }
-        Update: {
-          conversation_id?: string
-          created_at?: string | null
-          id?: string
-          is_read?: boolean | null
-          message?: string
-          metadata?: Json | null
-          sender_id?: string | null
-          sender_type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "chat_messages_conversation_id_fkey"
-            columns: ["conversation_id"]
-            isOneToOne: false
-            referencedRelation: "chat_conversations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       commission_assignments: {
         Row: {
           assigned_by: string
@@ -3573,6 +3485,156 @@ export type Database = {
             columns: ["converted_contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_chat_conversations: {
+        Row: {
+          assigned_agent_id: string | null
+          company_id: string | null
+          created_at: string | null
+          guest_email: string | null
+          guest_name: string | null
+          id: string
+          last_message_at: string | null
+          metadata: Json | null
+          priority: string | null
+          rating: number | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string | null
+          tags: string[] | null
+          typing_users: Json | null
+          unread_count: number | null
+          user_id: string | null
+        }
+        Insert: {
+          assigned_agent_id?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          guest_email?: string | null
+          guest_name?: string | null
+          id?: string
+          last_message_at?: string | null
+          metadata?: Json | null
+          priority?: string | null
+          rating?: number | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string | null
+          tags?: string[] | null
+          typing_users?: Json | null
+          unread_count?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          assigned_agent_id?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          guest_email?: string | null
+          guest_name?: string | null
+          id?: string
+          last_message_at?: string | null
+          metadata?: Json | null
+          priority?: string | null
+          rating?: number | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string | null
+          tags?: string[] | null
+          typing_users?: Json | null
+          unread_count?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_conversations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_chat_messages: {
+        Row: {
+          conversation_id: string
+          created_at: string | null
+          id: string
+          is_ai_response: boolean | null
+          is_read: boolean | null
+          message: string
+          metadata: Json | null
+          sender_id: string | null
+          sender_name: string | null
+          sender_type: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          is_ai_response?: boolean | null
+          is_read?: boolean | null
+          message: string
+          metadata?: Json | null
+          sender_id?: string | null
+          sender_name?: string | null
+          sender_type: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          is_ai_response?: boolean | null
+          is_read?: boolean | null
+          message?: string
+          metadata?: Json | null
+          sender_id?: string | null
+          sender_name?: string | null
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "live_chat_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_chat_typing: {
+        Row: {
+          conversation_id: string
+          id: string
+          is_typing: boolean | null
+          updated_at: string | null
+          user_id: string | null
+          user_name: string | null
+        }
+        Insert: {
+          conversation_id: string
+          id?: string
+          is_typing?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Update: {
+          conversation_id?: string
+          id?: string
+          is_typing?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_chat_typing_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "live_chat_conversations"
             referencedColumns: ["id"]
           },
         ]
@@ -6604,6 +6666,16 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      live_chat_stats: {
+        Row: {
+          active_chats: number | null
+          avg_resolution_time_minutes: number | null
+          chats_today: number | null
+          pending_chats: number | null
+          resolved_chats: number | null
+        }
+        Relationships: []
       }
       profiles_safe: {
         Row: {
