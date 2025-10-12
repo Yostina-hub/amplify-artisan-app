@@ -79,3 +79,7 @@ verify_jwt = false
 # Secure: requires authenticated moderator
 [functions.approve-post]
 verify_jwt = true
+
+# Live chat AI responder - public so guests can trigger
+[functions.live-chat-ai-responder]
+verify_jwt = false

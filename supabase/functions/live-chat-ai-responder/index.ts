@@ -16,13 +16,33 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get all pending conversations without assigned agent
-    const { data: pendingConvs } = await supabase
-      .from('live_chat_conversations')
-      .select('*, live_chat_messages(*)')
-      .eq('status', 'pending')
-      .is('assigned_agent_id', null)
-      .order('created_at', { ascending: true });
+    // Parse optional conversation_id from request body
+    let conversationId: string | undefined;
+    try {
+      const body = await req.json().catch(() => null);
+      if (body && typeof body.conversation_id === 'string') {
+        conversationId = body.conversation_id;
+      }
+    } catch (_) { /* ignore */ }
+
+    // Fetch conversations to process
+    let pendingConvs: any[] = [];
+    if (conversationId) {
+      const { data: conv } = await supabase
+        .from('live_chat_conversations')
+        .select('*, live_chat_messages(*)')
+        .eq('id', conversationId)
+        .maybeSingle();
+      if (conv) pendingConvs = [conv];
+    } else {
+      const { data } = await supabase
+        .from('live_chat_conversations')
+        .select('*, live_chat_messages(*)')
+        .in('status', ['pending', 'active'])
+        .is('assigned_agent_id', null)
+        .order('created_at', { ascending: true });
+      pendingConvs = data || [];
+    }
 
     if (!pendingConvs || pendingConvs.length === 0) {
       return new Response(JSON.stringify({ message: 'No pending conversations' }), {
@@ -33,7 +53,9 @@ serve(async (req) => {
     const responses = [];
 
     for (const conv of pendingConvs) {
-      const messages = conv.live_chat_messages || [];
+      const messages = (conv.live_chat_messages || []).sort(
+        (a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
       
       // Check if last message is from user/guest and not AI
       const lastMessage = messages[messages.length - 1];
@@ -47,8 +69,9 @@ serve(async (req) => {
         content: m.message,
       }));
 
-      // Call Lovable AI
-      const aiResponse = await fetch('https://api.lovable.app/v1/ai/chat', {
+      // Call Lovable AI Gateway (OpenAI-compatible)
+      const gatewayUrl = 'https://ai.gateway.lovable.dev/v1/chat/completions';
+      const aiResponse = await fetch(gatewayUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,10 +86,22 @@ serve(async (req) => {
             },
             ...conversationHistory,
           ],
+          // Non-streaming
           temperature: 0.7,
-          max_tokens: 200,
         }),
       });
+
+      if (!aiResponse.ok) {
+        const errorText = await aiResponse.text();
+        console.error('AI gateway error:', aiResponse.status, errorText);
+        if (aiResponse.status === 429) {
+          continue; // Rate limited, skip for now
+        }
+        if (aiResponse.status === 402) {
+          continue; // Payment required, skip
+        }
+        continue;
+      }
 
       const aiData = await aiResponse.json();
       const aiMessage = aiData.choices?.[0]?.message?.content;
@@ -78,7 +113,6 @@ serve(async (req) => {
           .insert({
             conversation_id: conv.id,
             sender_type: 'agent',
-            sender_name: 'AI Assistant',
             message: aiMessage,
             is_ai_response: true,
           });

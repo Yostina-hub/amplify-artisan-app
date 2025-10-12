@@ -47,7 +47,7 @@ export const useLiveChat = () => {
       let query = supabase
         .from('live_chat_conversations')
         .select('*')
-        .eq('status', 'active');
+        .in('status', ['active', 'pending']);
 
       if (user) {
         query = query.eq('user_id', user.id);
@@ -136,6 +136,16 @@ export const useLiveChat = () => {
         description: 'Failed to send message',
         variant: 'destructive',
       });
+      return;
+    }
+
+    // Trigger AI auto-response for this conversation (works for guests)
+    try {
+      await supabase.functions.invoke('live-chat-ai-responder', {
+        body: { conversation_id: conversationId },
+      });
+    } catch (invokeError) {
+      console.error('AI responder invoke failed:', invokeError);
     }
   }, [user, toast]);
 
