@@ -51,17 +51,15 @@ export const LiveChat = () => {
 
   const handleOpen = async () => {
     setIsOpen(true);
-    if (!user && !conversation) {
-      setShowGuestForm(true);
-    } else if (user && !conversation) {
-      await initConversation();
+    if (!conversation) {
+      // Start conversation immediately for both guests and users
+      await initConversation(guestName || undefined, guestEmail || undefined);
     }
   };
 
   const handleGuestStart = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!guestName.trim() || !guestEmail.trim()) return;
-    await initConversation(guestName, guestEmail);
+    await initConversation(guestName || undefined, guestEmail || undefined);
     setShowGuestForm(false);
   };
 
@@ -224,32 +222,43 @@ export const LiveChat = () => {
 
       {!isMinimized && (
         <>
-          {/* Guest Form */}
+          {/* Optional Guest Form */}
           {showGuestForm && (
             <div className="p-6 space-y-4 animate-fade-in">
               <div className="text-center space-y-2">
                 <h3 className="font-semibold text-lg">Start a conversation</h3>
-                <p className="text-sm text-muted-foreground">Connect with us instantly</p>
+                <p className="text-sm text-muted-foreground">Optional: Let us know who you are</p>
               </div>
               <form onSubmit={handleGuestStart} className="space-y-3">
                 <Input
-                  placeholder="Your name"
+                  placeholder="Your name (optional)"
                   value={guestName}
                   onChange={(e) => setGuestName(e.target.value)}
-                  required
                   className="border-2 focus:ring-2 focus:ring-primary"
                 />
                 <Input
                   type="email"
-                  placeholder="Your email"
+                  placeholder="Your email (optional)"
                   value={guestEmail}
                   onChange={(e) => setGuestEmail(e.target.value)}
-                  required
                   className="border-2 focus:ring-2 focus:ring-primary"
                 />
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Starting...' : 'Start Chat'}
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    type="button" 
+                    variant="outline"
+                    className="flex-1" 
+                    onClick={() => {
+                      initConversation();
+                      setShowGuestForm(false);
+                    }}
+                  >
+                    Skip
+                  </Button>
+                  <Button type="submit" className="flex-1" disabled={loading}>
+                    {loading ? 'Starting...' : 'Continue'}
+                  </Button>
+                </div>
               </form>
             </div>
           )}
