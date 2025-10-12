@@ -171,15 +171,15 @@ export function AppSidebar() {
   console.log('AppSidebar - Is company admin:', isCompanyAdmin);
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarContent>
-        <div className="px-6 py-4 flex items-center justify-between">
+    <Sidebar collapsible="icon" className="border-r">
+      <SidebarContent className="bg-gradient-to-b from-sidebar/95 to-sidebar">
+        <div className="px-4 py-6 flex items-center justify-between">
           {!isCollapsed ? (
             <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               SocialHub
             </h1>
           ) : (
-            <div className="w-8 h-8 mx-auto rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+            <div className="w-10 h-10 mx-auto rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-sm">SH</span>
             </div>
           )}
@@ -187,9 +187,9 @@ export function AppSidebar() {
         
         {/* Main Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel>Main</SidebarGroupLabel>
+          <SidebarGroupLabel className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Main</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-1 px-3">
               {mainItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
@@ -197,13 +197,15 @@ export function AppSidebar() {
                       to={item.url}
                       end
                       className={({ isActive }) =>
-                        isActive
-                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                          : "hover:bg-sidebar-accent/50"
+                        `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                          isActive
+                            ? "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-md font-medium"
+                            : "hover:bg-sidebar-accent text-sidebar-foreground"
+                        }`
                       }
                     >
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <item.icon className="h-5 w-5" />
+                      {!isCollapsed && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -217,8 +219,8 @@ export function AppSidebar() {
           <SidebarGroup>
             <CollapsibleTrigger className="w-full" asChild>
               <button className="w-full">
-                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
-                  <span className="font-medium">Social Media</span>
+                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded-lg mx-3 px-4 py-2 transition-colors text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <span>Social Media</span>
                   {!isCollapsed && (
                     <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${socialMediaOpen ? 'rotate-180' : ''}`} />
                   )}
@@ -227,20 +229,22 @@ export function AppSidebar() {
             </CollapsibleTrigger>
             <CollapsibleContent>
               <SidebarGroupContent>
-                <SidebarMenu>
+                <SidebarMenu className="gap-1 px-3">
                   {socialMediaItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
                         <NavLink
                           to={item.url}
                           className={({ isActive }) =>
-                            isActive
-                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                              : "hover:bg-sidebar-accent/50"
+                            `flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+                              isActive
+                                ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
+                            }`
                           }
                         >
                           <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
+                          {!isCollapsed && <span className="text-sm">{item.title}</span>}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -256,8 +260,8 @@ export function AppSidebar() {
           <SidebarGroup>
             <CollapsibleTrigger className="w-full" asChild>
               <button className="w-full">
-                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
-                  <span className="font-medium">Analytics & Insights</span>
+                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded-lg mx-3 px-4 py-2 transition-colors text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <span>Analytics & Insights</span>
                   {!isCollapsed && (
                     <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${analyticsOpen ? 'rotate-180' : ''}`} />
                   )}
@@ -266,20 +270,22 @@ export function AppSidebar() {
             </CollapsibleTrigger>
             <CollapsibleContent>
               <SidebarGroupContent>
-                <SidebarMenu>
+                <SidebarMenu className="gap-1 px-3">
                   {analyticsItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
                         <NavLink
                           to={item.url}
                           className={({ isActive }) =>
-                            isActive
-                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                              : "hover:bg-sidebar-accent/50"
+                            `flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+                              isActive
+                                ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
+                            }`
                           }
                         >
                           <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
+                          {!isCollapsed && <span className="text-sm">{item.title}</span>}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -295,8 +301,8 @@ export function AppSidebar() {
           <SidebarGroup>
             <CollapsibleTrigger className="w-full" asChild>
               <button className="w-full">
-                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
-                  <span className="font-medium">AI & Automation</span>
+                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded-lg mx-3 px-4 py-2 transition-colors text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <span>AI & Automation</span>
                   {!isCollapsed && (
                     <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${aiAutomationOpen ? 'rotate-180' : ''}`} />
                   )}
@@ -305,20 +311,22 @@ export function AppSidebar() {
             </CollapsibleTrigger>
             <CollapsibleContent>
               <SidebarGroupContent>
-                <SidebarMenu>
+                <SidebarMenu className="gap-1 px-3">
                   {aiAutomationItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
                         <NavLink
                           to={item.url}
                           className={({ isActive }) =>
-                            isActive
-                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                              : "hover:bg-sidebar-accent/50"
+                            `flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+                              isActive
+                                ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
+                            }`
                           }
                         >
                           <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
+                          {!isCollapsed && <span className="text-sm">{item.title}</span>}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -334,8 +342,8 @@ export function AppSidebar() {
           <SidebarGroup>
             <CollapsibleTrigger className="w-full" asChild>
               <button className="w-full">
-                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
-                  <span className="font-medium">Enterprise Builder</span>
+                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded-lg mx-3 px-4 py-2 transition-colors text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <span>Enterprise Builder</span>
                   {!isCollapsed && (
                     <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${builderOpen ? 'rotate-180' : ''}`} />
                   )}
@@ -344,20 +352,22 @@ export function AppSidebar() {
             </CollapsibleTrigger>
             <CollapsibleContent>
               <SidebarGroupContent>
-                <SidebarMenu>
+                <SidebarMenu className="gap-1 px-3">
                   {builderItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
                         <NavLink
                           to={item.url}
                           className={({ isActive }) =>
-                            isActive
-                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                              : "hover:bg-sidebar-accent/50"
+                            `flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+                              isActive
+                                ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
+                            }`
                           }
                         >
                           <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
+                          {!isCollapsed && <span className="text-sm">{item.title}</span>}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -373,8 +383,8 @@ export function AppSidebar() {
           <SidebarGroup>
             <CollapsibleTrigger className="w-full" asChild>
               <button className="w-full">
-                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
-                  <span className="font-medium">CRM</span>
+                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded-lg mx-3 px-4 py-2 transition-colors text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <span>CRM</span>
                   {!isCollapsed && (
                     <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${crmOpen ? 'rotate-180' : ''}`} />
                   )}
@@ -383,20 +393,22 @@ export function AppSidebar() {
             </CollapsibleTrigger>
             <CollapsibleContent>
               <SidebarGroupContent>
-                <SidebarMenu>
+                <SidebarMenu className="gap-1 px-3">
                   {crmItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
                         <NavLink
                           to={item.url}
                           className={({ isActive }) =>
-                            isActive
-                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                              : "hover:bg-sidebar-accent/50"
+                            `flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+                              isActive
+                                ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
+                            }`
                           }
                         >
                           <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
+                          {!isCollapsed && <span className="text-sm">{item.title}</span>}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -412,8 +424,8 @@ export function AppSidebar() {
           <SidebarGroup>
             <CollapsibleTrigger className="w-full" asChild>
               <button className="w-full">
-                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
-                  <span className="font-medium">Marketing</span>
+                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded-lg mx-3 px-4 py-2 transition-colors text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <span>Marketing</span>
                   {!isCollapsed && (
                     <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${marketingOpen ? 'rotate-180' : ''}`} />
                   )}
@@ -422,20 +434,22 @@ export function AppSidebar() {
             </CollapsibleTrigger>
             <CollapsibleContent>
               <SidebarGroupContent>
-                <SidebarMenu>
+                <SidebarMenu className="gap-1 px-3">
                   {marketingItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
                         <NavLink
                           to={item.url}
                           className={({ isActive }) =>
-                            isActive
-                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                              : "hover:bg-sidebar-accent/50"
+                            `flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+                              isActive
+                                ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
+                            }`
                           }
                         >
                           <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
+                          {!isCollapsed && <span className="text-sm">{item.title}</span>}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -450,9 +464,9 @@ export function AppSidebar() {
         {/* Agents Section */}
         {hasRole('agent') && (
           <SidebarGroup>
-            <SidebarGroupLabel>Agents</SidebarGroupLabel>
+            <SidebarGroupLabel className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Agents</SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu className="gap-1 px-3">
                 {agentItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
@@ -460,13 +474,15 @@ export function AppSidebar() {
                         to={item.url}
                         end
                         className={({ isActive }) =>
-                          isActive
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                            : "hover:bg-sidebar-accent/50"
+                          `flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+                            isActive
+                              ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                              : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
+                          }`
                         }
                       >
                         <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
+                        {!isCollapsed && <span className="text-sm">{item.title}</span>}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -482,8 +498,8 @@ export function AppSidebar() {
             <SidebarGroup>
               <CollapsibleTrigger className="w-full" asChild>
                 <button className="w-full">
-                  <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
-                    <span className="font-medium">Company Settings</span>
+                  <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded-lg mx-3 px-4 py-2 transition-colors text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    <span>Company Settings</span>
                     {!isCollapsed && (
                       <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${companySettingsOpen ? 'rotate-180' : ''}`} />
                     )}
@@ -492,7 +508,7 @@ export function AppSidebar() {
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <SidebarGroupContent>
-                  <SidebarMenu>
+                  <SidebarMenu className="gap-1 px-3">
                     {companySettingsItems.map((item) => (
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton asChild>
@@ -500,13 +516,15 @@ export function AppSidebar() {
                             to={item.url}
                             end
                             className={({ isActive }) =>
-                              isActive
-                                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                                : "hover:bg-sidebar-accent/50"
+                              `flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+                                isActive
+                                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                  : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
+                              }`
                             }
                           >
                             <item.icon className="h-4 w-4" />
-                            <span>{item.title}</span>
+                            {!isCollapsed && <span className="text-sm">{item.title}</span>}
                           </NavLink>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
@@ -524,8 +542,8 @@ export function AppSidebar() {
             <SidebarGroup>
                 <CollapsibleTrigger className="w-full" asChild>
                   <button className="w-full">
-                    <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
-                      <span className="font-medium">Management</span>
+                    <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded-lg mx-3 px-4 py-2 transition-colors text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      <span>Management</span>
                       {!isCollapsed && (
                         <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminManagementOpen ? 'rotate-180' : ''}`} />
                       )}
@@ -534,7 +552,7 @@ export function AppSidebar() {
                 </CollapsibleTrigger>
               <CollapsibleContent>
                 <SidebarGroupContent>
-                  <SidebarMenu>
+                  <SidebarMenu className="gap-1 px-3">
                     {adminManagementItems.map((item) => (
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton asChild>
@@ -542,13 +560,15 @@ export function AppSidebar() {
                             to={item.url}
                             end
                             className={({ isActive }) =>
-                              isActive
-                                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                                : "hover:bg-sidebar-accent/50"
+                              `flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+                                isActive
+                                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                  : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
+                              }`
                             }
                           >
                             <item.icon className="h-4 w-4" />
-                            <span>{item.title}</span>
+                            {!isCollapsed && <span className="text-sm">{item.title}</span>}
                           </NavLink>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
@@ -566,8 +586,8 @@ export function AppSidebar() {
             <SidebarGroup>
                 <CollapsibleTrigger className="w-full" asChild>
                   <button className="w-full">
-                    <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
-                      <span className="font-medium">Platform</span>
+                    <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded-lg mx-3 px-4 py-2 transition-colors text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      <span>Platform</span>
                       {!isCollapsed && (
                         <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminPlatformOpen ? 'rotate-180' : ''}`} />
                       )}
@@ -576,7 +596,7 @@ export function AppSidebar() {
                 </CollapsibleTrigger>
               <CollapsibleContent>
                 <SidebarGroupContent>
-                  <SidebarMenu>
+                  <SidebarMenu className="gap-1 px-3">
                     {adminPlatformItems.map((item) => (
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton asChild>
@@ -584,13 +604,15 @@ export function AppSidebar() {
                             to={item.url}
                             end
                             className={({ isActive }) =>
-                              isActive
-                                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                                : "hover:bg-sidebar-accent/50"
+                              `flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+                                isActive
+                                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                  : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
+                              }`
                             }
                           >
                             <item.icon className="h-4 w-4" />
-                            <span>{item.title}</span>
+                            {!isCollapsed && <span className="text-sm">{item.title}</span>}
                           </NavLink>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
@@ -608,8 +630,8 @@ export function AppSidebar() {
             <SidebarGroup>
                 <CollapsibleTrigger className="w-full" asChild>
                   <button className="w-full">
-                    <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
-                      <span className="font-medium">Business</span>
+                    <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded-lg mx-3 px-4 py-2 transition-colors text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      <span>Business</span>
                       {!isCollapsed && (
                         <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminBusinessOpen ? 'rotate-180' : ''}`} />
                       )}
@@ -618,7 +640,7 @@ export function AppSidebar() {
                 </CollapsibleTrigger>
               <CollapsibleContent>
                 <SidebarGroupContent>
-                  <SidebarMenu>
+                  <SidebarMenu className="gap-1 px-3">
                     {adminBusinessItems.map((item) => (
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton asChild>
@@ -626,13 +648,15 @@ export function AppSidebar() {
                             to={item.url}
                             end
                             className={({ isActive }) =>
-                              isActive
-                                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                                : "hover:bg-sidebar-accent/50"
+                              `flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+                                isActive
+                                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                  : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
+                              }`
                             }
                           >
                             <item.icon className="h-4 w-4" />
-                            <span>{item.title}</span>
+                            {!isCollapsed && <span className="text-sm">{item.title}</span>}
                           </NavLink>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
@@ -650,8 +674,8 @@ export function AppSidebar() {
             <SidebarGroup>
                 <CollapsibleTrigger className="w-full" asChild>
                   <button className="w-full">
-                    <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded px-3 py-2 transition-colors bg-sidebar/50">
-                      <span className="font-medium">System Configuration</span>
+                    <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-sidebar-accent/50 rounded-lg mx-3 px-4 py-2 transition-colors text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      <span>System Configuration</span>
                       {!isCollapsed && (
                         <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${adminSystemOpen ? 'rotate-180' : ''}`} />
                       )}
@@ -660,7 +684,7 @@ export function AppSidebar() {
                 </CollapsibleTrigger>
               <CollapsibleContent>
                 <SidebarGroupContent>
-                  <SidebarMenu>
+                  <SidebarMenu className="gap-1 px-3">
                     {adminSystemItems.map((item) => (
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton asChild>
@@ -668,13 +692,15 @@ export function AppSidebar() {
                             to={item.url}
                             end
                             className={({ isActive }) =>
-                              isActive
-                                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                                : "hover:bg-sidebar-accent/50"
+                              `flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+                                isActive
+                                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                  : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
+                              }`
                             }
                           >
                             <item.icon className="h-4 w-4" />
-                            <span>{item.title}</span>
+                            {!isCollapsed && <span className="text-sm">{item.title}</span>}
                           </NavLink>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
@@ -687,10 +713,10 @@ export function AppSidebar() {
         )}
         
         {/* Toggle All Button at Bottom */}
-        <div className="mt-auto p-4 border-t border-sidebar-border">
+        <div className="mt-auto p-4 border-t border-sidebar-border/50">
           <button
             onClick={toggleAll}
-            className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-md bg-sidebar-accent hover:bg-sidebar-accent/80 transition-colors text-sm font-medium"
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-sidebar-accent hover:bg-sidebar-accent/80 transition-all duration-200 text-sm font-medium shadow-sm"
             title={showAll ? "Collapse all sections" : "Expand all sections"}
           >
             {showAll ? (
