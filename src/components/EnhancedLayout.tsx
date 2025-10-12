@@ -91,22 +91,20 @@ export function EnhancedLayout() {
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-background via-background to-muted/20">
-        {!isMobile && <AppSidebar />}
+        <AppSidebar />
         <div className="flex-1 flex flex-col pb-16 lg:pb-0">
           {/* Enhanced Header */}
           <header className="h-14 lg:h-16 border-b border-border bg-card/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
             <div className="flex items-center justify-between h-full px-3 lg:px-6">
               {/* Left Section */}
               <div className="flex items-center gap-2 lg:gap-4">
-                {!isMobile && (
-                  <>
-                    <SidebarTrigger className="hover:bg-primary/10 transition-colors">
-                      <PanelLeft className="h-5 w-5" />
-                      <span className="sr-only">Toggle Sidebar</span>
-                    </SidebarTrigger>
-                    <Separator orientation="vertical" className="h-6" />
-                  </>
-                )}
+                <>
+                  <SidebarTrigger className="hover:bg-primary/10 transition-colors">
+                    <PanelLeft className="h-5 w-5" />
+                    <span className="sr-only">Toggle Sidebar</span>
+                  </SidebarTrigger>
+                  <Separator orientation="vertical" className="h-6" />
+                </>
                 
                 {/* Mobile: Show app logo */}
                 {isMobile && (
