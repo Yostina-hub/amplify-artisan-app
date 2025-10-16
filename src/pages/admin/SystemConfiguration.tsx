@@ -122,7 +122,18 @@ export default function SystemConfiguration() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">OAuth Apps</div>
-                <p className="text-xs text-muted-foreground">Platform API credentials</p>
+                <p className="text-xs text-muted-foreground">Company OAuth settings</p>
+              </CardContent>
+            </Card>
+
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleNavigate('/admin/platform-oauth-apps')}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Platform OAuth</CardTitle>
+                <Shield className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">Centralized</div>
+                <p className="text-xs text-muted-foreground">Platform-wide credentials</p>
               </CardContent>
             </Card>
 
@@ -329,13 +340,28 @@ export default function SystemConfiguration() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Globe className="h-5 w-5" />
-                  Social Platform OAuth
+                  Company Social OAuth
                 </CardTitle>
-                <CardDescription>Configure OAuth apps for social media platforms</CardDescription>
+                <CardDescription>Configure company-specific OAuth apps (per-company credentials)</CardDescription>
               </CardHeader>
               <CardContent>
                 <Button onClick={() => handleNavigate('/social-platform-settings')}>
-                  Configure OAuth Apps
+                  Configure Company OAuth
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Platform OAuth Apps
+                </CardTitle>
+                <CardDescription>Manage centralized OAuth credentials (Buffer/Hootsuite style)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button onClick={() => handleNavigate('/admin/platform-oauth-apps')}>
+                  Manage Platform OAuth
                 </Button>
               </CardContent>
             </Card>

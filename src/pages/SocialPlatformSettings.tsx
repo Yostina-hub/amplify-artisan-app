@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Save, Eye, EyeOff, ExternalLink, CheckCircle2, Settings } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Switch } from "@/components/ui/switch";
 
 const PLATFORM_GUIDES = {
   facebook: {
@@ -132,6 +133,7 @@ export default function SocialPlatformSettings() {
             client_id: data.client_id,
             client_secret: data.client_secret,
             redirect_url: data.redirect_url,
+            use_platform_oauth: data.use_platform_oauth,
             is_active: true,
             updated_at: new Date().toISOString()
           })
@@ -147,6 +149,7 @@ export default function SocialPlatformSettings() {
             client_id: data.client_id,
             client_secret: data.client_secret,
             redirect_url: data.redirect_url,
+            use_platform_oauth: data.use_platform_oauth,
             is_active: true
           });
 
@@ -177,12 +180,13 @@ export default function SocialPlatformSettings() {
     setFormData({
       client_id: config?.client_id || '',
       client_secret: config?.client_secret || '',
-      redirect_url: config?.redirect_url || `${window.location.origin}/oauth-callback`
+      redirect_url: config?.redirect_url || `${window.location.origin}/oauth-callback`,
+      use_platform_oauth: config?.use_platform_oauth ?? true
     });
   };
 
   const handleSave = (platformId: string) => {
-    if (!formData.client_id || !formData.client_secret) {
+    if (!formData.use_platform_oauth && (!formData.client_id || !formData.client_secret)) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields",
@@ -274,8 +278,32 @@ export default function SocialPlatformSettings() {
                     </TabsList>
 
                     <TabsContent value="config" className="space-y-4 mt-4">
-                      <div className="space-y-2">
-                        <Label htmlFor={`${platformId}-client-id`}>Client ID / App ID *</Label>
+                      <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg mb-4">
+                        <div className="space-y-0.5">
+                          <Label htmlFor={`${platformId}-use-platform`} className="text-base font-medium">
+                            Use Platform OAuth (Recommended)
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            Use centralized credentials managed by the platform
+                          </p>
+                        </div>
+                        <Switch
+                          id={`${platformId}-use-platform`}
+                          checked={formData.use_platform_oauth ?? true}
+                          onCheckedChange={(checked) => setFormData({ ...formData, use_platform_oauth: checked })}
+                        />
+                      </div>
+
+                      {!formData.use_platform_oauth && (
+                        <>
+                          <Alert className="mb-4">
+                            <AlertDescription>
+                              You're using your own OAuth apps. Make sure to configure them properly in your developer accounts.
+                            </AlertDescription>
+                          </Alert>
+
+                          <div className="space-y-2">
+                            <Label htmlFor={`${platformId}-client-id`}>Client ID / App ID *</Label>
                         <Input
                           id={`${platformId}-client-id`}
                           value={formData.client_id || ''}
@@ -315,10 +343,21 @@ export default function SocialPlatformSettings() {
                           onChange={(e) => setFormData({ ...formData, redirect_url: e.target.value })}
                           placeholder={`${window.location.origin}/oauth-callback`}
                         />
-                        <p className="text-xs text-muted-foreground">
-                          Add this URL to your app's authorized redirect URIs
-                        </p>
-                      </div>
+                            <p className="text-xs text-muted-foreground">
+                              Add this URL to your app's authorized redirect URIs
+                            </p>
+                          </div>
+                        </>
+                      )}
+
+                      {formData.use_platform_oauth && (
+                        <Alert>
+                          <CheckCircle2 className="h-4 w-4" />
+                          <AlertDescription>
+                            Using centralized platform credentials. No additional configuration needed.
+                          </AlertDescription>
+                        </Alert>
+                      )}
 
                       <div className="flex gap-2 pt-4">
                         <Button

@@ -1450,6 +1450,7 @@ export type Database = {
           platform_id: string
           redirect_url: string | null
           updated_at: string | null
+          use_platform_oauth: boolean | null
           webhook_url: string | null
         }
         Insert: {
@@ -1467,6 +1468,7 @@ export type Database = {
           platform_id: string
           redirect_url?: string | null
           updated_at?: string | null
+          use_platform_oauth?: boolean | null
           webhook_url?: string | null
         }
         Update: {
@@ -1484,6 +1486,7 @@ export type Database = {
           platform_id?: string
           redirect_url?: string | null
           updated_at?: string | null
+          use_platform_oauth?: boolean | null
           webhook_url?: string | null
         }
         Relationships: [
@@ -4017,6 +4020,50 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_oauth_apps: {
+        Row: {
+          client_id: string
+          client_secret: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          platform_id: string
+          redirect_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          client_id: string
+          client_secret: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          platform_id: string
+          redirect_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          client_secret?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          platform_id?: string
+          redirect_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_oauth_apps_platform_id_fkey"
+            columns: ["platform_id"]
+            isOneToOne: true
+            referencedRelation: "social_platforms"
             referencedColumns: ["id"]
           },
         ]

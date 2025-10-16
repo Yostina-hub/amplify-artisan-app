@@ -22,6 +22,7 @@ import UserManagement from "./pages/admin/UserManagement";
 import ContentModeration from "./pages/admin/ContentModeration";
 import SystemSettings from "./pages/admin/SystemSettings";
 import SystemConfiguration from "./pages/admin/SystemConfiguration";
+import PlatformOAuthApps from "./pages/admin/PlatformOAuthApps";
 import EmailSettings from "./pages/admin/EmailSettings";
 import CompanyEmailSettings from "./pages/CompanyEmailSettings";
 import SocialMediaMetrics from "./pages/SocialMediaMetrics";
@@ -156,6 +157,7 @@ const App = () => (
               <Route path="/admin/call-center-integrations" element={<ProtectedRoute requiredRole="admin"><CallCenterIntegrations /></ProtectedRoute>} />
               <Route path="/admin/firewall" element={<ProtectedRoute requiredRole="admin"><FirewallManagement /></ProtectedRoute>} />
               <Route path="/admin/live-chat" element={<ProtectedRoute requiredRole="admin"><LiveChatDashboard /></ProtectedRoute>} />
+              <Route path="/admin/platform-oauth-apps" element={<ProtectedRoute requiredRole="admin"><PlatformOAuthApps /></ProtectedRoute>} />
               
               {/* Company routes */}
               <Route path="/company/email-settings" element={<ProtectedRoute><CompanyEmailSettings /></ProtectedRoute>} />
