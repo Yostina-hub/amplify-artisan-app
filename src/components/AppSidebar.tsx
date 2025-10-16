@@ -118,19 +118,9 @@ const adminPlatformItems = [
   { title: "Permission Management", url: "/admin/permissions", icon: Shield },
 ];
 
-// Admin - System Configuration
+// Admin - System Configuration (Consolidated into single page)
 const adminSystemItems = [
-  { title: "Live Chat Dashboard", url: "/admin/live-chat", icon: MessageCircle },
-  { title: "Firewall Management", url: "/admin/firewall", icon: Shield },
-  { title: "API Integrations", url: "/admin/api-management", icon: Database },
-  { title: "Call Center Setup", url: "/admin/call-center-integrations", icon: Phone },
-  { title: "Public Content", url: "/admin/public-content", icon: Layout },
-  { title: "Email Settings", url: "/admin/email-settings", icon: Mail },
-  { title: "Social Auth Settings", url: "/admin/social-auth", icon: Key },
-  { title: "TTS/STT Settings", url: "/tts-settings", icon: Volume2 },
-  { title: "Trial Settings", url: "/admin/trial-settings", icon: Settings },
-  { title: "System Settings", url: "/admin/settings", icon: Cog },
-  { title: "Audit Log", url: "/admin/audit-log", icon: FileSearch },
+  { title: "System Configuration", url: "/admin/system-config", icon: Cog },
 ];
 
 export function AppSidebar() {

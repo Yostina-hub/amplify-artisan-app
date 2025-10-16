@@ -21,6 +21,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
 import ContentModeration from "./pages/admin/ContentModeration";
 import SystemSettings from "./pages/admin/SystemSettings";
+import SystemConfiguration from "./pages/admin/SystemConfiguration";
 import EmailSettings from "./pages/admin/EmailSettings";
 import CompanyEmailSettings from "./pages/CompanyEmailSettings";
 import SocialMediaMetrics from "./pages/SocialMediaMetrics";
@@ -134,6 +135,7 @@ const App = () => (
               <Route path="/admin/users" element={<ProtectedRoute requiredRole="admin"><UserManagement /></ProtectedRoute>} />
               <Route path="/admin/moderation" element={<ProtectedRoute requiredRole="admin"><ContentModeration /></ProtectedRoute>} />
               <Route path="/admin/settings" element={<ProtectedRoute requiredRole="admin"><SystemSettings /></ProtectedRoute>} />
+              <Route path="/admin/system-config" element={<ProtectedRoute requiredRole="admin"><SystemConfiguration /></ProtectedRoute>} />
               <Route path="/admin/email-settings" element={<ProtectedRoute requiredRole="admin"><EmailSettings /></ProtectedRoute>} />
               <Route path="/admin/social-platforms" element={<ProtectedRoute requiredRole="admin"><SocialPlatformManagement /></ProtectedRoute>} />
               <Route path="/admin/platform-subscriptions" element={<ProtectedRoute requiredRole="admin"><AdminCompanyPlatformSubscriptions /></ProtectedRoute>} />
