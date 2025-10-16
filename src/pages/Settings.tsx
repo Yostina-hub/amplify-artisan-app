@@ -234,8 +234,19 @@ export default function Settings() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Connected Social Media Accounts</CardTitle>
-          <CardDescription>Manage your social media platform connections</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Connected Social Media Accounts</CardTitle>
+              <CardDescription>Manage your social media platform connections</CardDescription>
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/social-platform-settings')}
+            >
+              <Icons.Settings className="h-4 w-4 mr-2" />
+              Configure OAuth Apps
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {loading ? (
