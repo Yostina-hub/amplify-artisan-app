@@ -43,16 +43,43 @@ serve(async (req) => {
 
     console.log(`Processing OAuth callback for ${platform}...`);
 
-    // Get platform configuration
-    const { data: config } = await supabase
+    // Get company platform configuration
+    const { data: companyConfig } = await supabase
       .from('company_platform_configs')
       .select('*')
       .eq('company_id', companyId)
       .eq('platform_id', platform)
-      .single();
+      .maybeSingle();
 
-    if (!config) {
-      throw new Error('Platform configuration not found');
+    // Determine which OAuth credentials to use
+    let config;
+    const usePlatformOAuth = companyConfig?.use_platform_oauth ?? true;
+
+    if (usePlatformOAuth) {
+      // Use centralized platform OAuth credentials
+      console.log(`Using centralized platform OAuth for ${platform}`);
+      const { data: platformConfig } = await supabase
+        .from('platform_oauth_apps')
+        .select('*')
+        .eq('platform_id', platform)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (!platformConfig) {
+        throw new Error('Centralized platform OAuth not configured for this platform');
+      }
+      config = platformConfig;
+    } else {
+      // Use company-specific OAuth credentials
+      console.log(`Using company-specific OAuth for ${platform}`);
+      if (!companyConfig) {
+        throw new Error('Company platform configuration not found');
+      }
+      config = companyConfig;
+    }
+
+    if (!config.client_id || !config.client_secret) {
+      throw new Error('OAuth credentials not configured');
     }
 
     let tokenData;

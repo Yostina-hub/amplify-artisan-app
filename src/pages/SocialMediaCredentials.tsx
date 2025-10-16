@@ -100,25 +100,76 @@ export default function SocialMediaCredentials() {
         return;
       }
 
+      // Check company platform config to determine which OAuth credentials to use
+      const { data: companyConfig } = await supabase
+        .from('company_platform_configs')
+        .select('*')
+        .eq('company_id', profile.company_id)
+        .eq('platform_id', platformId)
+        .maybeSingle();
+
+      const usePlatformOAuth = companyConfig?.use_platform_oauth ?? true;
+      let oauthConfig;
+
+      if (usePlatformOAuth) {
+        // Use centralized platform OAuth
+        const { data: platformConfig } = await supabase
+          .from('platform_oauth_apps')
+          .select('*')
+          .eq('platform_id', platformId)
+          .eq('is_active', true)
+          .maybeSingle();
+
+        if (!platformConfig) {
+          toast({
+            title: "OAuth Not Configured",
+            description: "Platform OAuth credentials are not set up. Contact your administrator.",
+            variant: "destructive",
+          });
+          setConnectingPlatform(null);
+          return;
+        }
+        oauthConfig = platformConfig;
+      } else {
+        // Use company-specific OAuth
+        if (!companyConfig?.client_id) {
+          toast({
+            title: "OAuth Not Configured",
+            description: "Please configure your OAuth app in Social Platform Settings first.",
+            variant: "destructive",
+          });
+          setConnectingPlatform(null);
+          return;
+        }
+        oauthConfig = companyConfig;
+      }
+
       const state = btoa(JSON.stringify({ 
         userId: user.id, 
         companyId: profile.company_id,
         platform: platformId 
       }));
       
-      const redirectUri = `${window.location.origin}/oauth-callback`;
+      const redirectUri = encodeURIComponent(oauthConfig.redirect_url || `${window.location.origin}/oauth-callback`);
+      const clientId = oauthConfig.client_id;
       
       let authUrl = '';
       
       switch (platformId) {
         case 'facebook':
-          authUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=YOUR_CLIENT_ID&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}&scope=pages_manage_posts,pages_read_engagement`;
+          authUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=pages_manage_posts,pages_read_engagement`;
           break;
         case 'twitter':
-          authUrl = `https://twitter.com/i/oauth2/authorize?response_type=code&client_id=YOUR_CLIENT_ID&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}&scope=tweet.read%20tweet.write%20users.read`;
+          authUrl = `https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=tweet.read%20tweet.write%20users.read`;
           break;
         case 'linkedin':
-          authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=YOUR_CLIENT_ID&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}&scope=w_member_social`;
+          authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=w_member_social`;
+          break;
+        case 'instagram':
+          authUrl = `https://api.instagram.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user_profile,user_media&response_type=code&state=${state}`;
+          break;
+        case 'tiktok':
+          authUrl = `https://www.tiktok.com/auth/authorize/?client_key=${clientId}&scope=user.info.basic,video.list&response_type=code&redirect_uri=${redirectUri}&state=${state}`;
           break;
         default:
           toast({
