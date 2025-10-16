@@ -4,9 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CheckCircle, XCircle, Link2, Unlink, Shield, TrendingUp, Users, BarChart3, Globe } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, Link2, Unlink, Shield, TrendingUp, Users, BarChart3, Globe, Settings, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 const PLATFORMS = [
   { id: 'facebook', name: 'Facebook', gradient: 'from-blue-500 to-blue-600', icon: '📘' },
@@ -22,6 +24,7 @@ const PLATFORMS = [
 export default function SocialMediaCredentials() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null);
 
   const { data: tokens, isLoading } = useQuery({
@@ -33,6 +36,30 @@ export default function SocialMediaCredentials() {
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data;
+    },
+  });
+
+  const { data: configs } = useQuery({
+    queryKey: ['platform-configs-check'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.company_id) return [];
+
+      const { data } = await supabase
+        .from('company_platform_configs')
+        .select('platform_id')
+        .eq('company_id', profile.company_id)
+        .eq('is_active', true);
+
+      return data || [];
     },
   });
 
@@ -148,6 +175,26 @@ export default function SocialMediaCredentials() {
             Manage {PLATFORMS.length}+ social media platform integrations
           </p>
         </div>
+
+        {(!configs || configs.length === 0) && (
+          <Alert className="border-amber-500 bg-amber-50 dark:bg-amber-950">
+            <AlertCircle className="h-4 w-4 text-amber-600" />
+            <AlertDescription className="flex items-center justify-between">
+              <span className="text-amber-900 dark:text-amber-100">
+                Configure your OAuth apps first to enable social connections
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate('/social-platform-settings')}
+                className="ml-4"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Go to Settings
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {isLoading ? (
           <div className="flex items-center justify-center p-12">

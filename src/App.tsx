@@ -33,6 +33,7 @@ import CompanyApplication from "./pages/CompanyApplication";
 import CompanyManagement from "./pages/admin/CompanyManagement";
 import SocialPlatformManagement from "./pages/admin/SocialPlatformManagement";
 import SocialMediaCredentials from "./pages/SocialMediaCredentials";
+import SocialPlatformSettings from "./pages/SocialPlatformSettings";
 import CompanyPlatformSettings from "./pages/PlatformConfigs";
 import CompanyPlatformSubscriptions from "./pages/CompanyPlatformSubscriptions";
 import AdminCompanyPlatformSubscriptions from "./pages/admin/CompanyPlatformSubscriptions";
@@ -170,6 +171,7 @@ const App = () => (
               <Route path="/automation" element={<ProtectedRoute><Automation /></ProtectedRoute>} />
               <Route path="/ai-analytics" element={<ProtectedRoute><AIAnalytics /></ProtectedRoute>} />
               <Route path="/social-media-credentials" element={<ProtectedRoute><SocialMediaCredentials /></ProtectedRoute>} />
+              <Route path="/social-platform-settings" element={<ProtectedRoute><SocialPlatformSettings /></ProtectedRoute>} />
               
               {/* Enterprise Builder */}
               <Route path="/module-builder" element={<ProtectedRoute><ModuleBuilder /></ProtectedRoute>} />
