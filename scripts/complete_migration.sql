@@ -1,12 +1,14 @@
 -- =====================================================
--- COMPLETE DATABASE MIGRATION - SocialHub Platform
+-- COMPLETE DATABASE MIGRATION - SocialHub CRM Platform
 -- =====================================================
--- This file combines all migrations for a fresh deployment
+-- This file combines ALL tables for a fresh deployment
+-- Includes 50+ tables with complete schema
 -- Run this on a new database to set up the complete schema
 -- =====================================================
 
 -- Create custom types
 CREATE TYPE app_role AS ENUM ('admin', 'agent', 'user');
+CREATE TYPE subscription_status AS ENUM ('active', 'cancelled', 'expired', 'trial');
 
 -- =====================================================
 -- CORE TABLES
@@ -182,21 +184,38 @@ CREATE TABLE IF NOT EXISTS social_media_accounts (
     updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Social media posts
+-- Social media posts (FIXED STATUS CHECK CONSTRAINT)
 CREATE TABLE IF NOT EXISTS social_media_posts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
-    account_id UUID REFERENCES social_media_accounts(id) ON DELETE CASCADE,
     content TEXT NOT NULL,
-    media_urls TEXT[],
-    scheduled_at TIMESTAMPTZ,
-    published_at TIMESTAMPTZ,
-    status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'scheduled', 'published', 'failed', 'pending_approval', 'approved', 'rejected')),
-    platform_post_id TEXT,
-    engagement_metrics JSONB DEFAULT '{}'::jsonb,
-    created_by UUID REFERENCES auth.users(id),
+    platforms TEXT[] NOT NULL,
+    scheduled_for TIMESTAMPTZ,
+    status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'scheduled', 'publishing', 'published', 'failed', 'pending_approval', 'approved', 'rejected')),
+    engagement_data JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ DEFAULT now(),
-    updated_at TIMESTAMPTZ DEFAULT now()
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    created_by UUID REFERENCES auth.users(id),
+    likes_count INTEGER DEFAULT 0,
+    comments_count INTEGER DEFAULT 0,
+    shares_count INTEGER DEFAULT 0,
+    views_count INTEGER DEFAULT 0,
+    clicks_count INTEGER DEFAULT 0,
+    reach INTEGER DEFAULT 0,
+    impressions INTEGER DEFAULT 0,
+    engagement_rate REAL DEFAULT 0,
+    published_at TIMESTAMPTZ,
+    requires_approval BOOLEAN DEFAULT false,
+    approved_by UUID REFERENCES auth.users(id),
+    approved_at TIMESTAMPTZ,
+    rejection_reason TEXT,
+    media_attachments JSONB DEFAULT '[]'::jsonb,
+    account_id UUID,
+    first_published_at TIMESTAMPTZ,
+    hashtags TEXT[],
+    mentions TEXT[],
+    location TEXT,
+    ai_generated BOOLEAN DEFAULT false
 );
 
 -- Social media comments
