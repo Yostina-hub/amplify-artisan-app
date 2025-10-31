@@ -631,7 +631,25 @@ sudo docker-compose restart kong
 
 ### Issue: Cannot Login with Default Credentials
 
-**Solutions to try in order:**
+**🔧 Quick Fix (Recommended)**
+
+Run the automated fix script:
+```bash
+# Execute the fix script
+sudo docker exec -i <postgres_container_id> psql -U postgres < scripts/fix-admin-login.sql
+
+# Or via direct psql connection
+psql "postgresql://postgres:password@localhost:5432/postgres" -f scripts/fix-admin-login.sql
+```
+
+This script will:
+- ✅ Check if admin user exists
+- ✅ Create or reset the admin user with correct password
+- ✅ Ensure profile and admin role are properly set
+- ✅ Verify email confirmation
+- ✅ Display comprehensive diagnostic information
+
+**Manual Troubleshooting Steps:**
 
 1. **Check if user exists:**
 ```sql
@@ -640,19 +658,22 @@ FROM auth.users
 WHERE email = 'abel.birara@gmail.com';
 ```
 
-2. **If user doesn't exist, create it using Option 3 (Studio) from setup section above**
-
-3. **If user exists but login fails, reset password:**
+2. **Reset password and confirm email:**
 ```sql
--- Update password
+-- Enable pgcrypto if not already enabled
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- Update password and confirm email
 UPDATE auth.users
 SET 
   encrypted_password = crypt('Admin@2025', gen_salt('bf')),
-  email_confirmed_at = now()
+  email_confirmed_at = now(),
+  confirmed_at = now(),
+  updated_at = now()
 WHERE email = 'abel.birara@gmail.com';
 ```
 
-4. **Verify admin role:**
+3. **Verify admin role (must have NULL company_id for super admin):**
 ```sql
 -- Check roles
 SELECT u.email, ur.role, ur.company_id
@@ -660,20 +681,39 @@ FROM auth.users u
 LEFT JOIN public.user_roles ur ON ur.user_id = u.id
 WHERE u.email = 'abel.birara@gmail.com';
 
--- Add admin role if missing
-INSERT INTO public.user_roles (user_id, role)
-SELECT id, 'admin'
+-- Fix admin role (ensure company_id is NULL)
+INSERT INTO public.user_roles (user_id, role, company_id)
+SELECT id, 'admin', NULL
 FROM auth.users
 WHERE email = 'abel.birara@gmail.com'
-ON CONFLICT DO NOTHING;
+ON CONFLICT (user_id, role) 
+DO UPDATE SET company_id = NULL;
 ```
 
-5. **Check Supabase Auth configuration:**
+4. **Check Supabase Auth Configuration:**
    - In Studio, go to Authentication → Settings
-   - Ensure "Enable Email Signup" is ON
-   - Disable "Confirm email" for easier testing
-   - Set Site URL to your domain: `https://yourdomain.com`
+   - Ensure "Enable Email Signup" is **ON**
+   - **Disable "Confirm email"** for easier testing
+   - Set Site URL to: `https://yourdomain.com`
    - Add Redirect URLs: `https://yourdomain.com/**`
+   
+5. **Verify Database Functions:**
+```sql
+-- Test if super admin function works
+SELECT public.is_super_admin(
+  (SELECT id FROM auth.users WHERE email = 'abel.birara@gmail.com')
+) as is_super_admin;
+
+-- Should return: true
+```
+
+**Common Issues:**
+
+- ❌ **Email not confirmed**: Run step 2 above or disable email confirmation in Auth settings
+- ❌ **Wrong password hash**: Run step 2 to reset password hash
+- ❌ **Missing admin role**: Run step 3 to add admin role
+- ❌ **company_id is not NULL**: Super admin must have `company_id = NULL` in user_roles table
+- ❌ **Auth service not responding**: Restart Supabase containers with `docker-compose restart`
 
 ### Issue: Email Not Sending
 
