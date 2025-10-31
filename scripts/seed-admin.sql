@@ -1,11 +1,21 @@
--- Automatic Super Admin User Seeding
+-- ============================================================================
+-- AUTOMATIC SUPER ADMIN USER SEEDING
+-- ============================================================================
 -- This script creates the default super admin user if it doesn't exist
--- Email: abel.birara@gmail.com
--- Password: Admin@2025 (CHANGE THIS IN PRODUCTION!)
-
+-- 
+-- Default Credentials:
+--   Email: abel.birara@gmail.com
+--   Password: Admin@2025
+--
+-- ⚠️  IMPORTANT: CHANGE THIS PASSWORD IMMEDIATELY AFTER FIRST LOGIN!
+--
 -- For VPS Self-Hosted Deployment:
--- This script is run automatically during deployment
--- The super admin can login immediately after deployment
+-- This script is run automatically during deployment OR you can run it manually:
+-- psql "postgresql://postgres:password@localhost:5432/postgres" -f scripts/seed-admin.sql
+-- ============================================================================
+
+-- Enable required extensions
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- 1. Create the admin user in auth.users (if not exists)
 DO $$
@@ -23,30 +33,39 @@ BEGIN
   -- If user doesn't exist, create it
   IF admin_user_id IS NULL THEN
     -- Generate encrypted password using crypt
-    -- Note: For production, you should change this password immediately after first login
     SELECT crypt(admin_password, gen_salt('bf')) INTO encrypted_pw;
     
-    -- Insert into auth.users
+    -- Insert into auth.users with all required fields
     INSERT INTO auth.users (
+      instance_id,
       id,
+      aud,
+      role,
       email,
       encrypted_password,
       email_confirmed_at,
+      confirmation_token,
+      raw_app_meta_data,
+      raw_user_meta_data,
       created_at,
-      updated_at,
-      raw_user_meta_data
+      updated_at
     ) VALUES (
+      '00000000-0000-0000-0000-000000000000',
       gen_random_uuid(),
+      'authenticated',
+      'authenticated',
       admin_email,
       encrypted_pw,
       now(),
-      now(),
-      now(),
+      '',
+      '{"provider":"email","providers":["email"]}'::jsonb,
       jsonb_build_object(
         'full_name', 'System Administrator',
         'email_verified', true,
         'requires_password_change', false
-      )
+      ),
+      now(),
+      now()
     )
     RETURNING id INTO admin_user_id;
     

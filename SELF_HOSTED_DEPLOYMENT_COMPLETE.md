@@ -125,7 +125,18 @@ Or via psql:
 ```
 
 ### Create Super Admin
+
+**Option 1: Run the seed script (Recommended)**
+```bash
+# Execute the seed script that creates admin user
+sudo docker exec -i <postgres_container_id> psql -U postgres < scripts/seed-admin.sql
+```
+
+**Option 2: Manual SQL (if seed script fails)**
 ```sql
+-- IMPORTANT: Enable the pgcrypto extension first
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- Insert super admin user
 INSERT INTO auth.users (
   id,
@@ -137,6 +148,7 @@ INSERT INTO auth.users (
   raw_user_meta_data,
   created_at,
   updated_at,
+  confirmation_token,
   role,
   aud
 ) VALUES (
@@ -145,25 +157,58 @@ INSERT INTO auth.users (
   'abel.birara@gmail.com',
   crypt('Admin@2025', gen_salt('bf')),
   now(),
-  '{"provider":"email","providers":["email"]}',
-  '{}',
+  '{"provider":"email","providers":["email"]}'::jsonb,
+  '{"full_name":"Super Admin"}'::jsonb,
   now(),
   now(),
+  '',
   'authenticated',
   'authenticated'
-);
+)
+ON CONFLICT (email) DO NOTHING
+RETURNING id;
 
 -- Create profile
-INSERT INTO profiles (id, full_name, email)
+INSERT INTO public.profiles (id, full_name, email)
 SELECT id, 'Super Admin', email
 FROM auth.users
-WHERE email = 'abel.birara@gmail.com';
+WHERE email = 'abel.birara@gmail.com'
+ON CONFLICT (id) DO NOTHING;
 
--- Assign admin role
-INSERT INTO user_roles (user_id, role)
+-- Assign admin role (no company_id for super admin)
+INSERT INTO public.user_roles (user_id, role)
 SELECT id, 'admin'
 FROM auth.users
-WHERE email = 'abel.birara@gmail.com';
+WHERE email = 'abel.birara@gmail.com'
+ON CONFLICT (user_id, role) DO NOTHING;
+
+-- Verify admin user was created
+SELECT 
+  u.email,
+  u.email_confirmed_at,
+  p.full_name,
+  ur.role
+FROM auth.users u
+LEFT JOIN public.profiles p ON p.id = u.id
+LEFT JOIN public.user_roles ur ON ur.user_id = u.id
+WHERE u.email = 'abel.birara@gmail.com';
+```
+
+**Option 3: Use Supabase Studio (Easiest)**
+1. Access Studio at `http://your-server-ip:3000` or `https://studio.yourdomain.com`
+2. Navigate to Authentication → Users
+3. Click "Add User"
+4. Email: `abel.birara@gmail.com`
+5. Password: `Admin@2025`
+6. Enable "Auto Confirm User"
+7. After creating, go to SQL Editor and run:
+```sql
+-- Assign admin role
+INSERT INTO public.user_roles (user_id, role)
+SELECT id, 'admin'
+FROM auth.users
+WHERE email = 'abel.birara@gmail.com'
+ON CONFLICT DO NOTHING;
 ```
 
 ---
@@ -583,6 +628,52 @@ Restart:
 ```bash
 sudo docker-compose restart kong
 ```
+
+### Issue: Cannot Login with Default Credentials
+
+**Solutions to try in order:**
+
+1. **Check if user exists:**
+```sql
+SELECT id, email, email_confirmed_at, encrypted_password IS NOT NULL as has_password
+FROM auth.users 
+WHERE email = 'abel.birara@gmail.com';
+```
+
+2. **If user doesn't exist, create it using Option 3 (Studio) from setup section above**
+
+3. **If user exists but login fails, reset password:**
+```sql
+-- Update password
+UPDATE auth.users
+SET 
+  encrypted_password = crypt('Admin@2025', gen_salt('bf')),
+  email_confirmed_at = now()
+WHERE email = 'abel.birara@gmail.com';
+```
+
+4. **Verify admin role:**
+```sql
+-- Check roles
+SELECT u.email, ur.role, ur.company_id
+FROM auth.users u
+LEFT JOIN public.user_roles ur ON ur.user_id = u.id
+WHERE u.email = 'abel.birara@gmail.com';
+
+-- Add admin role if missing
+INSERT INTO public.user_roles (user_id, role)
+SELECT id, 'admin'
+FROM auth.users
+WHERE email = 'abel.birara@gmail.com'
+ON CONFLICT DO NOTHING;
+```
+
+5. **Check Supabase Auth configuration:**
+   - In Studio, go to Authentication → Settings
+   - Ensure "Enable Email Signup" is ON
+   - Disable "Confirm email" for easier testing
+   - Set Site URL to your domain: `https://yourdomain.com`
+   - Add Redirect URLs: `https://yourdomain.com/**`
 
 ### Issue: Email Not Sending
 

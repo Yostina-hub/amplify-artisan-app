@@ -335,14 +335,14 @@ const Index = () => {
               <Zap className="h-4 w-4 text-primary" />
               <span className="text-sm font-semibold text-primary">Powerful Features</span>
             </div>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-foreground">
-              Everything You Need to
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+              <span className="text-foreground">Everything You Need to</span>
               <br />
               <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 Dominate Social Media
               </span>
             </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-lg md:text-xl text-foreground/80 max-w-3xl mx-auto">
               Built for teams who demand excellence. Experience enterprise-grade tools 
               with an interface so intuitive, you'll wonder how you ever lived without it.
             </p>
