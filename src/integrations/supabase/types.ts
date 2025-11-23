@@ -6812,10 +6812,7 @@ export type Database = {
         Args: { _branch_id: string; _user_id: string }
         Returns: boolean
       }
-      check_scheduled_posts: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      check_scheduled_posts: { Args: never; Returns: undefined }
       get_branch_hierarchy: {
         Args: { branch_uuid: string }
         Returns: {
@@ -6829,10 +6826,7 @@ export type Database = {
           branch_id: string
         }[]
       }
-      get_user_company_id: {
-        Args: { _user_id: string }
-        Returns: string
-      }
+      get_user_company_id: { Args: { _user_id: string }; Returns: string }
       get_user_roles: {
         Args: { _user_id: string }
         Returns: {
@@ -6848,26 +6842,14 @@ export type Database = {
           trial_ends_at: string
         }[]
       }
-      has_active_trial: {
-        Args: { _user_id: string }
-        Returns: boolean
-      }
+      has_active_trial: { Args: { _user_id: string }; Returns: boolean }
       has_permission: {
         Args: { _permission_key: string; _user_id: string }
         Returns: boolean
       }
-      has_role: {
-        Args: { _role: string; _user_id: string }
-        Returns: boolean
-      }
-      is_admin: {
-        Args: { _user_id: string }
-        Returns: boolean
-      }
-      is_super_admin: {
-        Args: { _user_id: string }
-        Returns: boolean
-      }
+      has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "agent" | "user"
