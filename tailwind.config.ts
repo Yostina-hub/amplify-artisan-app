@@ -14,6 +14,14 @@ export default {
     },
     extend: {
       colors: {
+        /* Ethio Telecom Brand Colors */
+        'lemon-green': 'hsl(var(--lemon-green))',
+        'dark-blue': 'hsl(var(--dark-blue))',
+        'light-gray': 'hsl(var(--light-gray))',
+        'brand-white': 'hsl(var(--brand-white))',
+        'brand-black': 'hsl(var(--brand-black))',
+        
+        /* Design System */
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -47,15 +55,12 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
+        chart: {
+          "1": "hsl(var(--chart-1))",
+          "2": "hsl(var(--chart-2))",
+          "3": "hsl(var(--chart-3))",
+          "4": "hsl(var(--chart-4))",
+          "5": "hsl(var(--chart-5))",
         },
       },
       borderRadius: {
@@ -117,10 +122,15 @@ export default {
         "glow-pulse": "glow-pulse 2s ease-in-out infinite",
         "float": "float 3s ease-in-out infinite",
       },
+      fontFamily: {
+        sans: ["'Gotham'", "'Noto Sans Ethiopic'", "-apple-system", "BlinkMacSystemFont", "'Segoe UI'", "sans-serif"],
+        headline: ["'Gotham'", "'Noto Sans Ethiopic'", "sans-serif"],
+        body: ["'Gotham'", "'Noto Sans Ethiopic'", "sans-serif"],
+      },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-glass": "linear-gradient(135deg, hsl(0 0% 100% / 0.7), hsl(0 0% 100% / 0.3))",
-        "gradient-mesh": "radial-gradient(at 40% 20%, hsl(184 91% 17% / 0.3) 0px, transparent 50%), radial-gradient(at 80% 0%, hsl(6 78% 57% / 0.2) 0px, transparent 50%)",
+        "gradient-mesh": "radial-gradient(at 40% 20%, hsl(88 54% 51% / 0.3) 0px, transparent 50%), radial-gradient(at 80% 0%, hsl(202 100% 37% / 0.2) 0px, transparent 50%)",
       },
       backdropBlur: {
         xs: "2px",

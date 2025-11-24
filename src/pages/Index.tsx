@@ -129,13 +129,13 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 border-b border-border bg-white/80 backdrop-blur-md shadow-sm">
+      <nav className="sticky top-0 z-50 border-b border-border bg-primary backdrop-blur-md shadow-sm">
         <div className="container mx-auto px-4 lg:px-6 py-3 lg:py-4 flex justify-between items-center">
           <div className="flex items-center gap-2 lg:gap-3 group cursor-pointer" onClick={() => navigate("/")}>
-            <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-              <MessageSquare className="h-5 w-5 lg:h-6 lg:w-6 text-white" />
+            <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl bg-primary-foreground flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+              <MessageSquare className="h-5 w-5 lg:h-6 lg:w-6 text-primary" />
             </div>
-            <span className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <span className="text-xl lg:text-2xl font-bold text-primary-foreground">
               SocialHub
             </span>
           </div>
@@ -143,7 +143,7 @@ const Index = () => {
             <FeaturesDropdown />
             <button 
               onClick={() => scrollToSection('integrations')}
-              className="text-sm font-semibold text-foreground hover:text-primary transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-primary after:transition-all"
+              className="text-sm font-semibold text-primary-foreground hover:text-primary-foreground/80 transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-primary-foreground after:transition-all"
             >
               Integrations
             </button>
@@ -151,13 +151,13 @@ const Index = () => {
             <ResourcesDropdown />
             <button 
               onClick={() => scrollToSection('pricing')}
-              className="text-sm font-semibold text-foreground hover:text-primary transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-primary after:transition-all"
+              className="text-sm font-semibold text-primary-foreground hover:text-primary-foreground/80 transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-primary-foreground after:transition-all"
             >
               Pricing
             </button>
             <button 
               onClick={() => scrollToSection('enterprise')}
-              className="text-sm font-semibold text-foreground hover:text-primary transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-primary after:transition-all"
+              className="text-sm font-semibold text-primary-foreground hover:text-primary-foreground/80 transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-primary-foreground after:transition-all"
             >
               Enterprise
             </button>
@@ -166,13 +166,13 @@ const Index = () => {
             <Button 
               variant="ghost" 
               onClick={() => navigate("/auth")} 
-              className="text-xs lg:text-sm font-semibold hidden md:flex hover:text-primary hover:bg-primary/5 transition-all px-3 lg:px-4"
+              className="text-xs lg:text-sm font-semibold hidden md:flex text-primary-foreground hover:text-primary-foreground hover:bg-primary-foreground/10 transition-all px-3 lg:px-4"
             >
               Log in
             </Button>
             <Button 
               onClick={() => handleGetStarted(undefined, true)} 
-              className="text-xs lg:text-sm font-semibold hidden md:flex bg-gradient-to-r from-primary to-accent hover:opacity-90 shadow-lg hover:shadow-xl transition-all hover:scale-105 px-3 lg:px-4"
+              className="text-xs lg:text-sm font-semibold hidden md:flex bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-105 px-3 lg:px-4"
             >
               Start Free Trial
             </Button>
