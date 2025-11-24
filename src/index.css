@@ -8,118 +8,129 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+    /* Ethio Telecom Brand Colors */
+    --lemon-green: 88 54% 51%;
+    --dark-blue: 202 100% 37%;
+    --light-gray: 0 0% 96%;
+    --brand-white: 0 0% 100%;
+    --brand-black: 5 6% 13%;
+
+    /* Design System Tokens mapped to Ethio Telecom brand */
     --background: 0 0% 100%;
-    --foreground: 210 24% 16%;
-
+    --foreground: 5 6% 13%;
     --card: 0 0% 100%;
-    --card-foreground: 210 24% 16%;
-
+    --card-foreground: 5 6% 13%;
     --popover: 0 0% 100%;
-    --popover-foreground: 210 24% 16%;
-
-    --primary: 184 91% 17%;
+    --popover-foreground: 5 6% 13%;
+    
+    /* Primary = Lemon Green */
+    --primary: 88 54% 51%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 184 91% 30%;
-
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 210 24% 16%;
-
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-
-    --accent: 6 78% 57%;
+    --primary-glow: 88 60% 65%;
+    
+    /* Secondary = Dark Blue */
+    --secondary: 202 100% 37%;
+    --secondary-foreground: 0 0% 100%;
+    
+    /* Muted = Light Gray */
+    --muted: 0 0% 96%;
+    --muted-foreground: 5 6% 40%;
+    
+    /* Accent = Lemon Green */
+    --accent: 88 54% 51%;
     --accent-foreground: 0 0% 100%;
-
+    
     --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
-
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 184 91% 17%;
-
+    
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 88 54% 51%;
     --radius: 0.5rem;
-
-    --sidebar-background: 210 100% 97%;
-    --sidebar-foreground: 210 24% 16%;
-    --sidebar-primary: 184 91% 17%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 16% 93%;
-    --sidebar-accent-foreground: 210 24% 16%;
-    --sidebar-border: 214 32% 91%;
-    --sidebar-ring: 184 91% 17%;
-    --sidebar-gradient: linear-gradient(180deg, hsl(210 100% 97%), hsl(210 80% 95%));
-
-    --gradient-primary: linear-gradient(135deg, hsl(184 91% 17%), hsl(6 78% 57%));
-    --gradient-hero: linear-gradient(135deg, hsl(184 91% 17% / 0.1), hsl(6 78% 57% / 0.05));
-    --gradient-accent: linear-gradient(135deg, hsl(6 78% 57%), hsl(6 78% 67%));
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 40% 98%));
-    --gradient-premium: linear-gradient(135deg, hsl(267 84% 61%), hsl(184 91% 17%));
+    
+    /* Sidebar with Lemon Green theme */
+    --sidebar-background: 88 54% 51%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 88 54% 51%;
+    --sidebar-accent: 88 60% 45%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 88 60% 55%;
+    --sidebar-ring: 0 0% 100%;
+    --sidebar-gradient: linear-gradient(180deg, hsl(88 54% 51%), hsl(88 54% 45%));
+    
+    /* Gradients with brand colors */
+    --gradient-primary: linear-gradient(135deg, hsl(88 54% 51%), hsl(202 100% 37%));
+    --gradient-hero: linear-gradient(135deg, hsl(88 54% 51% / 0.1), hsl(202 100% 37% / 0.05));
+    --gradient-accent: linear-gradient(135deg, hsl(88 54% 51%), hsl(88 60% 65%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(0 0% 98%));
+    --gradient-premium: linear-gradient(135deg, hsl(202 100% 37%), hsl(88 54% 51%));
     --gradient-glass: linear-gradient(135deg, hsl(0 0% 100% / 0.7), hsl(0 0% 100% / 0.3));
-    --gradient-mesh: radial-gradient(at 40% 20%, hsl(184 91% 17% / 0.3) 0px, transparent 50%), radial-gradient(at 80% 0%, hsl(6 78% 57% / 0.2) 0px, transparent 50%), radial-gradient(at 0% 50%, hsl(142 76% 36% / 0.2) 0px, transparent 50%);
-    --shadow-elegant: 0 10px 30px -10px hsl(184 91% 17% / 0.3);
-    --shadow-glow: 0 0 40px hsl(184 91% 30% / 0.4);
-    --shadow-card: 0 4px 20px hsl(184 91% 17% / 0.08);
-    --shadow-hover: 0 8px 30px hsl(184 91% 17% / 0.12);
-    --shadow-xl: 0 20px 50px -12px hsl(184 91% 17% / 0.25);
+    --gradient-mesh: radial-gradient(at 40% 20%, hsl(88 54% 51% / 0.3) 0px, transparent 50%), radial-gradient(at 80% 0%, hsl(202 100% 37% / 0.2) 0px, transparent 50%);
+    
+    /* Shadows with brand colors */
+    --shadow-elegant: 0 10px 30px -10px hsl(88 54% 51% / 0.3);
+    --shadow-glow: 0 0 40px hsl(88 54% 51% / 0.4);
+    --shadow-card: 0 4px 20px hsl(88 54% 51% / 0.08);
+    --shadow-hover: 0 8px 30px hsl(88 54% 51% / 0.12);
+    --shadow-xl: 0 20px 50px -12px hsl(88 54% 51% / 0.25);
     --shadow-inner: inset 0 2px 4px 0 hsl(0 0% 0% / 0.06);
+    
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     --transition-elastic: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 
   .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
-
-    --card: 217 33% 17%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 217 33% 17%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 184 91% 17%;
+    --background: 5 6% 13%;
+    --foreground: 0 0% 98%;
+    --card: 5 6% 18%;
+    --card-foreground: 0 0% 98%;
+    --popover: 5 6% 18%;
+    --popover-foreground: 0 0% 98%;
+    
+    --primary: 88 54% 51%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 184 91% 30%;
-
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-
-    --accent: 6 78% 57%;
+    --primary-glow: 88 60% 65%;
+    
+    --secondary: 202 100% 37%;
+    --secondary-foreground: 0 0% 100%;
+    
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 63.9%;
+    
+    --accent: 88 54% 51%;
     --accent-foreground: 0 0% 100%;
-
+    
     --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
-
     --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 184 91% 17%;
-
-    --sidebar-background: 222 47% 8%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 184 91% 17%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 88 54% 51%;
+    
+    --sidebar-background: 5 6% 10%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 88 54% 51%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 17%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 17%;
-    --sidebar-ring: 184 91% 17%;
-    --sidebar-gradient: linear-gradient(180deg, hsl(222 47% 8%), hsl(222 47% 6%));
-
-    --gradient-primary: linear-gradient(135deg, hsl(184 91% 17%), hsl(6 78% 57%));
-    --gradient-hero: linear-gradient(135deg, hsl(184 91% 17% / 0.2), hsl(6 78% 57% / 0.1));
-    --gradient-accent: linear-gradient(135deg, hsl(6 78% 57%), hsl(6 78% 67%));
-    --gradient-card: linear-gradient(145deg, hsl(217 33% 17%), hsl(222 47% 11%));
-    --gradient-premium: linear-gradient(135deg, hsl(267 84% 61%), hsl(184 91% 17%));
-    --shadow-elegant: 0 10px 30px -10px hsl(184 91% 17% / 0.5);
-    --shadow-glow: 0 0 40px hsl(184 91% 30% / 0.6);
+    --sidebar-accent: 5 6% 18%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 88 54% 51%;
+    --sidebar-gradient: linear-gradient(180deg, hsl(5 6% 10%), hsl(5 6% 8%));
+    
+    --gradient-primary: linear-gradient(135deg, hsl(88 54% 51%), hsl(202 100% 37%));
+    --gradient-hero: linear-gradient(135deg, hsl(88 54% 51% / 0.2), hsl(202 100% 37% / 0.1));
+    --gradient-accent: linear-gradient(135deg, hsl(88 54% 51%), hsl(88 60% 65%));
+    --gradient-card: linear-gradient(145deg, hsl(5 6% 18%), hsl(5 6% 13%));
+    --gradient-premium: linear-gradient(135deg, hsl(202 100% 37%), hsl(88 54% 51%));
+    
+    --shadow-elegant: 0 10px 30px -10px hsl(88 54% 51% / 0.5);
+    --shadow-glow: 0 0 40px hsl(88 54% 51% / 0.6);
     --shadow-card: 0 4px 20px hsl(0 0% 0% / 0.2);
     --shadow-hover: 0 8px 30px hsl(0 0% 0% / 0.3);
   }
@@ -132,6 +143,12 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Gotham', 'Noto Sans Ethiopic', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Gotham', 'Noto Sans Ethiopic', sans-serif;
+    font-weight: 700;
   }
 }
 
