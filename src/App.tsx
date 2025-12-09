@@ -93,6 +93,7 @@ import CallReports from "./pages/CallReports";
 import FirewallManagement from "./pages/admin/FirewallManagement";
 import LiveChatDashboard from "./pages/admin/LiveChatDashboard";
 import LayoutShowcase from "./pages/LayoutShowcase";
+import FinancialDocument from "./pages/FinancialDocument";
 
 const queryClient = new QueryClient();
 
@@ -107,6 +108,7 @@ const App = () => (
           <Routes>
             {/* Public routes without layout */}
             <Route path="/" element={<Index />} />
+            <Route path="/financial-document" element={<FinancialDocument />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/industry/:slug" element={<Industry />} />
