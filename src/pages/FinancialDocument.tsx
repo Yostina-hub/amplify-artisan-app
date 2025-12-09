@@ -402,41 +402,41 @@ const FinancialDocument = () => {
                 <td className="p-3 border-b">Enterprise Social Hub Platform - Perpetual License</td>
                 <td className="p-3 border-b">1</td>
                 <td className="p-3 border-b">License</td>
-                <td className="p-3 border-b text-right font-mono">2,500,000.00</td>
+                <td className="p-3 border-b text-right font-mono">12,500,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">CRM Module - Customer Relationship Management</td>
                 <td className="p-3 border-b">1</td>
                 <td className="p-3 border-b">Module</td>
-                <td className="p-3 border-b text-right font-mono">850,000.00</td>
+                <td className="p-3 border-b text-right font-mono">4,500,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">Social Media Management Suite</td>
                 <td className="p-3 border-b">1</td>
                 <td className="p-3 border-b">Module</td>
-                <td className="p-3 border-b text-right font-mono">650,000.00</td>
+                <td className="p-3 border-b text-right font-mono">3,800,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">Marketing Automation & Campaign Management</td>
                 <td className="p-3 border-b">1</td>
                 <td className="p-3 border-b">Module</td>
-                <td className="p-3 border-b text-right font-mono">550,000.00</td>
+                <td className="p-3 border-b text-right font-mono">3,200,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">Analytics & Reporting Dashboard</td>
                 <td className="p-3 border-b">1</td>
                 <td className="p-3 border-b">Module</td>
-                <td className="p-3 border-b text-right font-mono">400,000.00</td>
+                <td className="p-3 border-b text-right font-mono">2,500,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">AI-Powered Insights Engine</td>
                 <td className="p-3 border-b">1</td>
                 <td className="p-3 border-b">Module</td>
-                <td className="p-3 border-b text-right font-mono">750,000.00</td>
+                <td className="p-3 border-b text-right font-mono">4,000,000.00</td>
               </tr>
               <tr className="subtotal-row">
                 <td colSpan={3} className="bg-secondary/10 p-3 font-semibold text-right">Subtotal - Licensing</td>
-                <td className="bg-secondary/10 p-3 text-right font-semibold font-mono">5,700,000.00</td>
+                <td className="bg-secondary/10 p-3 text-right font-semibold font-mono">30,500,000.00</td>
               </tr>
             </tbody>
           </table>
@@ -460,61 +460,61 @@ const FinancialDocument = () => {
               </tr>
               <tr>
                 <td className="p-3 border-b">Project Management & Coordination</td>
-                <td className="p-3 border-b">60</td>
-                <td className="p-3 border-b">1 PM</td>
-                <td className="p-3 border-b text-right font-mono">420,000.00</td>
+                <td className="p-3 border-b">90</td>
+                <td className="p-3 border-b">2 PM</td>
+                <td className="p-3 border-b text-right font-mono">2,250,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">Solution Architecture & Design</td>
-                <td className="p-3 border-b">30</td>
-                <td className="p-3 border-b">2 Architects</td>
-                <td className="p-3 border-b text-right font-mono">480,000.00</td>
+                <td className="p-3 border-b">45</td>
+                <td className="p-3 border-b">3 Architects</td>
+                <td className="p-3 border-b text-right font-mono">2,700,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">System Configuration & Customization</td>
-                <td className="p-3 border-b">45</td>
-                <td className="p-3 border-b">3 Developers</td>
-                <td className="p-3 border-b text-right font-mono">675,000.00</td>
+                <td className="p-3 border-b">60</td>
+                <td className="p-3 border-b">5 Developers</td>
+                <td className="p-3 border-b text-right font-mono">3,750,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">API Integration with Existing Systems</td>
-                <td className="p-3 border-b">40</td>
-                <td className="p-3 border-b">2 Developers</td>
-                <td className="p-3 border-b text-right font-mono">400,000.00</td>
+                <td className="p-3 border-b">50</td>
+                <td className="p-3 border-b">4 Developers</td>
+                <td className="p-3 border-b text-right font-mono">2,500,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">Social Platform OAuth Integration</td>
-                <td className="p-3 border-b">20</td>
-                <td className="p-3 border-b">2 Developers</td>
-                <td className="p-3 border-b text-right font-mono">200,000.00</td>
+                <td className="p-3 border-b">30</td>
+                <td className="p-3 border-b">3 Developers</td>
+                <td className="p-3 border-b text-right font-mono">1,125,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">Database Migration & Data Import</td>
-                <td className="p-3 border-b">25</td>
-                <td className="p-3 border-b">2 Engineers</td>
-                <td className="p-3 border-b text-right font-mono">250,000.00</td>
+                <td className="p-3 border-b">40</td>
+                <td className="p-3 border-b">3 Engineers</td>
+                <td className="p-3 border-b text-right font-mono">1,500,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">Quality Assurance & Testing</td>
-                <td className="p-3 border-b">30</td>
-                <td className="p-3 border-b">2 QA Engineers</td>
-                <td className="p-3 border-b text-right font-mono">300,000.00</td>
+                <td className="p-3 border-b">45</td>
+                <td className="p-3 border-b">4 QA Engineers</td>
+                <td className="p-3 border-b text-right font-mono">2,250,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">User Acceptance Testing (UAT) Support</td>
-                <td className="p-3 border-b">15</td>
-                <td className="p-3 border-b">2 Engineers</td>
-                <td className="p-3 border-b text-right font-mono">150,000.00</td>
+                <td className="p-3 border-b">20</td>
+                <td className="p-3 border-b">3 Engineers</td>
+                <td className="p-3 border-b text-right font-mono">750,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">Go-Live Support & Stabilization</td>
-                <td className="p-3 border-b">14</td>
-                <td className="p-3 border-b">4 Engineers</td>
-                <td className="p-3 border-b text-right font-mono">280,000.00</td>
+                <td className="p-3 border-b">21</td>
+                <td className="p-3 border-b">6 Engineers</td>
+                <td className="p-3 border-b text-right font-mono">1,575,000.00</td>
               </tr>
               <tr className="subtotal-row">
                 <td colSpan={3} className="bg-secondary/10 p-3 font-semibold text-right">Subtotal - Implementation</td>
-                <td className="bg-secondary/10 p-3 text-right font-semibold font-mono">3,155,000.00</td>
+                <td className="bg-secondary/10 p-3 text-right font-semibold font-mono">18,400,000.00</td>
               </tr>
             </tbody>
           </table>
@@ -537,35 +537,35 @@ const FinancialDocument = () => {
                 <td className="p-3 border-b">Cloud Server Infrastructure</td>
                 <td className="p-3 border-b">High Availability Cluster</td>
                 <td className="p-3 border-b">12 Months</td>
-                <td className="p-3 border-b text-right font-mono">480,000.00</td>
+                <td className="p-3 border-b text-right font-mono">2,880,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">Database Server (PostgreSQL)</td>
                 <td className="p-3 border-b">Enterprise Grade</td>
                 <td className="p-3 border-b">12 Months</td>
-                <td className="p-3 border-b text-right font-mono">360,000.00</td>
+                <td className="p-3 border-b text-right font-mono">2,160,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">CDN & Load Balancing</td>
                 <td className="p-3 border-b">Global Distribution</td>
                 <td className="p-3 border-b">12 Months</td>
-                <td className="p-3 border-b text-right font-mono">180,000.00</td>
+                <td className="p-3 border-b text-right font-mono">1,080,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">SSL Certificates & Security</td>
                 <td className="p-3 border-b">Enterprise SSL + WAF</td>
                 <td className="p-3 border-b">12 Months</td>
-                <td className="p-3 border-b text-right font-mono">120,000.00</td>
+                <td className="p-3 border-b text-right font-mono">720,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">Backup & Disaster Recovery</td>
                 <td className="p-3 border-b">Daily Backup + DR Site</td>
                 <td className="p-3 border-b">12 Months</td>
-                <td className="p-3 border-b text-right font-mono">240,000.00</td>
+                <td className="p-3 border-b text-right font-mono">1,440,000.00</td>
               </tr>
               <tr className="subtotal-row">
                 <td colSpan={3} className="bg-secondary/10 p-3 font-semibold text-right">Subtotal - Infrastructure</td>
-                <td className="bg-secondary/10 p-3 text-right font-semibold font-mono">1,380,000.00</td>
+                <td className="bg-secondary/10 p-3 text-right font-semibold font-mono">8,280,000.00</td>
               </tr>
             </tbody>
           </table>
@@ -586,49 +586,49 @@ const FinancialDocument = () => {
             <tbody>
               <tr>
                 <td className="p-3 border-b">Executive Overview & Dashboard Training</td>
-                <td className="p-3 border-b">1 Day</td>
-                <td className="p-3 border-b">Up to 10</td>
-                <td className="p-3 border-b text-right font-mono">50,000.00</td>
+                <td className="p-3 border-b">2 Days</td>
+                <td className="p-3 border-b">Up to 15</td>
+                <td className="p-3 border-b text-right font-mono">320,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">CRM & Sales Team Training</td>
-                <td className="p-3 border-b">3 Days</td>
-                <td className="p-3 border-b">Up to 30</td>
-                <td className="p-3 border-b text-right font-mono">150,000.00</td>
+                <td className="p-3 border-b">5 Days</td>
+                <td className="p-3 border-b">Up to 50</td>
+                <td className="p-3 border-b text-right font-mono">875,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">Social Media Management Training</td>
-                <td className="p-3 border-b">2 Days</td>
-                <td className="p-3 border-b">Up to 20</td>
-                <td className="p-3 border-b text-right font-mono">100,000.00</td>
+                <td className="p-3 border-b">4 Days</td>
+                <td className="p-3 border-b">Up to 40</td>
+                <td className="p-3 border-b text-right font-mono">640,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">Marketing Automation Training</td>
-                <td className="p-3 border-b">2 Days</td>
-                <td className="p-3 border-b">Up to 15</td>
-                <td className="p-3 border-b text-right font-mono">100,000.00</td>
+                <td className="p-3 border-b">3 Days</td>
+                <td className="p-3 border-b">Up to 25</td>
+                <td className="p-3 border-b text-right font-mono">525,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">System Administration Training</td>
-                <td className="p-3 border-b">3 Days</td>
-                <td className="p-3 border-b">Up to 5</td>
-                <td className="p-3 border-b text-right font-mono">150,000.00</td>
+                <td className="p-3 border-b">5 Days</td>
+                <td className="p-3 border-b">Up to 10</td>
+                <td className="p-3 border-b text-right font-mono">700,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">Train-the-Trainer Program</td>
-                <td className="p-3 border-b">2 Days</td>
-                <td className="p-3 border-b">Up to 10</td>
-                <td className="p-3 border-b text-right font-mono">100,000.00</td>
+                <td className="p-3 border-b">4 Days</td>
+                <td className="p-3 border-b">Up to 20</td>
+                <td className="p-3 border-b text-right font-mono">560,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">Training Materials & Documentation</td>
                 <td className="p-3 border-b">-</td>
                 <td className="p-3 border-b">All Modules</td>
-                <td className="p-3 border-b text-right font-mono">80,000.00</td>
+                <td className="p-3 border-b text-right font-mono">500,000.00</td>
               </tr>
               <tr className="subtotal-row">
                 <td colSpan={3} className="bg-secondary/10 p-3 font-semibold text-right">Subtotal - Training</td>
-                <td className="bg-secondary/10 p-3 text-right font-semibold font-mono">730,000.00</td>
+                <td className="bg-secondary/10 p-3 text-right font-semibold font-mono">4,120,000.00</td>
               </tr>
             </tbody>
           </table>
@@ -649,31 +649,31 @@ const FinancialDocument = () => {
             <tbody>
               <tr>
                 <td className="p-3 border-b">Premium Support Package</td>
-                <td className="p-3 border-b">4hr Response</td>
+                <td className="p-3 border-b">2hr Response</td>
                 <td className="p-3 border-b">24/7</td>
-                <td className="p-3 border-b text-right font-mono">480,000.00</td>
+                <td className="p-3 border-b text-right font-mono">1,800,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">Software Updates & Patches</td>
                 <td className="p-3 border-b">-</td>
                 <td className="p-3 border-b">12 Months</td>
-                <td className="p-3 border-b text-right font-mono">285,000.00</td>
+                <td className="p-3 border-b text-right font-mono">1,525,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">Dedicated Account Manager</td>
                 <td className="p-3 border-b">-</td>
                 <td className="p-3 border-b">12 Months</td>
-                <td className="p-3 border-b text-right font-mono">180,000.00</td>
+                <td className="p-3 border-b text-right font-mono">960,000.00</td>
               </tr>
               <tr>
                 <td className="p-3 border-b">Quarterly Business Reviews</td>
                 <td className="p-3 border-b">-</td>
                 <td className="p-3 border-b">4 Sessions</td>
-                <td className="p-3 border-b text-right font-mono">120,000.00</td>
+                <td className="p-3 border-b text-right font-mono">600,000.00</td>
               </tr>
               <tr className="subtotal-row">
                 <td colSpan={3} className="bg-secondary/10 p-3 font-semibold text-right">Subtotal - Support</td>
-                <td className="bg-secondary/10 p-3 text-right font-semibold font-mono">1,065,000.00</td>
+                <td className="bg-secondary/10 p-3 text-right font-semibold font-mono">4,885,000.00</td>
               </tr>
             </tbody>
           </table>
@@ -684,37 +684,37 @@ const FinancialDocument = () => {
             <div className="space-y-3">
               <div className="flex justify-between py-2 border-b border-white/20">
                 <span>Platform Licensing & Initial Setup</span>
-                <span className="font-mono">ETB 5,700,000.00</span>
+                <span className="font-mono">ETB 30,500,000.00</span>
               </div>
               <div className="flex justify-between py-2 border-b border-white/20">
                 <span>Implementation & Integration Services</span>
-                <span className="font-mono">ETB 3,155,000.00</span>
+                <span className="font-mono">ETB 18,400,000.00</span>
               </div>
               <div className="flex justify-between py-2 border-b border-white/20">
                 <span>Infrastructure & Hosting (First Year)</span>
-                <span className="font-mono">ETB 1,380,000.00</span>
+                <span className="font-mono">ETB 8,280,000.00</span>
               </div>
               <div className="flex justify-between py-2 border-b border-white/20">
                 <span>Training & Knowledge Transfer</span>
-                <span className="font-mono">ETB 730,000.00</span>
+                <span className="font-mono">ETB 4,120,000.00</span>
               </div>
               <div className="flex justify-between py-2 border-b border-white/20">
                 <span>Support & Maintenance (First Year)</span>
-                <span className="font-mono">ETB 1,065,000.00</span>
+                <span className="font-mono">ETB 4,885,000.00</span>
               </div>
               <Separator className="bg-primary my-4" />
               <div className="flex justify-between py-3 text-xl font-bold">
                 <span>TOTAL INVESTMENT</span>
-                <span className="font-mono text-primary">ETB 12,030,000.00</span>
+                <span className="font-mono text-primary">ETB 66,185,000.00</span>
               </div>
               <div className="flex justify-between py-2 text-sm opacity-80">
                 <span>VAT (15%)</span>
-                <span className="font-mono">ETB 1,804,500.00</span>
+                <span className="font-mono">ETB 9,927,750.00</span>
               </div>
               <Separator className="bg-primary my-4" />
               <div className="flex justify-between py-3 text-2xl font-bold">
                 <span>GRAND TOTAL (Including VAT)</span>
-                <span className="font-mono text-primary">ETB 13,834,500.00</span>
+                <span className="font-mono text-primary">ETB 76,112,750.00</span>
               </div>
             </div>
           </div>
@@ -749,11 +749,11 @@ const FinancialDocument = () => {
             <div className="payment-box border rounded-lg p-4">
               <h4 className="text-secondary text-sm font-semibold uppercase mb-3">Payment Schedule</h4>
               <div className="space-y-2 text-xs">
-                <p><strong>Phase 1 (40%):</strong> ETB 5,533,800.00</p>
+                <p><strong>Phase 1 (40%):</strong> ETB 30,445,100.00</p>
                 <p className="text-muted-foreground">Due upon contract signing</p>
-                <p><strong>Phase 2 (40%):</strong> ETB 5,533,800.00</p>
+                <p><strong>Phase 2 (40%):</strong> ETB 30,445,100.00</p>
                 <p className="text-muted-foreground">Due upon UAT completion</p>
-                <p><strong>Phase 3 (20%):</strong> ETB 2,766,900.00</p>
+                <p><strong>Phase 3 (20%):</strong> ETB 15,222,550.00</p>
                 <p className="text-muted-foreground">Due upon Go-Live</p>
               </div>
             </div>
