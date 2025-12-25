@@ -4058,15 +4058,7 @@ export type Database = {
           redirect_url?: string | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "platform_oauth_apps_platform_id_fkey"
-            columns: ["platform_id"]
-            isOneToOne: true
-            referencedRelation: "social_platforms"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       price_book_entries: {
         Row: {
