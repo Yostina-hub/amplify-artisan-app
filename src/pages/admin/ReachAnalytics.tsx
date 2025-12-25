@@ -338,17 +338,17 @@ export default function ReachAnalytics() {
       let configuredPlatforms, connectedAccounts;
 
       if (isAdmin) {
-        // Fetch ALL platforms and accounts for admin
-        const { data: platforms } = await supabase
-          .from('company_platform_configs')
-          .select('id, platform_id, company_id, is_active, social_platforms(id, name, display_name, icon_name)')
+        // Fetch ALL connected tokens for admin
+        const { data: tokens } = await supabase
+          .from('social_platform_tokens')
+          .select('id, platform, company_id, is_active, account_name, account_id')
           .eq('is_active', true);
         
         const { data: accounts } = await querySocialMediaAccountsSafe()
           .select('*')
           .eq('is_active', true);
 
-        configuredPlatforms = platforms;
+        configuredPlatforms = tokens;
         connectedAccounts = accounts;
       } else {
         // Get user's company ID for non-admin users
@@ -360,10 +360,10 @@ export default function ReachAnalytics() {
 
         if (!profile?.company_id) return;
 
-        // Fetch configured platforms from company_platform_configs
-        const { data: platforms } = await supabase
-          .from('company_platform_configs')
-          .select('id, platform_id, is_active, social_platforms(id, name, display_name, icon_name)')
+        // Fetch connected tokens from social_platform_tokens
+        const { data: tokens } = await supabase
+          .from('social_platform_tokens')
+          .select('id, platform, is_active, account_name, account_id')
           .eq('company_id', profile.company_id)
           .eq('is_active', true);
 
@@ -373,11 +373,11 @@ export default function ReachAnalytics() {
           .eq('is_active', true)
           .eq('company_id', profile.company_id);
 
-        configuredPlatforms = platforms;
+        configuredPlatforms = tokens;
         connectedAccounts = accounts;
       }
 
-      // Combine both sources - prefer connected accounts, fall back to configured platforms
+      // Combine both sources - prefer connected accounts, fall back to connected tokens
       const accountsMap = new Map();
       
       // Add connected accounts first
@@ -389,13 +389,13 @@ export default function ReachAnalytics() {
         });
       });
 
-      // Add configured platforms that aren't already in connected accounts
-      configuredPlatforms?.forEach(config => {
-        const platform = (config.social_platforms as any)?.name;
-        const displayName = (config.social_platforms as any)?.display_name;
+      // Add connected tokens that aren't already in connected accounts
+      configuredPlatforms?.forEach((token: any) => {
+        const platform = token.platform;
+        const displayName = token.account_name;
         if (platform && !accountsMap.has(platform)) {
           accountsMap.set(platform, {
-            id: config.id,
+            id: token.id,
             platform: platform,
             account_name: displayName || platform,
           });
