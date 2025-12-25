@@ -34,9 +34,6 @@ import PendingApproval from "./pages/PendingApproval";
 import CompanyApplication from "./pages/CompanyApplication";
 import CompanyManagement from "./pages/admin/CompanyManagement";
 import SocialPlatformManagement from "./pages/admin/SocialPlatformManagement";
-import SocialMediaCredentials from "./pages/SocialMediaCredentials";
-import SocialPlatformSettings from "./pages/SocialPlatformSettings";
-import CompanyPlatformSettings from "./pages/PlatformConfigs";
 import SocialConnections from "./pages/SocialConnections";
 import CompanyPlatformSubscriptions from "./pages/CompanyPlatformSubscriptions";
 import AdminCompanyPlatformSubscriptions from "./pages/admin/CompanyPlatformSubscriptions";
@@ -166,7 +163,6 @@ const App = () => (
               <Route path="/company/email-settings" element={<ProtectedRoute><CompanyEmailSettings /></ProtectedRoute>} />
               <Route path="/company/audit-log" element={<ProtectedRoute><CompanyAuditLog /></ProtectedRoute>} />
               <Route path="/company/platform-subscriptions" element={<ProtectedRoute><CompanyPlatformSubscriptions /></ProtectedRoute>} />
-              <Route path="/company/platform-settings" element={<ProtectedRoute><CompanyPlatformSettings /></ProtectedRoute>} />
               <Route path="/company/api-management" element={<ProtectedRoute><CompanyAPIManagement /></ProtectedRoute>} />
               <Route path="/company/call-center-integrations" element={<ProtectedRoute><CallCenterIntegrations /></ProtectedRoute>} />
               <Route path="/tts-settings" element={<ProtectedRoute><TTSSettings /></ProtectedRoute>} />
@@ -177,8 +173,6 @@ const App = () => (
               <Route path="/social-intelligence" element={<ProtectedRoute><SocialIntelligence /></ProtectedRoute>} />
               <Route path="/automation" element={<ProtectedRoute><Automation /></ProtectedRoute>} />
               <Route path="/ai-analytics" element={<ProtectedRoute><AIAnalytics /></ProtectedRoute>} />
-              <Route path="/social-media-credentials" element={<ProtectedRoute><SocialMediaCredentials /></ProtectedRoute>} />
-              <Route path="/social-platform-settings" element={<ProtectedRoute><SocialPlatformSettings /></ProtectedRoute>} />
               <Route path="/social-connections" element={<ProtectedRoute><SocialConnections /></ProtectedRoute>} />
               
               {/* Enterprise Builder */}
@@ -208,7 +202,10 @@ const App = () => (
               <Route path="/project-management" element={<ProtectedRoute><ProjectManagement /></ProtectedRoute>} />
               <Route path="/contract-management" element={<ProtectedRoute><ContractManagement /></ProtectedRoute>} />
               
-              <Route path="/social-accounts" element={<ProtectedRoute><SocialMediaCredentials /></ProtectedRoute>} />
+              {/* Legacy redirects - point to new unified page */}
+              <Route path="/social-accounts" element={<ProtectedRoute><SocialConnections /></ProtectedRoute>} />
+              <Route path="/social-media-credentials" element={<ProtectedRoute><SocialConnections /></ProtectedRoute>} />
+              <Route path="/social-platform-settings" element={<ProtectedRoute><SocialConnections /></ProtectedRoute>} />
             </Route>
             
             {/* 404 catch-all - must be last */}
