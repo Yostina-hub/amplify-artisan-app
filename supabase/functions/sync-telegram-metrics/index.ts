@@ -46,29 +46,24 @@ Deno.serve(async (req) => {
 
     console.log('Company ID:', profile.company_id);
 
-    // Get Telegram platform ID
-    const { data: telegramPlatform } = await supabaseClient
-      .from('social_platforms')
-      .select('id')
-      .eq('name', 'telegram')
-      .single();
-
-    if (!telegramPlatform) {
-      throw new Error('Telegram platform not found');
-    }
-
-    // Get company's Telegram configuration
-    const { data: config } = await supabaseClient
-      .from('company_platform_configs')
-      .select('api_key, channel_id')
+    // Get Telegram credentials from unified social_platform_tokens
+    const { data: token } = await supabaseClient
+      .from('social_platform_tokens')
+      .select('*')
       .eq('company_id', profile.company_id)
-      .eq('platform_id', telegramPlatform.id)
+      .eq('platform', 'telegram')
       .eq('is_active', true)
       .single();
 
-    if (!config?.api_key || !config?.channel_id) {
-      throw new Error('Telegram not configured or missing API key/channel ID');
+    if (!token?.access_token || !token?.account_id) {
+      throw new Error('Telegram not connected. Please connect via Social Connections.');
     }
+
+    // Map to config format
+    const config = {
+      api_key: token.access_token,
+      channel_id: token.account_id
+    };
 
     console.log('Found Telegram config, fetching metrics...');
 

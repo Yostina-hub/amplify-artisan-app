@@ -43,29 +43,27 @@ Deno.serve(async (req) => {
       throw new Error('User not assigned to company');
     }
 
-    // Get platform details
-    const { data: platformData } = await supabaseClient
-      .from('social_platforms')
-      .select('id, name')
-      .eq('name', platform)
-      .single();
-
-    if (!platformData) {
-      throw new Error(`Platform ${platform} not found`);
-    }
-
-    // Get platform configuration
-    const { data: config } = await supabaseClient
-      .from('company_platform_configs')
-      .select('api_key, channel_id, config')
+    // Get platform credentials from unified social_platform_tokens
+    const { data: token } = await supabaseClient
+      .from('social_platform_tokens')
+      .select('*')
       .eq('company_id', profile.company_id)
-      .eq('platform_id', platformData.id)
+      .eq('platform', platform.toLowerCase())
       .eq('is_active', true)
       .single();
 
-    if (!config) {
-      throw new Error(`${platform} not configured for this company`);
+    if (!token) {
+      throw new Error(`${platform} not connected for this company. Please connect via Social Connections.`);
     }
+
+    // Map token data to config format for backward compatibility
+    const config = {
+      api_key: token.access_token,
+      channel_id: token.account_id,
+      access_token: token.access_token,
+      refresh_token: token.refresh_token,
+      config: token.metadata || {}
+    };
 
     let metrics = { followers: 0, posts: 0, engagement: 0 };
 
