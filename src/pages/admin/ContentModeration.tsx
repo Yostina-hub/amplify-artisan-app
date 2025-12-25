@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Shield, AlertTriangle, CheckCircle2, XCircle, Search, Filter, Globe, Clock, Eye, LayoutList, LayoutGrid, RefreshCw, ArrowUpDown, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { Shield, AlertTriangle, CheckCircle2, XCircle, Search, Filter, Clock, Eye, LayoutList, AlertCircle, RefreshCw, ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,8 +34,7 @@ const ContentModeration = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("draft");
   const [platformFilter, setPlatformFilter] = useState("all");
-  const [viewMode, setViewMode] = useState<"queue" | "kanban">("queue");
-  const [hideNew, setHideNew] = useState(false);
+  const [viewMode, setViewMode] = useState<"queue" | "issues">("queue");
   const [selectedPost, setSelectedPost] = useState<any>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [recheckingPostId, setRecheckingPostId] = useState<string | null>(null);
@@ -267,9 +266,8 @@ const ContentModeration = () => {
       // Queue shows draft and scheduled posts (not flagged or rejected)
       if (post.status !== "draft" && post.status !== "scheduled") return false;
       if (post.flagged) return false; // Exclude flagged posts from queue
-      if (hideNew) return false; // Hide if "hide new" is enabled
     } else {
-      // Kanban shows rejected and flagged posts
+      // Issues view shows rejected and flagged posts
       if (post.status !== "rejected" && !post.flagged) return false;
     }
 
@@ -312,25 +310,19 @@ const ContentModeration = () => {
               Comprehensive content review powered by advanced AI algorithms
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="lg" 
-              onClick={() => {
-                queryClient.invalidateQueries({ queryKey: ["moderation-posts"] });
-                queryClient.invalidateQueries({ queryKey: ["moderation-stats"] });
-                toast.success("Data refreshed");
-              }}
-              className="gap-2"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Refresh
-            </Button>
-            <Button size="lg" className="gap-2 shadow-lg hover:shadow-xl transition-all">
-              <Globe className="h-4 w-4" />
-              Multi-Language
-            </Button>
-          </div>
+          <Button 
+            variant="outline" 
+            size="lg" 
+            onClick={() => {
+              queryClient.invalidateQueries({ queryKey: ["moderation-posts"] });
+              queryClient.invalidateQueries({ queryKey: ["moderation-stats"] });
+              toast.success("Data refreshed");
+            }}
+            className="gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </Button>
         </div>
 
         {/* Stats Cards */}
@@ -340,7 +332,7 @@ const ContentModeration = () => {
             onClick={() => {
               setStatusFilter("flagged");
               setPlatformFilter("all");
-              setViewMode("kanban");
+              setViewMode("issues");
               setCurrentPage(1);
               // Scroll to content list
               setTimeout(() => {
@@ -413,7 +405,7 @@ const ContentModeration = () => {
             onClick={() => {
               setStatusFilter("rejected");
               setPlatformFilter("all");
-              setViewMode("kanban");
+              setViewMode("issues");
               setCurrentPage(1);
               setTimeout(() => {
                 document.getElementById("content-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -441,15 +433,15 @@ const ContentModeration = () => {
                 <Filter className="h-5 w-5" />
                 Advanced Filters
               </CardTitle>
-              <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "queue" | "kanban")} className="w-auto">
+              <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "queue" | "issues")} className="w-auto">
                 <TabsList>
                   <TabsTrigger value="queue" className="gap-2">
                     <LayoutList className="h-4 w-4" />
                     Content Queue
                   </TabsTrigger>
-                  <TabsTrigger value="kanban" className="gap-2">
-                    <LayoutGrid className="h-4 w-4" />
-                    Kanban Board
+                  <TabsTrigger value="issues" className="gap-2">
+                    <AlertCircle className="h-4 w-4" />
+                    Issues
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
@@ -503,18 +495,6 @@ const ContentModeration = () => {
                     <SelectItem value="telegram">Telegram</SelectItem>
                   </SelectContent>
                 </Select>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="hideNew"
-                    checked={hideNew}
-                    onChange={(e) => setHideNew(e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300"
-                  />
-                  <label htmlFor="hideNew" className="text-sm font-medium">
-                    Hide New
-                  </label>
-                </div>
               </div>
 
               <div className="flex items-center justify-between">
@@ -539,8 +519,8 @@ const ContentModeration = () => {
         <Card id="content-list" className="border-2 scroll-mt-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              {viewMode === "queue" ? <LayoutList className="h-5 w-5" /> : <LayoutGrid className="h-5 w-5" />}
-              {viewMode === "queue" ? "Content Queue" : "Kanban Board"}
+              {viewMode === "queue" ? <LayoutList className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />}
+              {viewMode === "queue" ? "Content Queue" : "Issues"}
             </CardTitle>
             <CardDescription>
               {viewMode === "queue" 
