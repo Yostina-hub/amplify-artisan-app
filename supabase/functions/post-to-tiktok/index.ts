@@ -44,33 +44,28 @@ serve(async (req) => {
       );
     }
 
-    // Get TikTok platform ID
-    const { data: tiktokPlatform, error: platformError } = await supabase
-      .from('social_platforms')
-      .select('id')
-      .eq('name', 'tiktok')
-      .single();
-
-    if (platformError || !tiktokPlatform) {
-      throw new Error("TikTok platform not found");
-    }
-
-    // Get company TikTok configuration
-    const { data: config, error: configError } = await supabase
-      .from('company_platform_configs')
-      .select('access_token, is_active, config')
+    // Get TikTok credentials from unified social_platform_tokens
+    const { data: token, error: tokenError } = await supabase
+      .from('social_platform_tokens')
+      .select('*')
       .eq('company_id', companyId)
-      .eq('platform_id', tiktokPlatform.id)
+      .eq('platform', 'tiktok')
       .eq('is_active', true)
       .single();
 
-    if (configError || !config) {
-      throw new Error(`TikTok not configured for this company: ${configError?.message}`);
+    if (tokenError || !token) {
+      throw new Error(`TikTok not connected for this company: ${tokenError?.message}`);
     }
 
-    if (!config.access_token) {
+    if (!token.access_token) {
       throw new Error("TikTok access token not configured");
     }
+
+    // Map to config format for backward compatibility
+    const config = {
+      access_token: token.access_token,
+      config: token.metadata || {}
+    };
 
     // Extract video from media_urls
     const mediaItems = Array.isArray(post.media_urls) ? post.media_urls : [];
