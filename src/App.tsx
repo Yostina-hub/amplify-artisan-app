@@ -91,6 +91,7 @@ import FinancialDocument from "./pages/FinancialDocument";
 
 const queryClient = new QueryClient();
 
+// Main App component with all providers
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
