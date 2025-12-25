@@ -1,7 +1,6 @@
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+import { useState, useEffect, createContext, useContext, ReactNode, useMemo } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 
 type UserRole = 'admin' | 'agent' | 'user';
@@ -158,8 +157,22 @@ const signOut = async () => {
   });
 };
 
+const value = useMemo(() => ({
+  user,
+  session,
+  loading,
+  roles,
+  rolesDetailed,
+  isSuperAdmin,
+  isCompanyAdmin,
+  hasRole,
+  signUp,
+  signIn,
+  signOut
+}), [user, session, loading, roles, rolesDetailed, isSuperAdmin, isCompanyAdmin]);
+
 return (
-  <AuthContext.Provider value={{ user, session, loading, roles, rolesDetailed, isSuperAdmin, isCompanyAdmin, hasRole, signUp, signIn, signOut }}>
+  <AuthContext.Provider value={value}>
     {children}
   </AuthContext.Provider>
 );
