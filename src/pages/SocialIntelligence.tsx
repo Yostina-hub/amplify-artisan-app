@@ -7,13 +7,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Brain, TrendingUp, Sparkles, Target, Globe, BarChart3, Smile, Frown, Meh, MessageCircle, Hash, Search, X, Plus, Shield, Trash2, AlertCircle, Eye, ExternalLink } from 'lucide-react';
+import { Brain, TrendingUp, Sparkles, BarChart3, Smile, Frown, Meh, MessageCircle, Hash, Search, Plus, Trash2, AlertCircle, ExternalLink } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { toast } from "sonner";
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 interface Keyword {
   id: string;
@@ -44,12 +43,6 @@ interface TrendingTopic {
   growth_rate: number;
   category: string | null;
 }
-
-const SENTIMENT_COLORS = {
-  positive: "#22c55e",
-  negative: "#ef4444",
-  neutral: "#94a3b8",
-};
 
 export default function SocialIntelligence() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -121,7 +114,7 @@ export default function SocialIntelligence() {
 
       if (error) throw error;
 
-      toast.success(`${isCompetitor ? 'Competitor' : 'Keyword'} added successfully`);
+      toast.success("Keyword added successfully");
       setNewKeyword("");
       setIsCompetitor(false);
       setIsAddDialogOpen(false);
@@ -157,18 +150,16 @@ export default function SocialIntelligence() {
     }
   };
 
-  // Calculate sentiment statistics
+  // Calculate sentiment statistics from sentiment_analysis table
   const stats = sentimentData?.reduce(
     (acc, item) => {
       acc[item.sentiment]++;
       acc.total++;
-      acc.avgScore += item.sentiment_score;
       return acc;
     },
-    { positive: 0, negative: 0, neutral: 0, mixed: 0, total: 0, avgScore: 0 }
+    { positive: 0, negative: 0, neutral: 0, mixed: 0, total: 0 }
   );
 
-  const avgSentimentScore = stats ? (stats.avgScore / stats.total).toFixed(2) : '0';
   const total = stats?.total || 0;
 
   // Listening stats
@@ -176,15 +167,12 @@ export default function SocialIntelligence() {
   const avgEngagement = mentions.length > 0 
     ? Math.round(mentions.reduce((sum, m) => sum + m.engagement_count, 0) / mentions.length)
     : 0;
-  const sentimentScore = mentions.length > 0
-    ? Math.round((mentions.filter(m => m.sentiment === "positive").length / mentions.length) * 100)
-    : 0;
 
   // Calculate sentiment distribution for chart
   const sentimentChartData = [
-    { name: "Positive", value: mentions.filter(m => m.sentiment === "positive").length, color: SENTIMENT_COLORS.positive },
-    { name: "Negative", value: mentions.filter(m => m.sentiment === "negative").length, color: SENTIMENT_COLORS.negative },
-    { name: "Neutral", value: mentions.filter(m => !m.sentiment || m.sentiment === "neutral").length, color: SENTIMENT_COLORS.neutral },
+    { name: "Positive", value: stats?.positive || 0, color: "hsl(var(--chart-2))" },
+    { name: "Negative", value: stats?.negative || 0, color: "hsl(var(--destructive))" },
+    { name: "Neutral", value: stats?.neutral || 0, color: "hsl(var(--muted-foreground))" },
   ].filter(d => d.value > 0);
 
   // Mention volume over time (last 7 days)
@@ -213,31 +201,30 @@ export default function SocialIntelligence() {
     switch (sentiment) {
       case 'positive': return <Smile className="h-5 w-5 text-green-500" />;
       case 'negative': return <Frown className="h-5 w-5 text-red-500" />;
-      case 'neutral': return <Meh className="h-5 w-5 text-gray-500" />;
-      default: return <Meh className="h-5 w-5 text-yellow-500" />;
+      default: return <Meh className="h-5 w-5 text-muted-foreground" />;
     }
   };
 
   const getSentimentColor = (sentiment: string | null) => {
     if (!sentiment) return "bg-muted text-muted-foreground";
-    if (sentiment === "positive") return "text-green-600 bg-green-50";
-    if (sentiment === "negative") return "text-red-600 bg-red-50";
-    return "text-gray-600 bg-gray-50";
+    if (sentiment === "positive") return "text-green-600 bg-green-50 dark:bg-green-950";
+    if (sentiment === "negative") return "text-red-600 bg-red-50 dark:bg-red-950";
+    return "text-muted-foreground bg-muted";
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-indigo-500/5 to-purple-500/5 animate-in fade-in-50 duration-700">
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/5 animate-in fade-in-50 duration-700">
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="backdrop-blur-sm bg-card/80 p-8 rounded-2xl border-2 border-primary/20 shadow-2xl">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-4">
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 shadow-lg">
-                <Brain className="h-8 w-8 text-white" />
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-primary to-accent shadow-lg">
+                <Brain className="h-8 w-8 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                  Social Intelligence Hub
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                  Social Intelligence
                 </h1>
                 <p className="text-muted-foreground mt-2 text-lg flex items-center gap-2">
                   <Sparkles className="h-4 w-4" />
@@ -252,7 +239,7 @@ export default function SocialIntelligence() {
                   Track Keyword
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="bg-card">
                 <DialogHeader>
                   <DialogTitle>Add Keyword to Track</DialogTitle>
                 </DialogHeader>
@@ -289,7 +276,7 @@ export default function SocialIntelligence() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-green-600">{stats?.positive || 0}</div>
-              <Progress value={total > 0 ? (stats!.positive / total) * 100 : 0} className="mt-2 h-2 bg-green-100" />
+              <Progress value={total > 0 ? (stats!.positive / total) * 100 : 0} className="mt-2 h-2" />
               <p className="text-xs text-muted-foreground mt-2">
                 {total > 0 ? ((stats!.positive / total) * 100).toFixed(1) : 0}% of total
               </p>
@@ -336,16 +323,12 @@ export default function SocialIntelligence() {
           </Card>
         </div>
 
-        {/* Main Tabs */}
+        {/* Main Tabs - Reduced from 5 to 4 */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid grid-cols-5 w-full max-w-2xl">
+          <TabsList className="grid grid-cols-4 w-full max-w-xl">
             <TabsTrigger value="overview">
               <BarChart3 className="h-4 w-4 mr-2" />
               Overview
-            </TabsTrigger>
-            <TabsTrigger value="sentiment">
-              <Brain className="h-4 w-4 mr-2" />
-              Sentiment
             </TabsTrigger>
             <TabsTrigger value="mentions">
               <MessageCircle className="h-4 w-4 mr-2" />
@@ -361,7 +344,7 @@ export default function SocialIntelligence() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab */}
+          {/* Overview Tab - Now includes sentiment details */}
           <TabsContent value="overview" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <Card>
@@ -433,21 +416,19 @@ export default function SocialIntelligence() {
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
 
-          {/* Sentiment Tab */}
-          <TabsContent value="sentiment" className="space-y-4">
+            {/* Recent Sentiment Analysis - merged from Sentiment tab */}
             <Card>
               <CardHeader>
                 <CardTitle>Recent Sentiment Analysis</CardTitle>
-                <CardDescription>Latest sentiment analysis from your social media</CardDescription>
+                <CardDescription>Latest AI-analyzed content from your social channels</CardDescription>
               </CardHeader>
               <CardContent>
                 {sentimentLoading ? (
                   <div className="text-center py-8 text-muted-foreground">Loading analysis...</div>
                 ) : sentimentData && sentimentData.length > 0 ? (
-                  <div className="space-y-3">
-                    {sentimentData.slice(0, 20).map((item) => (
+                  <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                    {sentimentData.slice(0, 10).map((item) => (
                       <div key={item.id} className="p-4 border rounded-lg">
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1">
@@ -457,21 +438,10 @@ export default function SocialIntelligence() {
                                 {item.sentiment}
                               </Badge>
                               <Badge variant="secondary">{item.platform}</Badge>
-                              <span className="text-sm text-muted-foreground">
-                                Score: {item.sentiment_score.toFixed(2)}
-                              </span>
                             </div>
-                            <p className="text-sm mb-2">{item.content_text}</p>
-                            {item.topics && item.topics.length > 0 && (
-                              <div className="flex flex-wrap gap-1 mt-2">
-                                <span className="text-xs text-muted-foreground">Topics:</span>
-                                {item.topics.map((topic: string, idx: number) => (
-                                  <Badge key={idx} variant="outline" className="text-xs">{topic}</Badge>
-                                ))}
-                              </div>
-                            )}
-                            <p className="text-xs text-muted-foreground mt-2">
-                              Analyzed {new Date(item.analyzed_at).toLocaleString()}
+                            <p className="text-sm mb-2 line-clamp-2">{item.content_text}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(item.analyzed_at).toLocaleDateString()}
                             </p>
                           </div>
                         </div>
@@ -482,7 +452,6 @@ export default function SocialIntelligence() {
                   <div className="text-center py-12 text-muted-foreground">
                     <Brain className="h-12 w-12 mx-auto mb-2 opacity-50" />
                     <p>No sentiment data yet</p>
-                    <p className="text-sm mt-1">Start analyzing your social content</p>
                   </div>
                 )}
               </CardContent>
@@ -494,14 +463,14 @@ export default function SocialIntelligence() {
             <Card>
               <CardHeader>
                 <CardTitle>Recent Mentions</CardTitle>
-                <CardDescription>Recent mentions of your tracked keywords across platforms</CardDescription>
+                <CardDescription>Mentions of your tracked keywords across platforms</CardDescription>
               </CardHeader>
               <CardContent>
                 {mentions.length === 0 ? (
                   <div className="text-center py-12">
                     <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <p className="text-muted-foreground">
-                      No mentions found. Add keywords to start tracking conversations.
+                      No mentions found. Add keywords to start tracking.
                     </p>
                   </div>
                 ) : (
@@ -523,7 +492,7 @@ export default function SocialIntelligence() {
                             {mention.post_url && (
                               <a href={mention.post_url} target="_blank" rel="noopener noreferrer" 
                                  className="text-primary hover:underline flex items-center gap-1">
-                                <ExternalLink className="w-3 h-3" /> View Post
+                                <ExternalLink className="w-3 h-3" /> View
                               </a>
                             )}
                           </div>
@@ -541,18 +510,18 @@ export default function SocialIntelligence() {
             <Card>
               <CardHeader>
                 <CardTitle>Tracked Keywords</CardTitle>
-                <CardDescription>Keywords and hashtags you're monitoring across platforms</CardDescription>
+                <CardDescription>Keywords and hashtags you're monitoring</CardDescription>
               </CardHeader>
               <CardContent>
                 {keywords.length === 0 ? (
                   <div className="text-center py-12">
                     <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <p className="text-muted-foreground mb-4">
-                      No keywords yet. Start tracking brands, hashtags, or competitors.
+                      No keywords yet. Start tracking brands or hashtags.
                     </p>
                     <Button onClick={() => setIsAddDialogOpen(true)}>
                       <Plus className="h-4 w-4 mr-2" />
-                      Add Your First Keyword
+                      Add First Keyword
                     </Button>
                   </div>
                 ) : (
@@ -565,9 +534,6 @@ export default function SocialIntelligence() {
                           <Badge variant={keyword.is_active ? "default" : "secondary"}>
                             {keyword.is_active ? "Active" : "Inactive"}
                           </Badge>
-                          {keyword.is_competitor && (
-                            <Badge variant="outline" className="bg-accent/10">Competitor</Badge>
-                          )}
                         </div>
                         <div className="flex items-center gap-2">
                           <Button variant="outline" size="sm" onClick={() => handleToggleKeyword(keyword.id, keyword.is_active)}>
@@ -590,7 +556,7 @@ export default function SocialIntelligence() {
             <Card>
               <CardHeader>
                 <CardTitle>Trending Topics</CardTitle>
-                <CardDescription>Current trending topics relevant to your industry</CardDescription>
+                <CardDescription>Current trending topics in your industry</CardDescription>
               </CardHeader>
               <CardContent>
                 {trends.length === 0 ? (
