@@ -337,8 +337,9 @@ async function publishToTikTok(content: any, token: any): Promise<{ postId: stri
 
 async function publishToTelegram(content: any, token: any) {
   // Telegram Bot API implementation
-  const botToken = token.bot_token;
-  const channelId = token.channel_id;
+  // access_token stores the bot token, account_id stores the channel ID
+  const botToken = token.access_token;
+  const channelId = token.account_id;
 
   const response = await fetch(
     `https://api.telegram.org/bot${botToken}/sendMessage`,
