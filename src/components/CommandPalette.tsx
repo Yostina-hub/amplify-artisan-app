@@ -66,7 +66,6 @@ export function CommandPalette() {
     { id: "nav-calendar", label: "Calendar", icon: Calendar, action: () => navigate("/calendar"), group: "Navigation" },
     
     // AI Features
-    { id: "ai-studio", label: "AI Content Studio", icon: Sparkles, action: () => navigate("/ai-studio"), group: "AI Features" },
     { id: "ai-inbox", label: "Social Inbox", icon: MessageCircle, action: () => navigate("/social-inbox"), group: "AI Features" },
     { id: "ai-automation", label: "Automation", icon: Zap, action: () => navigate("/automation"), group: "AI Features" },
     { id: "ai-analytics", label: "AI Analytics", icon: BarChart3, action: () => navigate("/ai-analytics"), group: "AI Features" },
