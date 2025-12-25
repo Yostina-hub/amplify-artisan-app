@@ -90,7 +90,6 @@ const companySettingsItems = [
   { title: "User Management", url: "/admin/users", icon: Users },
   { title: "Live Chat Dashboard", url: "/admin/live-chat", icon: MessageCircle },
   { title: "Platform Access", url: "/company/platform-subscriptions", icon: Package },
-  { title: "Platform API Settings", url: "/company/platform-settings", icon: Key },
   { title: "Email Settings", url: "/company/email-settings", icon: Mail },
   { title: "API Integrations", url: "/company/api-management", icon: Database },
   { title: "Call Center Setup", url: "/company/call-center-integrations", icon: Phone },
