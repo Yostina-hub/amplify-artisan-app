@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,7 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CalendarIcon, Image, Smile, Twitter, Instagram, Linkedin, Facebook, Youtube, MessageCircle, Pin, Camera, Send, Phone, Sparkles, TrendingUp, Clock, Globe, Zap, BarChart3, Target, Hash, AtSign, MapPin, Wand2, Languages, RefreshCw } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CalendarIcon, Image, Smile, Twitter, Instagram, Linkedin, Facebook, Youtube, MessageCircle, Pin, Camera, Send, Phone, Sparkles, TrendingUp, Clock, Globe, Zap, BarChart3, Target, Hash, AtSign, MapPin, Wand2, Languages, RefreshCw, Link2, CheckCircle2, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -66,7 +68,10 @@ export default function Composer() {
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
   const [performancePrediction, setPerformancePrediction] = useState<any>(null);
+  const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>([]);
+  const [loadingConnections, setLoadingConnections] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   const platforms = [
     { id: "twitter", name: "Twitter", icon: Twitter, color: "from-[#1DA1F2] to-[#1a8cd8]", maxChars: 280 },
@@ -90,6 +95,46 @@ export default function Composer() {
   const charLimit = getCharacterLimit();
   const charCount = content.length;
   const charPercentage = (charCount / charLimit) * 100;
+
+  // Fetch connected platforms on mount
+  useEffect(() => {
+    const fetchConnectedPlatforms = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          setLoadingConnections(false);
+          return;
+        }
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('company_id')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (!profile?.company_id) {
+          setLoadingConnections(false);
+          return;
+        }
+
+        const { data: tokens } = await supabase
+          .from('social_platform_tokens')
+          .select('platform')
+          .eq('company_id', profile.company_id)
+          .eq('is_active', true);
+
+        if (tokens) {
+          setConnectedPlatforms(tokens.map(t => t.platform));
+        }
+      } catch (error) {
+        console.error('Error fetching connected platforms:', error);
+      } finally {
+        setLoadingConnections(false);
+      }
+    };
+
+    fetchConnectedPlatforms();
+  }, []);
 
   useEffect(() => {
     if (content.length > 50 && selectedPlatforms.length > 0) {
@@ -484,10 +529,48 @@ export default function Composer() {
                   </TabsList>
 
                   <TabsContent value="platforms" className="space-y-4 mt-4">
+                    {connectedPlatforms.length === 0 && !loadingConnections && (
+                      <Alert className="border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
+                        <AlertCircle className="h-4 w-4 text-amber-600" />
+                        <AlertDescription className="flex items-center justify-between">
+                          <span className="text-amber-800 dark:text-amber-200">
+                            No social accounts connected. Connect platforms to publish directly.
+                          </span>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="ml-4"
+                            onClick={() => navigate('/social-connections')}
+                          >
+                            <Link2 className="h-4 w-4 mr-2" />
+                            Connect
+                          </Button>
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                    
+                    {connectedPlatforms.length > 0 && (
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                          <span>{connectedPlatforms.length} platform(s) connected</span>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          variant="ghost"
+                          onClick={() => navigate('/social-connections')}
+                        >
+                          <Link2 className="h-4 w-4 mr-2" />
+                          Manage
+                        </Button>
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                       {platforms.map((platform) => {
                         const Icon = platform.icon;
                         const isSelected = selectedPlatforms.includes(platform.id);
+                        const isConnected = connectedPlatforms.includes(platform.id);
                         return (
                           <div
                             key={platform.id}
@@ -509,11 +592,23 @@ export default function Composer() {
                                 {platform.name}
                               </span>
                             </div>
-                            {isSelected && platform.maxChars !== Infinity && (
-                              <div className="mt-2 text-xs opacity-90">
-                                Max: {platform.maxChars} chars
-                              </div>
-                            )}
+                            <div className="mt-2 flex items-center justify-between">
+                              {isConnected ? (
+                                <Badge variant="secondary" className={cn("text-xs gap-1", isSelected ? "bg-white/20 text-white" : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400")}>
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  Connected
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className={cn("text-xs", isSelected ? "border-white/50 text-white/80" : "text-muted-foreground")}>
+                                  Not linked
+                                </Badge>
+                              )}
+                              {isSelected && platform.maxChars !== Infinity && (
+                                <span className="text-xs opacity-90">
+                                  {platform.maxChars} chars
+                                </span>
+                              )}
+                            </div>
                           </div>
                         );
                       })}
@@ -854,7 +949,13 @@ export default function Composer() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Platforms</span>
+                  <span className="text-sm text-muted-foreground">Connected</span>
+                  <Badge variant={connectedPlatforms.length > 0 ? "default" : "secondary"} className={connectedPlatforms.length > 0 ? "bg-green-600" : ""}>
+                    {connectedPlatforms.length}
+                  </Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Selected</span>
                   <Badge>{selectedPlatforms.length}</Badge>
                 </div>
                 <div className="flex justify-between items-center">
