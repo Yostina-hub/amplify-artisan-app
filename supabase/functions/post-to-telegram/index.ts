@@ -44,33 +44,28 @@ serve(async (req) => {
       );
     }
 
-    // Get Telegram platform ID
-    const { data: telegramPlatform, error: platformError } = await supabase
-      .from('social_platforms')
-      .select('id')
-      .eq('name', 'telegram')
-      .single();
-
-    if (platformError || !telegramPlatform) {
-      throw new Error("Telegram platform not found");
-    }
-
-    // Get company Telegram configuration
-    const { data: config, error: configError } = await supabase
-      .from('company_platform_configs')
-      .select('api_key, channel_id, is_active')
+    // Get Telegram credentials from unified social_platform_tokens
+    const { data: token, error: tokenError } = await supabase
+      .from('social_platform_tokens')
+      .select('*')
       .eq('company_id', companyId)
-      .eq('platform_id', telegramPlatform.id)
+      .eq('platform', 'telegram')
       .eq('is_active', true)
       .single();
 
-    if (configError || !config) {
-      throw new Error(`Telegram not configured for this company: ${configError?.message}`);
+    if (tokenError || !token) {
+      throw new Error(`Telegram not connected for this company: ${tokenError?.message}`);
     }
 
-    if (!config.api_key || !config.channel_id) {
+    if (!token.access_token || !token.account_id) {
       throw new Error("Telegram bot token or channel ID not configured");
     }
+
+    // Map to config format for backward compatibility
+    const config = {
+      api_key: token.access_token,
+      channel_id: token.account_id
+    };
 
     // Send message to Telegram (with or without media)
     const mediaItems = Array.isArray(post.media_urls) ? post.media_urls : [];
