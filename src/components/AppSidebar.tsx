@@ -25,7 +25,6 @@ const mainItems = [
 // Analytics & Insights - Consolidated
 const analyticsItems = [
   { title: "Analytics Hub", url: "/analytics", icon: BarChart3 },
-  { title: "Reach Analytics", url: "/admin/reach-analytics", icon: TrendingUp },
 ];
 
 // AI & Automation - Consolidated

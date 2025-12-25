@@ -34,7 +34,7 @@ import SocialPlatformManagement from "./pages/admin/SocialPlatformManagement";
 import SocialConnections from "./pages/SocialConnections";
 import CompanyPlatformSubscriptions from "./pages/CompanyPlatformSubscriptions";
 import AdminCompanyPlatformSubscriptions from "./pages/admin/CompanyPlatformSubscriptions";
-import ReachAnalytics from "./pages/admin/ReachAnalytics";
+
 import ForcePasswordChange from "./pages/ForcePasswordChange";
 import LandingPageManager from "./pages/admin/LandingPageManager";
 import IndustryManagement from "./pages/admin/IndustryManagement";
@@ -134,7 +134,7 @@ const App = () => (
               <Route path="/admin/email-settings" element={<ProtectedRoute requiredRole="admin"><EmailSettings /></ProtectedRoute>} />
               <Route path="/admin/social-platforms" element={<ProtectedRoute requiredRole="admin"><SocialPlatformManagement /></ProtectedRoute>} />
               <Route path="/admin/platform-subscriptions" element={<ProtectedRoute requiredRole="admin"><AdminCompanyPlatformSubscriptions /></ProtectedRoute>} />
-              <Route path="/admin/reach-analytics" element={<ProtectedRoute requiredRole="admin"><ReachAnalytics /></ProtectedRoute>} />
+              
               <Route path="/admin/landing-page" element={<ProtectedRoute requiredRole="admin"><LandingPageManager /></ProtectedRoute>} />
               <Route path="/admin/industries" element={<ProtectedRoute requiredRole="admin"><IndustryManagement /></ProtectedRoute>} />
               <Route path="/admin/pricing" element={<ProtectedRoute requiredRole="admin"><PricingManagement /></ProtectedRoute>} />
