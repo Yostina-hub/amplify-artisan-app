@@ -39,7 +39,7 @@ const aiAutomationItems = [
 // Social Media Management - Consolidated
 const socialMediaItems = [
   { title: "Social Inbox", url: "/social-inbox", icon: MessageCircle },
-  { title: "Connected Accounts", url: "/social-media-credentials", icon: Link2 },
+  { title: "Social Connections", url: "/social-connections", icon: Link2 },
   { title: "Social Intelligence", url: "/social-intelligence", icon: Brain },
   { title: "Social Listening", url: "/social-listening", icon: Radio },
   { title: "Brand Monitoring", url: "/brand-monitoring", icon: MessageCircle },

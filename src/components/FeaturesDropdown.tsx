@@ -9,7 +9,7 @@ import { ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const features = [
-  { name: "One-Click Social Connect", icon: Link2, description: "Connect all platforms instantly", path: "/social-media-credentials" },
+  { name: "One-Click Social Connect", icon: Link2, description: "Connect all platforms instantly", path: "/social-connections" },
   { name: "Content Scheduling", icon: Calendar, description: "Plan and schedule posts", path: "/composer" },
   { name: "Analytics", icon: BarChart3, description: "Track performance", path: "/analytics" },
   { name: "Social Inbox", icon: MessageSquare, description: "Manage conversations", path: "/social-inbox" },

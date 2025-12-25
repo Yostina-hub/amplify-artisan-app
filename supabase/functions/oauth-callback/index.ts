@@ -43,39 +43,44 @@ serve(async (req) => {
 
     console.log(`Processing OAuth callback for ${platform}...`);
 
-    // Get company platform configuration
-    const { data: companyConfig } = await supabase
-      .from('company_platform_configs')
+    // First, try to get centralized platform OAuth (text-based platform_id like 'facebook')
+    let config;
+    const { data: platformOAuthConfig } = await supabase
+      .from('platform_oauth_apps')
       .select('*')
-      .eq('company_id', companyId)
-      .eq('platform_id', platform)
+      .eq('platform_id', platform.toLowerCase())
+      .eq('is_active', true)
       .maybeSingle();
 
-    // Determine which OAuth credentials to use
-    let config;
-    const usePlatformOAuth = companyConfig?.use_platform_oauth ?? true;
-
-    if (usePlatformOAuth) {
-      // Use centralized platform OAuth credentials
+    if (platformOAuthConfig) {
       console.log(`Using centralized platform OAuth for ${platform}`);
-      const { data: platformConfig } = await supabase
-        .from('platform_oauth_apps')
-        .select('*')
-        .eq('platform_id', platform)
-        .eq('is_active', true)
+      config = platformOAuthConfig;
+    } else {
+      // Fallback: Check if there's a company-specific config
+      // First get the platform UUID from social_platforms table
+      const { data: socialPlatform } = await supabase
+        .from('social_platforms')
+        .select('id')
+        .ilike('name', platform)
         .maybeSingle();
 
-      if (!platformConfig) {
-        throw new Error('Centralized platform OAuth not configured for this platform');
+      if (socialPlatform) {
+        const { data: companyConfig } = await supabase
+          .from('company_platform_configs')
+          .select('*')
+          .eq('company_id', companyId)
+          .eq('platform_id', socialPlatform.id)
+          .maybeSingle();
+
+        if (companyConfig && !companyConfig.use_platform_oauth && companyConfig.client_id) {
+          console.log(`Using company-specific OAuth for ${platform}`);
+          config = companyConfig;
+        }
       }
-      config = platformConfig;
-    } else {
-      // Use company-specific OAuth credentials
-      console.log(`Using company-specific OAuth for ${platform}`);
-      if (!companyConfig) {
-        throw new Error('Company platform configuration not found');
-      }
-      config = companyConfig;
+    }
+
+    if (!config) {
+      throw new Error(`OAuth not configured for ${platform}. Contact your administrator.`);
     }
 
     if (!config.client_id || !config.client_secret) {
