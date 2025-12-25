@@ -57,7 +57,7 @@ export default function Automation() {
   });
 
   // Fetch workflows
-  const { data: workflows, isLoading } = useQuery({
+  const { data: workflows, isLoading, error: workflowError } = useQuery({
     queryKey: ['automation-workflows'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -67,16 +67,20 @@ export default function Automation() {
         .from('profiles')
         .select('company_id')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
+
+      if (!profile?.company_id) {
+        return []; // Return empty array if no company
+      }
 
       const { data, error } = await supabase
         .from('automation_workflows')
         .select('*')
-        .eq('company_id', profile?.company_id)
+        .eq('company_id', profile.company_id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data || [];
     },
   });
 
@@ -427,6 +431,10 @@ export default function Automation() {
         <div className="flex items-center justify-center p-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
+      ) : workflowError ? (
+        <Card className="p-8 text-center">
+          <p className="text-muted-foreground">Unable to load workflows. Please try again.</p>
+        </Card>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
