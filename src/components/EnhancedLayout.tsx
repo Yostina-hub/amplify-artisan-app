@@ -90,11 +90,11 @@ export function EnhancedLayout() {
 
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="min-h-screen flex w-full bg-gradient-to-br from-background via-background to-muted/20">
+      <div className="h-screen flex w-full bg-gradient-to-br from-background via-background to-muted/20 overflow-hidden">
         <AppSidebar />
-        <div className="flex-1 flex flex-col pb-16 lg:pb-0">
+        <div className="flex-1 flex flex-col h-screen overflow-hidden pb-16 lg:pb-0">
           {/* Enhanced Header */}
-          <header className="h-14 lg:h-16 border-b border-border bg-card/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
+          <header className="h-14 lg:h-16 border-b border-border bg-card/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm flex-shrink-0">
             <div className="flex items-center justify-between h-full px-3 lg:px-6">
               {/* Left Section */}
               <div className="flex items-center gap-2 lg:gap-4">
@@ -245,8 +245,8 @@ export function EnhancedLayout() {
             </div>
           </header>
 
-          {/* Main Content Area */}
-          <main className="flex-1 p-3 lg:p-6 overflow-auto">
+          {/* Main Content Area - Independent scroll */}
+          <main className="flex-1 p-3 lg:p-6 overflow-y-auto overflow-x-hidden">
             <div className="max-w-[1600px] mx-auto">
               <Outlet />
             </div>
