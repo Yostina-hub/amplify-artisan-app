@@ -88,7 +88,7 @@ const fetchUserRoles = async (userId: string) => {
   const superAdmin = detailed.some(r => r.role === 'admin' && (r.company_id === null || r.company_id === undefined));
   const companyAdmin = detailed.some(r => r.role === 'admin' && r.company_id);
 
-  console.log('User roles loaded:', userRoles);
+  
   setRoles(userRoles);
   setRolesDetailed(detailed);
   setIsSuperAdmin(superAdmin);
