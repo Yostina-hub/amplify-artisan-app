@@ -16,18 +16,15 @@ import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import Agents from "./pages/Agents";
 import Auth from "./pages/Auth";
-import BrandMonitoring from "./pages/BrandMonitoring";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
 import ContentModeration from "./pages/admin/ContentModeration";
-import SystemSettings from "./pages/admin/SystemSettings";
 import SystemConfiguration from "./pages/admin/SystemConfiguration";
 import PlatformOAuthApps from "./pages/admin/PlatformOAuthApps";
 import EmailSettings from "./pages/admin/EmailSettings";
 import CompanyEmailSettings from "./pages/CompanyEmailSettings";
 import SocialMediaMetrics from "./pages/SocialMediaMetrics";
 import AdCampaigns from "./pages/AdCampaigns";
-import SocialListening from "./pages/SocialListening";
 import InfluencerMarketing from "./pages/InfluencerMarketing";
 import NotFound from "./pages/NotFound";
 import PendingApproval from "./pages/PendingApproval";
@@ -83,7 +80,7 @@ import CustomerSupport from "./pages/CustomerSupport";
 import CallCenter from "./pages/CallCenter";
 import ProjectManagement from "./pages/ProjectManagement";
 import ContractManagement from "./pages/ContractManagement";
-import TTSSettings from "./pages/TTSSettings";
+import { TTSSettings } from "./components/TTSSettings";
 import BranchManagement from "./pages/admin/BranchManagement";
 import PermissionManagement from "./pages/admin/PermissionManagement";
 import CallCenterIntegrations from "./pages/admin/CallCenterIntegrations";
@@ -126,8 +123,6 @@ const App = () => (
               <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
               <Route path="/ad-campaigns" element={<ProtectedRoute><AdCampaigns /></ProtectedRoute>} />
               <Route path="/influencer-marketing" element={<ProtectedRoute><InfluencerMarketing /></ProtectedRoute>} />
-              <Route path="/brand-monitoring" element={<ProtectedRoute><BrandMonitoring /></ProtectedRoute>} />
-              <Route path="/social-listening" element={<ProtectedRoute><SocialListening /></ProtectedRoute>} />
               <Route path="/agents" element={<ProtectedRoute requiredRole="agent"><Agents /></ProtectedRoute>} />
               
               {/* Admin routes */}
@@ -135,7 +130,7 @@ const App = () => (
               <Route path="/admin/companies" element={<ProtectedRoute requiredRole="admin"><CompanyManagement /></ProtectedRoute>} />
               <Route path="/admin/users" element={<ProtectedRoute requiredRole="admin"><UserManagement /></ProtectedRoute>} />
               <Route path="/admin/moderation" element={<ProtectedRoute requiredRole="admin"><ContentModeration /></ProtectedRoute>} />
-              <Route path="/admin/settings" element={<ProtectedRoute requiredRole="admin"><SystemSettings /></ProtectedRoute>} />
+              <Route path="/admin/settings" element={<ProtectedRoute requiredRole="admin"><SystemConfiguration /></ProtectedRoute>} />
               <Route path="/admin/system-config" element={<ProtectedRoute requiredRole="admin"><SystemConfiguration /></ProtectedRoute>} />
               <Route path="/admin/email-settings" element={<ProtectedRoute requiredRole="admin"><EmailSettings /></ProtectedRoute>} />
               <Route path="/admin/social-platforms" element={<ProtectedRoute requiredRole="admin"><SocialPlatformManagement /></ProtectedRoute>} />
