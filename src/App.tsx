@@ -53,7 +53,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Help from "./pages/Help";
 import APIManagement from "./pages/admin/APIManagement";
 import CompanyAPIManagement from "./pages/CompanyAPIManagement";
-import AIStudio from "./pages/AIStudio";
+
 import SocialInbox from "./pages/SocialInbox";
 import SocialIntelligence from "./pages/SocialIntelligence";
 import Automation from "./pages/Automation";
@@ -162,7 +162,7 @@ const App = () => (
               <Route path="/tts-settings" element={<ProtectedRoute><TTSSettings /></ProtectedRoute>} />
               
               {/* AI Features */}
-              <Route path="/ai-studio" element={<ProtectedRoute><AIStudio /></ProtectedRoute>} />
+              {/* AI Studio removed */}
               <Route path="/social-inbox" element={<ProtectedRoute><SocialInbox /></ProtectedRoute>} />
               <Route path="/social-intelligence" element={<ProtectedRoute><SocialIntelligence /></ProtectedRoute>} />
               <Route path="/automation" element={<ProtectedRoute><Automation /></ProtectedRoute>} />

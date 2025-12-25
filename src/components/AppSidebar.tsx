@@ -30,7 +30,6 @@ const analyticsItems = [
 
 // AI & Automation - Consolidated
 const aiAutomationItems = [
-  { title: "AI Content Studio", url: "/ai-studio", icon: Sparkles },
   { title: "Automation Workflows", url: "/automation", icon: Zap },
 ];
 
