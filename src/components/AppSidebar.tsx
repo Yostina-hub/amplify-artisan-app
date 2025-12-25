@@ -24,9 +24,8 @@ const mainItems = [
 
 // Analytics & Insights - Consolidated
 const analyticsItems = [
-  { title: "Overview Dashboard", url: "/reporting-dashboard", icon: BarChart3 },
-  { title: "Analytics Hub", url: "/admin/reach-analytics", icon: TrendingUp },
-  { title: "AI Insights", url: "/ai-analytics", icon: LineChart },
+  { title: "Analytics Hub", url: "/analytics", icon: BarChart3 },
+  { title: "Reach Analytics", url: "/admin/reach-analytics", icon: TrendingUp },
 ];
 
 // AI & Automation - Consolidated

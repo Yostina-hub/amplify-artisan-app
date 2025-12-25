@@ -23,7 +23,7 @@ import SystemConfiguration from "./pages/admin/SystemConfiguration";
 import PlatformOAuthApps from "./pages/admin/PlatformOAuthApps";
 import EmailSettings from "./pages/admin/EmailSettings";
 import CompanyEmailSettings from "./pages/CompanyEmailSettings";
-import SocialMediaMetrics from "./pages/SocialMediaMetrics";
+
 import AdCampaigns from "./pages/AdCampaigns";
 import InfluencerMarketing from "./pages/InfluencerMarketing";
 import NotFound from "./pages/NotFound";
@@ -57,11 +57,11 @@ import AIStudio from "./pages/AIStudio";
 import SocialInbox from "./pages/SocialInbox";
 import SocialIntelligence from "./pages/SocialIntelligence";
 import Automation from "./pages/Automation";
-import AIAnalytics from "./pages/AIAnalytics";
+
 import ModuleBuilder from "./pages/ModuleBuilder";
 import FormBuilder from "./pages/FormBuilder";
 import WorkflowBuilder from "./pages/WorkflowBuilder";
-import ReportingDashboard from "./pages/ReportingDashboard";
+
 import CRMFeatureStatus from "./pages/CRMFeatureStatus";
 import Contacts from "./pages/Contacts";
 import Accounts from "./pages/Accounts";
@@ -167,14 +167,14 @@ const App = () => (
               <Route path="/social-inbox" element={<ProtectedRoute><SocialInbox /></ProtectedRoute>} />
               <Route path="/social-intelligence" element={<ProtectedRoute><SocialIntelligence /></ProtectedRoute>} />
               <Route path="/automation" element={<ProtectedRoute><Automation /></ProtectedRoute>} />
-              <Route path="/ai-analytics" element={<ProtectedRoute><AIAnalytics /></ProtectedRoute>} />
+              <Route path="/ai-analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
               <Route path="/social-connections" element={<ProtectedRoute><SocialConnections /></ProtectedRoute>} />
               
               {/* Enterprise Builder */}
               <Route path="/module-builder" element={<ProtectedRoute><ModuleBuilder /></ProtectedRoute>} />
               <Route path="/form-builder" element={<ProtectedRoute><FormBuilder /></ProtectedRoute>} />
               <Route path="/workflow-builder" element={<ProtectedRoute><WorkflowBuilder /></ProtectedRoute>} />
-              <Route path="/reporting-dashboard" element={<ProtectedRoute><ReportingDashboard /></ProtectedRoute>} />
+              <Route path="/reporting-dashboard" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
               <Route path="/crm-roadmap" element={<ProtectedRoute><CRMFeatureStatus /></ProtectedRoute>} />
               
               {/* CRM */}
