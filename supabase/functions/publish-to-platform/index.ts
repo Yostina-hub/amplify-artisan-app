@@ -104,6 +104,15 @@ serve(async (req) => {
           case 'telegram':
             postResult = await publishToTelegram(content, token);
             break;
+          case 'youtube':
+            postResult = await publishToYouTube(content, token);
+            break;
+          case 'pinterest':
+            postResult = await publishToPinterest(content, token);
+            break;
+          case 'whatsapp':
+            postResult = await publishToWhatsApp(content, token);
+            break;
           default:
             throw new Error(`Platform ${platform} not supported`);
         }
@@ -336,8 +345,6 @@ async function publishToTikTok(content: any, token: any): Promise<{ postId: stri
 }
 
 async function publishToTelegram(content: any, token: any) {
-  // Telegram Bot API implementation
-  // access_token stores the bot token, account_id stores the channel ID
   const botToken = token.access_token;
   const channelId = token.account_id;
 
@@ -345,9 +352,7 @@ async function publishToTelegram(content: any, token: any) {
     `https://api.telegram.org/bot${botToken}/sendMessage`,
     {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         chat_id: channelId,
         text: content.generated_text,
@@ -357,7 +362,6 @@ async function publishToTelegram(content: any, token: any) {
   );
 
   const data = await response.json();
-  
   if (!data.ok) {
     throw new Error(data.description || 'Telegram API error');
   }
@@ -365,5 +369,110 @@ async function publishToTelegram(content: any, token: any) {
   return {
     postId: data.result.message_id.toString(),
     postUrl: `https://t.me/${channelId}/${data.result.message_id}`
+  };
+}
+
+async function publishToYouTube(content: any, token: any) {
+  // YouTube Data API v3 - Create a community post or video description
+  // Note: Full video upload requires complex chunked upload
+  const response = await fetch(
+    'https://www.googleapis.com/youtube/v3/activities?part=snippet',
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        snippet: {
+          description: content.generated_text,
+        }
+      }),
+    }
+  );
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error?.message || 'YouTube API error');
+  }
+
+  return {
+    postId: data.id || 'yt-post',
+    postUrl: `https://youtube.com/channel/${token.account_id}`
+  };
+}
+
+async function publishToPinterest(content: any, token: any) {
+  // Pinterest API v5 - Create a Pin
+  const imageUrl = content.generated_images?.[0] || '';
+  
+  if (!imageUrl) {
+    throw new Error('Pinterest requires an image to create a pin');
+  }
+
+  const response = await fetch('https://api.pinterest.com/v5/pins', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token.access_token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      board_id: token.metadata?.board_id || token.account_id,
+      media_source: {
+        source_type: 'image_url',
+        url: imageUrl
+      },
+      title: content.generated_text.substring(0, 100),
+      description: content.generated_text,
+      link: content.metadata?.link || ''
+    }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || 'Pinterest API error');
+  }
+
+  return {
+    postId: data.id,
+    postUrl: `https://pinterest.com/pin/${data.id}`
+  };
+}
+
+async function publishToWhatsApp(content: any, token: any) {
+  // WhatsApp Business Cloud API
+  const apiToken = token.access_token;
+  const phoneNumberId = token.account_id;
+  const recipientNumber = token.metadata?.broadcast_list || token.metadata?.recipient;
+
+  if (!recipientNumber) {
+    throw new Error('WhatsApp requires a recipient number or broadcast list');
+  }
+
+  const response = await fetch(
+    `https://graph.facebook.com/v18.0/${phoneNumberId}/messages`,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to: recipientNumber,
+        type: 'text',
+        text: { body: content.generated_text }
+      }),
+    }
+  );
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error?.message || 'WhatsApp API error');
+  }
+
+  return {
+    postId: data.messages?.[0]?.id || 'wa-msg',
+    postUrl: `https://wa.me/${recipientNumber}`
   };
 }
