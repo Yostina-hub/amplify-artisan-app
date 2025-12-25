@@ -60,7 +60,6 @@ import Automation from "./pages/Automation";
 
 import ModuleBuilder from "./pages/ModuleBuilder";
 import FormBuilder from "./pages/FormBuilder";
-import WorkflowBuilder from "./pages/WorkflowBuilder";
 
 import CRMFeatureStatus from "./pages/CRMFeatureStatus";
 import Contacts from "./pages/Contacts";
@@ -173,7 +172,7 @@ const App = () => (
               {/* Enterprise Builder */}
               <Route path="/module-builder" element={<ProtectedRoute><ModuleBuilder /></ProtectedRoute>} />
               <Route path="/form-builder" element={<ProtectedRoute><FormBuilder /></ProtectedRoute>} />
-              <Route path="/workflow-builder" element={<ProtectedRoute><WorkflowBuilder /></ProtectedRoute>} />
+              <Route path="/workflow-builder" element={<ProtectedRoute><Automation /></ProtectedRoute>} />
               <Route path="/reporting-dashboard" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
               <Route path="/crm-roadmap" element={<ProtectedRoute><CRMFeatureStatus /></ProtectedRoute>} />
               

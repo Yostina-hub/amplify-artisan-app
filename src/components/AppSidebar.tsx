@@ -32,7 +32,6 @@ const analyticsItems = [
 const aiAutomationItems = [
   { title: "AI Content Studio", url: "/ai-studio", icon: Sparkles },
   { title: "Automation Workflows", url: "/automation", icon: Zap },
-  { title: "Workflow Builder", url: "/workflow-builder", icon: Zap },
 ];
 
 // Social Media Management - Consolidated
