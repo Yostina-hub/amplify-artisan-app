@@ -149,10 +149,6 @@ export function AppSidebar() {
     setAdminSystemOpen(newState);
   };
 
-  console.log('AppSidebar - User roles:', roles);
-  console.log('AppSidebar - Is super admin:', isSuperAdmin);
-  console.log('AppSidebar - Is company admin:', isCompanyAdmin);
-
   return (
     <Sidebar collapsible="none" className="border-r bg-sidebar h-screen sticky top-0">
       <SidebarContent className="bg-sidebar text-sidebar-foreground overflow-y-auto h-full">
