@@ -113,6 +113,9 @@ serve(async (req) => {
           case 'whatsapp':
             postResult = await publishToWhatsApp(content, token);
             break;
+          case 'snapchat':
+            postResult = await publishToSnapchat(content, token);
+            break;
           default:
             throw new Error(`Platform ${platform} not supported`);
         }
@@ -474,5 +477,46 @@ async function publishToWhatsApp(content: any, token: any) {
   return {
     postId: data.messages?.[0]?.id || 'wa-msg',
     postUrl: `https://wa.me/${recipientNumber}`
+  };
+}
+
+async function publishToSnapchat(content: any, token: any) {
+  // Snapchat Marketing API - Create Spotlight content
+  const accessToken = token.access_token;
+  const adAccountId = token.account_id;
+
+  // Snapchat requires media upload first
+  const mediaUrl = content.generated_images?.[0] || '';
+  
+  const response = await fetch(
+    `https://adsapi.snapchat.com/v1/adaccounts/${adAccountId}/creatives`,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        creatives: [{
+          ad_account_id: adAccountId,
+          type: 'SNAP_AD',
+          headline: content.generated_text.substring(0, 34),
+          name: content.generated_text.substring(0, 64),
+          top_snap_media_id: mediaUrl,
+        }]
+      }),
+    }
+  );
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.request_status?.error_message || 'Snapchat API error');
+  }
+
+  const creativeId = data.creatives?.[0]?.creative?.id || 'snap-creative';
+
+  return {
+    postId: creativeId,
+    postUrl: `https://business.snapchat.com/dashboard/creatives/${creativeId}`
   };
 }

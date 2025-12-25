@@ -94,6 +94,14 @@ const PLATFORMS = [
     type: 'direct',
     fields: ['api_token', 'phone_number_id']
   },
+  { 
+    id: 'snapchat', 
+    name: 'Snapchat', 
+    gradient: 'from-yellow-400 to-yellow-500', 
+    icon: '👻',
+    type: 'oauth',
+    scopes: 'snapchat-marketing-api'
+  },
 ];
 
 export default function SocialConnections() {
@@ -298,6 +306,9 @@ export default function SocialConnections() {
           break;
         case 'pinterest':
           authUrl = `https://www.pinterest.com/oauth/?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${encodeURIComponent(platform?.scopes || '')}&state=${state}`;
+          break;
+        case 'snapchat':
+          authUrl = `https://accounts.snapchat.com/login/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${encodeURIComponent(platform?.scopes || '')}&state=${state}`;
           break;
         default:
           toast({
