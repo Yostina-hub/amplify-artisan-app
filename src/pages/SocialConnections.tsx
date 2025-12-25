@@ -79,6 +79,14 @@ const PLATFORMS = [
     scopes: 'https://www.googleapis.com/auth/youtube'
   },
   { 
+    id: 'pinterest', 
+    name: 'Pinterest', 
+    gradient: 'from-red-600 to-rose-500', 
+    icon: '📌',
+    type: 'oauth',
+    scopes: 'boards:read,pins:read,pins:write'
+  },
+  { 
     id: 'whatsapp', 
     name: 'WhatsApp', 
     gradient: 'from-green-500 to-green-600', 
@@ -164,23 +172,46 @@ export default function SocialConnections() {
         }
       }
 
-      // Save token
-      const { error } = await supabase
+      const accountId = data.channel_id || data.phone_number_id;
+      
+      // Check if already exists
+      const { data: existing } = await supabase
         .from('social_platform_tokens')
-        .upsert({
-          company_id: profile.company_id,
-          user_id: user.id,
-          platform,
-          access_token: data.bot_token || data.api_token,
-          account_id: data.channel_id || data.phone_number_id,
-          account_name: data.channel_id || data.phone_number_id,
-          is_active: true,
-          metadata: { ...data, connected_via: 'direct' }
-        }, {
-          onConflict: 'company_id,platform,account_id'
-        });
+        .select('id')
+        .eq('company_id', profile.company_id)
+        .eq('platform', platform)
+        .eq('account_id', accountId)
+        .single();
 
-      if (error) throw error;
+      if (existing) {
+        // Update existing token
+        const { error } = await supabase
+          .from('social_platform_tokens')
+          .update({
+            access_token: data.bot_token || data.api_token,
+            account_name: accountId,
+            is_active: true,
+            metadata: { ...data, connected_via: 'direct' },
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existing.id);
+        if (error) throw error;
+      } else {
+        // Insert new token
+        const { error } = await supabase
+          .from('social_platform_tokens')
+          .insert({
+            company_id: profile.company_id,
+            user_id: user.id,
+            platform,
+            access_token: data.bot_token || data.api_token,
+            account_id: accountId,
+            account_name: accountId,
+            is_active: true,
+            metadata: { ...data, connected_via: 'direct' }
+          });
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['social-platform-tokens'] });
@@ -264,6 +295,9 @@ export default function SocialConnections() {
           break;
         case 'youtube':
           authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${encodeURIComponent(platform?.scopes || '')}&state=${state}&access_type=offline`;
+          break;
+        case 'pinterest':
+          authUrl = `https://www.pinterest.com/oauth/?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${encodeURIComponent(platform?.scopes || '')}&state=${state}`;
           break;
         default:
           toast({

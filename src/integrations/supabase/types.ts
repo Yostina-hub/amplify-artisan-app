@@ -5580,6 +5580,7 @@ export type Database = {
           scopes: string[] | null
           token_expires_at: string | null
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           access_token: string
@@ -5597,6 +5598,7 @@ export type Database = {
           scopes?: string[] | null
           token_expires_at?: string | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           access_token?: string
@@ -5614,6 +5616,7 @@ export type Database = {
           scopes?: string[] | null
           token_expires_at?: string | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {

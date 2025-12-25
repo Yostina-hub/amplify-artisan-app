@@ -108,30 +108,60 @@ serve(async (req) => {
       case 'youtube':
         tokenData = await exchangeYouTubeCode(code, platformOAuthConfig);
         break;
+      case 'pinterest':
+        tokenData = await exchangePinterestCode(code, platformOAuthConfig);
+        break;
       default:
         throw new Error(`Platform ${platform} not supported`);
     }
 
     console.log(`Token exchange successful for ${platform}, account: ${tokenData.accountName}`);
 
-    // Save or update token in social_platform_tokens
-    const { error: tokenError } = await supabase
+    // Check for existing token
+    const { data: existingToken } = await supabase
       .from('social_platform_tokens')
-      .upsert({
-        company_id: companyId,
-        platform: platform.toLowerCase(),
-        access_token: tokenData.accessToken,
-        refresh_token: tokenData.refreshToken,
-        token_expires_at: tokenData.expiresAt,
-        account_id: tokenData.accountId,
-        account_name: tokenData.accountName,
-        scopes: tokenData.scopes || [],
-        is_active: true,
-        metadata: tokenData.metadata || {},
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'company_id,platform,account_id'
-      });
+      .select('id')
+      .eq('company_id', companyId)
+      .eq('platform', platform.toLowerCase())
+      .eq('account_id', tokenData.accountId)
+      .single();
+
+    let tokenError;
+    if (existingToken) {
+      // Update existing token
+      const result = await supabase
+        .from('social_platform_tokens')
+        .update({
+          access_token: tokenData.accessToken,
+          refresh_token: tokenData.refreshToken,
+          token_expires_at: tokenData.expiresAt,
+          account_name: tokenData.accountName,
+          scopes: tokenData.scopes || [],
+          is_active: true,
+          metadata: tokenData.metadata || {},
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existingToken.id);
+      tokenError = result.error;
+    } else {
+      // Insert new token
+      const result = await supabase
+        .from('social_platform_tokens')
+        .insert({
+          company_id: companyId,
+          user_id: userId,
+          platform: platform.toLowerCase(),
+          access_token: tokenData.accessToken,
+          refresh_token: tokenData.refreshToken,
+          token_expires_at: tokenData.expiresAt,
+          account_id: tokenData.accountId,
+          account_name: tokenData.accountName,
+          scopes: tokenData.scopes || [],
+          is_active: true,
+          metadata: tokenData.metadata || {}
+        });
+      tokenError = result.error;
+    }
 
     if (tokenError) {
       console.error('Error saving token:', tokenError);
@@ -527,5 +557,51 @@ async function exchangeYouTubeCode(code: string, config: any) {
     accountName: channel?.snippet?.title || 'YouTube Channel',
     scopes: ['youtube', 'youtube.readonly', 'youtube.upload'],
     metadata: { channelData: channel }
+  };
+}
+
+// Pinterest token exchange
+async function exchangePinterestCode(code: string, config: any) {
+  console.log('Exchanging Pinterest code...');
+  
+  const credentials = btoa(`${config.client_id}:${config.client_secret}`);
+  
+  const response = await fetch('https://api.pinterest.com/v5/oauth/token', {
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': `Basic ${credentials}`
+    },
+    body: new URLSearchParams({
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: config.redirect_url
+    })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok || data.error) {
+    console.error('Pinterest token error:', data);
+    throw new Error(data.error_description || data.message || 'Pinterest OAuth error');
+  }
+
+  // Get user info
+  const userResponse = await fetch('https://api.pinterest.com/v5/user_account', {
+    headers: { 'Authorization': `Bearer ${data.access_token}` }
+  });
+  const userData = await userResponse.json();
+
+  const expiresIn = data.expires_in || 2592000; // 30 days
+  const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
+
+  return {
+    accessToken: data.access_token,
+    refreshToken: data.refresh_token,
+    expiresAt,
+    accountId: userData.username || 'unknown',
+    accountName: userData.username || 'Pinterest User',
+    scopes: ['boards:read', 'pins:read', 'pins:write'],
+    metadata: { userData }
   };
 }

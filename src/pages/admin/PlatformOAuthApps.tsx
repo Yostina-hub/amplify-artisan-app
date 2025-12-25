@@ -65,6 +65,14 @@ const PLATFORMS = [
     docsUrl: 'https://developers.google.com/youtube/v3/getting-started',
     scopes: 'youtube.upload, youtube.readonly'
   },
+  { 
+    id: 'pinterest', 
+    name: 'Pinterest', 
+    icon: () => <span className="text-lg">📌</span>,
+    color: 'from-red-600 to-rose-500',
+    docsUrl: 'https://developers.pinterest.com/docs/getting-started/introduction/',
+    scopes: 'boards:read, pins:read, pins:write'
+  },
 ];
 
 export default function PlatformOAuthApps() {
