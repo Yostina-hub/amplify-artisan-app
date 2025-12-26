@@ -72,27 +72,21 @@ verify_jwt = true
 [functions.track-email-open]
 verify_jwt = false
 
-# Public: called by DB cron without JWT
 [functions.publish-scheduled-posts]
 verify_jwt = false
 
-# Secure: requires authenticated moderator
 [functions.approve-post]
 verify_jwt = true
 
-# Live chat AI responder - public so guests can trigger
 [functions.live-chat-ai-responder]
 verify_jwt = false
 
-# Live chat guest init - public
 [functions.live-chat-init]
 verify_jwt = false
 
-# Live chat guest send - public
 [functions.live-chat-send]
 verify_jwt = false
 
-# Media monitoring functions
 [functions.media-monitor-ingest]
 verify_jwt = true
 
@@ -100,4 +94,10 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.media-monitor-alerts]
+verify_jwt = true
+
+[functions.neural-engine-scrape]
+verify_jwt = true
+
+[functions.neural-engine-analyze]
 verify_jwt = true

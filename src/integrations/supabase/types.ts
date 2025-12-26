@@ -423,6 +423,72 @@ export type Database = {
           },
         ]
       }
+      ai_predictions: {
+        Row: {
+          company_id: string | null
+          confidence: number | null
+          created_at: string | null
+          description: string | null
+          expires_at: string | null
+          id: string
+          impact: string | null
+          is_active: boolean | null
+          prediction_type: string
+          profile_id: string | null
+          supporting_data: Json | null
+          timeframe: string | null
+          title: string
+          trend: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          confidence?: number | null
+          created_at?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          impact?: string | null
+          is_active?: boolean | null
+          prediction_type: string
+          profile_id?: string | null
+          supporting_data?: Json | null
+          timeframe?: string | null
+          title: string
+          trend?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          confidence?: number | null
+          created_at?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          impact?: string | null
+          is_active?: boolean | null
+          prediction_type?: string
+          profile_id?: string | null
+          supporting_data?: Json | null
+          timeframe?: string | null
+          title?: string
+          trend?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_predictions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_predictions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "company_monitoring_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_integration_fields: {
         Row: {
           created_at: string
@@ -1430,6 +1496,65 @@ export type Database = {
             columns: ["pricing_plan_id"]
             isOneToOne: false
             referencedRelation: "pricing_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_monitoring_profiles: {
+        Row: {
+          business_type: string
+          company_id: string | null
+          competitor_names: string[] | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          industry: string | null
+          is_active: boolean | null
+          keywords: string[] | null
+          languages: string[] | null
+          profile_name: string
+          target_regions: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_type: string
+          company_id?: string | null
+          competitor_names?: string[] | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          industry?: string | null
+          is_active?: boolean | null
+          keywords?: string[] | null
+          languages?: string[] | null
+          profile_name: string
+          target_regions?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_type?: string
+          company_id?: string | null
+          competitor_names?: string[] | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          industry?: string | null
+          is_active?: boolean | null
+          keywords?: string[] | null
+          languages?: string[] | null
+          profile_name?: string
+          target_regions?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_monitoring_profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -4359,6 +4484,47 @@ export type Database = {
           },
         ]
       }
+      monitoring_requirements: {
+        Row: {
+          alert_threshold: number | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          priority: string | null
+          profile_id: string | null
+          requirement_type: string
+          requirement_value: string
+        }
+        Insert: {
+          alert_threshold?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          priority?: string | null
+          profile_id?: string | null
+          requirement_type: string
+          requirement_value: string
+        }
+        Update: {
+          alert_threshold?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          priority?: string | null
+          profile_id?: string | null
+          requirement_type?: string
+          requirement_value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monitoring_requirements_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "company_monitoring_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notes: {
         Row: {
           company_id: string
@@ -5749,6 +5915,93 @@ export type Database = {
             columns: ["parent_team_id"]
             isOneToOne: false
             referencedRelation: "sales_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scraped_intelligence: {
+        Row: {
+          category: string | null
+          company_id: string | null
+          content: string | null
+          entities: Json | null
+          id: string
+          is_processed: boolean | null
+          language: string | null
+          matched_requirements: string[] | null
+          metadata: Json | null
+          profile_id: string | null
+          published_at: string | null
+          region: string | null
+          relevance_score: number | null
+          scraped_at: string | null
+          sentiment_label: string | null
+          sentiment_score: number | null
+          source_domain: string | null
+          source_type: string | null
+          source_url: string
+          summary: string | null
+          title: string | null
+        }
+        Insert: {
+          category?: string | null
+          company_id?: string | null
+          content?: string | null
+          entities?: Json | null
+          id?: string
+          is_processed?: boolean | null
+          language?: string | null
+          matched_requirements?: string[] | null
+          metadata?: Json | null
+          profile_id?: string | null
+          published_at?: string | null
+          region?: string | null
+          relevance_score?: number | null
+          scraped_at?: string | null
+          sentiment_label?: string | null
+          sentiment_score?: number | null
+          source_domain?: string | null
+          source_type?: string | null
+          source_url: string
+          summary?: string | null
+          title?: string | null
+        }
+        Update: {
+          category?: string | null
+          company_id?: string | null
+          content?: string | null
+          entities?: Json | null
+          id?: string
+          is_processed?: boolean | null
+          language?: string | null
+          matched_requirements?: string[] | null
+          metadata?: Json | null
+          profile_id?: string | null
+          published_at?: string | null
+          region?: string | null
+          relevance_score?: number | null
+          scraped_at?: string | null
+          sentiment_label?: string | null
+          sentiment_score?: number | null
+          source_domain?: string | null
+          source_type?: string | null
+          source_url?: string
+          summary?: string | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scraped_intelligence_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scraped_intelligence_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "company_monitoring_profiles"
             referencedColumns: ["id"]
           },
         ]
