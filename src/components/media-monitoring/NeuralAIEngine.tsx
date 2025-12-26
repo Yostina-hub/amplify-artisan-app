@@ -512,9 +512,15 @@ export function NeuralAIEngine({ isOpen, onClose }: NeuralAIEngineProps) {
                       <SelectTrigger className="w-full bg-background">
                         <SelectValue placeholder="Choose a sample profile to get started..." />
                       </SelectTrigger>
-                      <SelectContent className="bg-popover z-[100]">
+                      <SelectContent 
+                        className="bg-popover z-[200] max-h-[300px] overflow-y-auto" 
+                        position="popper" 
+                        side="bottom" 
+                        align="start"
+                        sideOffset={4}
+                      >
                         {SAMPLE_PROFILES.map((sample, index) => (
-                          <SelectItem key={index} value={sample.profile_name}>
+                          <SelectItem key={index} value={sample.profile_name} className="py-3">
                             <div className="flex flex-col items-start">
                               <span className="font-medium">{sample.profile_name}</span>
                               <span className="text-xs text-muted-foreground">{sample.business_type} • {sample.industry}</span>
@@ -544,7 +550,7 @@ export function NeuralAIEngine({ isOpen, onClose }: NeuralAIEngineProps) {
                           <SelectTrigger>
                             <SelectValue placeholder="Select business type" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="bg-popover z-[200] max-h-[250px] overflow-y-auto" position="popper" side="bottom" sideOffset={4}>
                             <SelectItem value="Ethio Telecom">Ethio Telecom</SelectItem>
                             <SelectItem value="Government - Federal">Government - Federal</SelectItem>
                             <SelectItem value="Government - Regional">Government - Regional</SelectItem>
@@ -585,7 +591,7 @@ export function NeuralAIEngine({ isOpen, onClose }: NeuralAIEngineProps) {
                           <SelectTrigger>
                             <SelectValue placeholder="Select industry" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="bg-popover z-[200] max-h-[250px] overflow-y-auto" position="popper" side="bottom" sideOffset={4}>
                             <SelectItem value="Telecommunications">Telecommunications</SelectItem>
                             <SelectItem value="Information Technology">Information Technology</SelectItem>
                             <SelectItem value="Public Administration">Public Administration</SelectItem>
