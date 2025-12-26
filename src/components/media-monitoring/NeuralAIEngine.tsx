@@ -150,6 +150,7 @@ export function NeuralAIEngine({ isOpen, onClose }: NeuralAIEngineProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
 
   // New profile form state
   const [newProfile, setNewProfile] = useState({
@@ -182,35 +183,79 @@ export function NeuralAIEngine({ isOpen, onClose }: NeuralAIEngineProps) {
 
   // Fetch user's company ID
   const { data: profile } = useQuery({
-    queryKey: ['user-profile'],
+    queryKey: ['user-profile', user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('company_id')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
+      if (error) throw error;
       return data;
     },
     enabled: !!user?.id,
   });
 
-  const companyId = profile?.company_id;
+  const companyId = profile?.company_id ?? null;
+
+  // Fetch user roles (to detect super admin)
+  const { data: userRoles } = useQuery({
+    queryKey: ['user-roles', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role, company_id')
+        .eq('user_id', user.id);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user?.id,
+  });
+
+  const isSuperAdmin = !!userRoles?.some((r) => r.role === 'admin' && !r.company_id);
+
+  // If user is super admin and has no company, allow selecting a company to work with
+  const { data: companies } = useQuery({
+    queryKey: ['companies-list'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('companies')
+        .select('id, name')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: isSuperAdmin && !companyId,
+  });
+
+  useEffect(() => {
+    if (!companyId && !selectedCompanyId && companies && companies.length === 1) {
+      setSelectedCompanyId(companies[0].id);
+    }
+  }, [companyId, selectedCompanyId, companies]);
+
+  const effectiveCompanyId = companyId || selectedCompanyId;
+
+  useEffect(() => {
+    setSelectedProfileId(null);
+  }, [effectiveCompanyId]);
 
   // Fetch monitoring profiles
   const { data: monitoringProfiles, isLoading: profilesLoading } = useQuery({
-    queryKey: ['monitoring-profiles', companyId],
+    queryKey: ['monitoring-profiles', effectiveCompanyId],
     queryFn: async () => {
-      if (!companyId) return [];
+      if (!effectiveCompanyId) return [];
       const { data, error } = await supabase
         .from('company_monitoring_profiles')
         .select('*')
-        .eq('company_id', companyId)
+        .eq('company_id', effectiveCompanyId)
         .eq('is_active', true);
       if (error) throw error;
       return data || [];
     },
-    enabled: !!companyId,
+    enabled: !!effectiveCompanyId,
   });
 
   // Fetch requirements for selected profile
@@ -231,62 +276,62 @@ export function NeuralAIEngine({ isOpen, onClose }: NeuralAIEngineProps) {
 
   // Fetch scraped intelligence
   const { data: intelligence, isLoading: intelligenceLoading, refetch: refetchIntelligence } = useQuery({
-    queryKey: ['scraped-intelligence', companyId, selectedProfileId, filterType],
+    queryKey: ['scraped-intelligence', effectiveCompanyId, selectedProfileId, filterType],
     queryFn: async () => {
-      if (!companyId) return [];
+      if (!effectiveCompanyId) return [];
       let query = supabase
         .from('scraped_intelligence')
         .select('*')
-        .eq('company_id', companyId)
+        .eq('company_id', effectiveCompanyId)
         .order('scraped_at', { ascending: false })
         .limit(50);
-      
+
       if (selectedProfileId) {
         query = query.eq('profile_id', selectedProfileId);
       }
       if (filterType !== 'all') {
         query = query.eq('category', filterType);
       }
-      
+
       const { data, error } = await query;
       if (error) throw error;
       return data || [];
     },
-    enabled: !!companyId,
+    enabled: !!effectiveCompanyId,
   });
 
   // Fetch AI predictions
   const { data: predictions, isLoading: predictionsLoading, refetch: refetchPredictions } = useQuery({
-    queryKey: ['ai-predictions', companyId, selectedProfileId],
+    queryKey: ['ai-predictions', effectiveCompanyId, selectedProfileId],
     queryFn: async () => {
-      if (!companyId) return [];
+      if (!effectiveCompanyId) return [];
       let query = supabase
         .from('ai_predictions')
         .select('*')
-        .eq('company_id', companyId)
+        .eq('company_id', effectiveCompanyId)
         .eq('is_active', true)
         .order('created_at', { ascending: false });
-      
+
       if (selectedProfileId) {
         query = query.eq('profile_id', selectedProfileId);
       }
-      
+
       const { data, error } = await query;
       if (error) throw error;
       return data || [];
     },
-    enabled: !!companyId,
+    enabled: !!effectiveCompanyId,
   });
 
   // Create monitoring profile
   const createProfileMutation = useMutation({
     mutationFn: async () => {
-      if (!companyId || !user?.id) throw new Error('Not authenticated');
-      
+      if (!effectiveCompanyId || !user?.id) throw new Error('Select a company first');
+
       const { data, error } = await supabase
         .from('company_monitoring_profiles')
         .insert({
-          company_id: companyId,
+          company_id: effectiveCompanyId,
           profile_name: newProfile.profile_name,
           business_type: newProfile.business_type,
           industry: newProfile.industry,
@@ -298,7 +343,7 @@ export function NeuralAIEngine({ isOpen, onClose }: NeuralAIEngineProps) {
         })
         .select()
         .single();
-      
+
       if (error) throw error;
       return data;
     },
@@ -351,12 +396,13 @@ export function NeuralAIEngine({ isOpen, onClose }: NeuralAIEngineProps) {
   // Scrape URLs mutation
   const scrapeMutation = useMutation({
     mutationFn: async ({ urls, query }: { urls?: string[], query?: string }) => {
+      if (!effectiveCompanyId) throw new Error('Select a company first');
       const { data, error } = await supabase.functions.invoke('neural-engine-scrape', {
         body: {
           urls,
           searchQuery: query,
           profileId: selectedProfileId,
-          companyId,
+          companyId: effectiveCompanyId,
         },
       });
       if (error) throw error;
@@ -374,10 +420,11 @@ export function NeuralAIEngine({ isOpen, onClose }: NeuralAIEngineProps) {
   // Analyze mutation
   const analyzeMutation = useMutation({
     mutationFn: async () => {
+      if (!effectiveCompanyId) throw new Error('Select a company first');
       const { data, error } = await supabase.functions.invoke('neural-engine-analyze', {
         body: {
           profileId: selectedProfileId,
-          companyId,
+          companyId: effectiveCompanyId,
           analysisType: 'predictions',
         },
       });
