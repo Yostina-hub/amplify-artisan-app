@@ -39,7 +39,17 @@ import {
   Loader2,
   CheckCircle2,
   Play,
-  Database
+  Database,
+  Youtube,
+  Facebook,
+  Instagram,
+  Twitter,
+  Video,
+  Users,
+  Heart,
+  MessageCircle,
+  Share2,
+  Eye
 } from "lucide-react";
 
 const SAMPLE_PROFILES = [
@@ -152,7 +162,9 @@ export function NeuralAIEngine({ isOpen, onClose }: NeuralAIEngineProps) {
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
 
-  // New profile form state
+  // Social media tracking state
+  const [socialPlatform, setSocialPlatform] = useState<'tiktok' | 'facebook' | 'youtube' | 'instagram' | 'twitter'>('youtube');
+  const [socialHandle, setSocialHandle] = useState("");
   const [newProfile, setNewProfile] = useState({
     profile_name: "",
     business_type: "",
@@ -323,7 +335,41 @@ export function NeuralAIEngine({ isOpen, onClose }: NeuralAIEngineProps) {
     enabled: !!effectiveCompanyId,
   });
 
-  // Create monitoring profile
+  // Fetch tracked social accounts
+  const { data: trackedAccounts, isLoading: accountsLoading, refetch: refetchAccounts } = useQuery({
+    queryKey: ['tracked-social-accounts', effectiveCompanyId],
+    queryFn: async () => {
+      if (!effectiveCompanyId) return [];
+      const { data, error } = await supabase
+        .from('tracked_social_accounts')
+        .select('*')
+        .eq('company_id', effectiveCompanyId)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!effectiveCompanyId,
+  });
+
+  // Fetch scraped social posts
+  const { data: socialPosts, isLoading: postsLoading, refetch: refetchPosts } = useQuery({
+    queryKey: ['scraped-social-posts', effectiveCompanyId],
+    queryFn: async () => {
+      if (!effectiveCompanyId) return [];
+      const { data, error } = await supabase
+        .from('scraped_social_posts')
+        .select('*, tracked_social_accounts!inner(account_handle, account_name, platform)')
+        .eq('company_id', effectiveCompanyId)
+        .order('scraped_at', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!effectiveCompanyId,
+  });
   const createProfileMutation = useMutation({
     mutationFn: async () => {
       if (!effectiveCompanyId || !user?.id) throw new Error('Select a company first');
@@ -440,6 +486,32 @@ export function NeuralAIEngine({ isOpen, onClose }: NeuralAIEngineProps) {
     },
   });
 
+  // Social media scrape mutation
+  const socialScrapeMutation = useMutation({
+    mutationFn: async ({ platform, handle }: { platform: string, handle: string }) => {
+      if (!effectiveCompanyId) throw new Error('Select a company first');
+      const { data, error } = await supabase.functions.invoke('scrape-social-media', {
+        body: {
+          platform,
+          accountHandle: handle,
+          companyId: effectiveCompanyId,
+          profileId: selectedProfileId,
+        },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      toast.success(data.message || `Tracked ${data.account?.account_name}`);
+      setSocialHandle("");
+      refetchAccounts();
+      refetchPosts();
+    },
+    onError: (error) => {
+      toast.error('Social scraping failed: ' + error.message);
+    },
+  });
+
   const handleScrapeUrls = () => {
     const urls = searchUrls.split('\n').map(u => u.trim()).filter(Boolean);
     if (urls.length > 0) {
@@ -451,6 +523,29 @@ export function NeuralAIEngine({ isOpen, onClose }: NeuralAIEngineProps) {
     if (searchQuery.trim()) {
       scrapeMutation.mutate({ query: searchQuery });
     }
+  };
+
+  const handleTrackSocialAccount = () => {
+    if (socialHandle.trim()) {
+      socialScrapeMutation.mutate({ platform: socialPlatform, handle: socialHandle });
+    }
+  };
+
+  const getPlatformIcon = (platform: string) => {
+    const icons: Record<string, React.ReactNode> = {
+      youtube: <Youtube className="h-4 w-4 text-red-500" />,
+      facebook: <Facebook className="h-4 w-4 text-blue-600" />,
+      instagram: <Instagram className="h-4 w-4 text-pink-500" />,
+      twitter: <Twitter className="h-4 w-4 text-sky-500" />,
+      tiktok: <Video className="h-4 w-4 text-black dark:text-white" />,
+    };
+    return icons[platform] || <Globe className="h-4 w-4" />;
+  };
+
+  const formatFollowers = (count: number) => {
+    if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+    return count.toString();
   };
 
   const getCategoryColor = (category: string) => {
@@ -858,18 +953,22 @@ export function NeuralAIEngine({ isOpen, onClose }: NeuralAIEngineProps) {
         <CardContent className="p-0">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="border-b border-border/50 px-4">
-              <TabsList className="bg-transparent h-12 gap-2">
-                <TabsTrigger value="predictions" className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300 rounded-lg px-6">
+              <TabsList className="bg-transparent h-12 gap-1 flex-wrap">
+                <TabsTrigger value="social" className="data-[state=active]:bg-pink-500/20 data-[state=active]:text-pink-300 rounded-lg px-4">
+                  <Users className="h-4 w-4 mr-2" />
+                  Social Tracking
+                </TabsTrigger>
+                <TabsTrigger value="predictions" className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300 rounded-lg px-4">
                   <Activity className="h-4 w-4 mr-2" />
                   Predictions
                 </TabsTrigger>
-                <TabsTrigger value="intelligence" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-300 rounded-lg px-6">
+                <TabsTrigger value="intelligence" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-300 rounded-lg px-4">
                   <Database className="h-4 w-4 mr-2" />
                   Intelligence
                 </TabsTrigger>
-                <TabsTrigger value="scrape" className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-300 rounded-lg px-6">
+                <TabsTrigger value="scrape" className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-300 rounded-lg px-4">
                   <Search className="h-4 w-4 mr-2" />
-                  Scrape
+                  Web Scrape
                 </TabsTrigger>
                 <TabsTrigger value="settings" className="data-[state=active]:bg-muted rounded-lg px-4">
                   <Settings2 className="h-4 w-4" />
@@ -878,6 +977,236 @@ export function NeuralAIEngine({ isOpen, onClose }: NeuralAIEngineProps) {
             </div>
 
             <ScrollArea className="h-[50vh]">
+              {/* Social Tracking Tab */}
+              <TabsContent value="social" className="p-4 space-y-4 mt-0">
+                {/* Add New Social Account */}
+                <div className="p-4 rounded-xl border bg-gradient-to-r from-pink-500/10 to-purple-500/10 border-pink-500/20">
+                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    Track Social Media Influencer / Channel
+                  </h4>
+                  <div className="flex gap-2 flex-wrap">
+                    <Select value={socialPlatform} onValueChange={(v) => setSocialPlatform(v as typeof socialPlatform)}>
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="youtube">
+                          <div className="flex items-center gap-2">
+                            <Youtube className="h-4 w-4 text-red-500" />
+                            YouTube
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="tiktok">
+                          <div className="flex items-center gap-2">
+                            <Video className="h-4 w-4" />
+                            TikTok
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="facebook">
+                          <div className="flex items-center gap-2">
+                            <Facebook className="h-4 w-4 text-blue-600" />
+                            Facebook
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="instagram">
+                          <div className="flex items-center gap-2">
+                            <Instagram className="h-4 w-4 text-pink-500" />
+                            Instagram
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="twitter">
+                          <div className="flex items-center gap-2">
+                            <Twitter className="h-4 w-4 text-sky-500" />
+                            Twitter/X
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      placeholder={`Enter ${socialPlatform} username or channel...`}
+                      value={socialHandle}
+                      onChange={(e) => setSocialHandle(e.target.value)}
+                      className="flex-1 min-w-[200px]"
+                    />
+                    <Button 
+                      onClick={handleTrackSocialAccount}
+                      disabled={socialScrapeMutation.isPending || !socialHandle.trim() || !effectiveCompanyId}
+                    >
+                      {socialScrapeMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Search className="h-4 w-4 mr-2" />
+                      )}
+                      Track & Scrape
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Enter username without @ (e.g., "MrBeast" for YouTube, "charlidamelio" for TikTok)
+                  </p>
+                </div>
+
+                {/* Tracked Accounts Grid */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      Tracked Accounts ({trackedAccounts?.length || 0})
+                    </h4>
+                    <Button size="sm" variant="outline" onClick={() => refetchAccounts()}>
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  {accountsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    </div>
+                  ) : trackedAccounts && trackedAccounts.length > 0 ? (
+                    <div className="grid gap-3 md:grid-cols-2">
+                      {(trackedAccounts as any[]).map((account) => (
+                        <div key={account.id} className="p-4 rounded-xl border bg-card hover:shadow-md transition-all">
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 rounded-full bg-muted">
+                              {getPlatformIcon(account.platform)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <h5 className="font-semibold truncate">{account.account_name || account.account_handle}</h5>
+                                <Badge variant="outline" className="text-xs capitalize">{account.platform}</Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground">@{account.account_handle}</p>
+                              <div className="flex items-center gap-4 mt-2 text-sm">
+                                <span className="flex items-center gap-1">
+                                  <Users className="h-3 w-3" />
+                                  {formatFollowers(account.followers_count || 0)}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Video className="h-3 w-3" />
+                                  {account.posts_count || 0} posts
+                                </span>
+                              </div>
+                              {account.last_scraped_at && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  <Clock className="h-3 w-3 inline mr-1" />
+                                  Scraped {new Date(account.last_scraped_at).toLocaleString()}
+                                </p>
+                              )}
+                            </div>
+                            <a href={account.account_url} target="_blank" rel="noopener noreferrer" className="p-1 rounded hover:bg-muted">
+                              <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Users className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                      <p>No accounts tracked yet. Add a TikToker, YouTuber, or Facebooker above!</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Recent Social Posts */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold flex items-center gap-2">
+                      <MessageCircle className="h-4 w-4" />
+                      Recent Posts & Content
+                    </h4>
+                    <Button size="sm" variant="outline" onClick={() => refetchPosts()}>
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {postsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    </div>
+                  ) : socialPosts && socialPosts.length > 0 ? (
+                    <div className="space-y-3">
+                      {(socialPosts as any[]).slice(0, 10).map((post) => (
+                        <div key={post.id} className="p-4 rounded-xl border bg-card hover:shadow-md transition-all">
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 rounded-full bg-muted shrink-0">
+                              {getPlatformIcon(post.platform)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-medium text-sm">
+                                  @{post.tracked_social_accounts?.account_handle}
+                                </span>
+                                <Badge variant="outline" className="text-xs capitalize">{post.platform}</Badge>
+                                {post.sentiment_label && (
+                                  <Badge className={`text-xs ${
+                                    post.sentiment_label === 'positive' ? 'bg-emerald-500/20 text-emerald-400' :
+                                    post.sentiment_label === 'negative' ? 'bg-red-500/20 text-red-400' :
+                                    'bg-gray-500/20 text-gray-400'
+                                  }`}>
+                                    {post.sentiment_label}
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-sm text-muted-foreground line-clamp-3">
+                                {post.content?.substring(0, 300)}
+                              </p>
+                              
+                              {/* Engagement metrics */}
+                              <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                                {post.likes_count > 0 && (
+                                  <span className="flex items-center gap-1">
+                                    <Heart className="h-3 w-3" />
+                                    {formatFollowers(post.likes_count)}
+                                  </span>
+                                )}
+                                {post.comments_count > 0 && (
+                                  <span className="flex items-center gap-1">
+                                    <MessageCircle className="h-3 w-3" />
+                                    {formatFollowers(post.comments_count)}
+                                  </span>
+                                )}
+                                {post.shares_count > 0 && (
+                                  <span className="flex items-center gap-1">
+                                    <Share2 className="h-3 w-3" />
+                                    {formatFollowers(post.shares_count)}
+                                  </span>
+                                )}
+                                {post.views_count > 0 && (
+                                  <span className="flex items-center gap-1">
+                                    <Eye className="h-3 w-3" />
+                                    {formatFollowers(post.views_count)}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Hashtags */}
+                              {post.hashtags?.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-2">
+                                  {post.hashtags.slice(0, 5).map((tag: string, i: number) => (
+                                    <Badge key={i} variant="secondary" className="text-xs">#{tag}</Badge>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                            {post.post_url && (
+                              <a href={post.post_url} target="_blank" rel="noopener noreferrer" className="p-1 rounded hover:bg-muted shrink-0">
+                                <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <MessageCircle className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                      <p>No posts scraped yet. Track an account to start collecting content!</p>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
               {/* Predictions Tab */}
               <TabsContent value="predictions" className="p-4 space-y-4 mt-0">
                 <div className="flex items-center justify-between">

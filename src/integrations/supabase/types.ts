@@ -6006,6 +6006,96 @@ export type Database = {
           },
         ]
       }
+      scraped_social_posts: {
+        Row: {
+          comments_count: number | null
+          company_id: string | null
+          content: string | null
+          engagement_score: number | null
+          entities: Json | null
+          hashtags: string[] | null
+          id: string
+          is_processed: boolean | null
+          likes_count: number | null
+          media_urls: Json | null
+          mentions: string[] | null
+          metadata: Json | null
+          platform: string
+          post_id: string | null
+          post_url: string | null
+          posted_at: string | null
+          scraped_at: string | null
+          sentiment_label: string | null
+          sentiment_score: number | null
+          shares_count: number | null
+          tracked_account_id: string | null
+          views_count: number | null
+        }
+        Insert: {
+          comments_count?: number | null
+          company_id?: string | null
+          content?: string | null
+          engagement_score?: number | null
+          entities?: Json | null
+          hashtags?: string[] | null
+          id?: string
+          is_processed?: boolean | null
+          likes_count?: number | null
+          media_urls?: Json | null
+          mentions?: string[] | null
+          metadata?: Json | null
+          platform: string
+          post_id?: string | null
+          post_url?: string | null
+          posted_at?: string | null
+          scraped_at?: string | null
+          sentiment_label?: string | null
+          sentiment_score?: number | null
+          shares_count?: number | null
+          tracked_account_id?: string | null
+          views_count?: number | null
+        }
+        Update: {
+          comments_count?: number | null
+          company_id?: string | null
+          content?: string | null
+          engagement_score?: number | null
+          entities?: Json | null
+          hashtags?: string[] | null
+          id?: string
+          is_processed?: boolean | null
+          likes_count?: number | null
+          media_urls?: Json | null
+          mentions?: string[] | null
+          metadata?: Json | null
+          platform?: string
+          post_id?: string | null
+          post_url?: string | null
+          posted_at?: string | null
+          scraped_at?: string | null
+          sentiment_label?: string | null
+          sentiment_score?: number | null
+          shares_count?: number | null
+          tracked_account_id?: string | null
+          views_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scraped_social_posts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scraped_social_posts_tracked_account_id_fkey"
+            columns: ["tracked_account_id"]
+            isOneToOne: false
+            referencedRelation: "tracked_social_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       security_audit_log: {
         Row: {
           action: string
@@ -7278,6 +7368,84 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tracked_social_accounts: {
+        Row: {
+          account_handle: string
+          account_name: string | null
+          account_url: string
+          company_id: string | null
+          created_at: string | null
+          engagement_rate: number | null
+          followers_count: number | null
+          following_count: number | null
+          id: string
+          is_active: boolean | null
+          last_scraped_at: string | null
+          metadata: Json | null
+          platform: string
+          posts_count: number | null
+          profile_id: string | null
+          profile_image_url: string | null
+          scrape_frequency: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          account_handle: string
+          account_name?: string | null
+          account_url: string
+          company_id?: string | null
+          created_at?: string | null
+          engagement_rate?: number | null
+          followers_count?: number | null
+          following_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_scraped_at?: string | null
+          metadata?: Json | null
+          platform: string
+          posts_count?: number | null
+          profile_id?: string | null
+          profile_image_url?: string | null
+          scrape_frequency?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          account_handle?: string
+          account_name?: string | null
+          account_url?: string
+          company_id?: string | null
+          created_at?: string | null
+          engagement_rate?: number | null
+          followers_count?: number | null
+          following_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_scraped_at?: string | null
+          metadata?: Json | null
+          platform?: string
+          posts_count?: number | null
+          profile_id?: string | null
+          profile_image_url?: string | null
+          scrape_frequency?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracked_social_accounts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tracked_social_accounts_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "company_monitoring_profiles"
             referencedColumns: ["id"]
           },
         ]
