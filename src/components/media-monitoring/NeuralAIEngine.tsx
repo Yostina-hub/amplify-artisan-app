@@ -408,19 +408,86 @@ export function NeuralAIEngine({ isOpen, onClose }: NeuralAIEngineProps) {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label>Business Type</Label>
-                        <Input
-                          value={newProfile.business_type}
-                          onChange={(e) => setNewProfile({ ...newProfile, business_type: e.target.value })}
-                          placeholder="e.g., Technology, Retail"
-                        />
+                        <Select 
+                          value={newProfile.business_type} 
+                          onValueChange={(v) => setNewProfile({ ...newProfile, business_type: v })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select business type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Ethio Telecom">Ethio Telecom</SelectItem>
+                            <SelectItem value="Government - Federal">Government - Federal</SelectItem>
+                            <SelectItem value="Government - Regional">Government - Regional</SelectItem>
+                            <SelectItem value="Government - Municipal">Government - Municipal</SelectItem>
+                            <SelectItem value="Government - Agency">Government - Agency</SelectItem>
+                            <SelectItem value="Public Enterprise">Public Enterprise</SelectItem>
+                            <SelectItem value="Private - Corporation">Private - Corporation</SelectItem>
+                            <SelectItem value="Private - SME">Private - SME</SelectItem>
+                            <SelectItem value="Private - Startup">Private - Startup</SelectItem>
+                            <SelectItem value="NGO / Non-Profit">NGO / Non-Profit</SelectItem>
+                            <SelectItem value="Financial Institution">Financial Institution</SelectItem>
+                            <SelectItem value="Bank">Bank</SelectItem>
+                            <SelectItem value="Insurance">Insurance</SelectItem>
+                            <SelectItem value="Educational Institution">Educational Institution</SelectItem>
+                            <SelectItem value="Healthcare">Healthcare</SelectItem>
+                            <SelectItem value="Manufacturing">Manufacturing</SelectItem>
+                            <SelectItem value="Retail & Trade">Retail & Trade</SelectItem>
+                            <SelectItem value="Technology">Technology</SelectItem>
+                            <SelectItem value="Telecommunications">Telecommunications</SelectItem>
+                            <SelectItem value="Media & Entertainment">Media & Entertainment</SelectItem>
+                            <SelectItem value="Agriculture">Agriculture</SelectItem>
+                            <SelectItem value="Construction">Construction</SelectItem>
+                            <SelectItem value="Transportation & Logistics">Transportation & Logistics</SelectItem>
+                            <SelectItem value="Hospitality & Tourism">Hospitality & Tourism</SelectItem>
+                            <SelectItem value="Energy & Utilities">Energy & Utilities</SelectItem>
+                            <SelectItem value="Real Estate">Real Estate</SelectItem>
+                            <SelectItem value="Consulting & Professional Services">Consulting & Professional Services</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div>
                         <Label>Industry</Label>
-                        <Input
-                          value={newProfile.industry}
-                          onChange={(e) => setNewProfile({ ...newProfile, industry: e.target.value })}
-                          placeholder="e.g., SaaS, E-commerce"
-                        />
+                        <Select 
+                          value={newProfile.industry} 
+                          onValueChange={(v) => setNewProfile({ ...newProfile, industry: v })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select industry" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Telecommunications">Telecommunications</SelectItem>
+                            <SelectItem value="Information Technology">Information Technology</SelectItem>
+                            <SelectItem value="Public Administration">Public Administration</SelectItem>
+                            <SelectItem value="Defense & Security">Defense & Security</SelectItem>
+                            <SelectItem value="Banking & Finance">Banking & Finance</SelectItem>
+                            <SelectItem value="Insurance">Insurance</SelectItem>
+                            <SelectItem value="Healthcare & Pharmaceuticals">Healthcare & Pharmaceuticals</SelectItem>
+                            <SelectItem value="Education">Education</SelectItem>
+                            <SelectItem value="Agriculture & Agribusiness">Agriculture & Agribusiness</SelectItem>
+                            <SelectItem value="Manufacturing & Industrial">Manufacturing & Industrial</SelectItem>
+                            <SelectItem value="Retail & Consumer Goods">Retail & Consumer Goods</SelectItem>
+                            <SelectItem value="E-commerce">E-commerce</SelectItem>
+                            <SelectItem value="Media & Publishing">Media & Publishing</SelectItem>
+                            <SelectItem value="Entertainment">Entertainment</SelectItem>
+                            <SelectItem value="Construction & Engineering">Construction & Engineering</SelectItem>
+                            <SelectItem value="Real Estate & Property">Real Estate & Property</SelectItem>
+                            <SelectItem value="Transportation & Logistics">Transportation & Logistics</SelectItem>
+                            <SelectItem value="Aviation">Aviation</SelectItem>
+                            <SelectItem value="Hospitality & Tourism">Hospitality & Tourism</SelectItem>
+                            <SelectItem value="Energy & Power">Energy & Power</SelectItem>
+                            <SelectItem value="Mining & Extractives">Mining & Extractives</SelectItem>
+                            <SelectItem value="Legal Services">Legal Services</SelectItem>
+                            <SelectItem value="Consulting">Consulting</SelectItem>
+                            <SelectItem value="NGO & Development">NGO & Development</SelectItem>
+                            <SelectItem value="Sports & Recreation">Sports & Recreation</SelectItem>
+                            <SelectItem value="Food & Beverage">Food & Beverage</SelectItem>
+                            <SelectItem value="Textile & Apparel">Textile & Apparel</SelectItem>
+                            <SelectItem value="Automotive">Automotive</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                     <div>
