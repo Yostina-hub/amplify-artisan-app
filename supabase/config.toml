@@ -91,3 +91,13 @@ verify_jwt = false
 # Live chat guest send - public
 [functions.live-chat-send]
 verify_jwt = false
+
+# Media monitoring functions
+[functions.media-monitor-ingest]
+verify_jwt = true
+
+[functions.media-monitor-enrich]
+verify_jwt = true
+
+[functions.media-monitor-alerts]
+verify_jwt = true
