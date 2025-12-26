@@ -3642,6 +3642,723 @@ export type Database = {
           },
         ]
       }
+      media_alert_rules: {
+        Row: {
+          channels: string[] | null
+          company_id: string | null
+          conditions: Json
+          cooldown_minutes: number | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          last_triggered_at: string | null
+          name: string
+          recipients: Json | null
+          rule_type: string
+          severity: string | null
+          threshold_period_minutes: number | null
+          threshold_value: number | null
+          trigger_count: number | null
+          updated_at: string
+        }
+        Insert: {
+          channels?: string[] | null
+          company_id?: string | null
+          conditions: Json
+          cooldown_minutes?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_triggered_at?: string | null
+          name: string
+          recipients?: Json | null
+          rule_type: string
+          severity?: string | null
+          threshold_period_minutes?: number | null
+          threshold_value?: number | null
+          trigger_count?: number | null
+          updated_at?: string
+        }
+        Update: {
+          channels?: string[] | null
+          company_id?: string | null
+          conditions?: Json
+          cooldown_minutes?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_triggered_at?: string | null
+          name?: string
+          recipients?: Json | null
+          rule_type?: string
+          severity?: string | null
+          threshold_period_minutes?: number | null
+          threshold_value?: number | null
+          trigger_count?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_alert_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          cluster_id: string | null
+          company_id: string | null
+          created_at: string
+          id: string
+          is_acknowledged: boolean | null
+          mention_ids: string[] | null
+          rule_id: string | null
+          sent_to: string[] | null
+          severity: string | null
+          summary: string | null
+          title: string
+          trigger_data: Json | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          cluster_id?: string | null
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          is_acknowledged?: boolean | null
+          mention_ids?: string[] | null
+          rule_id?: string | null
+          sent_to?: string[] | null
+          severity?: string | null
+          summary?: string | null
+          title: string
+          trigger_data?: Json | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          cluster_id?: string | null
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          is_acknowledged?: boolean | null
+          mention_ids?: string[] | null
+          rule_id?: string | null
+          sent_to?: string[] | null
+          severity?: string | null
+          summary?: string | null
+          title?: string
+          trigger_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_alerts_cluster_id_fkey"
+            columns: ["cluster_id"]
+            isOneToOne: false
+            referencedRelation: "media_clusters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_alerts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_alerts_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "media_alert_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_case_notes: {
+        Row: {
+          attachments: string[] | null
+          case_id: string
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          note_type: string | null
+        }
+        Insert: {
+          attachments?: string[] | null
+          case_id: string
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note_type?: string | null
+        }
+        Update: {
+          attachments?: string[] | null
+          case_id?: string
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_case_notes_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "media_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_cases: {
+        Row: {
+          alert_ids: string[] | null
+          assigned_to: string | null
+          case_number: string
+          cluster_ids: string[] | null
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          evidence_package_url: string | null
+          id: string
+          mention_ids: string[] | null
+          metadata: Json | null
+          priority: string | null
+          resolution: string | null
+          resolved_at: string | null
+          status: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          alert_ids?: string[] | null
+          assigned_to?: string | null
+          case_number: string
+          cluster_ids?: string[] | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          evidence_package_url?: string | null
+          id?: string
+          mention_ids?: string[] | null
+          metadata?: Json | null
+          priority?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          status?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          alert_ids?: string[] | null
+          assigned_to?: string | null
+          case_number?: string
+          cluster_ids?: string[] | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          evidence_package_url?: string | null
+          id?: string
+          mention_ids?: string[] | null
+          metadata?: Json | null
+          priority?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          status?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_cases_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_clusters: {
+        Row: {
+          avg_sentiment: number | null
+          company_id: string | null
+          created_at: string
+          dominant_sentiment: string | null
+          first_seen_at: string
+          id: string
+          is_trending: boolean | null
+          last_updated_at: string
+          mention_count: number | null
+          metadata: Json | null
+          peak_at: string | null
+          summary: string | null
+          title: string
+          top_entities: Json | null
+          top_sources: string[] | null
+          total_reach: number | null
+          trend_velocity: number | null
+        }
+        Insert: {
+          avg_sentiment?: number | null
+          company_id?: string | null
+          created_at?: string
+          dominant_sentiment?: string | null
+          first_seen_at?: string
+          id?: string
+          is_trending?: boolean | null
+          last_updated_at?: string
+          mention_count?: number | null
+          metadata?: Json | null
+          peak_at?: string | null
+          summary?: string | null
+          title: string
+          top_entities?: Json | null
+          top_sources?: string[] | null
+          total_reach?: number | null
+          trend_velocity?: number | null
+        }
+        Update: {
+          avg_sentiment?: number | null
+          company_id?: string | null
+          created_at?: string
+          dominant_sentiment?: string | null
+          first_seen_at?: string
+          id?: string
+          is_trending?: boolean | null
+          last_updated_at?: string
+          mention_count?: number | null
+          metadata?: Json | null
+          peak_at?: string | null
+          summary?: string | null
+          title?: string
+          top_entities?: Json | null
+          top_sources?: string[] | null
+          total_reach?: number | null
+          trend_velocity?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_clusters_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_ingestion_jobs: {
+        Row: {
+          company_id: string | null
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          items_duplicate: number | null
+          items_fetched: number | null
+          items_new: number | null
+          items_processed: number | null
+          metadata: Json | null
+          source_id: string | null
+          started_at: string | null
+          status: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          items_duplicate?: number | null
+          items_fetched?: number | null
+          items_new?: number | null
+          items_processed?: number | null
+          metadata?: Json | null
+          source_id?: string | null
+          started_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          items_duplicate?: number | null
+          items_fetched?: number | null
+          items_new?: number | null
+          items_processed?: number | null
+          metadata?: Json | null
+          source_id?: string | null
+          started_at?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_ingestion_jobs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_ingestion_jobs_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "media_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_mentions: {
+        Row: {
+          author_avatar: string | null
+          author_followers: number | null
+          author_handle: string | null
+          author_name: string | null
+          author_verified: boolean | null
+          cluster_id: string | null
+          company_id: string | null
+          content: string
+          content_html: string | null
+          country: string | null
+          created_at: string
+          credibility_score: number | null
+          duplicate_of: string | null
+          emotions: Json | null
+          engagement_comments: number | null
+          engagement_likes: number | null
+          engagement_shares: number | null
+          engagement_views: number | null
+          entities: Json | null
+          external_id: string | null
+          geo_location: Json | null
+          hashtags: string[] | null
+          id: string
+          is_duplicate: boolean | null
+          is_verified_source: boolean | null
+          language: string | null
+          matched_keywords: string[] | null
+          media_urls: string[] | null
+          permalink: string | null
+          platform: string
+          processed_at: string | null
+          published_at: string
+          raw_payload: Json | null
+          reach_estimate: number | null
+          sentiment_label: string | null
+          sentiment_score: number | null
+          source_id: string | null
+          title: string | null
+          topics: string[] | null
+          translated_content: string | null
+          translated_language: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_avatar?: string | null
+          author_followers?: number | null
+          author_handle?: string | null
+          author_name?: string | null
+          author_verified?: boolean | null
+          cluster_id?: string | null
+          company_id?: string | null
+          content: string
+          content_html?: string | null
+          country?: string | null
+          created_at?: string
+          credibility_score?: number | null
+          duplicate_of?: string | null
+          emotions?: Json | null
+          engagement_comments?: number | null
+          engagement_likes?: number | null
+          engagement_shares?: number | null
+          engagement_views?: number | null
+          entities?: Json | null
+          external_id?: string | null
+          geo_location?: Json | null
+          hashtags?: string[] | null
+          id?: string
+          is_duplicate?: boolean | null
+          is_verified_source?: boolean | null
+          language?: string | null
+          matched_keywords?: string[] | null
+          media_urls?: string[] | null
+          permalink?: string | null
+          platform: string
+          processed_at?: string | null
+          published_at: string
+          raw_payload?: Json | null
+          reach_estimate?: number | null
+          sentiment_label?: string | null
+          sentiment_score?: number | null
+          source_id?: string | null
+          title?: string | null
+          topics?: string[] | null
+          translated_content?: string | null
+          translated_language?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_avatar?: string | null
+          author_followers?: number | null
+          author_handle?: string | null
+          author_name?: string | null
+          author_verified?: boolean | null
+          cluster_id?: string | null
+          company_id?: string | null
+          content?: string
+          content_html?: string | null
+          country?: string | null
+          created_at?: string
+          credibility_score?: number | null
+          duplicate_of?: string | null
+          emotions?: Json | null
+          engagement_comments?: number | null
+          engagement_likes?: number | null
+          engagement_shares?: number | null
+          engagement_views?: number | null
+          entities?: Json | null
+          external_id?: string | null
+          geo_location?: Json | null
+          hashtags?: string[] | null
+          id?: string
+          is_duplicate?: boolean | null
+          is_verified_source?: boolean | null
+          language?: string | null
+          matched_keywords?: string[] | null
+          media_urls?: string[] | null
+          permalink?: string | null
+          platform?: string
+          processed_at?: string | null
+          published_at?: string
+          raw_payload?: Json | null
+          reach_estimate?: number | null
+          sentiment_label?: string | null
+          sentiment_score?: number | null
+          source_id?: string | null
+          title?: string | null
+          topics?: string[] | null
+          translated_content?: string | null
+          translated_language?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_mentions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_mentions_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "media_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_reports: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          filters: Json | null
+          format: string | null
+          id: string
+          is_active: boolean | null
+          last_generated_at: string | null
+          name: string
+          next_run_at: string | null
+          recipients: string[] | null
+          report_type: string | null
+          schedule: string | null
+          template_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          filters?: Json | null
+          format?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_generated_at?: string | null
+          name: string
+          next_run_at?: string | null
+          recipients?: string[] | null
+          report_type?: string | null
+          schedule?: string | null
+          template_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          filters?: Json | null
+          format?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_generated_at?: string | null
+          name?: string
+          next_run_at?: string | null
+          recipients?: string[] | null
+          report_type?: string | null
+          schedule?: string | null
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_reports_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_sources: {
+        Row: {
+          api_config: Json | null
+          company_id: string | null
+          crawl_config: Json | null
+          created_at: string
+          created_by: string | null
+          fetch_interval_minutes: number | null
+          id: string
+          is_active: boolean | null
+          last_fetched_at: string | null
+          metadata: Json | null
+          name: string
+          platform: string | null
+          priority: number | null
+          source_type: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          api_config?: Json | null
+          company_id?: string | null
+          crawl_config?: Json | null
+          created_at?: string
+          created_by?: string | null
+          fetch_interval_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_fetched_at?: string | null
+          metadata?: Json | null
+          name: string
+          platform?: string | null
+          priority?: number | null
+          source_type: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          api_config?: Json | null
+          company_id?: string | null
+          crawl_config?: Json | null
+          created_at?: string
+          created_by?: string | null
+          fetch_interval_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_fetched_at?: string | null
+          metadata?: Json | null
+          name?: string
+          platform?: string | null
+          priority?: number | null
+          source_type?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_sources_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_watchlists: {
+        Row: {
+          company_id: string | null
+          countries: string[] | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          items: string[]
+          languages: string[] | null
+          metadata: Json | null
+          name: string
+          priority: number | null
+          updated_at: string
+          watchlist_type: string
+        }
+        Insert: {
+          company_id?: string | null
+          countries?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          items?: string[]
+          languages?: string[] | null
+          metadata?: Json | null
+          name: string
+          priority?: number | null
+          updated_at?: string
+          watchlist_type: string
+        }
+        Update: {
+          company_id?: string | null
+          countries?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          items?: string[]
+          languages?: string[] | null
+          metadata?: Json | null
+          name?: string
+          priority?: number | null
+          updated_at?: string
+          watchlist_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_watchlists_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notes: {
         Row: {
           company_id: string
