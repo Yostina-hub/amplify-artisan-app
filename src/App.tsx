@@ -88,6 +88,7 @@ import FirewallManagement from "./pages/admin/FirewallManagement";
 import LiveChatDashboard from "./pages/admin/LiveChatDashboard";
 import LayoutShowcase from "./pages/LayoutShowcase";
 import FinancialDocument from "./pages/FinancialDocument";
+import MediaMonitoring from "./pages/MediaMonitoring";
 
 const queryClient = new QueryClient();
 
@@ -186,6 +187,7 @@ const App = () => (
               <Route path="/social-intelligence" element={<ProtectedRoute><SocialIntelligence /></ProtectedRoute>} />
               <Route path="/automation" element={<ProtectedRoute><Automation /></ProtectedRoute>} />
               <Route path="/ai-analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+              <Route path="/media-monitoring" element={<ProtectedRoute><MediaMonitoring /></ProtectedRoute>} />
               <Route path="/social-connections" element={<ProtectedRoute><SocialConnections /></ProtectedRoute>} />
               
               {/* Enterprise Builder */}
