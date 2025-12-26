@@ -490,17 +490,14 @@ export function NeuralAIEngine({ isOpen, onClose }: NeuralAIEngineProps) {
                     <DialogTitle>Create Monitoring Profile</DialogTitle>
                   </DialogHeader>
                   
-                  {/* Sample Profiles Section */}
+                  {/* Sample Profiles Dropdown */}
                   <div className="mb-4">
-                    <Label className="text-sm font-medium mb-2 block">Quick Start - Sample Profiles</Label>
-                    <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-1">
-                      {SAMPLE_PROFILES.map((sample, index) => (
-                        <Button
-                          key={index}
-                          variant="outline"
-                          size="sm"
-                          className="justify-start text-left h-auto py-2 px-3"
-                          onClick={() => setNewProfile({
+                    <Label className="text-sm font-medium mb-2 block">Quick Start - Select a Sample Profile</Label>
+                    <Select
+                      onValueChange={(value) => {
+                        const sample = SAMPLE_PROFILES.find(p => p.profile_name === value);
+                        if (sample) {
+                          setNewProfile({
                             profile_name: sample.profile_name,
                             business_type: sample.business_type,
                             industry: sample.industry,
@@ -508,15 +505,24 @@ export function NeuralAIEngine({ isOpen, onClose }: NeuralAIEngineProps) {
                             keywords: sample.keywords,
                             competitor_names: sample.competitor_names,
                             target_regions: sample.target_regions,
-                          })}
-                        >
-                          <div className="flex flex-col items-start">
-                            <span className="font-medium text-xs">{sample.profile_name}</span>
-                            <span className="text-[10px] text-muted-foreground">{sample.business_type}</span>
-                          </div>
-                        </Button>
-                      ))}
-                    </div>
+                          });
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="w-full bg-background">
+                        <SelectValue placeholder="Choose a sample profile to get started..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover z-[100]">
+                        {SAMPLE_PROFILES.map((sample, index) => (
+                          <SelectItem key={index} value={sample.profile_name}>
+                            <div className="flex flex-col items-start">
+                              <span className="font-medium">{sample.profile_name}</span>
+                              <span className="text-xs text-muted-foreground">{sample.business_type} • {sample.industry}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   
                   <div className="border-t pt-4 space-y-4">
