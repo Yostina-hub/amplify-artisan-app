@@ -42,6 +42,99 @@ import {
   Database
 } from "lucide-react";
 
+const SAMPLE_PROFILES = [
+  {
+    profile_name: 'Ethio Telecom Monitoring',
+    business_type: 'Ethio Telecom',
+    industry: 'Telecommunications',
+    description: 'Monitor Ethio Telecom services, network quality, customer feedback, and competitor activities',
+    keywords: 'ethio telecom, telebirr, mobile network, internet service, 4G, 5G, safaricom',
+    competitor_names: 'Safaricom Ethiopia, Starlink',
+    target_regions: 'Ethiopia, Addis Ababa, Oromia, Amhara'
+  },
+  {
+    profile_name: 'Ethiopian Government Affairs',
+    business_type: 'Government - Federal',
+    industry: 'Public Administration',
+    description: 'Track government policies, announcements, and public sector developments',
+    keywords: 'ethiopian government, ministry, policy, regulation, parliament, prime minister',
+    competitor_names: '',
+    target_regions: 'Ethiopia, African Union'
+  },
+  {
+    profile_name: 'Commercial Bank of Ethiopia',
+    business_type: 'Bank',
+    industry: 'Banking & Finance',
+    description: 'Monitor banking sector, financial news, and CBE-related updates',
+    keywords: 'CBE, commercial bank ethiopia, banking, loan, interest rate, forex',
+    competitor_names: 'Awash Bank, Dashen Bank, Bank of Abyssinia, Zemen Bank',
+    target_regions: 'Ethiopia'
+  },
+  {
+    profile_name: 'Ethiopian Airlines Group',
+    business_type: 'Public Enterprise',
+    industry: 'Aviation',
+    description: 'Track aviation industry, Ethiopian Airlines operations, and travel sector news',
+    keywords: 'ethiopian airlines, aviation, flight, bole airport, cargo, star alliance',
+    competitor_names: 'Kenya Airways, Emirates, Qatar Airways, Turkish Airlines',
+    target_regions: 'Ethiopia, Africa, Global'
+  },
+  {
+    profile_name: 'Tech Startup Ecosystem',
+    business_type: 'Private - Startup',
+    industry: 'Information Technology',
+    description: 'Monitor Ethiopian tech ecosystem, startups, and innovation news',
+    keywords: 'tech startup, fintech, innovation, venture capital, entrepreneur, digital ethiopia',
+    competitor_names: '',
+    target_regions: 'Ethiopia, East Africa'
+  },
+  {
+    profile_name: 'Healthcare Sector Watch',
+    business_type: 'Healthcare',
+    industry: 'Healthcare & Pharmaceuticals',
+    description: 'Track healthcare developments, public health news, and medical sector updates',
+    keywords: 'healthcare, hospital, medicine, health ministry, WHO, vaccination, public health',
+    competitor_names: '',
+    target_regions: 'Ethiopia, Africa'
+  },
+  {
+    profile_name: 'Real Estate & Construction',
+    business_type: 'Real Estate',
+    industry: 'Real Estate & Property',
+    description: 'Monitor real estate market, construction projects, and property developments',
+    keywords: 'real estate, construction, housing, condominium, commercial property, infrastructure',
+    competitor_names: '',
+    target_regions: 'Addis Ababa, Ethiopia'
+  },
+  {
+    profile_name: 'Agriculture & Export',
+    business_type: 'Agriculture',
+    industry: 'Agriculture & Agribusiness',
+    description: 'Track agricultural sector, coffee export, and farming developments',
+    keywords: 'agriculture, coffee, export, farming, horticulture, livestock, food security',
+    competitor_names: '',
+    target_regions: 'Ethiopia, East Africa'
+  },
+  {
+    profile_name: 'Addis Ababa City Government',
+    business_type: 'Government - Municipal',
+    industry: 'Public Administration',
+    description: 'Monitor city administration, urban development, and municipal services',
+    keywords: 'addis ababa, city government, urban, municipality, public service, infrastructure',
+    competitor_names: '',
+    target_regions: 'Addis Ababa'
+  },
+  {
+    profile_name: 'Ethiopian Insurance Corporation',
+    business_type: 'Insurance',
+    industry: 'Insurance',
+    description: 'Track insurance sector, EIC updates, and regulatory developments',
+    keywords: 'insurance, EIC, risk, claims, premium, reinsurance',
+    competitor_names: 'Awash Insurance, Nyala Insurance, Nile Insurance',
+    target_regions: 'Ethiopia'
+  }
+];
+
 interface NeuralAIEngineProps {
   isOpen: boolean;
   onClose: () => void;
@@ -392,11 +485,41 @@ export function NeuralAIEngine({ isOpen, onClose }: NeuralAIEngineProps) {
                     <Plus className="h-4 w-4" />
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-lg">
+                <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Create Monitoring Profile</DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-4">
+                  
+                  {/* Sample Profiles Section */}
+                  <div className="mb-4">
+                    <Label className="text-sm font-medium mb-2 block">Quick Start - Sample Profiles</Label>
+                    <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-1">
+                      {SAMPLE_PROFILES.map((sample, index) => (
+                        <Button
+                          key={index}
+                          variant="outline"
+                          size="sm"
+                          className="justify-start text-left h-auto py-2 px-3"
+                          onClick={() => setNewProfile({
+                            profile_name: sample.profile_name,
+                            business_type: sample.business_type,
+                            industry: sample.industry,
+                            description: sample.description,
+                            keywords: sample.keywords,
+                            competitor_names: sample.competitor_names,
+                            target_regions: sample.target_regions,
+                          })}
+                        >
+                          <div className="flex flex-col items-start">
+                            <span className="font-medium text-xs">{sample.profile_name}</span>
+                            <span className="text-[10px] text-muted-foreground">{sample.business_type}</span>
+                          </div>
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="border-t pt-4 space-y-4">
                     <div>
                       <Label>Profile Name</Label>
                       <Input
