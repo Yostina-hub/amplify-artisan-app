@@ -2,10 +2,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { EnhancedLayout } from "./components/EnhancedLayout";
-import { AuthProvider } from "./hooks/useAuth";
+import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { LiveChat } from "./components/LiveChat";
 import Index from "./pages/Index";
@@ -91,6 +91,24 @@ import FinancialDocument from "./pages/FinancialDocument";
 
 const queryClient = new QueryClient();
 
+function HomeRoute() {
+  const { user, loading, isSuperAdmin } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-background">
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  if (user) {
+    return <Navigate to={isSuperAdmin ? "/admin" : "/dashboard"} replace />;
+  }
+
+  return <Index />;
+}
+
 // Main App component with all providers
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -102,7 +120,7 @@ const App = () => (
           <BrowserRouter>
           <Routes>
             {/* Public routes without layout */}
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<HomeRoute />} />
             <Route path="/financial-document" element={<FinancialDocument />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
