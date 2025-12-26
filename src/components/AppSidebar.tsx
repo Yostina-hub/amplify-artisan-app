@@ -232,24 +232,24 @@ export function AppSidebar() {
     <TooltipProvider delayDuration={0}>
       <Sidebar 
         collapsible="icon" 
-        className="border-r border-border/40 bg-background"
+        className="border-r border-sidebar-border bg-sidebar"
       >
         {/* Header - Logo */}
         <SidebarHeader className={cn(
-          "border-b border-border/40 transition-all duration-200",
+          "border-b border-sidebar-border transition-all duration-200",
           isCollapsed ? "p-3" : "p-4"
         )}>
           <div className={cn(
             "flex items-center transition-all duration-200",
             isCollapsed ? "justify-center" : "gap-3"
           )}>
-            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center flex-shrink-0 shadow-sm">
-              <span className="text-primary-foreground font-bold text-sm">S</span>
+            <div className="w-9 h-9 rounded-lg bg-sidebar-primary flex items-center justify-center flex-shrink-0 shadow-sm">
+              <span className="text-sidebar-primary-foreground font-bold text-sm">S</span>
             </div>
             {!isCollapsed && (
               <div className="flex flex-col">
-                <span className="font-semibold text-foreground text-sm">SocialHub</span>
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Enterprise CRM</span>
+                <span className="font-semibold text-sidebar-foreground text-sm">SocialHub</span>
+                <span className="text-[10px] text-sidebar-muted uppercase tracking-wider">Enterprise CRM</span>
               </div>
             )}
           </div>
@@ -260,13 +260,13 @@ export function AppSidebar() {
             {/* Search Bar */}
             {!isCollapsed && (
               <div className="p-2 pt-3">
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-sidebar-muted" />
                   <Input
                     placeholder="Search..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-8 pl-8 text-xs bg-muted/40 border-0 focus-visible:ring-1 focus-visible:ring-ring/50"
+                    className="h-8 pl-8 text-xs bg-sidebar-accent border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-muted focus-visible:ring-1 focus-visible:ring-sidebar-ring"
                   />
                 </div>
               </div>
@@ -278,7 +278,7 @@ export function AppSidebar() {
                 {!isCollapsed && (
                   <div className="flex items-center gap-1.5 px-3 py-1 mb-1">
                     <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
-                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Pinned</span>
+                    <span className="text-[10px] font-medium text-sidebar-muted uppercase tracking-wider">Pinned</span>
                   </div>
                 )}
                 <SidebarMenu className="gap-0.5">
@@ -323,7 +323,7 @@ export function AppSidebar() {
               <SidebarGroup className="py-2">
                 {!isCollapsed && (
                   <div className="px-3 py-1 mb-1">
-                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Agents</span>
+                    <span className="text-[10px] font-medium text-sidebar-muted uppercase tracking-wider">Agents</span>
                   </div>
                 )}
                 <SidebarMenu className="gap-0.5">
@@ -353,7 +353,7 @@ export function AppSidebar() {
         </SidebarContent>
 
         {/* Footer */}
-        <SidebarFooter className="border-t border-border/40 p-2">
+        <SidebarFooter className="border-t border-sidebar-border p-2">
           <SidebarMenu className="gap-0.5">
             <NavItemRow
               item={{ title: "Settings", url: "/settings", icon: Settings }}
@@ -370,15 +370,15 @@ export function AppSidebar() {
           {/* User Profile */}
           <div className={cn(
             "flex items-center mt-2 p-2 rounded-lg transition-colors",
-            "hover:bg-muted/50 cursor-pointer group",
+            "hover:bg-sidebar-accent cursor-pointer group",
             isCollapsed && "justify-center p-1.5"
           )}>
             {isCollapsed ? (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button onClick={handleSignOut} className="focus:outline-none">
-                    <Avatar className="h-8 w-8 ring-2 ring-transparent hover:ring-primary/20 transition-all">
-                      <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
+                    <Avatar className="h-8 w-8 ring-2 ring-transparent hover:ring-sidebar-primary/20 transition-all">
+                      <AvatarFallback className="bg-sidebar-primary/10 text-sidebar-primary text-xs font-medium">
                         {userInitials}
                       </AvatarFallback>
                     </Avatar>
@@ -391,22 +391,22 @@ export function AppSidebar() {
               </Tooltip>
             ) : (
               <>
-                <Avatar className="h-8 w-8 ring-2 ring-transparent group-hover:ring-primary/20 transition-all flex-shrink-0">
-                  <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
+                <Avatar className="h-8 w-8 ring-2 ring-transparent group-hover:ring-sidebar-primary/20 transition-all flex-shrink-0">
+                  <AvatarFallback className="bg-sidebar-primary/10 text-sidebar-primary text-xs font-medium">
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0 ml-2.5">
-                  <p className="text-sm font-medium text-foreground truncate leading-tight">
+                  <p className="text-sm font-medium text-sidebar-foreground truncate leading-tight">
                     {user?.email?.split('@')[0] || 'User'}
                   </p>
-                  <p className="text-[10px] text-muted-foreground truncate">
+                  <p className="text-[10px] text-sidebar-muted truncate">
                     {user?.email}
                   </p>
                 </div>
                 <button 
                   onClick={handleSignOut}
-                  className="p-1.5 rounded-md opacity-0 group-hover:opacity-100 hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
+                  className="p-1.5 rounded-md opacity-0 group-hover:opacity-100 hover:bg-destructive/10 text-sidebar-muted hover:text-destructive transition-all"
                   title="Sign out"
                 >
                   <LogOut className="h-4 w-4" />
@@ -445,12 +445,12 @@ function NavGroupRow({
                   className={cn(
                     "w-full justify-center relative h-9",
                     hasActiveItem 
-                      ? "text-primary bg-primary/5" 
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      ? "text-sidebar-primary bg-sidebar-primary/10" 
+                      : "text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-accent"
                   )}
                 >
                   {hasActiveItem && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-primary rounded-r-full" />
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-sidebar-primary rounded-r-full" />
                   )}
                   <group.icon className="h-[18px] w-[18px]" />
                 </SidebarMenuButton>
@@ -498,7 +498,7 @@ function NavGroupRow({
   return (
     <SidebarGroup className="py-2">
       <div className="px-3 py-1 mb-1">
-        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+        <span className="text-[10px] font-medium text-sidebar-muted uppercase tracking-wider">
           {group.label}
         </span>
       </div>
@@ -534,12 +534,12 @@ function NavItemRow({
           "relative flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-all duration-150",
           isCollapsed && "justify-center px-0",
           isActive
-            ? "bg-primary/10 text-primary font-medium"
-            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            ? "bg-sidebar-primary/10 text-sidebar-primary font-medium"
+            : "text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
         )}
       >
         {isActive && (
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-primary rounded-r-full" />
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-sidebar-primary rounded-r-full" />
         )}
         <item.icon className={cn(
           "h-[18px] w-[18px] flex-shrink-0 transition-transform",
