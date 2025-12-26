@@ -512,45 +512,82 @@ export function NeuralAIEngine({ isOpen, onClose }: NeuralAIEngineProps) {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {/* Company selector for super admin */}
+              {isSuperAdmin && !companyId && (
+                <Select
+                  value={selectedCompanyId || ""}
+                  onValueChange={(v) => {
+                    setSelectedCompanyId(v);
+                    setSelectedProfileId(null);
+                  }}
+                >
+                  <SelectTrigger className="w-[200px] bg-background">
+                    <SelectValue placeholder="Select company" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover z-[200] max-h-[350px] overflow-y-auto" position="popper" side="bottom" sideOffset={4}>
+                    {companies && companies.length > 0 ? (
+                      companies.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="__none" disabled>
+                        No companies found
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              )}
+
               {/* Profile selector */}
-              <Select value={selectedProfileId || ""} onValueChange={(value) => {
-                // Check if it's a sample profile (starts with "sample_")
-                if (value.startsWith('sample_')) {
-                  const sampleIndex = parseInt(value.replace('sample_', ''));
-                  const sample = SAMPLE_PROFILES[sampleIndex];
-                  if (sample && companyId && user?.id) {
-                    // Create the profile from sample
-                    supabase
-                      .from('company_monitoring_profiles')
-                      .insert({
-                        company_id: companyId,
-                        profile_name: sample.profile_name,
-                        business_type: sample.business_type,
-                        industry: sample.industry,
-                        description: sample.description,
-                        keywords: sample.keywords.split(',').map(k => k.trim()).filter(Boolean),
-                        competitor_names: sample.competitor_names.split(',').map(k => k.trim()).filter(Boolean),
-                        target_regions: sample.target_regions.split(',').map(k => k.trim()).filter(Boolean),
-                        created_by: user.id,
-                      })
-                      .select()
-                      .single()
-                      .then(({ data, error }) => {
-                        if (error) {
-                          toast.error('Failed to create profile: ' + error.message);
-                        } else if (data) {
-                          toast.success('Profile created from template');
-                          queryClient.invalidateQueries({ queryKey: ['monitoring-profiles'] });
-                          setSelectedProfileId(data.id);
-                        }
-                      });
+              <Select
+                value={selectedProfileId || ""}
+                disabled={!effectiveCompanyId}
+                onValueChange={(value) => {
+                  if (!effectiveCompanyId) {
+                    toast.error('Select a company first');
+                    return;
                   }
-                } else {
-                  setSelectedProfileId(value);
-                }
-              }}>
+
+                  // Check if it's a sample profile (starts with "sample_")
+                  if (value.startsWith('sample_')) {
+                    const sampleIndex = parseInt(value.replace('sample_', ''));
+                    const sample = SAMPLE_PROFILES[sampleIndex];
+                    if (sample && user?.id) {
+                      // Create the profile from sample
+                      supabase
+                        .from('company_monitoring_profiles')
+                        .insert({
+                          company_id: effectiveCompanyId,
+                          profile_name: sample.profile_name,
+                          business_type: sample.business_type,
+                          industry: sample.industry,
+                          description: sample.description,
+                          keywords: sample.keywords.split(',').map(k => k.trim()).filter(Boolean),
+                          competitor_names: sample.competitor_names.split(',').map(k => k.trim()).filter(Boolean),
+                          target_regions: sample.target_regions.split(',').map(k => k.trim()).filter(Boolean),
+                          created_by: user.id,
+                        })
+                        .select()
+                        .single()
+                        .then(({ data, error }) => {
+                          if (error) {
+                            toast.error('Failed to create profile: ' + error.message);
+                          } else if (data) {
+                            toast.success('Profile created from template');
+                            queryClient.invalidateQueries({ queryKey: ['monitoring-profiles'] });
+                            setSelectedProfileId(data.id);
+                          }
+                        });
+                    }
+                  } else {
+                    setSelectedProfileId(value);
+                  }
+                }}
+              >
                 <SelectTrigger className="w-[220px] bg-background">
-                  <SelectValue placeholder="Select profile" />
+                  <SelectValue placeholder={effectiveCompanyId ? "Select profile" : "Select company first"} />
                 </SelectTrigger>
                 <SelectContent className="bg-popover z-[200] max-h-[350px] overflow-y-auto" position="popper" side="bottom" sideOffset={4}>
                   {/* Existing profiles */}
@@ -565,7 +602,7 @@ export function NeuralAIEngine({ isOpen, onClose }: NeuralAIEngineProps) {
                       <div className="my-1 border-t" />
                     </>
                   )}
-                  
+
                   {/* Sample profiles as quick-start */}
                   <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
                     {monitoringProfiles && monitoringProfiles.length > 0 ? 'Quick Start Templates' : 'Create from Template'}
