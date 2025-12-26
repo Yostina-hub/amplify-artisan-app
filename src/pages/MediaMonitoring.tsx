@@ -21,10 +21,11 @@ import {
   ArrowUpRight, ArrowDownRight, Volume2, Users, Layers,
   PieChart, LineChart, Newspaper, Twitter, Facebook, Youtube,
   Instagram, Linkedin, Send, Rss, AlertCircle, CheckCircle2,
-  XCircle, TrendingDown, Maximize2, MoreHorizontal, Star
+  XCircle, TrendingDown, Maximize2, MoreHorizontal, Star, Brain
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, PieChart as RechartsPie, Pie, Cell, Tooltip as RechartsTooltip, BarChart, Bar } from 'recharts';
+import { NeuralAIEngine } from '@/components/media-monitoring/NeuralAIEngine';
 
 // Platform configurations with icons and colors
 const platformConfig: Record<string, { icon: any; color: string; bgColor: string; name: string }> = {
@@ -67,6 +68,7 @@ export default function MediaMonitoring() {
   const [selectedSentiment, setSelectedSentiment] = useState<string>('all');
   const [isLiveMode, setIsLiveMode] = useState(true);
   const [activeView, setActiveView] = useState<'feed' | 'grid' | 'analytics'>('feed');
+  const [showNeuralEngine, setShowNeuralEngine] = useState(false);
 
   // Fetch mentions
   const { data: mentions, isLoading: mentionsLoading } = useQuery({
@@ -189,6 +191,9 @@ export default function MediaMonitoring() {
 
   return (
     <TooltipProvider>
+      {/* Neural AI Engine Modal */}
+      <NeuralAIEngine isOpen={showNeuralEngine} onClose={() => setShowNeuralEngine(false)} />
+      
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
         {/* Immersive Header with Glassmorphism */}
         <div className="relative overflow-hidden border-b border-border/50 bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5">
@@ -245,6 +250,16 @@ export default function MediaMonitoring() {
                 <Button size="sm" className="bg-gradient-to-r from-primary to-secondary hover:opacity-90">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Source
+                </Button>
+                
+                {/* Neural AI Engine Button */}
+                <Button 
+                  onClick={() => setShowNeuralEngine(true)}
+                  className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 hover:from-purple-700 hover:via-fuchsia-700 hover:to-purple-700 text-white shadow-lg shadow-purple-500/25 border-0"
+                >
+                  <Brain className="h-4 w-4 mr-2 animate-pulse" />
+                  Neural AI Engine
+                  <Sparkles className="h-3 w-3 ml-2" />
                 </Button>
               </div>
             </div>
@@ -875,3 +890,6 @@ function formatNumber(num: number): string {
   if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
   return num.toString();
 }
+
+// Export with Neural Engine Modal
+export { NeuralAIEngine };
