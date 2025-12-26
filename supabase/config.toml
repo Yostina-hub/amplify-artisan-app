@@ -101,3 +101,6 @@ verify_jwt = true
 
 [functions.neural-engine-analyze]
 verify_jwt = true
+
+[functions.scrape-social-media]
+verify_jwt = true
