@@ -165,11 +165,13 @@ const navigationGroups: NavGroup[] = [
     label: "Tools",
     icon: Box,
     items: [
+      { title: "Composer", url: "/composer", icon: FileText },
       { title: "Calendar", url: "/calendar", icon: Calendar },
       { title: "Documents", url: "/documents", icon: FileText },
       { title: "Projects", url: "/project-management", icon: FolderKanban },
       { title: "Module Builder", url: "/module-builder", icon: Database },
       { title: "Form Builder", url: "/form-builder", icon: Box },
+      { title: "Content Moderation", url: "/admin/moderation", icon: Flag },
     ],
   },
 ];
