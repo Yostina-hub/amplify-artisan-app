@@ -62,6 +62,7 @@ import {
   FileSearch,
   Volume2,
   Briefcase,
+  Radio,
   type LucideIcon,
 } from "lucide-react";
 
@@ -131,6 +132,7 @@ const navigationGroups: NavGroup[] = [
       { title: "Inbox", url: "/social-inbox", icon: MessageCircle },
       { title: "Connections", url: "/social-connections", icon: Link2 },
       { title: "Intelligence", url: "/social-intelligence", icon: Brain },
+      { title: "Media Monitoring", url: "/media-monitoring", icon: Radio },
     ],
   },
   {
