@@ -107,3 +107,6 @@ verify_jwt = true
 
 [functions.reply-to-telegram]
 verify_jwt = true
+
+[functions.telegram-webhook]
+verify_jwt = false
