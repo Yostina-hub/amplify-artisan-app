@@ -51,23 +51,14 @@ serve(async (req) => {
 
     const { postId, content, platforms } = validationResult.data;
 
-    const GOOGLE_GEMINI_API_KEY = Deno.env.get('GOOGLE_GEMINI_API_KEY');
-    if (!GOOGLE_GEMINI_API_KEY) {
-      throw new Error('GOOGLE_GEMINI_API_KEY not configured');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY not configured');
     }
 
     console.log(`Moderating post ${postId}...`);
 
-    // Call Gemini API for content analysis
-    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GOOGLE_GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: `You are a content moderation AI. Analyze social media posts and identify policy violations.
+    const systemPrompt = `You are a content moderation AI. Analyze social media posts and identify policy violations.
 
 Check for:
 1. Hate speech, harassment, or violence
@@ -82,29 +73,45 @@ Respond ONLY with valid JSON in this exact format:
   "flagReason": "specific reason or null",
   "violations": ["array", "of", "violation", "types"],
   "severity": "none" | "low" | "medium" | "high"
-}
+}`;
 
-Analyze this social media post for ${platforms.join(', ')}:
+    const userPrompt = `Analyze this social media post for ${platforms.join(', ')}:
 
 "${content}"
 
-Provide your analysis in JSON format.`
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.3,
-        }
+Provide your analysis in JSON format.`;
+
+    // Use Lovable AI Gateway
+    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        temperature: 0.3,
       }),
     });
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
       console.error('AI moderation error:', aiResponse.status, errorText);
+      if (aiResponse.status === 429) {
+        throw new Error('Rate limit exceeded. Please try again later.');
+      }
+      if (aiResponse.status === 402) {
+        throw new Error('AI credits exhausted. Please add funds to continue.');
+      }
       throw new Error(`AI moderation failed: ${aiResponse.status}`);
     }
 
     const aiData = await aiResponse.json();
-    const aiContent = aiData.candidates[0]?.content?.parts[0]?.text;
+    const aiContent = aiData.choices?.[0]?.message?.content;
 
     if (!aiContent) {
       throw new Error('No response from AI moderation');
