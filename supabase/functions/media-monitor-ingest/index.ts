@@ -90,6 +90,15 @@ serve(async (req) => {
 
     console.log(`Found ${sources?.length || 0} active sources to ingest`);
 
+    // Also get connected social platform tokens for real data
+    const { data: socialTokens } = await supabase
+      .from('social_platform_tokens')
+      .select('*')
+      .eq('company_id', targetCompanyId)
+      .eq('is_active', true);
+
+    console.log(`Found ${socialTokens?.length || 0} connected social accounts`);
+
     let totalFetched = 0;
     let totalNew = 0;
     let totalDuplicate = 0;
@@ -105,11 +114,47 @@ serve(async (req) => {
       ?.filter(w => w.watchlist_type === 'keyword' || w.watchlist_type === 'hashtag')
       .flatMap(w => w.items) || [];
 
-    // Process each source (simulated for now - real implementation would call platform APIs)
+    // Process social platform tokens first (real data from OAuth connections)
+    for (const token of socialTokens || []) {
+      console.log(`Fetching from connected ${token.platform}: ${token.account_name}`);
+      
+      // Call the social-sync function to get real data
+      try {
+        const syncResponse = await fetch(`${supabaseUrl}/functions/v1/social-sync`, {
+          method: 'POST',
+          headers: {
+            'Authorization': authHeader,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            platforms: [token.platform],
+            analyzeSentiments: true,
+          }),
+        });
+
+        if (syncResponse.ok) {
+          const syncData = await syncResponse.json();
+          totalNew += syncData.synced || 0;
+          totalFetched += syncData.total_fetched || 0;
+          console.log(`Synced ${syncData.synced} posts from ${token.platform}`);
+        }
+      } catch (syncError) {
+        console.error(`Failed to sync ${token.platform}:`, syncError);
+      }
+    }
+
+    // Process configured media sources (for sources not connected via OAuth)
     for (const source of sources || []) {
       console.log(`Processing source: ${source.name} (${source.platform})`);
 
-      // Simulate fetching data based on platform
+      // Check if this platform already has an OAuth connection
+      const hasOAuth = socialTokens?.some(t => t.platform === source.platform);
+      if (hasOAuth) {
+        console.log(`Skipping ${source.platform} - already synced via OAuth`);
+        continue;
+      }
+
+      // Simulate fetching data based on platform (fallback for non-OAuth sources)
       const mockMentions = generateMockMentions(source, targetCompanyId, keywords);
       
       for (const mention of mockMentions) {
