@@ -211,7 +211,7 @@ export default function SocialInbox() {
         </div>
 
         {/* Main Inbox */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[600px]">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" style={{ minHeight: '700px' }}>
           {/* Conversations List */}
           <Card className="lg:col-span-1 flex flex-col border-2 backdrop-blur-sm bg-card/95 shadow-xl">
             <CardHeader>
@@ -294,7 +294,7 @@ export default function SocialInbox() {
           </Card>
 
           {/* Conversation View */}
-          <Card className="lg:col-span-2 flex flex-col border-2 backdrop-blur-sm bg-card/95 shadow-xl">
+          <Card className="lg:col-span-2 flex flex-col border-2 backdrop-blur-sm bg-card/95 shadow-xl overflow-hidden">
             {selectedConversation ? (
               <>
                 <CardHeader className="border-b-2 bg-gradient-to-r from-primary/5 to-accent/5">
@@ -342,8 +342,8 @@ export default function SocialInbox() {
                   </div>
                 </CardHeader>
 
-                <CardContent className="flex-1 overflow-hidden p-0 flex flex-col">
-                  <ScrollArea className="flex-1 p-6">
+                <CardContent className="flex-1 overflow-hidden p-0 flex flex-col min-h-0">
+                  <ScrollArea className="flex-1 p-6 min-h-0" style={{ maxHeight: '350px' }}>
                     <div className="space-y-6">
                       {/* Original Message */}
                       <div className={cn(
