@@ -440,9 +440,10 @@ export default function SocialInbox() {
                           if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && replyText.trim()) {
                             e.preventDefault();
                             if (selectedConversation.platform === 'telegram') {
+                              const chatId = selectedConversation.metadata?.chat_id || selectedConversation.participant_id;
                               replyMutation.mutate({
                                 conversationId: selectedConversation.id,
-                                chatId: selectedConversation.metadata?.chat_id || selectedConversation.external_id,
+                                chatId: chatId,
                                 replyText: replyText.trim()
                               });
                             }
@@ -463,9 +464,11 @@ export default function SocialInbox() {
                             disabled={!replyText.trim() || replyMutation.isPending}
                             onClick={() => {
                               if (selectedConversation.platform === 'telegram') {
+                                const chatId = selectedConversation.metadata?.chat_id || selectedConversation.participant_id;
+                                console.log('Sending reply to chat_id:', chatId, 'metadata:', selectedConversation.metadata);
                                 replyMutation.mutate({
                                   conversationId: selectedConversation.id,
-                                  chatId: selectedConversation.metadata?.chat_id || selectedConversation.external_id,
+                                  chatId: chatId,
                                   replyText: replyText.trim()
                                 });
                               } else {
