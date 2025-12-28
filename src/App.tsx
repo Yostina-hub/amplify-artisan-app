@@ -89,6 +89,7 @@ import LiveChatDashboard from "./pages/admin/LiveChatDashboard";
 import LayoutShowcase from "./pages/LayoutShowcase";
 import FinancialDocument from "./pages/FinancialDocument";
 import MediaMonitoring from "./pages/MediaMonitoring";
+import SocialAnalytics from "./pages/SocialAnalytics";
 
 const queryClient = new QueryClient();
 
@@ -188,6 +189,7 @@ const App = () => (
               <Route path="/automation" element={<ProtectedRoute><Automation /></ProtectedRoute>} />
               <Route path="/ai-analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
               <Route path="/media-monitoring" element={<ProtectedRoute><MediaMonitoring /></ProtectedRoute>} />
+              <Route path="/social-analytics" element={<ProtectedRoute><SocialAnalytics /></ProtectedRoute>} />
               <Route path="/social-connections" element={<ProtectedRoute><SocialConnections /></ProtectedRoute>} />
               
               {/* Enterprise Builder */}
