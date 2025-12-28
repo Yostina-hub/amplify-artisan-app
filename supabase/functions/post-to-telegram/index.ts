@@ -25,13 +25,15 @@ serve(async (req) => {
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    // Get Telegram token from social_platform_tokens
+    // Get Telegram token from social_platform_tokens (use most recently updated active connection)
     const { data: telegramToken, error: tokenError } = await supabase
       .from('social_platform_tokens')
       .select('*')
       .eq('company_id', companyId)
       .eq('platform', 'telegram')
       .eq('is_active', true)
+      .order('updated_at', { ascending: false })
+      .limit(1)
       .maybeSingle();
 
     if (tokenError) {
@@ -49,6 +51,14 @@ serve(async (req) => {
 
     const botToken = telegramToken.access_token;
     const channelId = telegramToken.metadata?.channel_id || telegramToken.account_id;
+
+    console.log('Telegram connection picked:', {
+      tokenRowId: telegramToken.id,
+      account_id: telegramToken.account_id,
+      channel_id: telegramToken.metadata?.channel_id,
+      updated_at: telegramToken.updated_at,
+      is_active: telegramToken.is_active,
+    });
 
     if (!botToken || !channelId) {
       console.error('Missing bot token or channel ID');
