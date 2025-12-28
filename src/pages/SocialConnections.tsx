@@ -450,14 +450,16 @@ export default function SocialConnections() {
           });
         if (error) throw error;
       }
+      
+      // Return the saved data so we can use it directly
+      return { platformId, savedData: data, companyId: profile.company_id, userId: user.id };
     },
-    onSuccess: (_, { platformId }) => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['company-platform-configs'] });
-      toast({ title: "Custom credentials saved! Now click Connect to authenticate." });
+      toast({ title: "Credentials saved! Connecting..." });
       setCustomOAuthDialog(null);
-      setCustomOAuthData({});
-      // After saving, trigger OAuth connection with company's own credentials
-      handleOAuthConnectWithCustom(platformId);
+      // Immediately trigger OAuth with the just-saved credentials
+      initiateOAuthWithCredentials(result.platformId, result.savedData, result.companyId, result.userId);
     },
     onError: (error) => {
       toast({
@@ -468,42 +470,26 @@ export default function SocialConnections() {
     }
   });
 
-  // OAuth connect using company's custom credentials
-  const handleOAuthConnectWithCustom = async (platformId: string) => {
-    const config = companyConfigs?.find(c => c.platform_id === platformId);
-    if (!config?.client_id) {
-      toast({
-        title: "No credentials found",
-        description: "Please save your OAuth credentials first",
-        variant: "destructive"
-      });
-      return;
-    }
-    
+  // Helper to initiate OAuth with provided credentials (avoids stale cache issue)
+  const initiateOAuthWithCredentials = async (
+    platformId: string, 
+    credentials: Record<string, string>,
+    companyId: string,
+    userId: string
+  ) => {
     setConnectingPlatform(platformId);
     
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('company_id')
-        .eq('id', user.id)
-        .single();
-
-      if (!profile?.company_id) throw new Error('No company found');
-
       const platform = PLATFORMS.find(p => p.id === platformId);
       const state = btoa(JSON.stringify({ 
-        userId: user.id, 
-        companyId: profile.company_id,
+        userId, 
+        companyId,
         platform: platformId,
         useCustom: true
       }));
       
-      const redirectUri = encodeURIComponent(config.redirect_url || `${window.location.origin}/oauth-callback`);
-      const clientId = config.client_id;
+      const redirectUri = encodeURIComponent(credentials.redirect_url || `${window.location.origin}/functions/v1/oauth-callback`);
+      const clientId = credentials.client_id;
       
       let authUrl = '';
       
@@ -512,7 +498,7 @@ export default function SocialConnections() {
           authUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=${platform?.scopes}`;
           break;
         case 'twitter':
-          authUrl = `https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=${encodeURIComponent(platform?.scopes || '')}`;
+          authUrl = `https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=${encodeURIComponent(platform?.scopes || '')}&code_challenge=challenge&code_challenge_method=plain`;
           break;
         case 'linkedin':
           authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=${platform?.scopes}`;
@@ -529,14 +515,25 @@ export default function SocialConnections() {
         case 'pinterest':
           authUrl = `https://www.pinterest.com/oauth/?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${encodeURIComponent(platform?.scopes || '')}&state=${state}`;
           break;
+        case 'snapchat':
+          authUrl = `https://accounts.snapchat.com/login/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${encodeURIComponent(platform?.scopes || '')}&state=${state}`;
+          break;
         default:
-          toast({ title: "Platform not supported for custom OAuth" });
+          toast({
+            title: "Coming Soon",
+            description: `${platform?.name} integration coming soon`,
+          });
           setConnectingPlatform(null);
           return;
       }
 
       const popup = window.open(authUrl, 'OAuth', 'width=600,height=700,left=100,top=100');
       
+      toast({
+        title: "Connecting...",
+        description: "Complete authorization in the popup window",
+      });
+
       const checkPopup = setInterval(() => {
         if (popup?.closed) {
           clearInterval(checkPopup);
@@ -553,6 +550,50 @@ export default function SocialConnections() {
         variant: "destructive",
       });
       setConnectingPlatform(null);
+    }
+  };
+
+  // OAuth connect using company's saved custom credentials (from cache)
+  const handleOAuthConnectWithCustom = async (platformId: string) => {
+    const config = companyConfigs?.find(c => c.platform_id === platformId);
+    if (!config?.client_id) {
+      toast({
+        title: "No credentials found",
+        description: "Please save your OAuth credentials first",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.company_id) throw new Error('No company found');
+
+      initiateOAuthWithCredentials(
+        platformId,
+        {
+          client_id: config.client_id,
+          client_secret: config.client_secret || '',
+          redirect_url: config.redirect_url || `${window.location.origin}/functions/v1/oauth-callback`
+        },
+        profile.company_id,
+        user.id
+      );
+    } catch (error) {
+      console.error('Custom OAuth error:', error);
+      toast({
+        title: "Connection Failed",
+        description: "Unable to initiate connection",
+        variant: "destructive",
+      });
     }
   };
 
