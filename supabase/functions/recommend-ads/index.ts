@@ -50,40 +50,77 @@ Deno.serve(async (req) => {
 
     const recentAdIds = recentImpressions?.map(i => i.ad_campaign_id) || []
 
-    // Use Lovable AI Gateway to recommend ads based on user profile
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')
-    
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an ad recommendation system. Rank ads based on user interests and reach score. Return your response as valid JSON only.'
-          },
-          {
-            role: 'user',
-            content: `Analyze this data and recommend ${limit} ads. Return JSON format: {"recommended_ids": ["id1", "id2"], "reasoning": "explanation"}
+    // Build the prompt
+    const prompt = `Analyze this data and recommend ${limit} ads. Return JSON format: {"recommended_ids": ["id1", "id2"], "reasoning": "explanation"}
 
 User profile: ${JSON.stringify(reachScore || {})}
 Available campaigns: ${JSON.stringify(campaigns?.map(c => ({ id: c.id, name: c.name, target_audience: c.target_audience })))}
 Recently shown (avoid these): ${JSON.stringify(recentAdIds)}`
-          }
-        ]
-      })
-    })
 
-    if (!aiResponse.ok) {
-      throw new Error(`AI API error: ${aiResponse.status}`)
+    let resultText = ''
+
+    // Try Gemini 2.5 Flash first
+    const GOOGLE_GEMINI_API_KEY = Deno.env.get('GOOGLE_GEMINI_API_KEY')
+    
+    if (GOOGLE_GEMINI_API_KEY) {
+      try {
+        console.log('Trying Gemini 2.5 Flash...')
+        const geminiResponse = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GOOGLE_GEMINI_API_KEY}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [{
+                  text: `You are an ad recommendation system. Rank ads based on user interests and reach score. Return your response as valid JSON only.\n\n${prompt}`
+                }]
+              }],
+              generationConfig: { temperature: 0.5 }
+            })
+          }
+        )
+
+        if (geminiResponse.ok) {
+          const geminiData = await geminiResponse.json()
+          resultText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || ''
+          console.log('Gemini response received')
+        } else {
+          console.log('Gemini failed with status:', geminiResponse.status)
+        }
+      } catch (geminiError) {
+        console.error('Gemini error:', geminiError)
+      }
     }
 
-    const aiData = await aiResponse.json()
-    const resultText = aiData.choices?.[0]?.message?.content || ''
+    // Fallback to Lovable AI Gateway
+    if (!resultText) {
+      console.log('Falling back to Lovable AI Gateway...')
+      const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')
+      
+      const lovableResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash',
+          messages: [
+            { role: 'system', content: 'You are an ad recommendation system. Rank ads based on user interests and reach score. Return your response as valid JSON only.' },
+            { role: 'user', content: prompt }
+          ]
+        })
+      })
+
+      if (!lovableResponse.ok) {
+        throw new Error(`Lovable AI error: ${lovableResponse.status}`)
+      }
+
+      const lovableData = await lovableResponse.json()
+      resultText = lovableData.choices?.[0]?.message?.content || ''
+      console.log('Lovable AI response received')
+    }
     
     // Parse JSON from response
     let result
