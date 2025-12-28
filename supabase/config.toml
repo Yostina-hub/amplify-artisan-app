@@ -104,3 +104,6 @@ verify_jwt = true
 
 [functions.scrape-social-media]
 verify_jwt = true
+
+[functions.reply-to-telegram]
+verify_jwt = true

@@ -79,6 +79,31 @@ export default function SocialInbox() {
     },
   });
 
+  const replyMutation = useMutation({
+    mutationFn: async ({ conversationId, chatId, replyText }: { conversationId: string; chatId?: string; replyText: string }) => {
+      const { data, error } = await supabase.functions.invoke('reply-to-telegram', {
+        body: { conversationId, chatId, replyText }
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['social-conversations'] });
+      setReplyText('');
+      toast({
+        title: 'Reply Sent',
+        description: 'Your message was sent successfully',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Failed to Send',
+        description: error.message || 'Could not send your reply',
+        variant: 'destructive',
+      });
+    },
+  });
+
   const analyzeMessageMutation = useMutation({
     mutationFn: async (messageId: string) => {
       const { data, error } = await supabase.functions.invoke('analyze-sentiment', {
@@ -412,16 +437,22 @@ export default function SocialInbox() {
                         onChange={(e) => setReplyText(e.target.value)}
                         className="min-h-[100px] resize-none text-base"
                         onKeyDown={(e) => {
-                          if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                          if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && replyText.trim()) {
                             e.preventDefault();
-                            // handleReply();
+                            if (selectedConversation.platform === 'telegram') {
+                              replyMutation.mutate({
+                                conversationId: selectedConversation.id,
+                                chatId: selectedConversation.metadata?.chat_id || selectedConversation.external_id,
+                                replyText: replyText.trim()
+                              });
+                            }
                           }
                         }}
                       />
 
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-muted-foreground">
-                          ⌘ + Enter to send
+                          ⌘ + Enter to send {selectedConversation.platform === 'telegram' ? '(Telegram)' : ''}
                         </span>
                         <div className="flex gap-2">
                           <Button variant="outline" onClick={() => setReplyText('')}>
@@ -429,10 +460,29 @@ export default function SocialInbox() {
                           </Button>
                           <Button 
                             className="bg-gradient-to-r from-primary to-accent hover:opacity-90 shadow-md"
-                            disabled={!replyText.trim()}
+                            disabled={!replyText.trim() || replyMutation.isPending}
+                            onClick={() => {
+                              if (selectedConversation.platform === 'telegram') {
+                                replyMutation.mutate({
+                                  conversationId: selectedConversation.id,
+                                  chatId: selectedConversation.metadata?.chat_id || selectedConversation.external_id,
+                                  replyText: replyText.trim()
+                                });
+                              } else {
+                                toast({
+                                  title: 'Not Supported Yet',
+                                  description: `Replying to ${selectedConversation.platform} is coming soon`,
+                                  variant: 'default'
+                                });
+                              }
+                            }}
                           >
-                            <Send className="h-4 w-4 mr-2" />
-                            Send Reply
+                            {replyMutation.isPending ? (
+                              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                              <Send className="h-4 w-4 mr-2" />
+                            )}
+                            {replyMutation.isPending ? 'Sending...' : 'Send Reply'}
                           </Button>
                         </div>
                       </div>
