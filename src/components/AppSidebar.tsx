@@ -133,6 +133,7 @@ const navigationGroups: NavGroup[] = [
       { title: "Connections", url: "/social-connections", icon: Link2 },
       { title: "Intelligence", url: "/social-intelligence", icon: Brain },
       { title: "Media Monitoring", url: "/media-monitoring", icon: Radio },
+      { title: "Content Moderation", url: "/admin/moderation", icon: Flag },
     ],
   },
   {
@@ -173,7 +174,6 @@ const navigationGroups: NavGroup[] = [
       { title: "Projects", url: "/project-management", icon: FolderKanban },
       { title: "Module Builder", url: "/module-builder", icon: Database },
       { title: "Form Builder", url: "/form-builder", icon: Box },
-      { title: "Content Moderation", url: "/admin/moderation", icon: Flag },
     ],
   },
 ];
