@@ -7,9 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   Loader2, CheckCircle, XCircle, Link2, Unlink, Shield, 
-  Globe, Eye, EyeOff, Send, AlertCircle, Zap, RefreshCw
+  Globe, Eye, EyeOff, Send, AlertCircle, Zap, RefreshCw, Lock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -107,6 +108,8 @@ const PLATFORMS = [
 export default function SocialConnections() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { isSuperAdmin, isCompanyAdmin } = useAuth();
+  const isAdmin = isSuperAdmin || isCompanyAdmin;
   const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null);
   const [directConnectDialog, setDirectConnectDialog] = useState<string | null>(null);
   const [directFormData, setDirectFormData] = useState<Record<string, string>>({});
@@ -497,31 +500,38 @@ export default function SocialConnections() {
                         </Badge>
                       </div>
                     )}
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex-1 bg-white/10 hover:bg-white/20 border-white/30 text-white"
-                        onClick={() => platform.type === 'oauth' 
-                          ? handleOAuthConnect(platform.id) 
-                          : handleDirectConnect(platform.id)
-                        }
-                        disabled={connectingPlatform === platform.id}
-                      >
-                        <RefreshCw className="h-3 w-3 mr-1" />
-                        Refresh
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex-1 bg-white/10 hover:bg-white/20 border-white/30 text-white"
-                        onClick={() => disconnectMutation.mutate(connectedAccount.id)}
-                        disabled={disconnectMutation.isPending}
-                      >
-                        <Unlink className="h-3 w-3 mr-1" />
-                        Disconnect
-                      </Button>
-                    </div>
+                    {isAdmin ? (
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1 bg-white/10 hover:bg-white/20 border-white/30 text-white"
+                          onClick={() => platform.type === 'oauth' 
+                            ? handleOAuthConnect(platform.id) 
+                            : handleDirectConnect(platform.id)
+                          }
+                          disabled={connectingPlatform === platform.id}
+                        >
+                          <RefreshCw className="h-3 w-3 mr-1" />
+                          Refresh
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1 bg-white/10 hover:bg-white/20 border-white/30 text-white"
+                          onClick={() => disconnectMutation.mutate(connectedAccount.id)}
+                          disabled={disconnectMutation.isPending}
+                        >
+                          <Unlink className="h-3 w-3 mr-1" />
+                          Disconnect
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center gap-1 text-xs text-white/70 py-2">
+                        <Lock className="h-3 w-3" />
+                        Managed by admin
+                      </div>
+                    )}
                   </>
                 ) : (
                   <>
@@ -538,37 +548,46 @@ export default function SocialConnections() {
                         </p>
                       )}
                     </div>
-                    <Button
-                      className={cn(
-                        "w-full",
-                        isAvailable 
-                          ? "bg-gradient-to-r from-primary to-accent hover:opacity-90" 
-                          : "bg-muted text-muted-foreground"
-                      )}
-                      onClick={() => platform.type === 'oauth' 
-                        ? handleOAuthConnect(platform.id) 
-                        : handleDirectConnect(platform.id)
-                      }
-                      disabled={!isAvailable || connectingPlatform === platform.id}
-                    >
-                      {connectingPlatform === platform.id ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Connecting...
-                        </>
-                      ) : !isAvailable ? (
-                        <>
-                          <AlertCircle className="mr-2 h-4 w-4" />
-                          Not Available
-                        </>
-                      ) : (
-                        <>
-                          <Link2 className="mr-2 h-4 w-4" />
-                          Connect
-                        </>
-                      )}
-                    </Button>
-                    {!isAvailable && platform.type === 'oauth' && (
+                    {isAdmin ? (
+                      <Button
+                        className={cn(
+                          "w-full",
+                          isAvailable 
+                            ? "bg-gradient-to-r from-primary to-accent hover:opacity-90" 
+                            : "bg-muted text-muted-foreground"
+                        )}
+                        onClick={() => platform.type === 'oauth' 
+                          ? handleOAuthConnect(platform.id) 
+                          : handleDirectConnect(platform.id)
+                        }
+                        disabled={!isAvailable || connectingPlatform === platform.id}
+                      >
+                        {connectingPlatform === platform.id ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Connecting...
+                          </>
+                        ) : !isAvailable ? (
+                          <>
+                            <AlertCircle className="mr-2 h-4 w-4" />
+                            Not Available
+                          </>
+                        ) : (
+                          <>
+                            <Link2 className="mr-2 h-4 w-4" />
+                            Connect
+                          </>
+                        )}
+                      </Button>
+                    ) : (
+                      <div className="w-full p-3 bg-muted/50 rounded-lg text-center">
+                        <Lock className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
+                        <p className="text-xs text-muted-foreground">
+                          Only admins can connect accounts
+                        </p>
+                      </div>
+                    )}
+                    {!isAvailable && platform.type === 'oauth' && isAdmin && (
                       <p className="text-xs text-muted-foreground text-center">
                         Contact admin to enable
                       </p>
