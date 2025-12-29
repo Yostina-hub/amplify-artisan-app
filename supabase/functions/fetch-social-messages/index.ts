@@ -45,16 +45,31 @@ serve(async (req) => {
       throw new Error('User has no company');
     }
 
-    // Get platform tokens
-    const { data: tokens } = await supabase
+    // Get platform tokens - if platform is 'all', get all active tokens
+    let tokenQuery = supabase
       .from('social_platform_tokens')
       .select('*')
       .eq('company_id', profile.company_id)
-      .eq('platform', platform)
       .eq('is_active', true);
 
+    if (platform && platform !== 'all') {
+      tokenQuery = tokenQuery.eq('platform', platform);
+    }
+
+    const { data: tokens } = await tokenQuery;
+
     if (!tokens || tokens.length === 0) {
-      throw new Error(`No active tokens found for ${platform}`);
+      // Return success with 0 messages instead of throwing error
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          count: 0,
+          message: `No connected platforms found. Connect your social accounts first.` 
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     const messages: any[] = [];
