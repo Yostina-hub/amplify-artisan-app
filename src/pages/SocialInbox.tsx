@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Inbox, MessageCircle, Send, RefreshCw, Search, Filter, Sparkles, Languages, Star, Tag, AlertCircle } from 'lucide-react';
+import { Inbox, MessageCircle, Send, RefreshCw, Search, Filter, Sparkles, Languages, Star, Tag, AlertCircle, Heart, Eye, Share2 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -59,6 +59,44 @@ export default function SocialInbox() {
       const { data, error } = await query;
       if (error) throw error;
       return data;
+    },
+  });
+
+  // Fetch Telegram post metrics
+  const { data: telegramPosts } = useQuery({
+    queryKey: ['telegram-posts-metrics'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('social_media_posts')
+        .select('id, content, likes, shares, views, platform_post_ids, updated_at')
+        .contains('platforms', ['telegram'])
+        .eq('status', 'published')
+        .order('updated_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const telegramMetricsSyncMutation = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('sync-telegram-metrics');
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['telegram-posts-metrics'] });
+      toast({
+        title: 'Telegram Metrics Synced',
+        description: `Synced ${data?.syncedCount || 0} posts`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Sync Failed',
+        description: error.message || 'Could not sync Telegram metrics',
+        variant: 'destructive',
+      });
     },
   });
 
@@ -391,6 +429,54 @@ export default function SocialInbox() {
                           </div>
                         </div>
                       </div>
+
+                      {/* Telegram Post Metrics */}
+                      {selectedConversation.platform === 'telegram' && telegramPosts && telegramPosts.length > 0 && (
+                        <div className="p-4 bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-950/20 dark:to-blue-950/20 rounded-xl border-2 border-cyan-200 dark:border-cyan-800">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <Send className="h-4 w-4 text-cyan-600" />
+                              <span className="font-semibold text-cyan-900 dark:text-cyan-300">Telegram Post Metrics</span>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => telegramMetricsSyncMutation.mutate()}
+                              disabled={telegramMetricsSyncMutation.isPending}
+                              className="h-7 px-2"
+                            >
+                              <RefreshCw className={cn("h-3 w-3", telegramMetricsSyncMutation.isPending && "animate-spin")} />
+                            </Button>
+                          </div>
+                          <div className="space-y-2">
+                            {telegramPosts.slice(0, 3).map((post) => {
+                              const platformIds = post.platform_post_ids as Record<string, any> | null;
+                              const telegramData = platformIds?.telegram;
+                              return (
+                                <div key={post.id} className="p-3 bg-white/50 dark:bg-black/20 rounded-lg">
+                                  <p className="text-xs text-muted-foreground truncate mb-2">
+                                    {post.content?.substring(0, 50)}...
+                                  </p>
+                                  <div className="flex items-center gap-4 text-xs">
+                                    <div className="flex items-center gap-1">
+                                      <Heart className="h-3 w-3 text-red-500" />
+                                      <span>{post.likes || 0}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Eye className="h-3 w-3 text-cyan-500" />
+                                      <span>{post.views || 0}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Share2 className="h-3 w-3 text-blue-500" />
+                                      <span>{post.shares || 0}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
 
                       {/* Translated Reply Preview */}
                       {translatedReply && (
