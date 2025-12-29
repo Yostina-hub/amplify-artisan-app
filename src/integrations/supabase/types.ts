@@ -5278,6 +5278,89 @@ export type Database = {
           },
         ]
       }
+      password_history: {
+        Row: {
+          created_at: string | null
+          id: string
+          password_hash: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          password_hash: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          password_hash?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      password_policy_settings: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          id: string
+          max_age_days: number | null
+          max_repeated_chars: number | null
+          min_length: number | null
+          min_special_chars: number | null
+          password_history_count: number | null
+          prevent_common_passwords: boolean | null
+          prevent_username_in_password: boolean | null
+          require_lowercase: boolean | null
+          require_numbers: boolean | null
+          require_special_chars: boolean | null
+          require_uppercase: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          max_age_days?: number | null
+          max_repeated_chars?: number | null
+          min_length?: number | null
+          min_special_chars?: number | null
+          password_history_count?: number | null
+          prevent_common_passwords?: boolean | null
+          prevent_username_in_password?: boolean | null
+          require_lowercase?: boolean | null
+          require_numbers?: boolean | null
+          require_special_chars?: boolean | null
+          require_uppercase?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          max_age_days?: number | null
+          max_repeated_chars?: number | null
+          min_length?: number | null
+          min_special_chars?: number | null
+          password_history_count?: number | null
+          prevent_common_passwords?: boolean | null
+          prevent_username_in_password?: boolean | null
+          require_lowercase?: boolean | null
+          require_numbers?: boolean | null
+          require_special_chars?: boolean | null
+          require_uppercase?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "password_policy_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_transactions: {
         Row: {
           amount: number
@@ -6645,33 +6728,42 @@ export type Database = {
       security_audit_log: {
         Row: {
           action: string
+          category: string | null
           created_at: string | null
           details: Json | null
           id: string
           ip_address: string | null
           record_id: string | null
+          session_id: string | null
+          severity: string | null
           table_name: string
           user_agent: string | null
           user_id: string | null
         }
         Insert: {
           action: string
+          category?: string | null
           created_at?: string | null
           details?: Json | null
           id?: string
           ip_address?: string | null
           record_id?: string | null
+          session_id?: string | null
+          severity?: string | null
           table_name: string
           user_agent?: string | null
           user_id?: string | null
         }
         Update: {
           action?: string
+          category?: string | null
           created_at?: string | null
           details?: Json | null
           id?: string
           ip_address?: string | null
           record_id?: string | null
+          session_id?: string | null
+          severity?: string | null
           table_name?: string
           user_agent?: string | null
           user_id?: string | null
@@ -6745,6 +6837,87 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      session_fingerprints: {
+        Row: {
+          created_at: string | null
+          fingerprint_data: Json | null
+          fingerprint_hash: string
+          first_seen_at: string | null
+          id: string
+          ip_address: unknown
+          is_trusted: boolean | null
+          last_seen_at: string | null
+          session_id: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          fingerprint_data?: Json | null
+          fingerprint_hash: string
+          first_seen_at?: string | null
+          id?: string
+          ip_address?: unknown
+          is_trusted?: boolean | null
+          last_seen_at?: string | null
+          session_id: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          fingerprint_data?: Json | null
+          fingerprint_hash?: string
+          first_seen_at?: string | null
+          id?: string
+          ip_address?: unknown
+          is_trusted?: boolean | null
+          last_seen_at?: string | null
+          session_id?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      session_validation_logs: {
+        Row: {
+          action_taken: string | null
+          created_at: string | null
+          id: string
+          ip_address: unknown
+          new_fingerprint: string | null
+          old_fingerprint: string | null
+          session_id: string | null
+          user_agent: string | null
+          user_id: string | null
+          validation_result: string | null
+        }
+        Insert: {
+          action_taken?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown
+          new_fingerprint?: string | null
+          old_fingerprint?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          validation_result?: string | null
+        }
+        Update: {
+          action_taken?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown
+          new_fingerprint?: string | null
+          old_fingerprint?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          validation_result?: string | null
+        }
+        Relationships: []
       }
       sla_policies: {
         Row: {
@@ -8674,6 +8847,7 @@ export type Database = {
       }
       has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_common_password: { Args: { p_password: string }; Returns: boolean }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       track_failed_login: {
         Args: {
