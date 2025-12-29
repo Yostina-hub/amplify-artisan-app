@@ -152,15 +152,27 @@ serve(async (req) => {
       }
     }
 
-    // Update the post with Telegram message ID
+    // Update the post with Telegram message ID in platform_post_ids
     if (postId) {
+      // First get current platform_post_ids
+      const { data: currentPost } = await supabase
+        .from('social_media_posts')
+        .select('platform_post_ids')
+        .eq('id', postId)
+        .single();
+
+      const currentPlatformPostIds = currentPost?.platform_post_ids || {};
+      
       await supabase
         .from('social_media_posts')
         .update({
-          metadata: {
-            telegram_message_id: telegramResult.result?.message_id,
-            telegram_chat_id: channelId,
-            posted_to_telegram_at: new Date().toISOString(),
+          platform_post_ids: {
+            ...currentPlatformPostIds,
+            telegram: {
+              message_id: telegramResult.result?.message_id,
+              chat_id: channelId,
+              posted_at: new Date().toISOString(),
+            }
           }
         })
         .eq('id', postId);
