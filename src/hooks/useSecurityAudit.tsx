@@ -152,36 +152,20 @@ export const useSecurityAudit = () => {
   ): Promise<AuditLogEntry[]> => {
     setLoading(true);
     try {
-      let query = supabase
-        .from('security_audit_log')
-        .select('*', { count: 'exact' });
-
-      if (filters.user_id) {
-        query = query.eq('user_id', filters.user_id);
-      }
-      if (filters.company_id) {
-        query = query.eq('company_id', filters.company_id);
-      }
-      if (filters.action) {
-        query = query.ilike('action', `%${filters.action}%`);
-      }
-      if (filters.category) {
-        query = query.eq('category', filters.category);
-      }
-      if (filters.severity) {
-        query = query.eq('severity', filters.severity);
-      }
-      if (filters.start_date) {
-        query = query.gte('created_at', filters.start_date);
-      }
-      if (filters.end_date) {
-        query = query.lte('created_at', filters.end_date);
-      }
-
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
 
-      const { data, error, count } = await query
+      // Build filter conditions
+      const conditions: Record<string, string> = {};
+      if (filters.user_id) conditions.user_id = filters.user_id;
+      if (filters.company_id) conditions.company_id = filters.company_id;
+      if (filters.category) conditions.category = filters.category;
+      if (filters.severity) conditions.severity = filters.severity;
+
+      const { data, error, count } = await supabase
+        .from('security_audit_log')
+        .select('*', { count: 'exact' })
+        .match(conditions)
         .order('created_at', { ascending: false })
         .range(from, to);
 
@@ -213,16 +197,14 @@ export const useSecurityAudit = () => {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
 
-      let query = supabase
+      const conditions: Record<string, string> = {};
+      if (companyId) conditions.company_id = companyId;
+
+      const { data, error } = await supabase
         .from('security_audit_log')
         .select('severity, category, action')
+        .match(conditions)
         .gte('created_at', startDate.toISOString());
-
-      if (companyId) {
-        query = query.eq('company_id', companyId);
-      }
-
-      const { data, error } = await query;
 
       if (error) throw error;
 
@@ -256,18 +238,17 @@ export const useSecurityAudit = () => {
     filters: AuditLogFilters = {},
     format: 'json' | 'csv' = 'json'
   ): Promise<string> => {
-    let query = supabase
+    const conditions: Record<string, string> = {};
+    if (filters.user_id) conditions.user_id = filters.user_id;
+    if (filters.company_id) conditions.company_id = filters.company_id;
+    if (filters.category) conditions.category = filters.category;
+    if (filters.severity) conditions.severity = filters.severity;
+
+    const { data, error } = await supabase
       .from('security_audit_log')
-      .select('*');
-
-    if (filters.user_id) query = query.eq('user_id', filters.user_id);
-    if (filters.company_id) query = query.eq('company_id', filters.company_id);
-    if (filters.category) query = query.eq('category', filters.category);
-    if (filters.severity) query = query.eq('severity', filters.severity);
-    if (filters.start_date) query = query.gte('created_at', filters.start_date);
-    if (filters.end_date) query = query.lte('created_at', filters.end_date);
-
-    const { data, error } = await query.order('created_at', { ascending: false });
+      .select('*')
+      .match(conditions)
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
 
