@@ -93,6 +93,8 @@ import AnomalyDetectionManagement from "./pages/admin/AnomalyDetectionManagement
 import LayoutShowcase from "./pages/LayoutShowcase";
 import FinancialDocument from "./pages/FinancialDocument";
 import MediaMonitoring from "./pages/MediaMonitoring";
+import SecurityAuditLog from "./pages/admin/SecurityAuditLog";
+import SecurityDashboard from "./pages/admin/SecurityDashboard";
 import SocialAnalytics from "./pages/SocialAnalytics";
 
 const queryClient = new QueryClient();
@@ -182,7 +184,8 @@ const App = () => (
               <Route path="/admin/threat-detection" element={<ProtectedRoute requiredRole="admin"><ThreatDetection /></ProtectedRoute>} />
               <Route path="/admin/geo-blocking" element={<ProtectedRoute requiredRole="admin"><GeoBlockingManagement /></ProtectedRoute>} />
               <Route path="/admin/anomaly-detection" element={<ProtectedRoute requiredRole="admin"><AnomalyDetectionManagement /></ProtectedRoute>} />
-              
+              <Route path="/admin/security-audit" element={<ProtectedRoute requiredRole="admin"><SecurityAuditLog /></ProtectedRoute>} />
+              <Route path="/admin/security" element={<ProtectedRoute requiredRole="admin"><SecurityDashboard /></ProtectedRoute>} />
               {/* Company routes */}
               <Route path="/company/email-settings" element={<ProtectedRoute><CompanyEmailSettings /></ProtectedRoute>} />
               <Route path="/company/audit-log" element={<ProtectedRoute><CompanyAuditLog /></ProtectedRoute>} />
