@@ -196,6 +196,7 @@ const adminItems: NavItem[] = [
   { title: "Industries", url: "/admin/industries", icon: Layers },
   { title: "Platforms", url: "/admin/social-platforms", icon: Globe },
   { title: "Permissions", url: "/admin/permissions", icon: Shield },
+  { title: "Security", url: "/admin/security", icon: Shield },
   { title: "Moderation", url: "/admin/moderation", icon: Flag },
   { title: "System", url: "/admin/system-config", icon: Cog },
 ];
