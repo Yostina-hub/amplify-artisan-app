@@ -54,7 +54,11 @@ const SecurityDashboard = () => {
     { name: 'Network Restriction', status: 'active', description: 'VPN/Proxy detection' },
     { name: 'License Validation', status: 'active', description: 'Domain & feature control' },
     { name: 'SQL Injection Prevention', status: 'active', description: 'Safe query utilities' },
-    { name: 'Rate Limiting', status: 'active', description: 'Request throttling' }
+    { name: 'Rate Limiting', status: 'active', description: 'Request throttling' },
+    { name: 'Security Headers', status: 'active', description: 'CSP, XSS, Frame protection' },
+    { name: 'Firewall Rules', status: 'active', description: 'IP/UA blocking & path protection', link: '/admin/firewall' },
+    { name: 'Security Reporting', status: 'active', description: 'Export & compliance reports' },
+    { name: 'Permissions System', status: 'active', description: 'RBAC & branch access', link: '/admin/permissions' }
   ];
 
   useEffect(() => {
