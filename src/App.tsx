@@ -88,6 +88,8 @@ import FirewallManagement from "./pages/admin/FirewallManagement";
 import LiveChatDashboard from "./pages/admin/LiveChatDashboard";
 import ThreatDetection from "./pages/admin/ThreatDetection";
 import MFAManagement from "./pages/admin/MFAManagement";
+import GeoBlockingManagement from "./pages/admin/GeoBlockingManagement";
+import AnomalyDetectionManagement from "./pages/admin/AnomalyDetectionManagement";
 import LayoutShowcase from "./pages/LayoutShowcase";
 import FinancialDocument from "./pages/FinancialDocument";
 import MediaMonitoring from "./pages/MediaMonitoring";
@@ -178,6 +180,8 @@ const App = () => (
               <Route path="/admin/mfa-management" element={<ProtectedRoute requiredRole="admin"><MFAManagement /></ProtectedRoute>} />
               <Route path="/admin/platform-oauth-apps" element={<ProtectedRoute requiredRole="admin"><PlatformOAuthApps /></ProtectedRoute>} />
               <Route path="/admin/threat-detection" element={<ProtectedRoute requiredRole="admin"><ThreatDetection /></ProtectedRoute>} />
+              <Route path="/admin/geo-blocking" element={<ProtectedRoute requiredRole="admin"><GeoBlockingManagement /></ProtectedRoute>} />
+              <Route path="/admin/anomaly-detection" element={<ProtectedRoute requiredRole="admin"><AnomalyDetectionManagement /></ProtectedRoute>} />
               
               {/* Company routes */}
               <Route path="/company/email-settings" element={<ProtectedRoute><CompanyEmailSettings /></ProtectedRoute>} />

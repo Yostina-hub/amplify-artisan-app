@@ -119,3 +119,9 @@ verify_jwt = true
 
 [functions.mfa-otp]
 verify_jwt = false
+
+[functions.geo-blocking]
+verify_jwt = false
+
+[functions.anomaly-detection]
+verify_jwt = false
