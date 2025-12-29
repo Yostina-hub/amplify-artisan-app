@@ -87,6 +87,7 @@ import CallReports from "./pages/CallReports";
 import FirewallManagement from "./pages/admin/FirewallManagement";
 import LiveChatDashboard from "./pages/admin/LiveChatDashboard";
 import ThreatDetection from "./pages/admin/ThreatDetection";
+import MFAManagement from "./pages/admin/MFAManagement";
 import LayoutShowcase from "./pages/LayoutShowcase";
 import FinancialDocument from "./pages/FinancialDocument";
 import MediaMonitoring from "./pages/MediaMonitoring";
@@ -173,6 +174,8 @@ const App = () => (
               <Route path="/admin/call-center-integrations" element={<ProtectedRoute requiredRole="admin"><CallCenterIntegrations /></ProtectedRoute>} />
               <Route path="/admin/firewall" element={<ProtectedRoute requiredRole="admin"><FirewallManagement /></ProtectedRoute>} />
               <Route path="/admin/live-chat" element={<ProtectedRoute requiredRole="admin"><LiveChatDashboard /></ProtectedRoute>} />
+              <Route path="/admin/threat-detection" element={<ProtectedRoute requiredRole="admin"><ThreatDetection /></ProtectedRoute>} />
+              <Route path="/admin/mfa-management" element={<ProtectedRoute requiredRole="admin"><MFAManagement /></ProtectedRoute>} />
               <Route path="/admin/platform-oauth-apps" element={<ProtectedRoute requiredRole="admin"><PlatformOAuthApps /></ProtectedRoute>} />
               <Route path="/admin/threat-detection" element={<ProtectedRoute requiredRole="admin"><ThreatDetection /></ProtectedRoute>} />
               

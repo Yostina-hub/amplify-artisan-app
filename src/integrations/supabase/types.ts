@@ -4595,6 +4595,141 @@ export type Database = {
           },
         ]
       }
+      mfa_otp_codes: {
+        Row: {
+          attempts: number | null
+          code: string
+          created_at: string | null
+          delivery_method: string
+          expires_at: string
+          id: string
+          ip_address: unknown
+          is_used: boolean | null
+          max_attempts: number | null
+          purpose: string
+          updated_at: string | null
+          user_agent: string | null
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          attempts?: number | null
+          code: string
+          created_at?: string | null
+          delivery_method?: string
+          expires_at: string
+          id?: string
+          ip_address?: unknown
+          is_used?: boolean | null
+          max_attempts?: number | null
+          purpose?: string
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          attempts?: number | null
+          code?: string
+          created_at?: string | null
+          delivery_method?: string
+          expires_at?: string
+          id?: string
+          ip_address?: unknown
+          is_used?: boolean | null
+          max_attempts?: number | null
+          purpose?: string
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
+      mfa_rate_limits: {
+        Row: {
+          action_type: string
+          blocked_until: string | null
+          created_at: string | null
+          id: string
+          identifier: string
+          identifier_type: string
+          is_blocked: boolean | null
+          max_requests: number | null
+          request_count: number | null
+          updated_at: string | null
+          window_minutes: number | null
+          window_start: string | null
+        }
+        Insert: {
+          action_type: string
+          blocked_until?: string | null
+          created_at?: string | null
+          id?: string
+          identifier: string
+          identifier_type?: string
+          is_blocked?: boolean | null
+          max_requests?: number | null
+          request_count?: number | null
+          updated_at?: string | null
+          window_minutes?: number | null
+          window_start?: string | null
+        }
+        Update: {
+          action_type?: string
+          blocked_until?: string | null
+          created_at?: string | null
+          id?: string
+          identifier?: string
+          identifier_type?: string
+          is_blocked?: boolean | null
+          max_requests?: number | null
+          request_count?: number | null
+          updated_at?: string | null
+          window_minutes?: number | null
+          window_start?: string | null
+        }
+        Relationships: []
+      }
+      mfa_user_settings: {
+        Row: {
+          backup_codes: string[] | null
+          created_at: string | null
+          id: string
+          last_mfa_at: string | null
+          mfa_enabled: boolean | null
+          phone_number: string | null
+          phone_verified: boolean | null
+          preferred_method: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          backup_codes?: string[] | null
+          created_at?: string | null
+          id?: string
+          last_mfa_at?: string | null
+          mfa_enabled?: boolean | null
+          phone_number?: string | null
+          phone_verified?: boolean | null
+          preferred_method?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          backup_codes?: string[] | null
+          created_at?: string | null
+          id?: string
+          last_mfa_at?: string | null
+          mfa_enabled?: boolean | null
+          phone_number?: string | null
+          phone_verified?: boolean | null
+          preferred_method?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       monitoring_requirements: {
         Row: {
           alert_threshold: number | null
@@ -8154,7 +8289,16 @@ export type Database = {
         Args: { _branch_id: string; _user_id: string }
         Returns: boolean
       }
+      check_mfa_rate_limit: {
+        Args: {
+          p_action_type: string
+          p_identifier: string
+          p_identifier_type: string
+        }
+        Returns: Json
+      }
       check_scheduled_posts: { Args: never; Returns: undefined }
+      generate_otp_code: { Args: never; Returns: string }
       get_branch_hierarchy: {
         Args: { branch_uuid: string }
         Returns: {
