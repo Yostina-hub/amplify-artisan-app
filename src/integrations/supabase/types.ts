@@ -785,6 +785,39 @@ export type Database = {
           },
         ]
       }
+      behavioral_patterns: {
+        Row: {
+          created_at: string | null
+          id: string
+          ip_address: unknown
+          pattern_data: Json
+          pattern_type: string
+          risk_score: number | null
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown
+          pattern_data?: Json
+          pattern_type: string
+          risk_score?: number | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown
+          pattern_data?: Json
+          pattern_type?: string
+          risk_score?: number | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       branches: {
         Row: {
           address: string | null
@@ -3088,6 +3121,39 @@ export type Database = {
           },
         ]
       }
+      honeypot_interactions: {
+        Row: {
+          created_at: string | null
+          field_value: string | null
+          form_name: string | null
+          honeypot_field: string
+          id: string
+          ip_address: unknown
+          page_url: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          field_value?: string | null
+          form_name?: string | null
+          honeypot_field: string
+          id?: string
+          ip_address: unknown
+          page_url?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          field_value?: string | null
+          form_name?: string | null
+          honeypot_field?: string
+          id?: string
+          ip_address?: unknown
+          page_url?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       industries: {
         Row: {
           benefits: Json | null
@@ -3362,6 +3428,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ip_reputation: {
+        Row: {
+          blocked_reason: string | null
+          blocked_until: string | null
+          created_at: string | null
+          id: string
+          ip_address: unknown
+          is_blocked: boolean | null
+          last_seen_at: string | null
+          metadata: Json | null
+          reputation_score: number | null
+          suspicious_requests: number | null
+          total_requests: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          blocked_reason?: string | null
+          blocked_until?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address: unknown
+          is_blocked?: boolean | null
+          last_seen_at?: string | null
+          metadata?: Json | null
+          reputation_score?: number | null
+          suspicious_requests?: number | null
+          total_requests?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          blocked_reason?: string | null
+          blocked_until?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown
+          is_blocked?: boolean | null
+          last_seen_at?: string | null
+          metadata?: Json | null
+          reputation_score?: number | null
+          suspicious_requests?: number | null
+          total_requests?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       ip_whitelist: {
         Row: {
@@ -5689,6 +5800,42 @@ export type Database = {
           },
         ]
       }
+      rate_limit_tracking: {
+        Row: {
+          created_at: string | null
+          endpoint: string
+          id: string
+          identifier: string
+          identifier_type: string
+          is_exceeded: boolean | null
+          request_count: number | null
+          window_end: string | null
+          window_start: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          endpoint: string
+          id?: string
+          identifier: string
+          identifier_type?: string
+          is_exceeded?: boolean | null
+          request_count?: number | null
+          window_end?: string | null
+          window_start?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          endpoint?: string
+          id?: string
+          identifier?: string
+          identifier_type?: string
+          is_exceeded?: boolean | null
+          request_count?: number | null
+          window_end?: string | null
+          window_start?: string | null
+        }
+        Relationships: []
+      }
       role_permissions: {
         Row: {
           company_id: string | null
@@ -7230,6 +7377,68 @@ export type Database = {
           },
         ]
       }
+      threat_detections: {
+        Row: {
+          action_taken: Database["public"]["Enums"]["threat_action"]
+          company_id: string | null
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: unknown
+          is_resolved: boolean | null
+          request_path: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: Database["public"]["Enums"]["threat_severity"]
+          threat_type: Database["public"]["Enums"]["threat_type"]
+          updated_at: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_taken?: Database["public"]["Enums"]["threat_action"]
+          company_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address: unknown
+          is_resolved?: boolean | null
+          request_path?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["threat_severity"]
+          threat_type: Database["public"]["Enums"]["threat_type"]
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_taken?: Database["public"]["Enums"]["threat_action"]
+          company_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: unknown
+          is_resolved?: boolean | null
+          request_path?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["threat_severity"]
+          threat_type?: Database["public"]["Enums"]["threat_type"]
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "threat_detections_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ticket_comments: {
         Row: {
           attachments: Json | null
@@ -7986,6 +8195,15 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "agent" | "user"
+      threat_action: "warn" | "challenge" | "throttle" | "block"
+      threat_severity: "low" | "medium" | "high" | "critical"
+      threat_type:
+        | "bot"
+        | "brute_force"
+        | "suspicious_ip"
+        | "anomaly"
+        | "honeypot"
+        | "rate_limit"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -8114,6 +8332,16 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "agent", "user"],
+      threat_action: ["warn", "challenge", "throttle", "block"],
+      threat_severity: ["low", "medium", "high", "critical"],
+      threat_type: [
+        "bot",
+        "brute_force",
+        "suspicious_ip",
+        "anomaly",
+        "honeypot",
+        "rate_limit",
+      ],
     },
   },
 } as const
