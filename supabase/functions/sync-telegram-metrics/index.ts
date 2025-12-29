@@ -87,18 +87,23 @@ Deno.serve(async (req) => {
     // Get posts that have been published to Telegram
     const { data: posts, error: postsError } = await supabase
       .from('social_media_posts')
-      .select('id, metadata, views, likes, shares')
+      .select('id, platform_post_ids, views, likes, shares')
       .eq('company_id', companyId)
       .eq('status', 'published')
-      .contains('platforms', ['telegram'])
-      .not('metadata->telegram_message_id', 'is', null);
+      .contains('platforms', ['telegram']);
 
     if (postsError) {
       console.error('Error fetching posts:', postsError);
       throw new Error('Failed to fetch posts');
     }
 
-    console.log(`Found ${posts?.length || 0} published Telegram posts to sync`);
+    // Filter posts that have telegram message ID stored
+    const telegramPosts = (posts || []).filter(p => {
+      const platformIds = p.platform_post_ids as Record<string, any> | null;
+      return platformIds?.telegram?.message_id;
+    });
+
+    console.log(`Found ${telegramPosts.length} published Telegram posts with message IDs to sync`);
 
     let syncedCount = 0;
     const metricsResults: any[] = [];
@@ -113,9 +118,10 @@ Deno.serve(async (req) => {
       }
 
       // For each post, try to get message info
-      for (const post of posts || []) {
-        const telegramMessageId = post.metadata?.telegram_message_id;
-        const telegramChatId = post.metadata?.telegram_chat_id || channelId;
+      for (const post of telegramPosts) {
+        const platformIds = post.platform_post_ids as Record<string, any>;
+        const telegramMessageId = platformIds?.telegram?.message_id;
+        const telegramChatId = platformIds?.telegram?.chat_id || channelId;
 
         if (!telegramMessageId) continue;
 
@@ -172,11 +178,14 @@ Deno.serve(async (req) => {
           // Update post with available metrics
           const updateData: any = {
             likes: totalReactions, // Using likes field for reactions
-            metadata: {
-              ...post.metadata,
-              telegram_reactions: reactionDetails,
-              telegram_total_reactions: totalReactions,
-              telegram_metrics_synced_at: new Date().toISOString(),
+            platform_post_ids: {
+              ...platformIds,
+              telegram: {
+                ...platformIds.telegram,
+                reactions: reactionDetails,
+                total_reactions: totalReactions,
+                metrics_synced_at: new Date().toISOString(),
+              }
             },
             metrics_last_synced_at: new Date().toISOString(),
           };
