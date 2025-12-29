@@ -489,6 +489,75 @@ export type Database = {
           },
         ]
       }
+      anomaly_detections: {
+        Row: {
+          action_taken: string | null
+          anomaly_type: string
+          confidence_score: number | null
+          created_at: string | null
+          description: string | null
+          details: Json | null
+          distance_km: number | null
+          id: string
+          is_false_positive: boolean | null
+          previous_city: string | null
+          previous_country: string | null
+          previous_ip: unknown
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          source_city: string | null
+          source_country: string | null
+          source_ip: unknown
+          time_diff_minutes: number | null
+          user_id: string | null
+        }
+        Insert: {
+          action_taken?: string | null
+          anomaly_type: string
+          confidence_score?: number | null
+          created_at?: string | null
+          description?: string | null
+          details?: Json | null
+          distance_km?: number | null
+          id?: string
+          is_false_positive?: boolean | null
+          previous_city?: string | null
+          previous_country?: string | null
+          previous_ip?: unknown
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          source_city?: string | null
+          source_country?: string | null
+          source_ip?: unknown
+          time_diff_minutes?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          action_taken?: string | null
+          anomaly_type?: string
+          confidence_score?: number | null
+          created_at?: string | null
+          description?: string | null
+          details?: Json | null
+          distance_km?: number | null
+          id?: string
+          is_false_positive?: boolean | null
+          previous_city?: string | null
+          previous_country?: string | null
+          previous_ip?: unknown
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          source_city?: string | null
+          source_country?: string | null
+          source_ip?: unknown
+          time_diff_minutes?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       api_integration_fields: {
         Row: {
           created_at: string
@@ -3117,6 +3186,201 @@ export type Database = {
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "email_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      failed_login_attempts: {
+        Row: {
+          attempt_count: number | null
+          created_at: string | null
+          failure_reason: string | null
+          first_attempt_at: string | null
+          id: string
+          identifier: string
+          identifier_type: string
+          ip_address: unknown
+          is_locked: boolean | null
+          last_attempt_at: string | null
+          locked_until: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          attempt_count?: number | null
+          created_at?: string | null
+          failure_reason?: string | null
+          first_attempt_at?: string | null
+          id?: string
+          identifier: string
+          identifier_type?: string
+          ip_address?: unknown
+          is_locked?: boolean | null
+          last_attempt_at?: string | null
+          locked_until?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          attempt_count?: number | null
+          created_at?: string | null
+          failure_reason?: string | null
+          first_attempt_at?: string | null
+          id?: string
+          identifier?: string
+          identifier_type?: string
+          ip_address?: unknown
+          is_locked?: boolean | null
+          last_attempt_at?: string | null
+          locked_until?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      geo_access_logs: {
+        Row: {
+          action_taken: string
+          city: string | null
+          country_code: string | null
+          country_name: string | null
+          created_at: string | null
+          id: string
+          ip_address: unknown
+          latitude: number | null
+          longitude: number | null
+          region: string | null
+          request_path: string | null
+          rule_id: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_taken: string
+          city?: string | null
+          country_code?: string | null
+          country_name?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown
+          latitude?: number | null
+          longitude?: number | null
+          region?: string | null
+          request_path?: string | null
+          rule_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_taken?: string
+          city?: string | null
+          country_code?: string | null
+          country_name?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown
+          latitude?: number | null
+          longitude?: number | null
+          region?: string | null
+          request_path?: string | null
+          rule_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geo_access_logs_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "geo_blocking_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geo_blocking_rules: {
+        Row: {
+          action: string
+          company_id: string | null
+          country_code: string
+          country_name: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          reason: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          action?: string
+          company_id?: string | null
+          country_code: string
+          country_name: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          reason?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          action?: string
+          company_id?: string | null
+          country_code?: string
+          country_name?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          reason?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geo_blocking_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geo_settings: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          default_action: string
+          id: string
+          mode: string
+          proxy_blocking_enabled: boolean | null
+          tor_blocking_enabled: boolean | null
+          updated_at: string | null
+          vpn_detection_enabled: boolean | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          default_action?: string
+          id?: string
+          mode?: string
+          proxy_blocking_enabled?: boolean | null
+          tor_blocking_enabled?: boolean | null
+          updated_at?: string | null
+          vpn_detection_enabled?: boolean | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          default_action?: string
+          id?: string
+          mode?: string
+          proxy_blocking_enabled?: boolean | null
+          tor_blocking_enabled?: boolean | null
+          updated_at?: string | null
+          vpn_detection_enabled?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geo_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -7982,6 +8246,63 @@ export type Database = {
         }
         Relationships: []
       }
+      user_login_history: {
+        Row: {
+          city: string | null
+          country_code: string | null
+          country_name: string | null
+          created_at: string | null
+          device_fingerprint: string | null
+          failure_reason: string | null
+          id: string
+          ip_address: unknown
+          latitude: number | null
+          login_method: string | null
+          longitude: number | null
+          region: string | null
+          session_id: string | null
+          success: boolean | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          city?: string | null
+          country_code?: string | null
+          country_name?: string | null
+          created_at?: string | null
+          device_fingerprint?: string | null
+          failure_reason?: string | null
+          id?: string
+          ip_address?: unknown
+          latitude?: number | null
+          login_method?: string | null
+          longitude?: number | null
+          region?: string | null
+          session_id?: string | null
+          success?: boolean | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          city?: string | null
+          country_code?: string | null
+          country_name?: string | null
+          created_at?: string | null
+          device_fingerprint?: string | null
+          failure_reason?: string | null
+          id?: string
+          ip_address?: unknown
+          latitude?: number | null
+          login_method?: string | null
+          longitude?: number | null
+          region?: string | null
+          session_id?: string | null
+          success?: boolean | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_reach_scores: {
         Row: {
           created_at: string | null
@@ -8285,9 +8606,17 @@ export type Database = {
       }
     }
     Functions: {
+      calculate_distance_km: {
+        Args: { lat1: number; lat2: number; lon1: number; lon2: number }
+        Returns: number
+      }
       can_access_branch: {
         Args: { _branch_id: string; _user_id: string }
         Returns: boolean
+      }
+      check_geo_access: {
+        Args: { p_company_id?: string; p_country_code: string }
+        Returns: Json
       }
       check_mfa_rate_limit: {
         Args: {
@@ -8298,6 +8627,16 @@ export type Database = {
         Returns: Json
       }
       check_scheduled_posts: { Args: never; Returns: undefined }
+      detect_impossible_travel: {
+        Args: {
+          p_city: string
+          p_country_code: string
+          p_latitude: number
+          p_longitude: number
+          p_user_id: string
+        }
+        Returns: Json
+      }
       generate_otp_code: { Args: never; Returns: string }
       get_branch_hierarchy: {
         Args: { branch_uuid: string }
@@ -8336,6 +8675,15 @@ export type Database = {
       has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      track_failed_login: {
+        Args: {
+          p_failure_reason: string
+          p_identifier: string
+          p_identifier_type: string
+          p_ip_address: unknown
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "agent" | "user"
