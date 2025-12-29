@@ -119,6 +119,27 @@ export default function SocialAnalytics() {
     },
   });
 
+  // Telegram metrics sync mutation
+  const telegramMetricsSyncMutation = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('sync-telegram-metrics');
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      if (data.synced > 0) {
+        toast.success(data.message || `Synced Telegram metrics for ${data.synced} posts`);
+      } else {
+        toast.info(data.error || 'No Telegram posts to sync');
+      }
+      queryClient.invalidateQueries({ queryKey: ['analytics-mentions'] });
+      queryClient.invalidateQueries({ queryKey: ['social-media-posts'] });
+    },
+    onError: (error) => {
+      toast.error('Telegram sync failed: ' + error.message);
+    },
+  });
+
   // Computed analytics
   const analytics = useMemo(() => {
     if (!mentions) return null;
@@ -288,6 +309,26 @@ export default function SocialAnalytics() {
                   <RefreshCw className={`h-4 w-4 mr-2 ${syncMutation.isPending ? 'animate-spin' : ''}`} />
                   Sync All
                 </Button>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="icon"
+                      onClick={() => telegramMetricsSyncMutation.mutate()} 
+                      disabled={telegramMetricsSyncMutation.isPending}
+                      className="relative"
+                    >
+                      <Send className={`h-4 w-4 ${telegramMetricsSyncMutation.isPending ? 'animate-pulse' : ''}`} />
+                      {telegramMetricsSyncMutation.isPending && (
+                        <span className="absolute -top-1 -right-1 h-2 w-2 bg-primary rounded-full animate-ping" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Sync Telegram Reactions & Views</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </div>
           </div>
