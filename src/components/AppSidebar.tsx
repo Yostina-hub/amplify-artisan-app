@@ -33,6 +33,7 @@ import {
   Megaphone,
   MessageCircle,
   Share2,
+  BarChart2,
   BarChart3,
   Settings,
   HelpCircle,
@@ -129,9 +130,11 @@ const navigationGroups: NavGroup[] = [
     icon: Globe,
     items: [
       { title: "Inbox", url: "/social-inbox", icon: MessageCircle },
+      { title: "Analytics", url: "/social-analytics", icon: BarChart2 },
       { title: "Connections", url: "/social-connections", icon: Link2 },
       { title: "Intelligence", url: "/social-intelligence", icon: Brain },
       { title: "Media Monitoring", url: "/media-monitoring", icon: Radio },
+      { title: "Content Moderation", url: "/admin/moderation", icon: Flag },
     ],
   },
   {
@@ -150,7 +153,7 @@ const navigationGroups: NavGroup[] = [
     icon: BarChart3,
     items: [
       { title: "Reports", url: "/reports", icon: BarChart3 },
-      { title: "Dashboards", url: "/analytics", icon: TrendingUp },
+      { title: "Analytics", url: "/analytics", icon: TrendingUp },
     ],
   },
   {
