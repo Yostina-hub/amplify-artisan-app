@@ -26,7 +26,9 @@ import {
   MessageSquare,
   RefreshCw,
   Trash2,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Search,
+  LogOut
 } from 'lucide-react';
 
 interface Campaign {
@@ -85,8 +87,8 @@ export default function TelegramBulkMessaging() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      const { data } = await supabase.functions.invoke('telegram-bulk-auth', {
-        body: { action: 'check_status' }
+      const { data } = await supabase.functions.invoke('telegram-mtproto-auth', {
+        body: { action: 'check_session' }
       });
 
       if (data?.is_authenticated) {
@@ -136,8 +138,8 @@ export default function TelegramBulkMessaging() {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('telegram-bulk-auth', {
-        body: { action: 'request_code', phone_number: authPhone }
+      const { data, error } = await supabase.functions.invoke('telegram-mtproto-auth', {
+        body: { action: 'send_code', phone_number: authPhone }
       });
 
       if (error) throw error;
@@ -163,8 +165,8 @@ export default function TelegramBulkMessaging() {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('telegram-bulk-auth', {
-        body: { action: 'verify_code', phone_number: authPhone, code: authCode }
+      const { data, error } = await supabase.functions.invoke('telegram-mtproto-auth', {
+        body: { action: 'verify_code', phone_number: authPhone, phone_code: authCode }
       });
 
       if (error) throw error;
@@ -286,11 +288,41 @@ export default function TelegramBulkMessaging() {
     }
   };
 
+  const resolveContacts = async (campaignId: string) => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('telegram-resolve-contacts', {
+        body: { campaign_id: campaignId }
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        toast.success(`Resolved ${data.resolved} contacts (${data.not_found} not found)`);
+        fetchContacts(campaignId);
+        fetchCampaigns();
+      } else {
+        throw new Error(data?.error || 'Failed to resolve contacts');
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to resolve contacts');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const startCampaign = async (campaignId: string) => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('telegram-bulk-send', {
-        body: { campaign_id: campaignId, action: 'start' }
+      // First resolve contacts if there are pending ones
+      const pendingCount = contacts.filter(c => c.status === 'pending').length;
+      if (pendingCount > 0) {
+        toast.info('Resolving contacts first...');
+        await resolveContacts(campaignId);
+      }
+
+      const { data, error } = await supabase.functions.invoke('telegram-mtproto-send', {
+        body: { campaign_id: campaignId, action: 'start', batch_size: 10 }
       });
 
       if (error) throw error;
@@ -314,7 +346,7 @@ export default function TelegramBulkMessaging() {
   const pauseCampaign = async (campaignId: string) => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('telegram-bulk-send', {
+      const { data, error } = await supabase.functions.invoke('telegram-mtproto-send', {
         body: { campaign_id: campaignId, action: 'pause' }
       });
 
@@ -484,10 +516,33 @@ export default function TelegramBulkMessaging() {
         {isAuthenticated && (
           <Card className="bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
             <CardContent className="py-4">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-green-600" />
-                <span className="font-medium">Telegram Connected:</span>
-                <span className="text-muted-foreground">{authPhone}</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-green-600" />
+                  <span className="font-medium">Telegram Connected:</span>
+                  <span className="text-muted-foreground">{authPhone}</span>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      await supabase.functions.invoke('telegram-mtproto-auth', {
+                        body: { action: 'logout' }
+                      });
+                      setIsAuthenticated(false);
+                      setAuthStep('phone');
+                      setAuthPhone('');
+                      setAuthCode('');
+                      toast.success('Logged out from Telegram');
+                    } catch (error) {
+                      console.error('Logout error:', error);
+                    }
+                  }}
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Disconnect
+                </Button>
               </div>
             </CardContent>
           </Card>
