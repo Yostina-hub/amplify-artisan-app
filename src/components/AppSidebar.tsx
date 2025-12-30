@@ -88,18 +88,6 @@ const pinnedItems: NavItem[] = [
 
 const navigationGroups: NavGroup[] = [
   {
-    id: "crm",
-    label: "CRM",
-    icon: Users,
-    items: [
-      { title: "Contacts", url: "/contacts", icon: Users },
-      { title: "Accounts", url: "/accounts", icon: Building2 },
-      { title: "Leads", url: "/leads", icon: UserPlus },
-      { title: "Pipeline", url: "/pipeline", icon: GitBranch },
-      { title: "Activities", url: "/activities", icon: Calendar },
-    ],
-  },
-  {
     id: "marketing",
     label: "Marketing",
     icon: Megaphone,
@@ -131,6 +119,18 @@ const navigationGroups: NavGroup[] = [
     items: [
       { title: "Reports", url: "/reports", icon: BarChart3 },
       { title: "Analytics", url: "/analytics", icon: TrendingUp },
+    ],
+  },
+  {
+    id: "crm",
+    label: "CRM",
+    icon: Users,
+    items: [
+      { title: "Contacts", url: "/contacts", icon: Users },
+      { title: "Accounts", url: "/accounts", icon: Building2 },
+      { title: "Leads", url: "/leads", icon: UserPlus },
+      { title: "Pipeline", url: "/pipeline", icon: GitBranch },
+      { title: "Activities", url: "/activities", icon: Calendar },
     ],
   },
   {
