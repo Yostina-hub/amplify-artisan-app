@@ -100,19 +100,6 @@ const navigationGroups: NavGroup[] = [
     ],
   },
   {
-    id: "sales",
-    label: "Sales",
-    icon: TrendingUp,
-    items: [
-      { title: "Products", url: "/products", icon: Package },
-      { title: "Quotes", url: "/quotes", icon: FileText },
-      { title: "Invoices", url: "/invoices", icon: Receipt },
-      { title: "Payments", url: "/payments", icon: CreditCard },
-      { title: "Contracts", url: "/contract-management", icon: FileCheck },
-      { title: "Territory", url: "/territory-management", icon: Map },
-    ],
-  },
-  {
     id: "marketing",
     label: "Marketing",
     icon: Megaphone,
@@ -138,6 +125,28 @@ const navigationGroups: NavGroup[] = [
     ],
   },
   {
+    id: "analytics",
+    label: "Analytics",
+    icon: BarChart3,
+    items: [
+      { title: "Reports", url: "/reports", icon: BarChart3 },
+      { title: "Analytics", url: "/analytics", icon: TrendingUp },
+    ],
+  },
+  {
+    id: "sales",
+    label: "Sales",
+    icon: TrendingUp,
+    items: [
+      { title: "Products", url: "/products", icon: Package },
+      { title: "Quotes", url: "/quotes", icon: FileText },
+      { title: "Invoices", url: "/invoices", icon: Receipt },
+      { title: "Payments", url: "/payments", icon: CreditCard },
+      { title: "Contracts", url: "/contract-management", icon: FileCheck },
+      { title: "Territory", url: "/territory-management", icon: Map },
+    ],
+  },
+  {
     id: "service",
     label: "Service",
     icon: Headphones,
@@ -145,15 +154,6 @@ const navigationGroups: NavGroup[] = [
       { title: "Support", url: "/customer-support", icon: Headphones },
       { title: "Live Chat", url: "/admin/live-chat", icon: MessageCircle },
       { title: "Call Center", url: "/call-center", icon: Phone },
-    ],
-  },
-  {
-    id: "analytics",
-    label: "Analytics",
-    icon: BarChart3,
-    items: [
-      { title: "Reports", url: "/reports", icon: BarChart3 },
-      { title: "Analytics", url: "/analytics", icon: TrendingUp },
     ],
   },
   {
