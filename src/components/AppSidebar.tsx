@@ -83,8 +83,6 @@ interface NavGroup {
 
 const pinnedItems: NavItem[] = [
   { title: "Home", url: "/dashboard", icon: Home },
-  { title: "Leads", url: "/leads", icon: UserPlus },
-  { title: "Contacts", url: "/contacts", icon: Users },
 ];
 
 const navigationGroups: NavGroup[] = [
@@ -118,10 +116,11 @@ const navigationGroups: NavGroup[] = [
     label: "Marketing",
     icon: Megaphone,
     items: [
-      { title: "Campaigns", url: "/ad-campaigns", icon: Megaphone },
+      { title: "Composer", url: "/composer", icon: Share2 },
       { title: "Email", url: "/email-marketing", icon: Mail },
-      { title: "Social", url: "/composer", icon: Share2 },
+      { title: "Campaigns", url: "/ad-campaigns", icon: Target },
       { title: "Influencers", url: "/influencer-marketing", icon: TrendingUp },
+      { title: "Calendar", url: "/calendar", icon: Calendar },
     ],
   },
   {
@@ -133,16 +132,6 @@ const navigationGroups: NavGroup[] = [
       { title: "Connections", url: "/social-connections", icon: Link2 },
       { title: "Intelligence", url: "/social-intelligence", icon: Brain },
       { title: "Media Monitoring", url: "/media-monitoring", icon: Radio },
-      { title: "Content Moderation", url: "/admin/moderation", icon: Flag },
-    ],
-  },
-  {
-    id: "automation",
-    label: "Automation",
-    icon: Zap,
-    items: [
-      { title: "Workflows", url: "/automation", icon: Workflow },
-      { title: "Call Center", url: "/call-center", icon: Phone },
     ],
   },
   {
@@ -152,6 +141,7 @@ const navigationGroups: NavGroup[] = [
     items: [
       { title: "Support", url: "/customer-support", icon: Headphones },
       { title: "Live Chat", url: "/admin/live-chat", icon: MessageCircle },
+      { title: "Call Center", url: "/call-center", icon: Phone },
     ],
   },
   {
@@ -160,7 +150,7 @@ const navigationGroups: NavGroup[] = [
     icon: BarChart3,
     items: [
       { title: "Reports", url: "/reports", icon: BarChart3 },
-      { title: "Analytics", url: "/analytics", icon: TrendingUp },
+      { title: "Dashboards", url: "/analytics", icon: TrendingUp },
     ],
   },
   {
@@ -168,12 +158,11 @@ const navigationGroups: NavGroup[] = [
     label: "Tools",
     icon: Box,
     items: [
-      { title: "Composer", url: "/composer", icon: FileText },
-      { title: "Calendar", url: "/calendar", icon: Calendar },
       { title: "Documents", url: "/documents", icon: FileText },
       { title: "Projects", url: "/project-management", icon: FolderKanban },
+      { title: "Workflows", url: "/automation", icon: Workflow },
       { title: "Module Builder", url: "/module-builder", icon: Database },
-      { title: "Form Builder", url: "/form-builder", icon: Box },
+      { title: "Form Builder", url: "/form-builder", icon: Layers },
     ],
   },
 ];
@@ -183,7 +172,7 @@ const companyItems: NavItem[] = [
   { title: "Platform Access", url: "/company/platform-subscriptions", icon: Package },
   { title: "Email Settings", url: "/company/email-settings", icon: Mail },
   { title: "API", url: "/company/api-management", icon: Database },
-  { title: "Call Center", url: "/company/call-center-integrations", icon: Phone },
+  { title: "Integrations", url: "/company/call-center-integrations", icon: Link2 },
   { title: "TTS/STT", url: "/tts-settings", icon: Volume2 },
   { title: "Audit Log", url: "/company/audit-log", icon: FileSearch },
 ];
