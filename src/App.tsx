@@ -96,6 +96,7 @@ import MediaMonitoring from "./pages/MediaMonitoring";
 import SecurityAuditLog from "./pages/admin/SecurityAuditLog";
 import SecurityDashboard from "./pages/admin/SecurityDashboard";
 import SocialAnalytics from "./pages/SocialAnalytics";
+import TelegramBulkMessaging from "./pages/TelegramBulkMessaging";
 
 const queryClient = new QueryClient();
 
@@ -223,6 +224,7 @@ const App = () => (
               <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
               <Route path="/call-reports" element={<ProtectedRoute><CallReports /></ProtectedRoute>} />
               <Route path="/email-marketing" element={<ProtectedRoute><EmailMarketing /></ProtectedRoute>} />
+              <Route path="/telegram-bulk" element={<ProtectedRoute><TelegramBulkMessaging /></ProtectedRoute>} />
               <Route path="/documents" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
               <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
               <Route path="/territory-management" element={<ProtectedRoute><TerritoryManagement /></ProtectedRoute>} />

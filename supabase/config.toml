@@ -125,3 +125,12 @@ verify_jwt = false
 
 [functions.anomaly-detection]
 verify_jwt = false
+
+[functions.telegram-bulk-auth]
+verify_jwt = true
+
+[functions.telegram-bulk-send]
+verify_jwt = true
+
+[functions.telegram-import-contacts]
+verify_jwt = true

@@ -7816,6 +7816,168 @@ export type Database = {
           },
         ]
       }
+      telegram_bulk_campaigns: {
+        Row: {
+          company_id: string | null
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          delivered_count: number | null
+          description: string | null
+          failed_count: number | null
+          id: string
+          message_template: string
+          name: string
+          scheduled_at: string | null
+          sent_count: number | null
+          started_at: string | null
+          status: string
+          total_contacts: number | null
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivered_count?: number | null
+          description?: string | null
+          failed_count?: number | null
+          id?: string
+          message_template: string
+          name: string
+          scheduled_at?: string | null
+          sent_count?: number | null
+          started_at?: string | null
+          status?: string
+          total_contacts?: number | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivered_count?: number | null
+          description?: string | null
+          failed_count?: number | null
+          id?: string
+          message_template?: string
+          name?: string
+          scheduled_at?: string | null
+          sent_count?: number | null
+          started_at?: string | null
+          status?: string
+          total_contacts?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telegram_bulk_campaigns_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      telegram_bulk_contacts: {
+        Row: {
+          campaign_id: string | null
+          created_at: string
+          delivered_at: string | null
+          error_message: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          phone_number: string
+          sent_at: string | null
+          status: string
+          telegram_access_hash: number | null
+          telegram_user_id: number | null
+          updated_at: string
+        }
+        Insert: {
+          campaign_id?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          error_message?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone_number: string
+          sent_at?: string | null
+          status?: string
+          telegram_access_hash?: number | null
+          telegram_user_id?: number | null
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          error_message?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone_number?: string
+          sent_at?: string | null
+          status?: string
+          telegram_access_hash?: number | null
+          telegram_user_id?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telegram_bulk_contacts_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "telegram_bulk_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      telegram_sessions: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          id: string
+          is_authenticated: boolean | null
+          last_used_at: string | null
+          phone_number: string
+          session_string: string
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          is_authenticated?: boolean | null
+          last_used_at?: string | null
+          phone_number: string
+          session_string: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          is_authenticated?: boolean | null
+          last_used_at?: string | null
+          phone_number?: string
+          session_string?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telegram_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       territories: {
         Row: {
           account_size_range: string | null
