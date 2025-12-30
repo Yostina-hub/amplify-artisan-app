@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -11,9 +11,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronLeft, ChevronRight, Plus, Clock, MapPin, Search, Filter, Calendar as CalendarIcon, Trash, Sparkles, Globe, Link, Repeat, Video } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ChevronLeft, ChevronRight, Plus, Clock, MapPin, Search, Filter, Calendar as CalendarIcon, Trash, Sparkles, Globe, Link, Repeat, Video, List, LayoutGrid, CalendarDays, Instagram, Facebook, Twitter, Linkedin, Send, ChevronDown, FileText, CheckCircle } from "lucide-react";
 import { useState, useEffect } from "react";
-import { format, isSameDay } from "date-fns";
+import { format, isSameDay, startOfWeek, addDays, addWeeks, subWeeks, isToday } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,6 +40,18 @@ interface Event {
   meetingLink?: string;
   reminders?: number[];
   metadata?: any;
+  imageUrl?: string;
+  platforms?: string[];
+}
+
+interface SocialPost {
+  id: string;
+  content: string;
+  platforms: string[];
+  scheduledFor: Date;
+  status: string;
+  imageUrl?: string;
+  accountName?: string;
 }
 
 const categoryConfig = {
@@ -69,7 +82,7 @@ const categoryConfig = {
   },
   campaign: { 
     gradient: "from-indigo-500 via-purple-500 to-indigo-600",
-    badge: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/20",
+    badge: "bg-indigo-500/10 text-indigo-700 dark:text-purple-300 border-indigo-500/20",
     icon: "📢"
   },
   review: { 
@@ -79,20 +92,31 @@ const categoryConfig = {
   },
 };
 
+const PlatformIcon = ({ platform, className }: { platform: string; className?: string }) => {
+  const icons: Record<string, React.ReactNode> = {
+    instagram: <Instagram className={cn("h-4 w-4 text-pink-500", className)} />,
+    facebook: <Facebook className={cn("h-4 w-4 text-blue-600", className)} />,
+    twitter: <Twitter className={cn("h-4 w-4 text-sky-500", className)} />,
+    linkedin: <Linkedin className={cn("h-4 w-4 text-blue-700", className)} />,
+    telegram: <Send className={cn("h-4 w-4 text-sky-400", className)} />,
+  };
+  return icons[platform.toLowerCase()] || <Globe className={cn("h-4 w-4", className)} />;
+};
+
 export default function CalendarView() {
   const { session } = useAuth();
   const { sendEventCreatedNotification } = useNotifications();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [view, setView] = useState<"month" | "week" | "day">("month");
+  const [view, setView] = useState<"list" | "week" | "month">("week");
+  const [activeTab, setActiveTab] = useState("calendar");
   const [events, setEvents] = useState<Event[]>([]);
+  const [socialPosts, setSocialPosts] = useState<SocialPost[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
-  const [isEditEventOpen, setIsEditEventOpen] = useState(false);
-  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [timezone, setTimezone] = useState("Africa/Addis_Ababa");
+  const [timezone, setTimezone] = useState("GMT +03:00");
   const [newEvent, setNewEvent] = useState({
     title: "",
     description: "",
@@ -106,10 +130,15 @@ export default function CalendarView() {
     recurrenceRule: "daily",
   });
 
-  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
-  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
-  const monthName = currentDate.toLocaleString("default", { month: "long" });
-  const year = currentDate.getFullYear();
+  // Week view helpers
+  const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
+  const weekDays = Array.from({ length: 7 }).map((_, i) => addDays(weekStart, i));
+  
+  const getWeekRange = () => {
+    const start = format(weekDays[0], "MMM d");
+    const end = format(weekDays[6], "d, yyyy");
+    return `${start} - ${end}`;
+  };
 
   useEffect(() => {
     fetchEvents();
@@ -120,7 +149,6 @@ export default function CalendarView() {
     
     setIsLoading(true);
     try {
-      // Fetch calendar events
       const { data: calendarData, error: calendarError } = await supabase
         .from("calendar_events")
         .select("*")
@@ -129,7 +157,6 @@ export default function CalendarView() {
 
       if (calendarError) throw calendarError;
 
-      // Fetch scheduled social media posts
       const { data: profile } = await supabase
         .from("profiles")
         .select("company_id")
@@ -140,7 +167,7 @@ export default function CalendarView() {
       if (profile?.company_id) {
         const { data: postsData, error: postsError } = await supabase
           .from("social_media_posts")
-          .select("id, platforms, content, status, approved_at, scheduled_at, scheduled_for")
+          .select("id, platforms, content, status, approved_at, scheduled_at, scheduled_for, media_urls")
           .eq("company_id", profile.company_id)
           .or("scheduled_at.not.is.null,scheduled_for.not.is.null")
           .order("scheduled_at", { ascending: true, nullsFirst: false });
@@ -150,7 +177,27 @@ export default function CalendarView() {
         }
       }
 
-      // Combine calendar events and scheduled posts
+      // Process social posts for display
+      const processedSocialPosts: SocialPost[] = scheduledPosts
+        .filter((post) => {
+          const scheduledDate = post.scheduled_at || post.scheduled_for;
+          return scheduledDate;
+        })
+        .map((post) => {
+          const scheduledDate = post.scheduled_at || post.scheduled_for;
+          return {
+            id: post.id,
+            content: post.content || "",
+            platforms: post.platforms || [],
+            scheduledFor: new Date(scheduledDate),
+            status: post.status,
+            imageUrl: post.media_urls?.[0] || undefined,
+            accountName: "Business Account",
+          };
+        });
+
+      setSocialPosts(processedSocialPosts);
+
       const formattedEvents: Event[] = [
         ...(calendarData || []).map((event) => ({
           id: event.id,
@@ -167,36 +214,24 @@ export default function CalendarView() {
           isRecurring: false,
           meetingLink: "",
         })),
-        ...scheduledPosts
-          .filter((post) => {
-            const scheduledDate = post.scheduled_at || post.scheduled_for;
-            return new Date(scheduledDate) >= new Date(); // Only show future posts
-          })
-          .map((post) => {
-            const scheduledDate = post.scheduled_at || post.scheduled_for;
-            return {
-              id: `post-${post.id}`,
-              title: `📱 ${post.platforms?.join(", ")} Post`,
-              description: post.content || "",
-              date: new Date(scheduledDate),
-              time: new Date(scheduledDate).toLocaleTimeString('en-US', { 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                hour12: false,
-                timeZone: 'Africa/Addis_Ababa'
-              }),
-              category: "social" as Event["category"],
-              color: categoryConfig.social.gradient,
-              metadata: {
-                type: "social_post",
-                postId: post.id,
-                platforms: post.platforms,
-                status: post.status,
-                approvedAt: post.approved_at,
-                scheduledFor: scheduledDate,
-              }
-            };
-          })
+        ...processedSocialPosts.map((post) => ({
+          id: `post-${post.id}`,
+          title: post.content.substring(0, 50) + (post.content.length > 50 ? "..." : ""),
+          description: post.content,
+          date: post.scheduledFor,
+          time: format(post.scheduledFor, 'h:mma'),
+          category: "social" as Event["category"],
+          color: categoryConfig.social.gradient,
+          platforms: post.platforms,
+          imageUrl: post.imageUrl,
+          metadata: {
+            type: "social_post",
+            postId: post.id,
+            platforms: post.platforms,
+            status: post.status,
+            accountName: post.accountName,
+          }
+        }))
       ];
 
       setEvents(formattedEvents);
@@ -208,12 +243,10 @@ export default function CalendarView() {
     }
   };
 
-  const getEventsForDay = (day: number) => {
+  const getEventsForDay = (day: Date) => {
     return events.filter(
       (event) =>
-        event.date.getDate() === day &&
-        event.date.getMonth() === currentDate.getMonth() &&
-        event.date.getFullYear() === currentDate.getFullYear() &&
+        isSameDay(event.date, day) &&
         (filterCategory === "all" || event.category === filterCategory) &&
         (searchQuery === "" || event.title.toLowerCase().includes(searchQuery.toLowerCase()))
     );
@@ -270,7 +303,6 @@ export default function CalendarView() {
       toast.success("Event created successfully!");
       await sendEventCreatedNotification(newEvent.title);
       
-      // Reset
       setNewEvent({
         title: "",
         description: "",
@@ -300,256 +332,598 @@ export default function CalendarView() {
     }
   };
 
+  const navigateWeek = (direction: "prev" | "next") => {
+    setCurrentDate(direction === "next" ? addWeeks(currentDate, 1) : subWeeks(currentDate, 1));
+  };
+
+  const goToToday = () => {
+    setCurrentDate(new Date());
+  };
+
+  // Social Post Card Component
+  const SocialPostCard = ({ post, event }: { post?: SocialPost; event: Event }) => {
+    const platforms = event.platforms || post?.platforms || event.metadata?.platforms || [];
+    const time = format(event.date, 'h:mma');
+    const accountName = event.metadata?.accountName || "Account";
+    const imageUrl = event.imageUrl || post?.imageUrl;
+    const content = event.description || post?.content || "";
+    
+    return (
+      <div className="group relative bg-card rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer border border-border/50">
+        {/* Image Preview */}
+        {imageUrl ? (
+          <div className="aspect-video bg-gradient-to-br from-purple-400 via-pink-400 to-orange-300 relative">
+            <img src={imageUrl} alt="" className="w-full h-full object-cover" />
+            {/* Platform badge */}
+            <div className="absolute bottom-2 left-2">
+              {platforms.slice(0, 1).map((platform: string) => (
+                <div key={platform} className="bg-white/90 rounded-full p-1 shadow-sm">
+                  <PlatformIcon platform={platform} className="h-3 w-3" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="aspect-video bg-gradient-to-br from-indigo-400 via-purple-400 to-pink-400 flex items-center justify-center">
+            <div className="text-white/80 text-xs px-2 text-center line-clamp-3">
+              {content.substring(0, 80)}...
+            </div>
+            <div className="absolute bottom-2 left-2">
+              {platforms.slice(0, 1).map((platform: string) => (
+                <div key={platform} className="bg-white/90 rounded-full p-1 shadow-sm">
+                  <PlatformIcon platform={platform} className="h-3 w-3" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Post Info */}
+        <div className="p-2 space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-sm truncate">{accountName}</span>
+            <span className="text-xs text-muted-foreground">{time}</span>
+          </div>
+          <p className="text-xs text-muted-foreground line-clamp-1">{content}</p>
+        </div>
+      </div>
+    );
+  };
+
+  // Event Card Component for non-social events
+  const EventCard = ({ event }: { event: Event }) => (
+    <Popover>
+      <PopoverTrigger asChild>
+        <div
+          className={cn(
+            "text-xs px-2 py-1.5 rounded-md truncate font-medium text-white bg-gradient-to-r cursor-pointer shadow-sm hover:shadow-md transition-all",
+            categoryConfig[event.category].gradient
+          )}
+        >
+          <div className="flex items-center gap-1">
+            <span>{categoryConfig[event.category].icon}</span>
+            <span className="truncate">{event.title}</span>
+          </div>
+          <div className="text-[10px] opacity-80">{event.time}</div>
+        </div>
+      </PopoverTrigger>
+      <PopoverContent className="w-80" side="right">
+        <div className="space-y-3">
+          <div>
+            <h4 className="font-semibold text-base flex items-center gap-2">
+              {categoryConfig[event.category].icon} {event.title}
+            </h4>
+            <Badge className={categoryConfig[event.category].badge}>
+              {event.category}
+            </Badge>
+          </div>
+          {event.description && (
+            <p className="text-sm text-muted-foreground">{event.description}</p>
+          )}
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+              <span>{format(event.date, "PPP")}</span>
+            </div>
+            {event.time && (
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <span>{event.time} {event.endTime && `- ${event.endTime}`}</span>
+              </div>
+            )}
+            {event.location && (
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+                <span>{event.location}</span>
+              </div>
+            )}
+          </div>
+          {!event.id.startsWith("post-") && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => handleDeleteEvent(event.id)}
+              className="w-full"
+            >
+              <Trash className="h-4 w-4 mr-2" />
+              Delete Event
+            </Button>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-primary/5 to-accent/10">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4">
           <div className="relative">
             <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary/20 border-t-primary mx-auto"></div>
             <CalendarIcon className="h-6 w-6 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
           </div>
-          <p className="text-muted-foreground font-medium">Loading your intelligent calendar...</p>
+          <p className="text-muted-foreground font-medium">Loading your calendar...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 animate-in fade-in-50 duration-700">
-      <div className="container mx-auto p-6 space-y-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 backdrop-blur-sm bg-card/50 p-6 rounded-2xl border-2">
-          <div>
-            <h1 className="text-5xl font-bold tracking-tight bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent animate-in slide-in-from-left duration-500">
-              Smart Calendar
-            </h1>
-            <p className="text-muted-foreground mt-2 text-lg">
-              AI-powered scheduling with timezone support
-            </p>
-          </div>
-          
-          <div className="flex gap-2">
-            <Select value={timezone} onValueChange={setTimezone}>
-              <SelectTrigger className="w-[200px] bg-background">
-                <Globe className="h-4 w-4 mr-2" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-background z-50">
-                {["Africa/Addis_Ababa", "UTC", "America/New_York", "America/Los_Angeles", "Europe/London", "Europe/Paris", "Asia/Tokyo", "Asia/Shanghai", "Asia/Dubai"].map(tz => (
-                  <SelectItem key={tz} value={tz}>
-                    {tz === "Africa/Addis_Ababa" ? "🇪🇹 " : ""}
-                    {tz.replace(/_/g, " ")}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+    <div className="min-h-screen bg-background">
+      <div className="border-b bg-card">
+        <div className="container mx-auto">
+          {/* Top Tabs */}
+          <div className="flex items-center justify-between px-4 py-3 border-b">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="bg-transparent border-0 p-0 h-auto gap-6">
+                <TabsTrigger 
+                  value="calendar" 
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none pb-3 px-1 text-base font-medium"
+                >
+                  Calendar
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="drafts"
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none pb-3 px-1 text-base font-medium"
+                >
+                  Drafts
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="content"
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none pb-3 px-1 text-base font-medium"
+                >
+                  Content
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="approvals"
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none pb-3 px-1 text-base font-medium"
+                >
+                  Approvals
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
 
-            <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 shadow-lg hover:shadow-xl transition-all duration-300">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Event
+            {/* Post Now Button */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2">
+                  Post now
+                  <ChevronDown className="h-4 w-4" />
                 </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl">Create New Event</DialogTitle>
-                  <DialogDescription>Schedule meetings, deadlines, and campaigns</DialogDescription>
-                </DialogHeader>
-                <div className="space-y-6 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="title" className="text-base font-semibold">Event Title *</Label>
-                    <Input
-                      id="title"
-                      placeholder="Team Strategy Meeting"
-                      value={newEvent.title}
-                      onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
-                      className="text-base"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      placeholder="Discuss Q4 objectives and key results..."
-                      value={newEvent.description}
-                      onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
-                      className="min-h-[100px]"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Date *</Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-full justify-start font-normal">
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {format(newEvent.date, "PPP")}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <CalendarComponent
-                            mode="single"
-                            selected={newEvent.date}
-                            onSelect={(date) => date && setNewEvent({ ...newEvent, date })}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="category">Category *</Label>
-                      <Select value={newEvent.category} onValueChange={(value: Event["category"]) => setNewEvent({ ...newEvent, category: value })}>
-                        <SelectTrigger className="bg-background">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-background z-50">
-                          {Object.entries(categoryConfig).map(([key, config]) => (
-                            <SelectItem key={key} value={key}>
-                              <span className="flex items-center gap-2">
-                                <span>{config.icon}</span>
-                                <span className="capitalize">{key}</span>
-                              </span>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="time">Start Time</Label>
-                      <Input
-                        id="time"
-                        type="time"
-                        value={newEvent.time}
-                        onChange={(e) => setNewEvent({ ...newEvent, time: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="endTime">End Time</Label>
-                      <Input
-                        id="endTime"
-                        type="time"
-                        value={newEvent.endTime}
-                        onChange={(e) => setNewEvent({ ...newEvent, endTime: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <Tabs defaultValue="details" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="details">Details</TabsTrigger>
-                      <TabsTrigger value="advanced">Advanced</TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="details" className="space-y-4 mt-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="location">Location</Label>
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            id="location"
-                            placeholder="Conference Room A / Zoom"
-                            value={newEvent.location}
-                            onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
-                            className="pl-9"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="meetingLink">Meeting Link</Label>
-                        <div className="relative">
-                          <Link className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            id="meetingLink"
-                            placeholder="https://zoom.us/j/..."
-                            value={newEvent.meetingLink}
-                            onChange={(e) => setNewEvent({ ...newEvent, meetingLink: e.target.value })}
-                            className="pl-9"
-                          />
-                        </div>
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="advanced" className="space-y-4 mt-4">
-                      <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                        <Checkbox 
-                          id="recurring"
-                          checked={newEvent.isRecurring}
-                          onCheckedChange={(checked) => setNewEvent({ ...newEvent, isRecurring: checked as boolean })}
-                        />
-                        <Label htmlFor="recurring" className="flex items-center gap-2 cursor-pointer">
-                          <Repeat className="h-4 w-4" />
-                          <span>Recurring Event</span>
-                        </Label>
-                      </div>
-
-                      {newEvent.isRecurring && (
-                        <Select value={newEvent.recurrenceRule} onValueChange={(value) => setNewEvent({ ...newEvent, recurrenceRule: value })}>
-                          <SelectTrigger className="bg-background">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-background z-50">
-                            <SelectItem value="daily">Daily</SelectItem>
-                            <SelectItem value="weekly">Weekly</SelectItem>
-                            <SelectItem value="monthly">Monthly</SelectItem>
-                            <SelectItem value="yearly">Yearly</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      )}
-                    </TabsContent>
-                  </Tabs>
-
-                  <Button onClick={handleAddEvent} className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-purple-500">
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Create Event
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>
+                  <Instagram className="h-4 w-4 mr-2" /> Post to Instagram
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Facebook className="h-4 w-4 mr-2" /> Post to Facebook
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Twitter className="h-4 w-4 mr-2" /> Post to Twitter
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Linkedin className="h-4 w-4 mr-2" /> Post to LinkedIn
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Send className="h-4 w-4 mr-2" /> Post to Telegram
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-        </div>
 
-        {/* View Selector & Filters */}
-        <Card className="backdrop-blur-sm bg-card/95 border-2">
-          <CardContent className="p-4">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}>
+          {/* Navigation Bar */}
+          <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-3">
+              {/* Navigation Arrows */}
+              <div className="flex items-center gap-1">
+                <Button variant="outline" size="icon" onClick={() => navigateWeek("prev")} className="h-8 w-8">
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <h2 className="text-2xl font-bold min-w-[200px] text-center">
-                  {monthName} {year}
-                </h2>
-                <Button variant="outline" size="icon" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}>
+                <Button variant="outline" size="sm" onClick={goToToday} className="h-8 px-3 font-medium">
+                  Today
+                </Button>
+                <Button variant="outline" size="icon" onClick={() => navigateWeek("next")} className="h-8 w-8">
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
 
-              <div className="flex gap-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search events..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 w-[200px]"
+              {/* Date Range */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" className="text-lg font-semibold gap-2">
+                    {getWeekRange()}
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={currentDate}
+                    onSelect={(date) => date && setCurrentDate(date)}
+                    initialFocus
                   />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* View Toggle */}
+              <div className="flex border rounded-lg p-1 bg-muted/30">
+                <Button
+                  variant={view === "list" ? "secondary" : "ghost"}
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setView("list")}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={view === "week" ? "secondary" : "ghost"}
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setView("week")}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={view === "month" ? "secondary" : "ghost"}
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setView("month")}
+                >
+                  <CalendarDays className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Calendar Content */}
+      <div className="container mx-auto p-4">
+        <Tabs value={activeTab} className="w-full">
+          <TabsContent value="calendar" className="mt-0">
+            {view === "week" && (
+              <div className="bg-card rounded-lg border overflow-hidden">
+                {/* Week Header */}
+                <div className="grid grid-cols-[80px_repeat(7,1fr)] border-b">
+                  <div className="p-3 text-xs text-muted-foreground flex items-center">
+                    <Globe className="h-3 w-3 mr-1" />
+                    {timezone}
+                  </div>
+                  {weekDays.map((day) => {
+                    const dayEvents = getEventsForDay(day);
+                    const dayIsToday = isToday(day);
+                    return (
+                      <div key={day.toISOString()} className={cn("p-3 text-center border-l", dayIsToday && "bg-primary/5")}>
+                        <div className="text-xs text-muted-foreground font-medium">{format(day, "EEE")}</div>
+                        <div className={cn(
+                          "text-lg font-semibold mt-1 inline-flex items-center justify-center",
+                          dayIsToday && "bg-foreground text-background rounded-full h-8 w-8"
+                        )}>
+                          {format(day, "d")}
+                        </div>
+                        {dayEvents.length > 0 && (
+                          <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">
+                            {dayEvents.length}
+                          </Badge>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
 
-                <Select value={filterCategory} onValueChange={setFilterCategory}>
-                  <SelectTrigger className="w-[150px] bg-background">
-                    <Filter className="h-4 w-4 mr-2" />
+                {/* Week Content */}
+                <div className="grid grid-cols-[80px_repeat(7,1fr)] min-h-[500px]">
+                  {/* Time Column */}
+                  <div className="border-r">
+                    {/* Recommended time badge placeholder */}
+                  </div>
+
+                  {/* Day Columns */}
+                  {weekDays.map((day) => {
+                    const dayEvents = getEventsForDay(day);
+                    const socialEvents = dayEvents.filter(e => e.category === "social" || e.id.startsWith("post-"));
+                    const otherEvents = dayEvents.filter(e => e.category !== "social" && !e.id.startsWith("post-"));
+                    const dayIsToday = isToday(day);
+
+                    return (
+                      <div key={day.toISOString()} className={cn("border-l p-2 space-y-2", dayIsToday && "bg-primary/5")}>
+                        {/* Social Post Cards */}
+                        {socialEvents.map((event) => (
+                          <SocialPostCard key={event.id} event={event} />
+                        ))}
+                        
+                        {/* Other Events */}
+                        {otherEvents.map((event) => (
+                          <EventCard key={event.id} event={event} />
+                        ))}
+
+                        {/* Recommended Time Indicator (show on first empty slot) */}
+                        {dayEvents.length === 0 && dayIsToday && (
+                          <div className="mt-4">
+                            <Badge variant="secondary" className="bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 text-[10px]">
+                              <Clock className="h-3 w-3 mr-1" />
+                              Recommended time 2:30 PM
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {view === "month" && (
+              <Card className="overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-7 gap-2 mb-4">
+                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                      <div key={day} className="text-center font-semibold text-sm text-muted-foreground py-2">
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-7 gap-2">
+                    {Array.from({ length: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay() }).map((_, i) => (
+                      <div key={`empty-${i}`} className="aspect-square" />
+                    ))}
+
+                    {Array.from({ length: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate() }).map((_, i) => {
+                      const day = i + 1;
+                      const dayDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+                      const dayEvents = getEventsForDay(dayDate);
+                      const dayIsToday = isToday(dayDate);
+
+                      return (
+                        <div
+                          key={day}
+                          className={cn(
+                            "aspect-square p-2 border rounded-lg transition-all hover:shadow-lg cursor-pointer",
+                            dayIsToday ? "border-primary bg-primary/10" : "border-border bg-card hover:bg-muted/50",
+                            dayEvents.length > 0 && "ring-1 ring-primary/20"
+                          )}
+                        >
+                          <div className={cn(
+                            "font-semibold text-sm mb-1 inline-flex items-center justify-center",
+                            dayIsToday && "bg-primary text-primary-foreground rounded-full h-6 w-6"
+                          )}>{day}</div>
+                          <ScrollArea className="h-[calc(100%-24px)]">
+                            <div className="space-y-1">
+                              {dayEvents.slice(0, 2).map((event) => (
+                                event.category === "social" || event.id.startsWith("post-") ? (
+                                  <div key={event.id} className="text-xs px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 truncate flex items-center gap-1">
+                                    {event.platforms?.slice(0, 1).map((p: string) => (
+                                      <PlatformIcon key={p} platform={p} className="h-3 w-3" />
+                                    ))}
+                                    <span className="truncate">{event.time}</span>
+                                  </div>
+                                ) : (
+                                  <div
+                                    key={event.id}
+                                    className={cn(
+                                      "text-xs px-1.5 py-0.5 rounded truncate text-white bg-gradient-to-r",
+                                      categoryConfig[event.category].gradient
+                                    )}
+                                  >
+                                    {event.title}
+                                  </div>
+                                )
+                              ))}
+                              {dayEvents.length > 2 && (
+                                <div className="text-[10px] text-center text-muted-foreground">
+                                  +{dayEvents.length - 2} more
+                                </div>
+                              )}
+                            </div>
+                          </ScrollArea>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {view === "list" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Scheduled Content</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {events
+                      .filter(e => e.date >= new Date())
+                      .sort((a, b) => a.date.getTime() - b.date.getTime())
+                      .slice(0, 10)
+                      .map((event) => (
+                        <div
+                          key={event.id}
+                          className="flex items-center gap-4 p-4 rounded-lg border hover:shadow-md transition-all"
+                        >
+                          {/* Preview Image or Icon */}
+                          {event.imageUrl ? (
+                            <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                              <img src={event.imageUrl} alt="" className="w-full h-full object-cover" />
+                            </div>
+                          ) : (
+                            <div className={cn("w-16 h-16 rounded-lg flex items-center justify-center text-2xl bg-gradient-to-br", categoryConfig[event.category].gradient)}>
+                              {categoryConfig[event.category].icon}
+                            </div>
+                          )}
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              {event.platforms?.map((p: string) => (
+                                <PlatformIcon key={p} platform={p} />
+                              ))}
+                              <span className="font-medium truncate">{event.title}</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <CalendarIcon className="h-3 w-3" />
+                                {format(event.date, "MMM d, yyyy")}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {event.time}
+                              </span>
+                            </div>
+                          </div>
+
+                          <Badge variant="outline" className={categoryConfig[event.category].badge}>
+                            {event.category}
+                          </Badge>
+
+                          {!event.id.startsWith("post-") && (
+                            <Button variant="ghost" size="icon" onClick={() => handleDeleteEvent(event.id)}>
+                              <Trash className="h-4 w-4 text-destructive" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="drafts" className="mt-0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Drafts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                  <FileText className="h-12 w-12 mb-4 opacity-50" />
+                  <p>No drafts yet</p>
+                  <p className="text-sm">Create content and save as draft to see it here</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="content" className="mt-0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <LayoutGrid className="h-5 w-5" />
+                  Content Library
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                  <LayoutGrid className="h-12 w-12 mb-4 opacity-50" />
+                  <p>No content in library</p>
+                  <p className="text-sm">Upload images and videos to use in your posts</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="approvals" className="mt-0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5" />
+                  Pending Approvals
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                  <CheckCircle className="h-12 w-12 mb-4 opacity-50" />
+                  <p>No pending approvals</p>
+                  <p className="text-sm">Content requiring approval will appear here</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Add Event Dialog */}
+      <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">Create New Event</DialogTitle>
+            <DialogDescription>Schedule meetings, deadlines, and campaigns</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="title" className="text-base font-semibold">Event Title *</Label>
+              <Input
+                id="title"
+                placeholder="Team Strategy Meeting"
+                value={newEvent.title}
+                onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+                className="text-base"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                placeholder="Discuss Q4 objectives and key results..."
+                value={newEvent.description}
+                onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+                className="min-h-[100px]"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Date *</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start font-normal">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {format(newEvent.date, "PPP")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <CalendarComponent
+                      mode="single"
+                      selected={newEvent.date}
+                      onSelect={(date) => date && setNewEvent({ ...newEvent, date })}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="category">Category *</Label>
+                <Select value={newEvent.category} onValueChange={(value: Event["category"]) => setNewEvent({ ...newEvent, category: value })}>
+                  <SelectTrigger className="bg-background">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-background z-50">
-                    <SelectItem value="all">All Categories</SelectItem>
                     {Object.entries(categoryConfig).map(([key, config]) => (
                       <SelectItem key={key} value={key}>
                         <span className="flex items-center gap-2">
@@ -560,204 +934,51 @@ export default function CalendarView() {
                     ))}
                   </SelectContent>
                 </Select>
-
-                <div className="flex border rounded-lg p-1">
-                  {["month", "week", "day"].map((v) => (
-                    <Button
-                      key={v}
-                      variant={view === v ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setView(v as any)}
-                      className="capitalize"
-                    >
-                      {v}
-                    </Button>
-                  ))}
-                </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Calendar Grid */}
-        <Card className="backdrop-blur-sm bg-card/95 border-2 shadow-2xl">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-7 gap-2 mb-4">
-              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-                <div key={day} className="text-center font-semibold text-sm text-muted-foreground py-2">
-                  {day}
-                </div>
-              ))}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="time">Start Time</Label>
+                <Input
+                  id="time"
+                  type="time"
+                  value={newEvent.time}
+                  onChange={(e) => setNewEvent({ ...newEvent, time: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="endTime">End Time</Label>
+                <Input
+                  id="endTime"
+                  type="time"
+                  value={newEvent.endTime}
+                  onChange={(e) => setNewEvent({ ...newEvent, endTime: e.target.value })}
+                />
+              </div>
             </div>
 
-            <div className="grid grid-cols-7 gap-2">
-              {Array.from({ length: firstDayOfMonth }).map((_, i) => (
-                <div key={`empty-${i}`} className="aspect-square" />
-              ))}
-
-              {Array.from({ length: daysInMonth }).map((_, i) => {
-                const day = i + 1;
-                const dayEvents = getEventsForDay(day);
-                const isToday = isSameDay(
-                  new Date(currentDate.getFullYear(), currentDate.getMonth(), day),
-                  new Date()
-                );
-
-                return (
-                  <div
-                    key={day}
-                    className={cn(
-                      "aspect-square p-2 border-2 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer",
-                      isToday ? "border-primary bg-primary/10 shadow-md" : "border-border bg-card/50 hover:bg-card",
-                      dayEvents.length > 0 && "ring-2 ring-accent/30"
-                    )}
-                  >
-                    <div className="font-semibold text-sm mb-1">{day}</div>
-                    <ScrollArea className="h-[calc(100%-24px)]">
-                      <div className="space-y-1">
-                        {dayEvents.slice(0, 3).map((event) => (
-                          <Popover key={event.id}>
-                            <PopoverTrigger asChild>
-                              <div
-                                className={cn(
-                                  "text-xs px-2 py-1 rounded-md truncate font-medium text-white bg-gradient-to-r cursor-pointer",
-                                  categoryConfig[event.category].gradient,
-                                  "shadow-sm hover:shadow-md transition-shadow"
-                                )}
-                              >
-                                {categoryConfig[event.category].icon} {event.title}
-                              </div>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-80" side="right">
-                              <div className="space-y-3">
-                                <div>
-                                  <h4 className="font-semibold text-base flex items-center gap-2">
-                                    {categoryConfig[event.category].icon} {event.title}
-                                  </h4>
-                                  <Badge className={categoryConfig[event.category].badge}>
-                                    {event.category}
-                                  </Badge>
-                                </div>
-                                {event.description && (
-                                  <p className="text-sm text-muted-foreground">{event.description}</p>
-                                )}
-                                <div className="space-y-2 text-sm">
-                                  <div className="flex items-center gap-2">
-                                    <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                                    <span>{format(event.date, "PPP")}</span>
-                                  </div>
-                                  {event.time && (
-                                    <div className="flex items-center gap-2">
-                                      <Clock className="h-4 w-4 text-muted-foreground" />
-                                      <span>{event.time} {event.endTime && `- ${event.endTime}`}</span>
-                                    </div>
-                                  )}
-                                  {event.location && (
-                                    <div className="flex items-center gap-2">
-                                      <MapPin className="h-4 w-4 text-muted-foreground" />
-                                      <span>{event.location}</span>
-                                    </div>
-                                  )}
-                                  {event.metadata?.platforms && (
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-muted-foreground">Platforms:</span>
-                                      <span>{event.metadata.platforms.join(", ")}</span>
-                                    </div>
-                                  )}
-                                  {event.metadata?.status && (
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-muted-foreground">Status:</span>
-                                      <Badge variant="outline">{event.metadata.status}</Badge>
-                                    </div>
-                                  )}
-                                </div>
-                                {!event.id.startsWith("post-") && (
-                                  <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={() => handleDeleteEvent(event.id)}
-                                    className="w-full"
-                                  >
-                                    <Trash className="h-4 w-4 mr-2" />
-                                    Delete Event
-                                  </Button>
-                                )}
-                              </div>
-                            </PopoverContent>
-                          </Popover>
-                        ))}
-                        {dayEvents.length > 3 && (
-                          <div className="text-xs text-center text-muted-foreground py-1">
-                            +{dayEvents.length - 3} more
-                          </div>
-                        )}
-                      </div>
-                    </ScrollArea>
-                  </div>
-                );
-              })}
+            <div className="space-y-2">
+              <Label htmlFor="location">Location</Label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="location"
+                  placeholder="Conference Room A / Zoom"
+                  value={newEvent.location}
+                  onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
+                  className="pl-9"
+                />
+              </div>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Upcoming Events */}
-        <Card className="backdrop-blur-sm bg-gradient-to-r from-card/95 to-accent/5 border-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" />
-              Upcoming Events
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {events
-                .filter(e => e.date >= new Date())
-                .sort((a, b) => a.date.getTime() - b.date.getTime())
-                .slice(0, 5)
-                .map((event) => (
-                  <div
-                    key={event.id}
-                    className="flex items-center justify-between p-4 rounded-xl border-2 hover:shadow-lg transition-all bg-card"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className={cn("w-12 h-12 rounded-xl bg-gradient-to-br flex items-center justify-center text-2xl shadow-md", categoryConfig[event.category].gradient)}>
-                        {categoryConfig[event.category].icon}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">{event.title}</h3>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="outline" className={categoryConfig[event.category].badge}>
-                            {event.category}
-                          </Badge>
-                          <span className="text-sm text-muted-foreground flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {format(event.date, "MMM d")} at {event.time}
-                          </span>
-                          {event.isRecurring && (
-                            <Badge variant="secondary" className="gap-1">
-                              <Repeat className="h-3 w-3" />
-                              {event.recurrenceRule}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex gap-1">
-                      {event.meetingLink && (
-                        <Button variant="ghost" size="icon" onClick={() => window.open(event.meetingLink, '_blank')}>
-                          <Video className="h-4 w-4" />
-                        </Button>
-                      )}
-                      <Button variant="ghost" size="icon" onClick={() => handleDeleteEvent(event.id)}>
-                        <Trash className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            <Button onClick={handleAddEvent} className="w-full h-12 text-base font-semibold">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Event
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
