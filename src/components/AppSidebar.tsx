@@ -117,8 +117,10 @@ const navigationGroups: NavGroup[] = [
     label: "Analytics",
     icon: BarChart3,
     items: [
-      { title: "Reports", url: "/reports", icon: BarChart3 },
-      { title: "Analytics", url: "/analytics", icon: TrendingUp },
+      { title: "Platform", url: "/analytics-platform", icon: BarChart3 },
+      { title: "Reports", url: "/reports", icon: FileText },
+      { title: "Segments", url: "/analytics/segments", icon: Users },
+      { title: "Alerts", url: "/analytics/alerts", icon: Zap },
     ],
   },
   {

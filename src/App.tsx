@@ -100,6 +100,7 @@ import TelegramBulkMessaging from "./pages/TelegramBulkMessaging";
 import AnalyticsDashboard from "./pages/analytics/AnalyticsDashboard";
 import SegmentsManager from "./pages/analytics/SegmentsManager";
 import AlertsManager from "./pages/analytics/AlertsManager";
+import ReportsBuilder from "./pages/analytics/ReportsBuilder";
 
 const queryClient = new QueryClient();
 
@@ -212,6 +213,7 @@ const App = () => (
               <Route path="/analytics-platform" element={<ProtectedRoute><AnalyticsDashboard /></ProtectedRoute>} />
               <Route path="/analytics/segments" element={<ProtectedRoute><SegmentsManager /></ProtectedRoute>} />
               <Route path="/analytics/alerts" element={<ProtectedRoute><AlertsManager /></ProtectedRoute>} />
+              <Route path="/reports" element={<ProtectedRoute><ReportsBuilder /></ProtectedRoute>} />
               
               {/* Enterprise Builder */}
               <Route path="/module-builder" element={<ProtectedRoute><ModuleBuilder /></ProtectedRoute>} />
