@@ -2382,6 +2382,7 @@ export type Database = {
           rejection_reason: string | null
           sales_enabled: boolean
           status: string
+          tools_enabled: boolean | null
           updated_at: string
           website: string | null
         }
@@ -2402,6 +2403,7 @@ export type Database = {
           rejection_reason?: string | null
           sales_enabled?: boolean
           status?: string
+          tools_enabled?: boolean | null
           updated_at?: string
           website?: string | null
         }
@@ -2422,6 +2424,7 @@ export type Database = {
           rejection_reason?: string | null
           sales_enabled?: boolean
           status?: string
+          tools_enabled?: boolean | null
           updated_at?: string
           website?: string | null
         }

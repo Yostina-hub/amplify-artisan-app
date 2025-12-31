@@ -5,8 +5,9 @@ import { supabase } from '@/integrations/supabase/client';
 interface ModuleAccessState {
   crmEnabled: boolean;
   salesEnabled: boolean;
+  toolsEnabled: boolean;
   loading: boolean;
-  toggleModule: (companyId: string, module: 'crm' | 'sales', enabled: boolean) => Promise<boolean>;
+  toggleModule: (companyId: string, module: 'crm' | 'sales' | 'tools', enabled: boolean) => Promise<boolean>;
   refetch: () => void;
 }
 
@@ -14,6 +15,7 @@ export function useCRMAccess(): ModuleAccessState {
   const { user, isSuperAdmin } = useAuth();
   const [crmEnabled, setCrmEnabled] = useState(false);
   const [salesEnabled, setSalesEnabled] = useState(false);
+  const [toolsEnabled, setToolsEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const fetchModuleStatus = async () => {
@@ -35,6 +37,7 @@ export function useCRMAccess(): ModuleAccessState {
         if (isSuperAdmin) {
           setCrmEnabled(true);
           setSalesEnabled(true);
+          setToolsEnabled(true);
         }
         setLoading(false);
         return;
@@ -43,7 +46,7 @@ export function useCRMAccess(): ModuleAccessState {
       // Fetch company's module status
       const { data: company, error } = await supabase
         .from('companies')
-        .select('crm_enabled, sales_enabled')
+        .select('crm_enabled, sales_enabled, tools_enabled')
         .eq('id', profile.company_id)
         .single();
 
@@ -51,14 +54,17 @@ export function useCRMAccess(): ModuleAccessState {
         console.error('Error fetching module status:', error);
         setCrmEnabled(false);
         setSalesEnabled(false);
+        setToolsEnabled(false);
       } else {
         setCrmEnabled(company?.crm_enabled ?? false);
         setSalesEnabled(company?.sales_enabled ?? false);
+        setToolsEnabled(company?.tools_enabled ?? false);
       }
     } catch (error) {
       console.error('Error in useCRMAccess:', error);
       setCrmEnabled(false);
       setSalesEnabled(false);
+      setToolsEnabled(false);
     } finally {
       setLoading(false);
     }
@@ -68,16 +74,17 @@ export function useCRMAccess(): ModuleAccessState {
     fetchModuleStatus();
   }, [user, isSuperAdmin]);
 
-  const toggleModule = async (companyId: string, module: 'crm' | 'sales', enabled: boolean): Promise<boolean> => {
+  const toggleModule = async (companyId: string, module: 'crm' | 'sales' | 'tools', enabled: boolean): Promise<boolean> => {
     if (!isSuperAdmin) {
       console.error('Only super admins can toggle modules');
       return false;
     }
 
     try {
-      const updateData = module === 'crm' 
-        ? { crm_enabled: enabled } 
-        : { sales_enabled: enabled };
+      const updateData = 
+        module === 'crm' ? { crm_enabled: enabled } :
+        module === 'sales' ? { sales_enabled: enabled } :
+        { tools_enabled: enabled };
 
       const { error } = await supabase
         .from('companies')
@@ -99,6 +106,7 @@ export function useCRMAccess(): ModuleAccessState {
   return {
     crmEnabled,
     salesEnabled,
+    toolsEnabled,
     loading,
     toggleModule,
     refetch: fetchModuleStatus,

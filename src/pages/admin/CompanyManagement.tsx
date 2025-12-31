@@ -37,7 +37,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Search, MoreHorizontal, CheckCircle, XCircle, Pause, Mail, Eye, Trash2, UserCog, KeyRound, Users, TrendingUp } from "lucide-react";
+import { Search, MoreHorizontal, CheckCircle, XCircle, Pause, Mail, Eye, Trash2, UserCog, KeyRound, Users, TrendingUp, Wrench } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { usePagination } from "@/hooks/usePagination";
@@ -59,6 +59,7 @@ interface Company {
   created_at: string;
   crm_enabled: boolean;
   sales_enabled: boolean;
+  tools_enabled: boolean;
 }
 
 export default function CompanyManagement() {
@@ -385,6 +386,12 @@ export default function CompanyManagement() {
                     <span>Sales</span>
                   </div>
                 </TableHead>
+                <TableHead className="text-center">
+                  <div className="flex items-center justify-center gap-1">
+                    <Wrench className="h-4 w-4" />
+                    <span>Tools</span>
+                  </div>
+                </TableHead>
                 <TableHead>Applied</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -392,13 +399,13 @@ export default function CompanyManagement() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground">
+                  <TableCell colSpan={9} className="text-center text-muted-foreground">
                     Loading companies...
                   </TableCell>
                 </TableRow>
               ) : companies.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground">
+                  <TableCell colSpan={9} className="text-center text-muted-foreground">
                     No companies found
                   </TableCell>
                 </TableRow>
@@ -490,6 +497,49 @@ export default function CompanyManagement() {
                               : company.sales_enabled 
                                 ? 'Click to disable Sales features'
                                 : 'Click to enable Sales features'
+                            }
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="flex justify-center">
+                              <Switch
+                                checked={company.tools_enabled}
+                                onCheckedChange={async (checked) => {
+                                  try {
+                                    const { error } = await supabase
+                                      .from('companies')
+                                      .update({ tools_enabled: checked })
+                                      .eq('id', company.id);
+                                    
+                                    if (error) throw error;
+                                    
+                                    toast.success(
+                                      checked 
+                                        ? `Tools enabled for ${company.name}` 
+                                        : `Tools disabled for ${company.name}`
+                                    );
+                                    fetchCompanies();
+                                  } catch (error) {
+                                    console.error('Error toggling Tools:', error);
+                                    toast.error('Failed to update Tools status');
+                                  }
+                                }}
+                                disabled={company.status !== 'approved'}
+                                className="data-[state=checked]:bg-amber-500"
+                              />
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {company.status !== 'approved' 
+                              ? 'Approve company first to enable Tools'
+                              : company.tools_enabled 
+                                ? 'Click to disable Tools features'
+                                : 'Click to enable Tools features'
                             }
                           </TooltipContent>
                         </Tooltip>

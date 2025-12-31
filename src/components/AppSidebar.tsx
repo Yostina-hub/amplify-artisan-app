@@ -203,7 +203,7 @@ const adminItems: NavItem[] = [
 export function AppSidebar() {
   const { state } = useSidebar();
   const { hasRole, isCompanyAdmin, isSuperAdmin, user, signOut } = useAuth();
-  const { crmEnabled, salesEnabled, loading: modulesLoading } = useCRMAccess();
+  const { crmEnabled, salesEnabled, toolsEnabled, loading: modulesLoading } = useCRMAccess();
   const navigate = useNavigate();
   const location = useLocation();
   const isCollapsed = state === "collapsed";
@@ -233,9 +233,12 @@ export function AppSidebar() {
       // Hide Sales group if not enabled for the company
       if (group.id === 'sales' && !salesEnabled) return false;
       
+      // Hide Tools group if not enabled for the company
+      if (group.id === 'tools' && !toolsEnabled) return false;
+      
       return true;
     });
-  }, [crmEnabled, salesEnabled, isSuperAdmin]);
+  }, [crmEnabled, salesEnabled, toolsEnabled, isSuperAdmin]);
 
   // Filter items based on search
   const filteredGroups = searchQuery
