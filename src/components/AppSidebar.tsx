@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useCRMAccess } from "@/hooks/useCRMAccess";
 import {
   Sidebar,
   SidebarContent,
@@ -20,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Home,
   Users,
@@ -64,6 +66,7 @@ import {
   Volume2,
   Briefcase,
   Radio,
+  Lock,
   type LucideIcon,
 } from "lucide-react";
 
@@ -200,6 +203,7 @@ const adminItems: NavItem[] = [
 export function AppSidebar() {
   const { state } = useSidebar();
   const { hasRole, isCompanyAdmin, isSuperAdmin, user, signOut } = useAuth();
+  const { crmEnabled, loading: crmLoading } = useCRMAccess();
   const navigate = useNavigate();
   const location = useLocation();
   const isCollapsed = state === "collapsed";
@@ -217,15 +221,28 @@ export function AppSidebar() {
 
   const userInitials = user?.email?.slice(0, 2).toUpperCase() || 'U';
 
+  // Filter navigation groups based on CRM access
+  const accessibleGroups = useMemo(() => {
+    return navigationGroups.filter(group => {
+      // Super admins see everything
+      if (isSuperAdmin) return true;
+      
+      // Hide CRM group if not enabled for the company
+      if (group.id === 'crm' && !crmEnabled) return false;
+      
+      return true;
+    });
+  }, [crmEnabled, isSuperAdmin]);
+
   // Filter items based on search
   const filteredGroups = searchQuery
-    ? navigationGroups.map(group => ({
+    ? accessibleGroups.map(group => ({
         ...group,
         items: group.items.filter(item =>
           item.title.toLowerCase().includes(searchQuery.toLowerCase())
         ),
       })).filter(group => group.items.length > 0)
-    : navigationGroups;
+    : accessibleGroups;
 
   return (
     <TooltipProvider delayDuration={0}>

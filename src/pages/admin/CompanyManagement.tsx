@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -30,7 +31,13 @@ import {
 import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Search, MoreHorizontal, CheckCircle, XCircle, Pause, Mail, Eye, Trash2, UserCog, KeyRound } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Search, MoreHorizontal, CheckCircle, XCircle, Pause, Mail, Eye, Trash2, UserCog, KeyRound, Users } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { usePagination } from "@/hooks/usePagination";
@@ -50,6 +57,7 @@ interface Company {
   applied_at: string;
   approved_at: string | null;
   created_at: string;
+  crm_enabled: boolean;
 }
 
 export default function CompanyManagement() {
@@ -365,6 +373,12 @@ export default function CompanyManagement() {
                 <TableHead>Industry</TableHead>
                 <TableHead>Size</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead className="text-center">
+                  <div className="flex items-center justify-center gap-1">
+                    <Users className="h-4 w-4" />
+                    <span>CRM</span>
+                  </div>
+                </TableHead>
                 <TableHead>Applied</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -372,13 +386,13 @@ export default function CompanyManagement() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center text-muted-foreground">
                     Loading companies...
                   </TableCell>
                 </TableRow>
               ) : companies.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center text-muted-foreground">
                     No companies found
                   </TableCell>
                 </TableRow>
@@ -390,6 +404,49 @@ export default function CompanyManagement() {
                     <TableCell>{company.industry || "—"}</TableCell>
                     <TableCell>{company.company_size || "—"}</TableCell>
                     <TableCell>{getStatusBadge(company.status)}</TableCell>
+                    <TableCell className="text-center">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="flex justify-center">
+                              <Switch
+                                checked={company.crm_enabled}
+                                onCheckedChange={async (checked) => {
+                                  try {
+                                    const { error } = await supabase
+                                      .from('companies')
+                                      .update({ crm_enabled: checked })
+                                      .eq('id', company.id);
+                                    
+                                    if (error) throw error;
+                                    
+                                    toast.success(
+                                      checked 
+                                        ? `CRM enabled for ${company.name}` 
+                                        : `CRM disabled for ${company.name}`
+                                    );
+                                    fetchCompanies();
+                                  } catch (error) {
+                                    console.error('Error toggling CRM:', error);
+                                    toast.error('Failed to update CRM status');
+                                  }
+                                }}
+                                disabled={company.status !== 'approved'}
+                                className="data-[state=checked]:bg-primary"
+                              />
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {company.status !== 'approved' 
+                              ? 'Approve company first to enable CRM'
+                              : company.crm_enabled 
+                                ? 'Click to disable CRM features'
+                                : 'Click to enable CRM features'
+                            }
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
                     <TableCell className="text-muted-foreground">
                       {new Date(company.applied_at).toLocaleDateString()}
                     </TableCell>
