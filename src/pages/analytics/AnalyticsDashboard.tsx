@@ -207,7 +207,7 @@ export default function AnalyticsDashboard() {
               title={kpi.name}
               value={kpi.currentValue}
               changePercent={kpi.changePercent}
-              trend={kpi.trend}
+              trend={kpi.trend as "up" | "down"}
               category={kpi.category}
               format={kpi.display_format}
               unit={kpi.unit}
