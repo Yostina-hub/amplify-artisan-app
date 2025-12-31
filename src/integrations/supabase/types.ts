@@ -2372,6 +2372,7 @@ export type Database = {
           approved_by: string | null
           company_size: string | null
           created_at: string
+          crm_enabled: boolean
           email: string
           id: string
           industry: string | null
@@ -2390,6 +2391,7 @@ export type Database = {
           approved_by?: string | null
           company_size?: string | null
           created_at?: string
+          crm_enabled?: boolean
           email: string
           id?: string
           industry?: string | null
@@ -2408,6 +2410,7 @@ export type Database = {
           approved_by?: string | null
           company_size?: string | null
           created_at?: string
+          crm_enabled?: boolean
           email?: string
           id?: string
           industry?: string | null
