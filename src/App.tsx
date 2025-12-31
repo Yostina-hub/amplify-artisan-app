@@ -97,6 +97,9 @@ import SecurityAuditLog from "./pages/admin/SecurityAuditLog";
 import SecurityDashboard from "./pages/admin/SecurityDashboard";
 import SocialAnalytics from "./pages/SocialAnalytics";
 import TelegramBulkMessaging from "./pages/TelegramBulkMessaging";
+import AnalyticsDashboard from "./pages/analytics/AnalyticsDashboard";
+import SegmentsManager from "./pages/analytics/SegmentsManager";
+import AlertsManager from "./pages/analytics/AlertsManager";
 
 const queryClient = new QueryClient();
 
@@ -204,6 +207,11 @@ const App = () => (
               <Route path="/media-monitoring" element={<ProtectedRoute><MediaMonitoring /></ProtectedRoute>} />
               <Route path="/social-analytics" element={<ProtectedRoute><SocialAnalytics /></ProtectedRoute>} />
               <Route path="/social-connections" element={<ProtectedRoute><SocialConnections /></ProtectedRoute>} />
+              
+              {/* Analytics Platform */}
+              <Route path="/analytics-platform" element={<ProtectedRoute><AnalyticsDashboard /></ProtectedRoute>} />
+              <Route path="/analytics/segments" element={<ProtectedRoute><SegmentsManager /></ProtectedRoute>} />
+              <Route path="/analytics/alerts" element={<ProtectedRoute><AlertsManager /></ProtectedRoute>} />
               
               {/* Enterprise Builder */}
               <Route path="/module-builder" element={<ProtectedRoute><ModuleBuilder /></ProtectedRoute>} />
