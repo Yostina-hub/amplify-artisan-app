@@ -489,6 +489,833 @@ export type Database = {
           },
         ]
       }
+      analytics_alert_rules: {
+        Row: {
+          company_id: string
+          comparison_period: string | null
+          condition_operator: string
+          condition_type: string
+          cooldown_minutes: number | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          kpi_id: string
+          last_triggered_at: string | null
+          name: string
+          notification_channels: string[] | null
+          severity: string | null
+          threshold_percent: number | null
+          threshold_value: number
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          comparison_period?: string | null
+          condition_operator?: string
+          condition_type?: string
+          cooldown_minutes?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          kpi_id: string
+          last_triggered_at?: string | null
+          name: string
+          notification_channels?: string[] | null
+          severity?: string | null
+          threshold_percent?: number | null
+          threshold_value: number
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          comparison_period?: string | null
+          condition_operator?: string
+          condition_type?: string
+          cooldown_minutes?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          kpi_id?: string
+          last_triggered_at?: string | null
+          name?: string
+          notification_channels?: string[] | null
+          severity?: string | null
+          threshold_percent?: number | null
+          threshold_value?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_alert_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytics_alert_rules_kpi_id_fkey"
+            columns: ["kpi_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_kpi_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          company_id: string
+          created_at: string | null
+          current_value: number | null
+          id: string
+          message: string
+          metadata: Json | null
+          resolved_at: string | null
+          resolved_by: string | null
+          rule_id: string | null
+          severity: string | null
+          status: string | null
+          threshold_value: number | null
+          title: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          company_id: string
+          created_at?: string | null
+          current_value?: number | null
+          id?: string
+          message: string
+          metadata?: Json | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          rule_id?: string | null
+          severity?: string | null
+          status?: string | null
+          threshold_value?: number | null
+          title: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          company_id?: string
+          created_at?: string | null
+          current_value?: number | null
+          id?: string
+          message?: string
+          metadata?: Json | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          rule_id?: string | null
+          severity?: string | null
+          status?: string | null
+          threshold_value?: number | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_alerts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytics_alerts_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_alert_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_audit_log: {
+        Row: {
+          action: string
+          company_id: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: unknown
+          resource_id: string | null
+          resource_type: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          company_id: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: unknown
+          resource_id?: string | null
+          resource_type: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          company_id?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: unknown
+          resource_id?: string | null
+          resource_type?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_audit_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_dashboard_templates: {
+        Row: {
+          created_at: string | null
+          default_kpis: string[] | null
+          description: string | null
+          id: string
+          industry: string | null
+          is_system: boolean | null
+          layout: Json
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          default_kpis?: string[] | null
+          description?: string | null
+          id?: string
+          industry?: string | null
+          is_system?: boolean | null
+          layout?: Json
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          default_kpis?: string[] | null
+          description?: string | null
+          id?: string
+          industry?: string | null
+          is_system?: boolean | null
+          layout?: Json
+          name?: string
+        }
+        Relationships: []
+      }
+      analytics_dashboards: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          filters: Json | null
+          id: string
+          is_default: boolean | null
+          is_shared: boolean | null
+          layout: Json
+          name: string
+          template_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          filters?: Json | null
+          id?: string
+          is_default?: boolean | null
+          is_shared?: boolean | null
+          layout?: Json
+          name: string
+          template_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          filters?: Json | null
+          id?: string
+          is_default?: boolean | null
+          is_shared?: boolean | null
+          layout?: Json
+          name?: string
+          template_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_dashboards_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytics_dashboards_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_dashboard_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_exports: {
+        Row: {
+          company_id: string
+          completed_at: string | null
+          created_at: string | null
+          created_by: string | null
+          dashboard_id: string | null
+          export_type: string
+          file_name: string | null
+          file_url: string | null
+          filters: Json | null
+          id: string
+          status: string | null
+        }
+        Insert: {
+          company_id: string
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          dashboard_id?: string | null
+          export_type?: string
+          file_name?: string | null
+          file_url?: string | null
+          filters?: Json | null
+          id?: string
+          status?: string | null
+        }
+        Update: {
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          dashboard_id?: string | null
+          export_type?: string
+          file_name?: string | null
+          file_url?: string | null
+          filters?: Json | null
+          id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_exports_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytics_exports_dashboard_id_fkey"
+            columns: ["dashboard_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_dashboards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_ingestion_jobs: {
+        Row: {
+          company_id: string
+          completed_at: string | null
+          created_at: string | null
+          created_by: string | null
+          error_details: Json | null
+          id: string
+          records_failed: number | null
+          records_processed: number | null
+          source_config: Json | null
+          source_type: string
+          started_at: string | null
+          status: string | null
+        }
+        Insert: {
+          company_id: string
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          error_details?: Json | null
+          id?: string
+          records_failed?: number | null
+          records_processed?: number | null
+          source_config?: Json | null
+          source_type: string
+          started_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          error_details?: Json | null
+          id?: string
+          records_failed?: number | null
+          records_processed?: number | null
+          source_config?: Json | null
+          source_type?: string
+          started_at?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_ingestion_jobs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_kpi_definitions: {
+        Row: {
+          aggregation: string | null
+          calculation_type: string
+          category: string
+          company_id: string | null
+          created_at: string | null
+          description: string | null
+          display_format: string | null
+          filters: Json | null
+          id: string
+          is_active: boolean | null
+          is_system: boolean | null
+          metadata: Json | null
+          name: string
+          source_field: string | null
+          source_table: string
+          time_granularity: string[] | null
+          unit: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          aggregation?: string | null
+          calculation_type?: string
+          category?: string
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_format?: string | null
+          filters?: Json | null
+          id?: string
+          is_active?: boolean | null
+          is_system?: boolean | null
+          metadata?: Json | null
+          name: string
+          source_field?: string | null
+          source_table: string
+          time_granularity?: string[] | null
+          unit?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          aggregation?: string | null
+          calculation_type?: string
+          category?: string
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_format?: string | null
+          filters?: Json | null
+          id?: string
+          is_active?: boolean | null
+          is_system?: boolean | null
+          metadata?: Json | null
+          name?: string
+          source_field?: string | null
+          source_table?: string
+          time_granularity?: string[] | null
+          unit?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_kpi_definitions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_kpi_values: {
+        Row: {
+          branch_id: string | null
+          calculated_at: string | null
+          change_percent: number | null
+          company_id: string
+          granularity: string
+          id: string
+          kpi_id: string
+          metadata: Json | null
+          period_end: string
+          period_start: string
+          previous_value: number | null
+          value: number
+        }
+        Insert: {
+          branch_id?: string | null
+          calculated_at?: string | null
+          change_percent?: number | null
+          company_id: string
+          granularity?: string
+          id?: string
+          kpi_id: string
+          metadata?: Json | null
+          period_end: string
+          period_start: string
+          previous_value?: number | null
+          value: number
+        }
+        Update: {
+          branch_id?: string | null
+          calculated_at?: string | null
+          change_percent?: number | null
+          company_id?: string
+          granularity?: string
+          id?: string
+          kpi_id?: string
+          metadata?: Json | null
+          period_end?: string
+          period_start?: string
+          previous_value?: number | null
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_kpi_values_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytics_kpi_values_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytics_kpi_values_kpi_id_fkey"
+            columns: ["kpi_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_kpi_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_recommendations: {
+        Row: {
+          actioned_at: string | null
+          actioned_by: string | null
+          category: string | null
+          company_id: string
+          created_at: string | null
+          description: string
+          dismissed_at: string | null
+          dismissed_by: string | null
+          expected_impact: string | null
+          expires_at: string | null
+          id: string
+          kpi_id: string | null
+          metadata: Json | null
+          priority: string | null
+          reason: string | null
+          segment_id: string | null
+          status: string | null
+          suggested_action: string | null
+          title: string
+        }
+        Insert: {
+          actioned_at?: string | null
+          actioned_by?: string | null
+          category?: string | null
+          company_id: string
+          created_at?: string | null
+          description: string
+          dismissed_at?: string | null
+          dismissed_by?: string | null
+          expected_impact?: string | null
+          expires_at?: string | null
+          id?: string
+          kpi_id?: string | null
+          metadata?: Json | null
+          priority?: string | null
+          reason?: string | null
+          segment_id?: string | null
+          status?: string | null
+          suggested_action?: string | null
+          title: string
+        }
+        Update: {
+          actioned_at?: string | null
+          actioned_by?: string | null
+          category?: string | null
+          company_id?: string
+          created_at?: string | null
+          description?: string
+          dismissed_at?: string | null
+          dismissed_by?: string | null
+          expected_impact?: string | null
+          expires_at?: string | null
+          id?: string
+          kpi_id?: string | null
+          metadata?: Json | null
+          priority?: string | null
+          reason?: string | null
+          segment_id?: string | null
+          status?: string | null
+          suggested_action?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_recommendations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytics_recommendations_kpi_id_fkey"
+            columns: ["kpi_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_kpi_definitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytics_recommendations_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_segments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_scheduled_reports: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          created_by: string | null
+          dashboard_id: string
+          export_format: string | null
+          id: string
+          is_active: boolean | null
+          last_run_at: string | null
+          name: string
+          next_run_at: string | null
+          notification_channels: string[] | null
+          recipients: Json
+          schedule_cron: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          created_by?: string | null
+          dashboard_id: string
+          export_format?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_run_at?: string | null
+          name: string
+          next_run_at?: string | null
+          notification_channels?: string[] | null
+          recipients?: Json
+          schedule_cron: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          dashboard_id?: string
+          export_format?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_run_at?: string | null
+          name?: string
+          next_run_at?: string | null
+          notification_channels?: string[] | null
+          recipients?: Json
+          schedule_cron?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_scheduled_reports_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytics_scheduled_reports_dashboard_id_fkey"
+            columns: ["dashboard_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_dashboards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_segment_members: {
+        Row: {
+          entity_id: string
+          entity_type: string
+          id: string
+          joined_at: string | null
+          metadata: Json | null
+          score: number | null
+          segment_id: string
+        }
+        Insert: {
+          entity_id: string
+          entity_type?: string
+          id?: string
+          joined_at?: string | null
+          metadata?: Json | null
+          score?: number | null
+          segment_id: string
+        }
+        Update: {
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          joined_at?: string | null
+          metadata?: Json | null
+          score?: number | null
+          segment_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_segment_members_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_segments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_segments: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          member_count: number | null
+          name: string
+          rules: Json
+          segment_type: string | null
+          updated_at: string | null
+          value_metrics: Json | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          member_count?: number | null
+          name: string
+          rules?: Json
+          segment_type?: string | null
+          updated_at?: string | null
+          value_metrics?: Json | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          member_count?: number | null
+          name?: string
+          rules?: Json
+          segment_type?: string | null
+          updated_at?: string | null
+          value_metrics?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_segments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_tenant_settings: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          currency: string | null
+          data_retention_days: number | null
+          features_enabled: Json | null
+          fiscal_year_start: number | null
+          id: string
+          industry_template: string | null
+          language: string | null
+          timezone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          currency?: string | null
+          data_retention_days?: number | null
+          features_enabled?: Json | null
+          fiscal_year_start?: number | null
+          id?: string
+          industry_template?: string | null
+          language?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          currency?: string | null
+          data_retention_days?: number | null
+          features_enabled?: Json | null
+          fiscal_year_start?: number | null
+          id?: string
+          industry_template?: string | null
+          language?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_tenant_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       anomaly_detections: {
         Row: {
           action_taken: string | null
