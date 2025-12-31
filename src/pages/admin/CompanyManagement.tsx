@@ -37,7 +37,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Search, MoreHorizontal, CheckCircle, XCircle, Pause, Mail, Eye, Trash2, UserCog, KeyRound, Users } from "lucide-react";
+import { Search, MoreHorizontal, CheckCircle, XCircle, Pause, Mail, Eye, Trash2, UserCog, KeyRound, Users, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { usePagination } from "@/hooks/usePagination";
@@ -58,6 +58,7 @@ interface Company {
   approved_at: string | null;
   created_at: string;
   crm_enabled: boolean;
+  sales_enabled: boolean;
 }
 
 export default function CompanyManagement() {
@@ -371,12 +372,17 @@ export default function CompanyManagement() {
                 <TableHead>Company Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Industry</TableHead>
-                <TableHead>Size</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-center">
                   <div className="flex items-center justify-center gap-1">
                     <Users className="h-4 w-4" />
                     <span>CRM</span>
+                  </div>
+                </TableHead>
+                <TableHead className="text-center">
+                  <div className="flex items-center justify-center gap-1">
+                    <TrendingUp className="h-4 w-4" />
+                    <span>Sales</span>
                   </div>
                 </TableHead>
                 <TableHead>Applied</TableHead>
@@ -400,9 +406,8 @@ export default function CompanyManagement() {
                 companies.map((company) => (
                   <TableRow key={company.id}>
                     <TableCell className="font-medium">{company.name}</TableCell>
-                    <TableCell>{company.email}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{company.email}</TableCell>
                     <TableCell>{company.industry || "—"}</TableCell>
-                    <TableCell>{company.company_size || "—"}</TableCell>
                     <TableCell>{getStatusBadge(company.status)}</TableCell>
                     <TableCell className="text-center">
                       <TooltipProvider>
@@ -447,7 +452,50 @@ export default function CompanyManagement() {
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="text-center">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="flex justify-center">
+                              <Switch
+                                checked={company.sales_enabled}
+                                onCheckedChange={async (checked) => {
+                                  try {
+                                    const { error } = await supabase
+                                      .from('companies')
+                                      .update({ sales_enabled: checked })
+                                      .eq('id', company.id);
+                                    
+                                    if (error) throw error;
+                                    
+                                    toast.success(
+                                      checked 
+                                        ? `Sales enabled for ${company.name}` 
+                                        : `Sales disabled for ${company.name}`
+                                    );
+                                    fetchCompanies();
+                                  } catch (error) {
+                                    console.error('Error toggling Sales:', error);
+                                    toast.error('Failed to update Sales status');
+                                  }
+                                }}
+                                disabled={company.status !== 'approved'}
+                                className="data-[state=checked]:bg-emerald-500"
+                              />
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {company.status !== 'approved' 
+                              ? 'Approve company first to enable Sales'
+                              : company.sales_enabled 
+                                ? 'Click to disable Sales features'
+                                : 'Click to enable Sales features'
+                            }
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
                       {new Date(company.applied_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="text-right">

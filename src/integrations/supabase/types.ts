@@ -2380,6 +2380,7 @@ export type Database = {
           phone: string | null
           pricing_plan_id: string | null
           rejection_reason: string | null
+          sales_enabled: boolean
           status: string
           updated_at: string
           website: string | null
@@ -2399,6 +2400,7 @@ export type Database = {
           phone?: string | null
           pricing_plan_id?: string | null
           rejection_reason?: string | null
+          sales_enabled?: boolean
           status?: string
           updated_at?: string
           website?: string | null
@@ -2418,6 +2420,7 @@ export type Database = {
           phone?: string | null
           pricing_plan_id?: string | null
           rejection_reason?: string | null
+          sales_enabled?: boolean
           status?: string
           updated_at?: string
           website?: string | null

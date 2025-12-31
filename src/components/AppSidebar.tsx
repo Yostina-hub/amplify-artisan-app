@@ -203,7 +203,7 @@ const adminItems: NavItem[] = [
 export function AppSidebar() {
   const { state } = useSidebar();
   const { hasRole, isCompanyAdmin, isSuperAdmin, user, signOut } = useAuth();
-  const { crmEnabled, loading: crmLoading } = useCRMAccess();
+  const { crmEnabled, salesEnabled, loading: modulesLoading } = useCRMAccess();
   const navigate = useNavigate();
   const location = useLocation();
   const isCollapsed = state === "collapsed";
@@ -221,7 +221,7 @@ export function AppSidebar() {
 
   const userInitials = user?.email?.slice(0, 2).toUpperCase() || 'U';
 
-  // Filter navigation groups based on CRM access
+  // Filter navigation groups based on module access
   const accessibleGroups = useMemo(() => {
     return navigationGroups.filter(group => {
       // Super admins see everything
@@ -230,9 +230,12 @@ export function AppSidebar() {
       // Hide CRM group if not enabled for the company
       if (group.id === 'crm' && !crmEnabled) return false;
       
+      // Hide Sales group if not enabled for the company
+      if (group.id === 'sales' && !salesEnabled) return false;
+      
       return true;
     });
-  }, [crmEnabled, isSuperAdmin]);
+  }, [crmEnabled, salesEnabled, isSuperAdmin]);
 
   // Filter items based on search
   const filteredGroups = searchQuery
