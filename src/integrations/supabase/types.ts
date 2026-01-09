@@ -9639,11 +9639,6 @@ export type Database = {
           is_verified: boolean | null
           sender_email: string | null
           sender_name: string | null
-          smtp_host: string | null
-          smtp_port: number | null
-          smtp_secure: boolean | null
-          smtp_username: string | null
-          updated_at: string | null
         }
         Insert: {
           company_id?: string | null
@@ -9653,11 +9648,6 @@ export type Database = {
           is_verified?: boolean | null
           sender_email?: string | null
           sender_name?: string | null
-          smtp_host?: string | null
-          smtp_port?: number | null
-          smtp_secure?: boolean | null
-          smtp_username?: string | null
-          updated_at?: string | null
         }
         Update: {
           company_id?: string | null
@@ -9667,11 +9657,6 @@ export type Database = {
           is_verified?: boolean | null
           sender_email?: string | null
           sender_name?: string | null
-          smtp_host?: string | null
-          smtp_port?: number | null
-          smtp_secure?: boolean | null
-          smtp_username?: string | null
-          updated_at?: string | null
         }
         Relationships: [
           {
@@ -9696,29 +9681,36 @@ export type Database = {
       profiles_safe: {
         Row: {
           avatar_url: string | null
+          branch_id: string | null
           company_id: string | null
           created_at: string | null
           full_name: string | null
           id: string | null
-          updated_at: string | null
         }
         Insert: {
           avatar_url?: string | null
+          branch_id?: string | null
           company_id?: string | null
           created_at?: string | null
           full_name?: string | null
           id?: string | null
-          updated_at?: string | null
         }
         Update: {
           avatar_url?: string | null
+          branch_id?: string | null
           company_id?: string | null
           created_at?: string | null
           full_name?: string | null
           id?: string | null
-          updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_company_id_fkey"
             columns: ["company_id"]
@@ -9737,7 +9729,6 @@ export type Database = {
           id: string | null
           is_active: boolean | null
           platform: string | null
-          token_expires_at: string | null
           updated_at: string | null
           user_id: string | null
         }
@@ -9749,7 +9740,6 @@ export type Database = {
           id?: string | null
           is_active?: boolean | null
           platform?: string | null
-          token_expires_at?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
@@ -9761,7 +9751,6 @@ export type Database = {
           id?: string | null
           is_active?: boolean | null
           platform?: string | null
-          token_expires_at?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
