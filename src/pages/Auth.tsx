@@ -10,7 +10,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, AlertCircle, MessageSquare } from 'lucide-react';
+import { useRateLimiting, clearFailedLoginAttempts } from '@/hooks/useRateLimiting';
+import { Loader2, AlertCircle, MessageSquare, Lock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const Auth = () => {
@@ -51,12 +52,24 @@ const Auth = () => {
     }
   };
 
+  // Login rate limiting
+  const loginRateLimiter = useRateLimiting('login');
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check rate limit before attempting login
+    if (!loginRateLimiter.checkRateLimit()) {
+      return;
+    }
+    
     setLoading(true);
     
     try {
       await signIn(signInForm.email, signInForm.password);
+      
+      // Clear failed attempts on successful login
+      await clearFailedLoginAttempts(signInForm.email);
       
       // Check if user needs to change password
       const { data: { user } } = await supabase.auth.getUser();
@@ -75,10 +88,22 @@ const Auth = () => {
       const isSuperAdmin = userRoles?.some(r => r.role === 'admin' && !r.company_id);
       navigate(isSuperAdmin ? '/admin' : '/dashboard');
     } catch (error: any) {
+      // Track failed login attempt server-side
+      try {
+        await supabase.rpc('track_failed_login', {
+          p_identifier: signInForm.email,
+          p_identifier_type: 'email',
+          p_ip_address: 'client',
+          p_failure_reason: error.message || 'invalid_credentials'
+        });
+      } catch (trackError) {
+        console.error('Failed to track login attempt:', trackError);
+      }
+      
       toast({
         variant: "destructive",
         title: "Sign in failed",
-        description: error.message || "Invalid email or password. Please try again.",
+        description: "Invalid email or password. Please try again.",
       });
     } finally {
       setLoading(false);
@@ -333,6 +358,16 @@ const Auth = () => {
                   </div>
                 </div>
 
+                {loginRateLimiter.isBlocked && loginRateLimiter.blockedUntil && (
+                  <Alert variant="destructive" className="mb-4">
+                    <Lock className="h-4 w-4" />
+                    <AlertDescription>
+                      Too many login attempts. Please try again after {' '}
+                      {Math.ceil((loginRateLimiter.blockedUntil.getTime() - Date.now()) / 60000)} minutes.
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="signin-email">Email</Label>
@@ -343,7 +378,7 @@ const Auth = () => {
                       value={signInForm.email}
                       onChange={(e) => setSignInForm({ ...signInForm, email: e.target.value })}
                       required
-                      disabled={loading}
+                      disabled={loading || loginRateLimiter.isBlocked}
                     />
                   </div>
                 <div className="space-y-2">
@@ -357,11 +392,16 @@ const Auth = () => {
                     disabled={loading}
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full" disabled={loading || loginRateLimiter.isBlocked}>
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Signing in...
+                    </>
+                  ) : loginRateLimiter.isBlocked ? (
+                    <>
+                      <Lock className="mr-2 h-4 w-4" />
+                      Account Locked
                     </>
                   ) : (
                   'Sign In'

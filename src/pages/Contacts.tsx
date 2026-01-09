@@ -17,6 +17,7 @@ import { ClickToCall } from "@/components/ClickToCall";
 import { AIAssistant } from "@/components/crm/AIAssistant";
 import { PredictiveInsights } from "@/components/crm/PredictiveInsights";
 import { SmartSearch } from "@/components/crm/SmartSearch";
+import { useRateLimiting, useBulkOperationLimiter } from "@/hooks/useRateLimiting";
 
 export default function Contacts() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -43,6 +44,10 @@ export default function Contacts() {
   });
   const queryClient = useQueryClient();
   const itemsPerPage = 20;
+  
+  // Rate limiting for contact creation and bulk imports
+  const contactRateLimiter = useRateLimiting('contact_create');
+  const bulkImportLimiter = useBulkOperationLimiter('bulk_import');
 
   const { data: contactsData } = useQuery({
     queryKey: ["contacts", searchQuery, currentPage],
@@ -93,6 +98,11 @@ export default function Contacts() {
 
   const createContactMutation = useMutation({
     mutationFn: async (data: any) => {
+      // Rate limit check for contact creation
+      if (!contactRateLimiter.checkRateLimit()) {
+        throw new Error('Rate limit exceeded. Please slow down.');
+      }
+      
       if (data.email) {
         const { data: existingContact } = await supabase
           .from("contacts")
@@ -333,6 +343,11 @@ export default function Contacts() {
             status: values[9] || "active",
           };
         });
+
+        // Rate limit and batch size validation for bulk import
+        if (!bulkImportLimiter.canPerformBulkOperation(data)) {
+          return;
+        }
 
         const { data: auth } = await supabase.auth.getUser();
         const userId = auth.user?.id;
