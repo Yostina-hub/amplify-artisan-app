@@ -14,6 +14,7 @@ import { Plus, Edit, Trash2, Building2, DollarSign, Users2, Phone } from "lucide
 import { PageHelp } from "@/components/PageHelp";
 import { useBranches } from "@/hooks/useBranches";
 import { ClickToCall } from "@/components/ClickToCall";
+import { useRateLimiting } from "@/hooks/useRateLimiting";
 
 export default function Accounts() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -38,6 +39,9 @@ export default function Accounts() {
   });
   const queryClient = useQueryClient();
   const itemsPerPage = 20;
+  
+  // Rate limiting for account operations
+  const accountRateLimiter = useRateLimiting('account_create');
 
   const { data: accountsData } = useQuery({
     queryKey: ["accounts", searchQuery, currentPage],
@@ -73,6 +77,11 @@ export default function Accounts() {
 
   const createAccountMutation = useMutation({
     mutationFn: async (data: any) => {
+      // Rate limiting check
+      if (!accountRateLimiter.checkRateLimit()) {
+        throw new Error('Rate limit exceeded. Please wait before creating more accounts.');
+      }
+      
       // Check for duplicate account by name
       const { data: existingAccount } = await supabase
         .from("accounts")

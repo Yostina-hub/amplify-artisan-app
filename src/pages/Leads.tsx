@@ -15,6 +15,7 @@ import { Plus, Edit, Trash2, UserPlus, TrendingUp, CheckCircle2, Sparkles, Downl
 import { PageHelp } from "@/components/PageHelp";
 import { useBranches } from "@/hooks/useBranches";
 import { ClickToCall } from "@/components/ClickToCall";
+import { useRateLimiting, useBulkOperationLimiter } from "@/hooks/useRateLimiting";
 
 export default function Leads() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -40,6 +41,10 @@ export default function Leads() {
   });
   const queryClient = useQueryClient();
   const itemsPerPage = 20;
+  
+  // Rate limiting for lead operations
+  const leadRateLimiter = useRateLimiting('lead_create');
+  const bulkLimiter = useBulkOperationLimiter('bulk_import');
 
   const { data: leadsData } = useQuery({
     queryKey: ["leads", searchQuery, currentPage],
@@ -79,6 +84,11 @@ export default function Leads() {
 
   const createLeadMutation = useMutation({
     mutationFn: async (data: any) => {
+      // Rate limiting check
+      if (!leadRateLimiter.checkRateLimit()) {
+        throw new Error('Rate limit exceeded. Please wait before creating more leads.');
+      }
+      
       // Check if lead with same email already exists
       if (data.email) {
         const { data: existingLead } = await supabase
@@ -355,6 +365,12 @@ export default function Leads() {
             description: values[9] || "",
           };
         });
+
+        // Rate limiting and batch size validation for bulk import
+        if (!bulkLimiter.canPerformBulkOperation(data)) {
+          event.target.value = "";
+          return;
+        }
 
         const { data: auth } = await supabase.auth.getUser();
         const userId = auth.user?.id;
