@@ -15,6 +15,7 @@ import { Plus, Search, CheckCircle2, Clock, AlertCircle, Calendar } from "lucide
 import { format } from "date-fns";
 import { PageHelp } from "@/components/PageHelp";
 import { useBranches } from "@/hooks/useBranches";
+import { useRateLimiting } from "@/hooks/useRateLimiting";
 
 type Activity = {
   id: string;
@@ -34,6 +35,9 @@ export default function Activities() {
   const { accessibleBranches } = useBranches();
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
+  
+  // Rate limiting for activity operations
+  const activityRateLimiter = useRateLimiting('activity_create');
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [formData, setFormData] = useState({
@@ -96,6 +100,11 @@ export default function Activities() {
 
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
+      // Rate limiting check
+      if (!activityRateLimiter.checkRateLimit()) {
+        throw new Error('Rate limit exceeded. Please wait before creating more activities.');
+      }
+      
       const { error } = await supabase.from("activities").insert({
         ...data,
         company_id: profile?.company_id,

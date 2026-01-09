@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Search, FileText, Trash2, DollarSign, CheckCircle, XCircle } from "lucide-react";
 import { format } from "date-fns";
+import { useRateLimiting } from "@/hooks/useRateLimiting";
 
 type Quote = {
   id: string;
@@ -40,6 +41,9 @@ type QuoteItem = {
 export default function Quotes() {
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
+  
+  // Rate limiting for quote operations
+  const quoteRateLimiter = useRateLimiting('quote_create');
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [lineItems, setLineItems] = useState<QuoteItem[]>([]);
@@ -106,6 +110,11 @@ export default function Quotes() {
 
   const createMutation = useMutation({
     mutationFn: async (data: { quote: typeof formData; items: QuoteItem[] }) => {
+      // Rate limiting check
+      if (!quoteRateLimiter.checkRateLimit()) {
+        throw new Error('Rate limit exceeded. Please wait before creating more quotes.');
+      }
+      
       const totals = calculateTotals(data.items);
       
       const { data: quote, error: quoteError } = await supabase
