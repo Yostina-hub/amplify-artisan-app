@@ -347,7 +347,7 @@ export default function UserManagement() {
         throw new Error('Not authenticated');
       }
 
-      const { error } = await supabase.functions.invoke('create-user', {
+      const { data, error } = await supabase.functions.invoke('create-user', {
         body: {
           email: createForm.email,
           fullName: createForm.fullName,
@@ -361,7 +361,16 @@ export default function UserManagement() {
       
       if (error) throw error;
 
-      toast.success('User created successfully. Welcome email sent with password setup instructions.');
+      // Show the temporary password in a toast if returned
+      if (data?.temporaryPassword) {
+        toast.success(
+          `User created! Temporary password: ${data.temporaryPassword}`,
+          { duration: 30000, description: 'Copy this password now - it won\'t be shown again.' }
+        );
+      } else {
+        toast.success('User created successfully. Welcome email sent with password setup instructions.');
+      }
+      
       setIsCreateDialogOpen(false);
       setCreateForm({ email: '', fullName: '', role: 'user', companyId: '' });
       fetchUsers();
