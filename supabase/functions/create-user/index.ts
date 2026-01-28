@@ -322,6 +322,7 @@ Deno.serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         user: newUser.user,
+        temporaryPassword: temporaryPassword,
         message: 'User created successfully. Welcome email sent with password setup instructions.'
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
