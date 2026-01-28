@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { MoreHorizontal, Search, UserPlus, Mail, KeyRound, Eye, Calendar, Building, Shield } from "lucide-react";
+import { MoreHorizontal, Search, UserPlus, Mail, KeyRound, Eye, Calendar, Building, Shield, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
@@ -427,6 +427,37 @@ export default function UserManagement() {
     }
   };
 
+  const handleManualPasswordReset = async (user: User) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
+
+      const { data, error } = await supabase.functions.invoke('reset-user-password', {
+        body: { userId: user.id },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.temporaryPassword) {
+        toast.success(
+          `New password for ${user.email}: ${data.temporaryPassword}`,
+          { duration: 30000, description: 'Copy this password now - it won\'t be shown again.' }
+        );
+      } else {
+        toast.success('Password reset successfully');
+      }
+    } catch (error: any) {
+      console.error('Error resetting password:', error);
+      toast.error(error.message || 'Failed to reset password');
+    }
+  };
+
   const handleViewDetails = async (user: User) => {
     setUserDetails(user);
     setIsDetailsDialogOpen(true);
@@ -605,10 +636,16 @@ export default function UserManagement() {
                             Assign Role
                           </DropdownMenuItem>
                           <DropdownMenuItem
+                            onClick={() => handleManualPasswordReset(user)}
+                          >
+                            <RotateCcw className="mr-2 h-4 w-4" />
+                            Reset Password
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
                             onClick={() => handleSendPasswordReset(user)}
                           >
                             <KeyRound className="mr-2 h-4 w-4" />
-                            Send Password Reset
+                            Send Password Reset Email
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="text-destructive"
