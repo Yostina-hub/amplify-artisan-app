@@ -439,5 +439,245 @@ export const pageHelpContent = {
       "Keep profile information current",
       "Generate API keys only when needed"
     ]
+  },
+  adCampaigns: {
+    title: "Ad Campaigns",
+    description: "Create and manage advertising campaigns across social media platforms. Track performance, budget spend, and ROI in real-time.",
+    features: [
+      "Multi-platform ad campaign management",
+      "Budget tracking and spend optimization",
+      "Real-time performance metrics (impressions, clicks, conversions)",
+      "ROI calculation and analysis",
+      "Campaign scheduling with start/end dates",
+      "A/B testing support for creative assets",
+      "Audience targeting and segmentation"
+    ],
+    tips: [
+      "Set clear campaign objectives before launching",
+      "Monitor performance daily for the first week",
+      "Use A/B testing to optimize creative performance",
+      "Allocate budget based on platform performance",
+      "Review ROI metrics to identify best-performing campaigns"
+    ]
+  },
+  influencerMarketing: {
+    title: "Influencer Marketing",
+    description: "Discover, manage, and collaborate with influencers across platforms. Track campaign performance and measure influencer ROI.",
+    features: [
+      "Influencer discovery and database management",
+      "Campaign creation and tracking",
+      "Engagement rate and follower analytics",
+      "Cost per post and ROI tracking",
+      "Multi-platform influencer search",
+      "Performance reporting and analytics",
+      "Contract and payment management"
+    ],
+    tips: [
+      "Focus on engagement rate over follower count",
+      "Verify influencer authenticity before partnerships",
+      "Set clear campaign KPIs and deliverables",
+      "Track unique discount codes for ROI measurement",
+      "Build long-term relationships with top performers"
+    ]
+  },
+  socialIntelligence: {
+    title: "Social Intelligence",
+    description: "AI-powered sentiment analysis, brand monitoring, and social listening. Track mentions, analyze trends, and stay ahead of conversations.",
+    features: [
+      "Real-time sentiment analysis across platforms",
+      "Brand and competitor mention tracking",
+      "Trending topic detection and alerts",
+      "Keyword and hashtag monitoring",
+      "AI-powered insight generation",
+      "Geographic and demographic analysis",
+      "Automated alert notifications"
+    ],
+    tips: [
+      "Set up alerts for brand mentions and competitors",
+      "Review sentiment trends weekly for patterns",
+      "Respond quickly to negative sentiment spikes",
+      "Use trending topics to inform content strategy",
+      "Track competitor sentiment for market insights"
+    ]
+  },
+  payments: {
+    title: "Payments",
+    description: "Track and manage all payment transactions. Monitor payment status, handle refunds, and reconcile accounts efficiently.",
+    features: [
+      "Payment status tracking and history",
+      "Multiple payment method support",
+      "Refund processing and management",
+      "Payment reconciliation tools",
+      "Automated payment reminders",
+      "Transaction reporting and export",
+      "Payment gateway integration"
+    ],
+    tips: [
+      "Reconcile payments weekly to catch discrepancies",
+      "Set up automated reminders for overdue payments",
+      "Keep detailed records of all refund requests",
+      "Review failed payments promptly",
+      "Offer multiple payment options for customers"
+    ]
+  },
+  contractManagement: {
+    title: "Contract Management",
+    description: "Manage customer contracts, track renewals, and ensure compliance. Automated alerts help you never miss important dates.",
+    features: [
+      "Contract template library",
+      "Renewal date tracking and alerts",
+      "Document attachment and versioning",
+      "Contract value and terms tracking",
+      "Approval workflow automation",
+      "Amendment history and audit trails",
+      "E-signature integration support"
+    ],
+    tips: [
+      "Set renewal reminders 90 days in advance",
+      "Use templates for consistency across contracts",
+      "Track all amendments with detailed notes",
+      "Link contracts to accounts for easy reference",
+      "Review expiring contracts weekly"
+    ]
+  },
+  territoryManagement: {
+    title: "Territory Management",
+    description: "Define and manage sales territories. Assign accounts, track performance by region, and optimize territory coverage.",
+    features: [
+      "Geographic territory definition",
+      "Account and rep assignment",
+      "Territory performance analytics",
+      "Coverage optimization tools",
+      "Quota setting and tracking",
+      "Territory hierarchy management",
+      "Performance comparison reports"
+    ],
+    tips: [
+      "Balance territory workload across reps",
+      "Review territory performance quarterly",
+      "Consider customer density when defining boundaries",
+      "Use data to identify underserved areas",
+      "Align territories with market opportunities"
+    ]
+  },
+  formBuilder: {
+    title: "Form Builder",
+    description: "Create custom data entry forms for your modules. Design forms with various field types and validation rules.",
+    features: [
+      "Drag-and-drop form design",
+      "Multiple field type support",
+      "Validation rule configuration",
+      "Date picker and calendar integration",
+      "Dropdown and multi-select options",
+      "Form preview and testing",
+      "Data export capabilities"
+    ],
+    tips: [
+      "Keep forms simple and focused",
+      "Use validation to ensure data quality",
+      "Group related fields together",
+      "Test forms before deploying",
+      "Use clear labels and help text"
+    ]
+  },
+  moduleBuilder: {
+    title: "Module Builder",
+    description: "Create custom modules to extend platform functionality. Define fields, relationships, and access controls for your data.",
+    features: [
+      "Custom module creation",
+      "Drag-and-drop field ordering",
+      "Multiple field types and validations",
+      "Branch-based access control",
+      "Permission assignment",
+      "Component type selection",
+      "Module icon and color customization"
+    ],
+    tips: [
+      "Plan your data structure before building",
+      "Use descriptive field names",
+      "Set appropriate access permissions",
+      "Test modules thoroughly before deployment",
+      "Document custom modules for team reference"
+    ]
+  },
+  projectManagement: {
+    title: "Project Management",
+    description: "Plan, track, and manage projects with tasks, milestones, and team collaboration. Visual boards and timelines keep everyone aligned.",
+    features: [
+      "Project planning and task management",
+      "Kanban board and list views",
+      "Timeline and Gantt chart visualization",
+      "Time tracking and logging",
+      "Budget and resource management",
+      "Team collaboration tools",
+      "Progress reporting and analytics"
+    ],
+    tips: [
+      "Break projects into manageable tasks",
+      "Set realistic deadlines and milestones",
+      "Track time to improve estimates",
+      "Use status updates for team visibility",
+      "Review project health weekly"
+    ]
+  },
+  liveChat: {
+    title: "Live Chat Dashboard",
+    description: "Manage real-time customer conversations. View active chats, assign agents, and monitor response times.",
+    features: [
+      "Real-time chat management",
+      "Agent assignment and routing",
+      "Chat history and transcripts",
+      "Response time analytics",
+      "Customer satisfaction tracking",
+      "AI-powered response suggestions",
+      "Multi-channel conversation view"
+    ],
+    tips: [
+      "Respond within 60 seconds for best satisfaction",
+      "Use canned responses for common questions",
+      "Escalate complex issues promptly",
+      "Review chat transcripts for training",
+      "Monitor agent workload distribution"
+    ]
+  },
+  contentModeration: {
+    title: "Content Moderation",
+    description: "Review and moderate user-generated content. Maintain brand safety and community standards across platforms.",
+    features: [
+      "Content review queue management",
+      "Automated content flagging",
+      "Approval and rejection workflows",
+      "Moderation policy enforcement",
+      "Content analytics and reporting",
+      "Team collaboration tools",
+      "Audit trail and history"
+    ],
+    tips: [
+      "Define clear moderation guidelines",
+      "Review flagged content promptly",
+      "Use automation for obvious violations",
+      "Document decisions for consistency",
+      "Train team on moderation policies"
+    ]
+  },
+  analyticsPlatform: {
+    title: "Analytics Platform",
+    description: "Unified analytics dashboard with KPIs, segments, and alerts. Make data-driven decisions with real-time insights.",
+    features: [
+      "Customizable KPI dashboards",
+      "Real-time data visualization",
+      "Audience segmentation tools",
+      "Automated alert notifications",
+      "Custom report generation",
+      "Data export and scheduling",
+      "Cross-module analytics"
+    ],
+    tips: [
+      "Focus on KPIs that drive business outcomes",
+      "Set up alerts for critical thresholds",
+      "Review dashboards daily",
+      "Share reports with stakeholders regularly",
+      "Use segments to personalize analysis"
+    ]
   }
 };

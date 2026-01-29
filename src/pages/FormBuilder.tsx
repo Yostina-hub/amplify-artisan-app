@@ -16,6 +16,8 @@ import { Plus, Edit, Trash2, CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { PageHelp } from "@/components/PageHelp";
+import { pageHelpContent } from "@/lib/pageHelpContent";
 
 export default function FormBuilder() {
   const [selectedModuleId, setSelectedModuleId] = useState<string>("");
@@ -215,6 +217,13 @@ export default function FormBuilder() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      <PageHelp
+        title={pageHelpContent.formBuilder.title}
+        description={pageHelpContent.formBuilder.description}
+        features={pageHelpContent.formBuilder.features}
+        tips={pageHelpContent.formBuilder.tips}
+      />
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Form Builder</h1>

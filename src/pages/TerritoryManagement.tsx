@@ -48,6 +48,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { PageHelp } from "@/components/PageHelp";
+import { pageHelpContent } from "@/lib/pageHelpContent";
 import { useToast } from "@/hooks/use-toast";
 
 const TerritoryManagement = () => {
@@ -230,6 +232,13 @@ const TerritoryManagement = () => {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-6">
+        <PageHelp
+          title={pageHelpContent.territoryManagement.title}
+          description={pageHelpContent.territoryManagement.description}
+          features={pageHelpContent.territoryManagement.features}
+          tips={pageHelpContent.territoryManagement.tips}
+        />
+
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>

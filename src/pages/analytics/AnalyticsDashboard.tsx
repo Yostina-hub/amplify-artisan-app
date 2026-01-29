@@ -19,6 +19,8 @@ import { AnalyticsKPICard } from "@/components/analytics/AnalyticsKPICard";
 import { AnalyticsRecommendations } from "@/components/analytics/AnalyticsRecommendations";
 import { AnalyticsAlerts } from "@/components/analytics/AnalyticsAlerts";
 import { AnalyticsSegments } from "@/components/analytics/AnalyticsSegments";
+import { PageHelp } from "@/components/PageHelp";
+import { pageHelpContent } from "@/lib/pageHelpContent";
 
 const COLORS = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
 
@@ -165,6 +167,13 @@ export default function AnalyticsDashboard() {
 
   return (
     <div className="container mx-auto p-6 space-y-6 animate-in fade-in-50 duration-500">
+      <PageHelp
+        title={pageHelpContent.analyticsPlatform.title}
+        description={pageHelpContent.analyticsPlatform.description}
+        features={pageHelpContent.analyticsPlatform.features}
+        tips={pageHelpContent.analyticsPlatform.tips}
+      />
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>

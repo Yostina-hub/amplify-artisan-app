@@ -13,6 +13,8 @@ import { Brain, TrendingUp, Sparkles, BarChart3, Smile, Frown, Meh, MessageCircl
 import { Progress } from '@/components/ui/progress';
 import { toast } from "sonner";
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { PageHelp } from "@/components/PageHelp";
+import { pageHelpContent } from "@/lib/pageHelpContent";
 
 interface Keyword {
   id: string;
@@ -215,6 +217,13 @@ export default function SocialIntelligence() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/5 animate-in fade-in-50 duration-700">
       <div className="container mx-auto p-6 space-y-6">
+        <PageHelp
+          title={pageHelpContent.socialIntelligence.title}
+          description={pageHelpContent.socialIntelligence.description}
+          features={pageHelpContent.socialIntelligence.features}
+          tips={pageHelpContent.socialIntelligence.tips}
+        />
+
         {/* Header */}
         <div className="backdrop-blur-sm bg-card/80 p-8 rounded-2xl border-2 border-primary/20 shadow-2xl">
           <div className="flex items-center justify-between flex-wrap gap-4">
