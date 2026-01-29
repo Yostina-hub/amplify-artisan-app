@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,7 @@ import { ReportInsights } from "@/components/reports/ReportInsights";
 import { ReportStats } from "@/components/reports/ReportStats";
 import { RecentReports } from "@/components/reports/RecentReports";
 import { ReportCategories } from "@/components/reports/ReportCategories";
+import { useReports } from "@/hooks/useReports";
 import { toast } from "sonner";
 import { 
   Select,
@@ -336,6 +337,14 @@ export default function Reports() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [dateRange, setDateRange] = useState("30");
 
+  const { 
+    reports: generatedReports, 
+    isLoading: reportsLoading, 
+    generateReport, 
+    retryReport, 
+    deleteReport 
+  } = useReports();
+
   const { data: session } = useQuery({
     queryKey: ["session"],
     queryFn: async () => {
@@ -352,10 +361,56 @@ export default function Reports() {
     return matchesSearch && matchesCategory;
   });
 
-  const handleGenerateReport = async (reportId: string) => {
-    // Simulate report generation
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-  };
+  const handleGenerateReport = useCallback(async (report: typeof allReports[0]) => {
+    try {
+      const result = await generateReport(
+        report.id,
+        report.title,
+        report.categoryLabel,
+        "pdf",
+        `Last ${dateRange} days`
+      );
+      if (result.status === "completed") {
+        toast.success(`${report.title} generated successfully!`, {
+          description: "Your report is ready to download.",
+          action: {
+            label: "Download",
+            onClick: () => toast.info("Downloading report..."),
+          },
+        });
+      } else {
+        toast.error("Report generation failed", {
+          description: "Please try again or contact support.",
+        });
+      }
+    } catch (error) {
+      toast.error("Failed to generate report");
+    }
+  }, [generateReport, dateRange]);
+
+  const handleQuickGenerate = useCallback(async (
+    templateId: string,
+    name: string,
+    type: string,
+    format: "pdf" | "csv" | "xlsx" | "json"
+  ) => {
+    return generateReport(templateId, name, type, format, `Last ${dateRange} days`);
+  }, [generateReport, dateRange]);
+
+  const handleRetryReport = useCallback(async (id: string) => {
+    toast.info("Retrying report generation...");
+    const result = await retryReport(id);
+    if (result?.status === "completed") {
+      toast.success("Report generated successfully!");
+    } else {
+      toast.error("Retry failed. Please try again.");
+    }
+  }, [retryReport]);
+
+  const handleDeleteReport = useCallback((id: string) => {
+    deleteReport(id);
+    toast.success("Report deleted");
+  }, [deleteReport]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
@@ -426,7 +481,7 @@ export default function Reports() {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left Column - Quick Actions & Insights */}
           <div className="space-y-6">
-            <QuickReportGenerator />
+            <QuickReportGenerator onGenerate={handleQuickGenerate} />
             <ReportInsights />
           </div>
 
@@ -463,10 +518,14 @@ export default function Reports() {
                   category={report.categoryLabel}
                   trend={report.trend}
                   trendValue={report.trendValue}
-                  lastGenerated={report.lastGenerated}
+                  lastGenerated={
+                    generatedReports.find(r => r.templateId === report.id && r.status === "completed")
+                      ? "Just now"
+                      : report.lastGenerated
+                  }
                   isPopular={report.isPopular}
                   isNew={report.isNew}
-                  onGenerate={() => handleGenerateReport(report.id)}
+                  onGenerate={() => handleGenerateReport(report)}
                   gradient={report.gradient}
                 />
               ))}
@@ -485,7 +544,12 @@ export default function Reports() {
         </div>
 
         {/* Recent Reports Section */}
-        <RecentReports />
+        <RecentReports 
+          reports={generatedReports}
+          onRetry={handleRetryReport}
+          onDelete={handleDeleteReport}
+          isLoading={reportsLoading}
+        />
       </div>
     </div>
   );
