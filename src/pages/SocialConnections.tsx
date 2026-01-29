@@ -29,6 +29,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageHelp } from "@/components/PageHelp";
+import { pageHelpContent } from "@/lib/pageHelpContent";
 
 // Platform configurations - OAuth vs Direct Token
 const PLATFORMS = [
@@ -636,6 +638,12 @@ export default function SocialConnections() {
 
   return (
     <div className="container mx-auto p-6 space-y-6 animate-in fade-in-50 duration-500">
+      <PageHelp
+        title={pageHelpContent.socialConnections.title}
+        description={pageHelpContent.socialConnections.description}
+        features={pageHelpContent.socialConnections.features}
+        tips={pageHelpContent.socialConnections.tips}
+      />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

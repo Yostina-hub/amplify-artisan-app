@@ -15,6 +15,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { PageHelp } from "@/components/PageHelp";
+import { pageHelpContent } from "@/lib/pageHelpContent";
 
 const PLATFORMS_CONFIG = {
   twitter: { color: "bg-[#1DA1F2]", name: "Twitter" },
@@ -197,6 +199,12 @@ export default function SocialInbox() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 animate-in fade-in-50 duration-700">
       <div className="container mx-auto p-6 space-y-6">
+        <PageHelp
+          title={pageHelpContent.socialInbox.title}
+          description={pageHelpContent.socialInbox.description}
+          features={pageHelpContent.socialInbox.features}
+          tips={pageHelpContent.socialInbox.tips}
+        />
         {/* Header */}
         <div className="flex items-center justify-between backdrop-blur-sm bg-card/50 p-6 rounded-2xl border-2">
           <div>

@@ -18,6 +18,8 @@ import { format, isSameDay, startOfWeek, addDays, addWeeks, subWeeks, isToday } 
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { PageHelp } from "@/components/PageHelp";
+import { pageHelpContent } from "@/lib/pageHelpContent";
 import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
 
@@ -470,6 +472,14 @@ export default function CalendarView() {
 
   return (
     <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-6 py-4">
+        <PageHelp
+          title={pageHelpContent.calendar.title}
+          description={pageHelpContent.calendar.description}
+          features={pageHelpContent.calendar.features}
+          tips={pageHelpContent.calendar.tips}
+        />
+      </div>
       <div className="border-b bg-card">
         <div className="container mx-auto">
           {/* Top Tabs */}

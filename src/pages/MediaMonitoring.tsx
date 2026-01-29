@@ -26,6 +26,8 @@ import {
 import { format, formatDistanceToNow } from 'date-fns';
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, PieChart as RechartsPie, Pie, Cell, Tooltip as RechartsTooltip, BarChart, Bar } from 'recharts';
 import { NeuralAIEngine } from '@/components/media-monitoring/NeuralAIEngine';
+import { PageHelp } from "@/components/PageHelp";
+import { pageHelpContent } from "@/lib/pageHelpContent";
 
 // Platform configurations with icons and colors
 const platformConfig: Record<string, { icon: any; color: string; bgColor: string; name: string }> = {
@@ -195,6 +197,14 @@ export default function MediaMonitoring() {
       <NeuralAIEngine isOpen={showNeuralEngine} onClose={() => setShowNeuralEngine(false)} />
       
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+        <div className="container mx-auto px-6 py-4">
+          <PageHelp
+            title={pageHelpContent.mediaMonitoring.title}
+            description={pageHelpContent.mediaMonitoring.description}
+            features={pageHelpContent.mediaMonitoring.features}
+            tips={pageHelpContent.mediaMonitoring.tips}
+          />
+        </div>
         {/* Immersive Header with Glassmorphism */}
         <div className="relative overflow-hidden border-b border-border/50 bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
