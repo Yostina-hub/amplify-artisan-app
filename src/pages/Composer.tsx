@@ -19,6 +19,8 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { PageHelp } from "@/components/PageHelp";
+import { pageHelpContent } from "@/lib/pageHelpContent";
 
 const LANGUAGES = [
   { code: "en", name: "English", flag: "🇺🇸" },
@@ -411,6 +413,12 @@ export default function Composer() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10">
       <div className="max-w-7xl mx-auto space-y-6 p-6 animate-in fade-in-50 duration-700">
+        <PageHelp
+          title={pageHelpContent.composer.title}
+          description={pageHelpContent.composer.description}
+          features={pageHelpContent.composer.features}
+          tips={pageHelpContent.composer.tips}
+        />
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">

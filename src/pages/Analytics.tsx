@@ -15,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { PredictiveInsights } from "@/components/crm/PredictiveInsights";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { PageHelp } from "@/components/PageHelp";
+import { pageHelpContent } from "@/lib/pageHelpContent";
 
 const COLORS = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
 
@@ -292,6 +294,12 @@ export default function Analytics() {
 
   return (
     <div className="container mx-auto p-6 space-y-6 animate-in fade-in-50 duration-500">
+      <PageHelp
+        title={pageHelpContent.analytics.title}
+        description={pageHelpContent.analytics.description}
+        features={pageHelpContent.analytics.features}
+        tips={pageHelpContent.analytics.tips}
+      />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
