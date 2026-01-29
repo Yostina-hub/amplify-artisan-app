@@ -18,6 +18,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   Dialog,
@@ -36,13 +37,14 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { MoreHorizontal, Search, UserPlus, Mail, KeyRound, Eye, Calendar, Building, Shield, RotateCcw } from "lucide-react";
+import { MoreHorizontal, Search, UserPlus, Mail, KeyRound, Eye, Calendar, Building, Shield, RotateCcw, Key } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { z } from "zod";
 import { usePagination } from "@/hooks/usePagination";
 import { PaginationControls } from "@/components/PaginationControls";
+import { UserPermissionAssigner } from "@/components/admin/UserPermissionAssigner";
 
 const createUserSchema = z.object({
   email: z.string().trim().email({ message: "Invalid email address" }).max(255),
@@ -110,6 +112,8 @@ export default function UserManagement() {
   const [userDetails, setUserDetails] = useState<User | null>(null);
   const [userAuditLogs, setUserAuditLogs] = useState<AuditLog[]>([]);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);
+  const [permissionUser, setPermissionUser] = useState<User | null>(null);
   
   const pagination = usePagination(25);
 
@@ -635,6 +639,16 @@ export default function UserManagement() {
                             <Shield className="mr-2 h-4 w-4" />
                             Assign Role
                           </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => {
+                              setPermissionUser(user);
+                              setIsPermissionsDialogOpen(true);
+                            }}
+                          >
+                            <Key className="mr-2 h-4 w-4" />
+                            Manage Permissions
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
                           <DropdownMenuItem
                             onClick={() => handleManualPasswordReset(user)}
                           >
@@ -647,6 +661,7 @@ export default function UserManagement() {
                             <KeyRound className="mr-2 h-4 w-4" />
                             Send Password Reset Email
                           </DropdownMenuItem>
+                          <DropdownMenuSeparator />
                           <DropdownMenuItem
                             className="text-destructive"
                             onClick={() => handleDeleteUser(user)}
@@ -991,6 +1006,19 @@ export default function UserManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* User Permissions Dialog */}
+      {permissionUser && (
+        <UserPermissionAssigner
+          userId={permissionUser.id}
+          userName={permissionUser.full_name || permissionUser.email}
+          isOpen={isPermissionsDialogOpen}
+          onClose={() => {
+            setIsPermissionsDialogOpen(false);
+            setPermissionUser(null);
+          }}
+        />
+      )}
     </div>
   );
 }
