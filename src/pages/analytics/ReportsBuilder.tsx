@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { 
   ArrowLeft, 
@@ -32,15 +33,33 @@ import {
   BarChart3,
   PieChart,
   LineChart,
-  Table as TableIcon
+  Table as TableIcon,
+  Zap,
+  CheckCircle2
 } from "lucide-react";
 import { format } from "date-fns";
+
+interface TemplateConfig {
+  name: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
 
 export default function ReportsBuilder() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [newReportOpen, setNewReportOpen] = useState(false);
+  const [templateModalOpen, setTemplateModalOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateConfig | null>(null);
+  const [templateConfig, setTemplateConfig] = useState({
+    name: '',
+    dateRange: '30',
+    format: 'pdf',
+    schedule: 'manual',
+    recipients: ''
+  });
+  const [isGenerating, setIsGenerating] = useState(false);
   const [newReport, setNewReport] = useState({
     name: '',
     description: '',
@@ -142,6 +161,48 @@ export default function ReportsBuilder() {
     queryClient.invalidateQueries({ queryKey: ['analytics-scheduled-reports'] });
   };
 
+  const handleUseTemplate = (template: TemplateConfig) => {
+    setSelectedTemplate(template);
+    setTemplateConfig({
+      name: template.name,
+      dateRange: '30',
+      format: 'pdf',
+      schedule: 'manual',
+      recipients: ''
+    });
+    setTemplateModalOpen(true);
+  };
+
+  const handleGenerateFromTemplate = async () => {
+    if (!selectedTemplate) return;
+    
+    setIsGenerating(true);
+    
+    // Simulate report generation
+    await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 1000));
+    
+    setIsGenerating(false);
+    setTemplateModalOpen(false);
+    
+    toast.success(`${templateConfig.name} report generated!`, {
+      description: "Your report is ready to download.",
+      action: {
+        label: "Download",
+        onClick: () => toast.info("Downloading report..."),
+      },
+    });
+    
+    // Reset
+    setSelectedTemplate(null);
+    setTemplateConfig({
+      name: '',
+      dateRange: '30',
+      format: 'pdf',
+      schedule: 'manual',
+      recipients: ''
+    });
+  };
+
   const reportTypes = [
     { value: 'table', label: 'Table', icon: TableIcon },
     { value: 'bar', label: 'Bar Chart', icon: BarChart3 },
@@ -154,6 +215,15 @@ export default function ReportsBuilder() {
     { value: 'daily', label: 'Daily' },
     { value: 'weekly', label: 'Weekly' },
     { value: 'monthly', label: 'Monthly' },
+  ];
+
+  const templates: TemplateConfig[] = [
+    { name: 'Sales Performance', description: 'Track revenue, deals, and conversion rates', icon: BarChart3 },
+    { name: 'Customer Engagement', description: 'Monitor user activity and retention', icon: LineChart },
+    { name: 'Marketing ROI', description: 'Campaign performance and attribution', icon: PieChart },
+    { name: 'Support Metrics', description: 'Ticket resolution and satisfaction', icon: TableIcon },
+    { name: 'Social Analytics', description: 'Social media reach and engagement', icon: Share2 },
+    { name: 'Email Performance', description: 'Open rates, clicks, and conversions', icon: Mail },
   ];
 
   return (
@@ -176,70 +246,72 @@ export default function ReportsBuilder() {
               New Report
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
+          <DialogContent className="w-[95vw] max-w-[500px] max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader className="flex-shrink-0">
               <DialogTitle>Create New Report</DialogTitle>
               <DialogDescription>Configure your report settings and visualization type.</DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label>Report Name</Label>
-                <Input 
-                  placeholder="Q4 Sales Performance" 
-                  value={newReport.name}
-                  onChange={(e) => setNewReport({ ...newReport, name: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Description</Label>
-                <Input 
-                  placeholder="Monthly sales metrics and trends" 
-                  value={newReport.description}
-                  onChange={(e) => setNewReport({ ...newReport, description: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Visualization Type</Label>
-                <div className="grid grid-cols-4 gap-2">
-                  {reportTypes.map((type) => {
-                    const Icon = type.icon;
-                    return (
-                      <button
-                        key={type.value}
-                        onClick={() => setNewReport({ ...newReport, type: type.value })}
-                        className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-colors ${
-                          newReport.type === type.value 
-                            ? 'border-primary bg-primary/10' 
-                            : 'border-border hover:border-primary/50'
-                        }`}
-                      >
-                        <Icon className="h-5 w-5" />
-                        <span className="text-xs">{type.label}</span>
-                      </button>
-                    );
-                  })}
+            <ScrollArea className="flex-1 -mx-6 px-6">
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>Report Name</Label>
+                  <Input 
+                    placeholder="Q4 Sales Performance" 
+                    value={newReport.name}
+                    onChange={(e) => setNewReport({ ...newReport, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Description</Label>
+                  <Input 
+                    placeholder="Monthly sales metrics and trends" 
+                    value={newReport.description}
+                    onChange={(e) => setNewReport({ ...newReport, description: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Visualization Type</Label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {reportTypes.map((type) => {
+                      const Icon = type.icon;
+                      return (
+                        <button
+                          key={type.value}
+                          onClick={() => setNewReport({ ...newReport, type: type.value })}
+                          className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-colors ${
+                            newReport.type === type.value 
+                              ? 'border-primary bg-primary/10' 
+                              : 'border-border hover:border-primary/50'
+                          }`}
+                        >
+                          <Icon className="h-5 w-5" />
+                          <span className="text-xs">{type.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Schedule</Label>
+                  <Select 
+                    value={newReport.schedule}
+                    onValueChange={(value) => setNewReport({ ...newReport, schedule: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {scheduleOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Schedule</Label>
-                <Select 
-                  value={newReport.schedule}
-                  onValueChange={(value) => setNewReport({ ...newReport, schedule: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {scheduleOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
+            </ScrollArea>
+            <DialogFooter className="flex-shrink-0 pt-4 border-t">
               <Button variant="outline" onClick={() => setNewReportOpen(false)}>Cancel</Button>
               <Button onClick={() => {
                 toast.success('Report created successfully');
@@ -254,7 +326,7 @@ export default function ReportsBuilder() {
       </div>
 
       <Tabs defaultValue="scheduled" className="space-y-4">
-        <TabsList>
+        <TabsList className="flex flex-wrap h-auto gap-1">
           <TabsTrigger value="scheduled">Scheduled Reports</TabsTrigger>
           <TabsTrigger value="exports">Export History</TabsTrigger>
           <TabsTrigger value="templates">Templates</TabsTrigger>
@@ -271,68 +343,70 @@ export default function ReportsBuilder() {
             </CardHeader>
             <CardContent>
               {scheduledReports && scheduledReports.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Dashboard</TableHead>
-                      <TableHead>Schedule</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Last Run</TableHead>
-                      <TableHead>Next Run</TableHead>
-                      <TableHead className="w-[50px]"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {scheduledReports.map((report: any) => (
-                      <TableRow key={report.id}>
-                        <TableCell className="font-medium">{report.name}</TableCell>
-                        <TableCell>{report.analytics_dashboards?.name || 'N/A'}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{report.schedule_cron}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={report.is_active ? 'default' : 'secondary'}>
-                            {report.is_active ? 'Active' : 'Paused'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {report.last_run_at ? format(new Date(report.last_run_at), 'MMM d, h:mm a') : 'Never'}
-                        </TableCell>
-                        <TableCell>
-                          {report.next_run_at ? format(new Date(report.next_run_at), 'MMM d, h:mm a') : 'N/A'}
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleToggleSchedule(report.id, report.is_active)}>
-                                {report.is_active ? (
-                                  <><Pause className="h-4 w-4 mr-2" /> Pause</>
-                                ) : (
-                                  <><Play className="h-4 w-4 mr-2" /> Activate</>
-                                )}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Edit className="h-4 w-4 mr-2" /> Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                className="text-destructive"
-                                onClick={() => handleDeleteSchedule(report.id)}
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" /> Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead className="hidden sm:table-cell">Dashboard</TableHead>
+                        <TableHead className="hidden md:table-cell">Schedule</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="hidden lg:table-cell">Last Run</TableHead>
+                        <TableHead className="hidden lg:table-cell">Next Run</TableHead>
+                        <TableHead className="w-[50px]"></TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {scheduledReports.map((report: any) => (
+                        <TableRow key={report.id}>
+                          <TableCell className="font-medium">{report.name}</TableCell>
+                          <TableCell className="hidden sm:table-cell">{report.analytics_dashboards?.name || 'N/A'}</TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            <Badge variant="outline">{report.schedule_cron}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={report.is_active ? 'default' : 'secondary'}>
+                              {report.is_active ? 'Active' : 'Paused'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="hidden lg:table-cell">
+                            {report.last_run_at ? format(new Date(report.last_run_at), 'MMM d, h:mm a') : 'Never'}
+                          </TableCell>
+                          <TableCell className="hidden lg:table-cell">
+                            {report.next_run_at ? format(new Date(report.next_run_at), 'MMM d, h:mm a') : 'N/A'}
+                          </TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="bg-popover">
+                                <DropdownMenuItem onClick={() => handleToggleSchedule(report.id, report.is_active)}>
+                                  {report.is_active ? (
+                                    <><Pause className="h-4 w-4 mr-2" /> Pause</>
+                                  ) : (
+                                    <><Play className="h-4 w-4 mr-2" /> Activate</>
+                                  )}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Edit className="h-4 w-4 mr-2" /> Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  className="text-destructive"
+                                  onClick={() => handleDeleteSchedule(report.id)}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" /> Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               ) : (
                 <div className="text-center py-8">
                   <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -361,49 +435,53 @@ export default function ReportsBuilder() {
             </CardHeader>
             <CardContent>
               {exports && exports.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>File Name</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Created</TableHead>
-                      <TableHead className="w-[100px]">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {exports.map((exp: any) => (
-                      <TableRow key={exp.id}>
-                        <TableCell className="font-medium">
-                          <div className="flex items-center gap-2">
-                            <FileText className="h-4 w-4 text-muted-foreground" />
-                            {exp.file_name || 'Untitled Export'}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{exp.export_type.toUpperCase()}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={exp.status === 'completed' ? 'default' : exp.status === 'failed' ? 'destructive' : 'secondary'}>
-                            {exp.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {format(new Date(exp.created_at), 'MMM d, yyyy h:mm a')}
-                        </TableCell>
-                        <TableCell>
-                          {exp.file_url && (
-                            <Button variant="ghost" size="sm" asChild>
-                              <a href={exp.file_url} download>
-                                <Download className="h-4 w-4" />
-                              </a>
-                            </Button>
-                          )}
-                        </TableCell>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>File Name</TableHead>
+                        <TableHead className="hidden sm:table-cell">Type</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="hidden md:table-cell">Created</TableHead>
+                        <TableHead className="w-[100px]">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {exports.map((exp: any) => (
+                        <TableRow key={exp.id}>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                              <span className="truncate max-w-[150px] sm:max-w-none">
+                                {exp.file_name || 'Untitled Export'}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden sm:table-cell">
+                            <Badge variant="outline">{exp.export_type.toUpperCase()}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={exp.status === 'completed' ? 'default' : exp.status === 'failed' ? 'destructive' : 'secondary'}>
+                              {exp.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {format(new Date(exp.created_at), 'MMM d, yyyy h:mm a')}
+                          </TableCell>
+                          <TableCell>
+                            {exp.file_url && (
+                              <Button variant="ghost" size="sm" asChild>
+                                <a href={exp.file_url} download>
+                                  <Download className="h-4 w-4" />
+                                </a>
+                              </Button>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               ) : (
                 <div className="text-center py-8">
                   <Download className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -418,32 +496,30 @@ export default function ReportsBuilder() {
         </TabsContent>
 
         <TabsContent value="templates" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {[
-              { name: 'Sales Performance', description: 'Track revenue, deals, and conversion rates', icon: BarChart3 },
-              { name: 'Customer Engagement', description: 'Monitor user activity and retention', icon: LineChart },
-              { name: 'Marketing ROI', description: 'Campaign performance and attribution', icon: PieChart },
-              { name: 'Support Metrics', description: 'Ticket resolution and satisfaction', icon: TableIcon },
-              { name: 'Social Analytics', description: 'Social media reach and engagement', icon: Share2 },
-              { name: 'Email Performance', description: 'Open rates, clicks, and conversions', icon: Mail },
-            ].map((template, index) => {
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            {templates.map((template, index) => {
               const Icon = template.icon;
               return (
-                <Card key={index} className="cursor-pointer hover:border-primary/50 transition-colors">
+                <Card key={index} className="cursor-pointer hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group">
                   <CardHeader>
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
                         <Icon className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <CardTitle className="text-base">{template.name}</CardTitle>
+                        <CardTitle className="text-base group-hover:text-primary transition-colors">{template.name}</CardTitle>
                         <CardDescription className="text-xs">{template.description}</CardDescription>
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <Button variant="outline" size="sm" className="w-full">
-                      <Eye className="h-4 w-4 mr-2" />
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+                      onClick={() => handleUseTemplate(template)}
+                    >
+                      <Zap className="h-4 w-4 mr-2" />
                       Use Template
                     </Button>
                   </CardContent>
@@ -453,6 +529,149 @@ export default function ReportsBuilder() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Template Configuration Modal */}
+      <Dialog open={templateModalOpen} onOpenChange={setTemplateModalOpen}>
+        <DialogContent className="w-[95vw] max-w-[500px] max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2">
+              {selectedTemplate && (
+                <>
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <selectedTemplate.icon className="h-4 w-4 text-primary" />
+                  </div>
+                  {selectedTemplate.name}
+                </>
+              )}
+            </DialogTitle>
+            <DialogDescription>
+              Configure your report settings before generating.
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="flex-1 -mx-6 px-6">
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Report Name</Label>
+                <Input 
+                  placeholder="Enter report name" 
+                  value={templateConfig.name}
+                  onChange={(e) => setTemplateConfig({ ...templateConfig, name: e.target.value })}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Date Range</Label>
+                <Select 
+                  value={templateConfig.dateRange}
+                  onValueChange={(value) => setTemplateConfig({ ...templateConfig, dateRange: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7">Last 7 days</SelectItem>
+                    <SelectItem value="30">Last 30 days</SelectItem>
+                    <SelectItem value="90">Last 90 days</SelectItem>
+                    <SelectItem value="365">Last 12 months</SelectItem>
+                    <SelectItem value="custom">Custom Range</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {['pdf', 'xlsx', 'csv', 'json'].map((format) => (
+                    <button
+                      key={format}
+                      onClick={() => setTemplateConfig({ ...templateConfig, format })}
+                      className={`flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-colors ${
+                        templateConfig.format === format 
+                          ? 'border-primary bg-primary/10' 
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <span className="text-xs font-medium uppercase">{format}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Schedule</Label>
+                <Select 
+                  value={templateConfig.schedule}
+                  onValueChange={(value) => setTemplateConfig({ ...templateConfig, schedule: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="manual">Generate Now (One-time)</SelectItem>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {templateConfig.schedule !== 'manual' && (
+                <div className="space-y-2">
+                  <Label>Email Recipients (optional)</Label>
+                  <Input 
+                    placeholder="email@example.com, team@company.com" 
+                    value={templateConfig.recipients}
+                    onChange={(e) => setTemplateConfig({ ...templateConfig, recipients: e.target.value })}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Comma-separated email addresses for scheduled delivery
+                  </p>
+                </div>
+              )}
+
+              {/* Preview section */}
+              <div className="p-4 rounded-lg bg-muted/50 border border-border">
+                <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                  <Eye className="h-4 w-4" />
+                  Report Preview
+                </h4>
+                <div className="space-y-1 text-xs text-muted-foreground">
+                  <p>• <span className="font-medium text-foreground">{templateConfig.name || 'Untitled'}</span></p>
+                  <p>• Date range: Last {templateConfig.dateRange} days</p>
+                  <p>• Format: {templateConfig.format.toUpperCase()}</p>
+                  <p>• Schedule: {templateConfig.schedule === 'manual' ? 'One-time generation' : `${templateConfig.schedule.charAt(0).toUpperCase() + templateConfig.schedule.slice(1)} delivery`}</p>
+                </div>
+              </div>
+            </div>
+          </ScrollArea>
+          <DialogFooter className="flex-shrink-0 pt-4 border-t flex-col sm:flex-row gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setTemplateModalOpen(false)}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleGenerateFromTemplate}
+              disabled={isGenerating || !templateConfig.name}
+              className="w-full sm:w-auto gap-2"
+            >
+              {isGenerating ? (
+                <>
+                  <div className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="h-4 w-4" />
+                  Generate Report
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
