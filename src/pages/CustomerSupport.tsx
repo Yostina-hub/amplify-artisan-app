@@ -52,6 +52,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { PageHelp } from "@/components/PageHelp";
+import { pageHelpContent } from "@/lib/pageHelpContent";
 import { useToast } from "@/hooks/use-toast";
 import { ClickToCall } from "@/components/ClickToCall";
 
@@ -250,6 +252,13 @@ const CustomerSupport = () => {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-6">
+        <PageHelp
+          title={pageHelpContent.customerSupport.title}
+          description={pageHelpContent.customerSupport.description}
+          features={pageHelpContent.customerSupport.features}
+          tips={pageHelpContent.customerSupport.tips}
+        />
+
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>

@@ -18,6 +18,8 @@ import {
   Clock, TrendingUp, FileCheck, AlertTriangle, Search, Filter,
   PenTool, RefreshCw, ShieldCheck, Download, Eye, Edit
 } from "lucide-react";
+import { PageHelp } from "@/components/PageHelp";
+import { pageHelpContent } from "@/lib/pageHelpContent";
 
 export default function ContractManagement() {
   const [newContractOpen, setNewContractOpen] = useState(false);

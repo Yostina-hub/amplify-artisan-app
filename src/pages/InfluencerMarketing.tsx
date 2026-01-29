@@ -15,6 +15,8 @@ import { Plus, Search, Users, TrendingUp, DollarSign, Instagram, Youtube, Facebo
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
+import { PageHelp } from "@/components/PageHelp";
+import { pageHelpContent } from "@/lib/pageHelpContent";
 
 const InfluencerMarketing = () => {
   const { user } = useAuth();
@@ -138,6 +140,13 @@ const InfluencerMarketing = () => {
 
   return (
     <main className="container mx-auto p-6 space-y-6">
+      <PageHelp
+        title={pageHelpContent.influencerMarketing.title}
+        description={pageHelpContent.influencerMarketing.description}
+        features={pageHelpContent.influencerMarketing.features}
+        tips={pageHelpContent.influencerMarketing.tips}
+      />
+
       <header className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Influencer Marketing</h1>

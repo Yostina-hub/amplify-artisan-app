@@ -12,6 +12,8 @@ import { PlusCircle, Play, Pause, TrendingUp, Eye, Calendar, DollarSign, MousePo
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
+import { PageHelp } from "@/components/PageHelp";
+import { pageHelpContent } from "@/lib/pageHelpContent";
 
 type Campaign = {
   id: string;
@@ -140,6 +142,13 @@ export default function AdCampaigns() {
 
   return (
     <div className="space-y-6 animate-in fade-in-50 duration-500">
+      <PageHelp
+        title={pageHelpContent.adCampaigns.title}
+        description={pageHelpContent.adCampaigns.description}
+        features={pageHelpContent.adCampaigns.features}
+        tips={pageHelpContent.adCampaigns.tips}
+      />
+
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Ad Campaigns</h1>
