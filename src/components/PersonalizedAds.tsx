@@ -59,6 +59,14 @@ export function PersonalizedAds({ maxAds = 3, className = '' }: PersonalizedAdsP
     try {
       setLoading(true);
       
+      // Double-check we have a valid session before calling
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        setAds([]);
+        setIsAuthenticated(false);
+        return;
+      }
+      
       const { data, error } = await supabase.functions.invoke('recommend-ads', {
         body: { limit: maxAds }
       });

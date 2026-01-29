@@ -8,7 +8,12 @@ Deno.serve(async (req) => {
 
   try {
     const authHeader = req.headers.get('Authorization')
-    if (!authHeader) throw new Error('No authorization header')
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'No authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -17,8 +22,13 @@ Deno.serve(async (req) => {
     )
 
     // Get current user
-    const { data: { user } } = await supabaseClient.auth.getUser()
-    if (!user) throw new Error('Not authenticated')
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Not authenticated', recommendations: [] }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
 
     const { limit = 5 } = await req.json()
 
