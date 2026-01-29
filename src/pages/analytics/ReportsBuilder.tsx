@@ -47,9 +47,10 @@ interface TemplateConfig {
 
 export default function ReportsBuilder() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isSuperAdmin } = useAuth();
   const queryClient = useQueryClient();
   const [newReportOpen, setNewReportOpen] = useState(false);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateConfig | null>(null);
   const [templateConfig, setTemplateConfig] = useState({
@@ -57,14 +58,16 @@ export default function ReportsBuilder() {
     dateRange: '30',
     format: 'pdf',
     schedule: 'manual',
-    recipients: ''
+    recipients: '',
+    dashboardId: ''
   });
   const [isGenerating, setIsGenerating] = useState(false);
   const [newReport, setNewReport] = useState({
     name: '',
     description: '',
     type: 'table',
-    schedule: 'manual'
+    schedule: 'manual',
+    dashboardId: ''
   });
 
   // Fetch user profile for company_id
@@ -83,53 +86,89 @@ export default function ReportsBuilder() {
     enabled: !!user?.id
   });
 
+  const effectiveCompanyId = profile?.company_id ?? selectedCompanyId ?? null;
+
+  const { data: companies } = useQuery({
+    queryKey: ['companies-list-for-report-builder', isSuperAdmin],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('companies')
+        .select('id, name')
+        .order('name', { ascending: true });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user?.id && isSuperAdmin && !profile?.company_id,
+  });
+
   // Fetch scheduled reports
   const { data: scheduledReports } = useQuery({
-    queryKey: ['analytics-scheduled-reports', profile?.company_id],
+    queryKey: ['analytics-scheduled-reports', effectiveCompanyId],
     queryFn: async () => {
-      if (!profile?.company_id) return [];
+      if (!effectiveCompanyId) return [];
       const { data, error } = await supabase
         .from('analytics_scheduled_reports')
         .select('*, analytics_dashboards(name)')
-        .eq('company_id', profile.company_id)
+        .eq('company_id', effectiveCompanyId)
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data || [];
     },
-    enabled: !!profile?.company_id
+    enabled: !!effectiveCompanyId
   });
 
   // Fetch exports
   const { data: exports } = useQuery({
-    queryKey: ['analytics-exports', profile?.company_id],
+    queryKey: ['analytics-exports', effectiveCompanyId],
     queryFn: async () => {
-      if (!profile?.company_id) return [];
+      if (!effectiveCompanyId) return [];
       const { data, error } = await supabase
         .from('analytics_exports')
         .select('*')
-        .eq('company_id', profile.company_id)
+        .eq('company_id', effectiveCompanyId)
         .order('created_at', { ascending: false })
         .limit(20);
       if (error) throw error;
       return data || [];
     },
-    enabled: !!profile?.company_id
+    enabled: !!effectiveCompanyId
   });
 
   // Fetch dashboards for report creation
   const { data: dashboards } = useQuery({
-    queryKey: ['analytics-dashboards', profile?.company_id],
+    queryKey: ['analytics-dashboards', effectiveCompanyId],
     queryFn: async () => {
-      if (!profile?.company_id) return [];
+      if (!effectiveCompanyId) return [];
       const { data, error } = await supabase
         .from('analytics_dashboards')
         .select('id, name')
-        .eq('company_id', profile.company_id);
+        .eq('company_id', effectiveCompanyId);
       if (error) throw error;
       return data || [];
     },
-    enabled: !!profile?.company_id
+    enabled: !!effectiveCompanyId
   });
+
+  const scheduleToCron = (schedule: string) => {
+    switch (schedule) {
+      case 'daily':
+        return '0 9 * * *';
+      case 'weekly':
+        return '0 9 * * 1';
+      case 'monthly':
+        return '0 9 1 * *';
+      default:
+        return 'manual';
+    }
+  };
+
+  const parseRecipients = (raw: string) => {
+    const emails = raw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    return { emails };
+  };
 
   const handleToggleSchedule = async (id: string, currentStatus: boolean) => {
     const { error } = await supabase
@@ -168,18 +207,72 @@ export default function ReportsBuilder() {
       dateRange: '30',
       format: 'pdf',
       schedule: 'manual',
-      recipients: ''
+      recipients: '',
+      dashboardId: dashboards?.[0]?.id ?? ''
     });
     setTemplateModalOpen(true);
   };
 
   const handleGenerateFromTemplate = async () => {
     if (!selectedTemplate) return;
+
+    if (!effectiveCompanyId) {
+      toast.error('No company selected', {
+        description: 'Select a company first to generate reports.',
+      });
+      return;
+    }
+
+    if (templateConfig.schedule !== 'manual' && !templateConfig.dashboardId) {
+      toast.error('Select a dashboard', {
+        description: 'Scheduled reports require a dashboard to export.',
+      });
+      return;
+    }
     
     setIsGenerating(true);
     
     // Simulate report generation
-    await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1500 + Math.random() * 1000));
+
+    try {
+      if (templateConfig.schedule === 'manual') {
+        const { error } = await supabase.from('analytics_exports').insert({
+          company_id: effectiveCompanyId,
+          export_type: templateConfig.format,
+          status: 'completed',
+          file_name: `${templateConfig.name}.${templateConfig.format}`,
+          file_url: null,
+          dashboard_id: templateConfig.dashboardId || null,
+          filters: { dateRange: templateConfig.dateRange, template: selectedTemplate.name },
+          created_by: user?.id ?? null,
+          completed_at: new Date().toISOString(),
+        });
+        if (error) throw error;
+        queryClient.invalidateQueries({ queryKey: ['analytics-exports'] });
+      } else {
+        const { error } = await supabase.from('analytics_scheduled_reports').insert({
+          company_id: effectiveCompanyId,
+          dashboard_id: templateConfig.dashboardId,
+          name: templateConfig.name,
+          schedule_cron: scheduleToCron(templateConfig.schedule),
+          recipients: parseRecipients(templateConfig.recipients),
+          export_format: templateConfig.format,
+          is_active: true,
+          created_by: user?.id ?? null,
+          notification_channels: ['email'],
+        });
+        if (error) throw error;
+        queryClient.invalidateQueries({ queryKey: ['analytics-scheduled-reports'] });
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to save report', {
+        description: 'Please try again.',
+      });
+      setIsGenerating(false);
+      return;
+    }
     
     setIsGenerating(false);
     setTemplateModalOpen(false);
@@ -199,8 +292,74 @@ export default function ReportsBuilder() {
       dateRange: '30',
       format: 'pdf',
       schedule: 'manual',
-      recipients: ''
+      recipients: '',
+      dashboardId: ''
     });
+  };
+
+  const handleCreateReport = async () => {
+    if (!newReport.name.trim()) {
+      toast.error('Report name is required');
+      return;
+    }
+
+    if (!effectiveCompanyId) {
+      toast.error('No company selected', {
+        description: isSuperAdmin
+          ? 'Select a company first to create reports.'
+          : 'Your account is not linked to a company yet. Please apply for company access.',
+        action: !isSuperAdmin
+          ? { label: 'Apply', onClick: () => navigate('/company-application') }
+          : undefined,
+      });
+      return;
+    }
+
+    if (newReport.schedule !== 'manual' && !newReport.dashboardId) {
+      toast.error('Select a dashboard', {
+        description: 'Scheduled reports require a dashboard to export.',
+      });
+      return;
+    }
+
+    try {
+      if (newReport.schedule === 'manual') {
+        const { error } = await supabase.from('analytics_exports').insert({
+          company_id: effectiveCompanyId,
+          export_type: 'pdf',
+          status: 'completed',
+          file_name: `${newReport.name}.pdf`,
+          file_url: null,
+          dashboard_id: newReport.dashboardId || null,
+          filters: { description: newReport.description, visualization: newReport.type },
+          created_by: user?.id ?? null,
+          completed_at: new Date().toISOString(),
+        });
+        if (error) throw error;
+        queryClient.invalidateQueries({ queryKey: ['analytics-exports'] });
+      } else {
+        const { error } = await supabase.from('analytics_scheduled_reports').insert({
+          company_id: effectiveCompanyId,
+          dashboard_id: newReport.dashboardId,
+          name: newReport.name,
+          schedule_cron: scheduleToCron(newReport.schedule),
+          recipients: { emails: [] },
+          export_format: 'pdf',
+          is_active: true,
+          created_by: user?.id ?? null,
+          notification_channels: ['email'],
+        });
+        if (error) throw error;
+        queryClient.invalidateQueries({ queryKey: ['analytics-scheduled-reports'] });
+      }
+
+      toast.success('Report created successfully');
+      setNewReportOpen(false);
+      setNewReport({ name: '', description: '', type: 'table', schedule: 'manual', dashboardId: '' });
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to create report');
+    }
   };
 
   const reportTypes = [
@@ -229,7 +388,7 @@ export default function ReportsBuilder() {
   return (
     <div className="container mx-auto py-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate('/analytics-platform')}>
             <ArrowLeft className="h-5 w-5" />
@@ -239,6 +398,22 @@ export default function ReportsBuilder() {
             <p className="text-muted-foreground">Create, schedule, and export analytics reports</p>
           </div>
         </div>
+
+        {!profile?.company_id && isSuperAdmin && companies && companies.length > 0 && (
+          <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+            <SelectTrigger className="w-[220px]">
+              <SelectValue placeholder="Select company" />
+            </SelectTrigger>
+            <SelectContent>
+              {companies.map((c: any) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+
         <Dialog open={newReportOpen} onOpenChange={setNewReportOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -309,15 +484,35 @@ export default function ReportsBuilder() {
                     </SelectContent>
                   </Select>
                 </div>
+
+                <div className="space-y-2">
+                  <Label>Dashboard</Label>
+                  <Select
+                    value={newReport.dashboardId}
+                    onValueChange={(value) => setNewReport({ ...newReport, dashboardId: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={dashboards?.length ? 'Select dashboard' : 'No dashboards found'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(dashboards || []).map((d: any) => (
+                        <SelectItem key={d.id} value={d.id}>
+                          {d.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {newReport.schedule !== 'manual' && (
+                    <p className="text-xs text-muted-foreground">
+                      Required for scheduled reports.
+                    </p>
+                  )}
+                </div>
               </div>
             </ScrollArea>
             <DialogFooter className="flex-shrink-0 pt-4 border-t">
               <Button variant="outline" onClick={() => setNewReportOpen(false)}>Cancel</Button>
-              <Button onClick={() => {
-                toast.success('Report created successfully');
-                setNewReportOpen(false);
-                setNewReport({ name: '', description: '', type: 'table', schedule: 'manual' });
-              }}>
+              <Button onClick={handleCreateReport}>
                 Create Report
               </Button>
             </DialogFooter>
@@ -613,6 +808,30 @@ export default function ReportsBuilder() {
                     <SelectItem value="monthly">Monthly</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Dashboard</Label>
+                <Select
+                  value={templateConfig.dashboardId}
+                  onValueChange={(value) => setTemplateConfig({ ...templateConfig, dashboardId: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={dashboards?.length ? 'Select dashboard' : 'No dashboards found'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(dashboards || []).map((d: any) => (
+                      <SelectItem key={d.id} value={d.id}>
+                        {d.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {templateConfig.schedule !== 'manual' && (
+                  <p className="text-xs text-muted-foreground">
+                    Required for scheduled delivery.
+                  </p>
+                )}
               </div>
 
               {templateConfig.schedule !== 'manual' && (
