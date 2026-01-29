@@ -10,8 +10,16 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       return new Response(
-        JSON.stringify({ error: 'No authorization header' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ success: false, error: 'Not authenticated', recommendations: [], reasoning: null }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Defensive: require Bearer token format
+    if (!authHeader.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Not authenticated', recommendations: [], reasoning: null }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -25,12 +33,21 @@ Deno.serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
     if (authError || !user) {
       return new Response(
-        JSON.stringify({ error: 'Not authenticated', recommendations: [] }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ success: false, error: 'Not authenticated', recommendations: [], reasoning: null }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    const { limit = 5 } = await req.json()
+    // Body is optional; default if missing/invalid.
+    let limit = 5
+    try {
+      const body = await req.json().catch(() => ({}))
+      if (body && typeof body.limit === 'number' && Number.isFinite(body.limit)) {
+        limit = Math.max(1, Math.min(20, Math.floor(body.limit)))
+      }
+    } catch {
+      // ignore
+    }
 
     // Get user reach score
     const { data: reachScore, error: scoreError } = await supabaseClient
@@ -158,8 +175,9 @@ Recently shown (avoid these): ${JSON.stringify(recentAdIds)}`
     console.error('Error:', error)
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return new Response(
-      JSON.stringify({ error: errorMessage }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      // Keep this non-throwing for clients; ads are optional and shouldn't break the app.
+      JSON.stringify({ success: false, error: errorMessage, recommendations: [], reasoning: null }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 })

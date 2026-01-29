@@ -66,23 +66,34 @@ export function PersonalizedAds({ maxAds = 3, className = '' }: PersonalizedAdsP
         setIsAuthenticated(false);
         return;
       }
+
+      // Validate the session server-side; local storage can contain stale tokens.
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData?.user) {
+        setAds([]);
+        setIsAuthenticated(false);
+        return;
+      }
       
       const { data, error } = await supabase.functions.invoke('recommend-ads', {
         body: { limit: maxAds }
       });
 
       if (error) {
-        // Silently handle auth errors - just don't show ads
-        if (error.message?.includes('Not authenticated') || error.message?.includes('401')) {
-          setAds([]);
-          return;
-        }
-        throw error;
+        // Ads are optional; never let this bubble into a UI crash.
+        setAds([]);
+        return;
+      }
+
+      // When unauthenticated, the backend returns a 200 with success:false.
+      if (data?.success === false) {
+        setAds([]);
+        return;
       }
 
       setAds(data?.recommendations || []);
     } catch (error: any) {
-      console.error('Error fetching ads:', error);
+      // Avoid noisy logs for an optional widget.
       setAds([]);
     } finally {
       setLoading(false);
