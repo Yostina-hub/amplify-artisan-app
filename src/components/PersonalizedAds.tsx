@@ -22,10 +22,37 @@ export function PersonalizedAds({ maxAds = 3, className = '' }: PersonalizedAdsP
   const [ads, setAds] = useState<AdCampaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [dismissedAds, setDismissedAds] = useState<Set<string>>(new Set());
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchRecommendedAds();
+    // Check authentication first, then fetch ads
+    const checkAuthAndFetch = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setIsAuthenticated(true);
+        fetchRecommendedAds();
+      } else {
+        setLoading(false);
+        setIsAuthenticated(false);
+      }
+    };
+    
+    checkAuthAndFetch();
+    
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        setIsAuthenticated(true);
+        fetchRecommendedAds();
+      } else {
+        setIsAuthenticated(false);
+        setAds([]);
+        setLoading(false);
+      }
+    });
+    
+    return () => subscription.unsubscribe();
   }, []);
 
   const fetchRecommendedAds = async () => {
@@ -36,11 +63,19 @@ export function PersonalizedAds({ maxAds = 3, className = '' }: PersonalizedAdsP
         body: { limit: maxAds }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Silently handle auth errors - just don't show ads
+        if (error.message?.includes('Not authenticated') || error.message?.includes('401')) {
+          setAds([]);
+          return;
+        }
+        throw error;
+      }
 
-      setAds(data.recommendations || []);
+      setAds(data?.recommendations || []);
     } catch (error: any) {
       console.error('Error fetching ads:', error);
+      setAds([]);
     } finally {
       setLoading(false);
     }
@@ -101,6 +136,9 @@ export function PersonalizedAds({ maxAds = 3, className = '' }: PersonalizedAdsP
   }, [ads]);
 
   const visibleAds = ads.filter(ad => !dismissedAds.has(ad.id));
+
+  // Don't show ads for unauthenticated users
+  if (!isAuthenticated) return null;
 
   if (loading) {
     return (
