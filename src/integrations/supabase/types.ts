@@ -9474,6 +9474,54 @@ export type Database = {
         }
         Relationships: []
       }
+      user_permissions: {
+        Row: {
+          company_id: string | null
+          expires_at: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          is_active: boolean | null
+          permission_id: string
+          user_id: string
+        }
+        Insert: {
+          company_id?: string | null
+          expires_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          permission_id: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string | null
+          expires_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          permission_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_permissions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_reach_scores: {
         Row: {
           created_at: string | null
@@ -9812,6 +9860,14 @@ export type Database = {
         }[]
       }
       get_user_company_id: { Args: { _user_id: string }; Returns: string }
+      get_user_permissions: {
+        Args: { _user_id: string }
+        Returns: {
+          permission_key: string
+          permission_name: string
+          source: string
+        }[]
+      }
       get_user_roles: {
         Args: { _user_id: string }
         Returns: {
